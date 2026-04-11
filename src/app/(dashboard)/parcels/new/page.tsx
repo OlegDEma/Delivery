@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +13,7 @@ import { ClientSearch } from '@/components/clients/client-search';
 import { DescriptionAutocomplete } from '@/components/parcels/description-autocomplete';
 import { CostCalculator } from '@/components/parcels/cost-calculator';
 import { FieldHint } from '@/components/shared/field-hint';
+import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 
 interface SelectedClient {
   id: string;
@@ -61,6 +63,39 @@ export default function NewParcelPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // Load repeat data if ?repeat=parcelId
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const repeatId = params.get('repeat');
+    if (!repeatId) return;
+
+    fetch(`/api/parcels/${repeatId}`).then(r => r.ok ? r.json() : null).then(data => {
+      if (!data) return;
+      setDirection(data.direction);
+      setShipmentType(data.shipmentType);
+      setDescription(data.description || '');
+      setPayer(data.payer);
+      setPaymentMethod(data.paymentMethod);
+      setPaymentInUkraine(data.paymentInUkraine);
+      // Set sender/receiver from data
+      if (data.sender) {
+        setSender({
+          id: data.sender.id, phone: data.sender.phone,
+          firstName: data.sender.firstName, lastName: data.sender.lastName,
+          middleName: null, country: null, addresses: data.sender.addresses || [],
+        });
+      }
+      if (data.receiver) {
+        setReceiver({
+          id: data.receiver.id, phone: data.receiver.phone,
+          firstName: data.receiver.firstName, lastName: data.receiver.lastName,
+          middleName: null, country: null, addresses: data.receiver.addresses || [],
+        });
+        if (data.receiverAddressId) setReceiverAddressId(data.receiverAddressId);
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Receiver (first, as per TZ)
   const [receiver, setReceiver] = useState<SelectedClient | null>(null);
@@ -232,10 +267,13 @@ export default function NewParcelPage() {
 
     if (res.ok) {
       const parcel = await res.json();
+      toast.success('Посилку створено');
       router.push(`/parcels/${parcel.id}`);
     } else {
       const data = await res.json();
-      setError(data.error || 'Помилка створення');
+      const msg = data.error || 'Помилка створення';
+      setError(msg);
+      toast.error(msg);
     }
     setSaving(false);
   }
@@ -247,6 +285,7 @@ export default function NewParcelPage() {
 
   return (
     <div className="max-w-2xl">
+      <Breadcrumbs items={[{label: 'Посилки', href: '/parcels'}, {label: 'Нова посилка'}]} />
       <h1 className="text-2xl font-bold mb-4">Нова посилка</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">

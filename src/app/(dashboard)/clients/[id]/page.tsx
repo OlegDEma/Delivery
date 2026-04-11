@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate } from '@/lib/utils/format';
@@ -147,6 +148,7 @@ export default function ClientDetailPage() {
 
   return (
     <div className="max-w-2xl space-y-4">
+      <Breadcrumbs items={[{label: 'Клієнти', href: '/clients'}, {label: client.lastName + ' ' + client.firstName}]} />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -162,6 +164,39 @@ export default function ClientDetailPage() {
           {editing ? 'Скасувати' : 'Редагувати'}
         </Button>
       </div>
+
+      {/* Stats */}
+      {(client as unknown as { stats?: { totalParcels: number; totalSent: number; totalReceived: number; totalSpent: number; unpaidCount: number } }).stats && (() => {
+        const stats = (client as unknown as { stats: { totalParcels: number; totalSent: number; totalReceived: number; totalSpent: number; unpaidCount: number } }).stats;
+        return (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="bg-white rounded-lg border p-3 text-center">
+              <div className="text-2xl font-bold">{stats.totalParcels}</div>
+              <div className="text-xs text-gray-500">Всього посилок</div>
+            </div>
+            <div className="bg-white rounded-lg border p-3 text-center">
+              <div className="text-2xl font-bold text-green-600">{stats.totalSent}</div>
+              <div className="text-xs text-gray-500">Відправлено</div>
+            </div>
+            <div className="bg-white rounded-lg border p-3 text-center">
+              <div className="text-2xl font-bold text-blue-600">{stats.totalReceived}</div>
+              <div className="text-xs text-gray-500">Отримано</div>
+            </div>
+            <div className="bg-white rounded-lg border p-3 text-center">
+              <div className={`text-2xl font-bold ${stats.unpaidCount > 0 ? 'text-red-600' : 'text-gray-400'}`}>{stats.unpaidCount}</div>
+              <div className="text-xs text-gray-500">Не оплачено</div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Notes */}
+      {client.notes && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+          <div className="text-xs text-yellow-600 font-medium mb-1">Нотатки</div>
+          <div className="text-sm">{client.notes}</div>
+        </div>
+      )}
 
       {/* Edit form */}
       {editing && (

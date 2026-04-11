@@ -9,6 +9,8 @@ export async function GET() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   const [
     totalParcels,
@@ -18,19 +20,41 @@ export async function GET() {
     delivered,
     totalClients,
     activeTrips,
+    unpaidCount,
+    pendingOrders,
+    upcomingTrip,
   ] = await Promise.all([
     prisma.parcel.count(),
     prisma.parcel.count({ where: { createdAt: { gte: today } } }),
     prisma.parcel.count({ where: { status: 'at_lviv_warehouse' } }),
-    prisma.parcel.count({
-      where: { status: { in: ['in_transit_to_ua', 'in_transit_to_eu'] } },
-    }),
-    prisma.parcel.count({
-      where: { status: { in: ['delivered_ua', 'delivered_eu'] } },
-    }),
+    prisma.parcel.count({ where: { status: { in: ['in_transit_to_ua', 'in_transit_to_eu'] } } }),
+    prisma.parcel.count({ where: { status: { in: ['delivered_ua', 'delivered_eu'] } } }),
     prisma.client.count(),
     prisma.trip.count({ where: { status: { in: ['planned', 'in_progress'] } } }),
+    prisma.parcel.count({ where: { isPaid: false, totalCost: { gt: 0 }, status: { notIn: ['draft', 'returned'] } } }),
+    prisma.parcel.count({ where: { status: 'draft', createdSource: { in: ['client_web', 'client_telegram'] } } }),
+    prisma.trip.findFirst({
+      where: { status: 'planned', departureDate: { gte: today } },
+      orderBy: { departureDate: 'asc' },
+      select: { id: true, departureDate: true, country: true, direction: true, _count: { select: { parcels: true } } },
+    }),
   ]);
+
+  // Unpaid total
+  const unpaidTotal = await prisma.parcel.aggregate({
+    where: { isPaid: false, totalCost: { gt: 0 }, status: { notIn: ['draft', 'returned'] } },
+    _sum: { totalCost: true },
+  });
+
+  // Recent activity (status changes)
+  const recentActivity = await prisma.parcelStatusHistory.findMany({
+    take: 10,
+    orderBy: { changedAt: 'desc' },
+    include: {
+      parcel: { select: { internalNumber: true, id: true } },
+      changedBy: { select: { fullName: true } },
+    },
+  });
 
   // Recent parcels
   const recentParcels = await prisma.parcel.findMany({
@@ -53,6 +77,19 @@ export async function GET() {
     delivered,
     totalClients,
     activeTrips,
+    unpaidCount,
+    unpaidTotal: Number(unpaidTotal._sum.totalCost) || 0,
+    pendingOrders,
+    upcomingTrip,
     recentParcels,
+    recentActivity: recentActivity.map(a => ({
+      id: a.id,
+      parcelId: a.parcel.id,
+      parcelNumber: a.parcel.internalNumber,
+      status: a.status,
+      changedBy: a.changedBy?.fullName || 'Система',
+      changedAt: a.changedAt,
+      notes: a.notes,
+    })),
   });
 }

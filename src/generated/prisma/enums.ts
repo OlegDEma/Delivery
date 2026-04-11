@@ -165,3 +165,13 @@ export const WarehouseAction = {
 } as const
 
 export type WarehouseAction = (typeof WarehouseAction)[keyof typeof WarehouseAction]
+
+
+export const ClaimStatus = {
+  open: 'open',
+  in_progress: 'in_progress',
+  resolved: 'resolved',
+  rejected: 'rejected'
+} as const
+
+export type ClaimStatus = (typeof ClaimStatus)[keyof typeof ClaimStatus]

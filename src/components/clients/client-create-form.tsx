@@ -71,7 +71,7 @@ export function ClientCreateForm({ onSuccess, onCancel, initialPhone }: ClientCr
 
       if (res.ok) {
         const data = await res.json();
-        // API returns client object directly (not wrapped in .client)
+        toast.success('Клієнта створено');
         onSuccess(data);
       } else {
         const data = await res.json();

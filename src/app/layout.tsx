@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: "Delivery - Управління доставкою",
   description: "Система управління доставкою посилок Європа-Україна",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export const viewport: Viewport = {

@@ -92,6 +92,13 @@ export async function PATCH(
   if (body.estimatedDeliveryStart !== undefined) updateData.estimatedDeliveryStart = body.estimatedDeliveryStart;
   if (body.estimatedDeliveryEnd !== undefined) updateData.estimatedDeliveryEnd = body.estimatedDeliveryEnd;
   if (body.shortNumber !== undefined) updateData.shortNumber = body.shortNumber;
+  // Editable fields
+  if (body.description !== undefined) updateData.description = body.description;
+  if (body.declaredValue !== undefined) updateData.declaredValue = Number(body.declaredValue);
+  if (body.needsPackaging !== undefined) updateData.needsPackaging = body.needsPackaging;
+  if (body.payer !== undefined) updateData.payer = body.payer;
+  if (body.paymentMethod !== undefined) updateData.paymentMethod = body.paymentMethod;
+  if (body.paymentInUkraine !== undefined) updateData.paymentInUkraine = body.paymentInUkraine;
 
   const updated = await prisma.parcel.update({
     where: { id },

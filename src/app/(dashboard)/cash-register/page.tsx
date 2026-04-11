@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -64,18 +65,26 @@ export default function CashRegisterPage() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+
+    const numAmount = Number(amount);
+    if (!numAmount || numAmount <= 0) {
+      setError('Сума має бути більше 0');
+      return;
+    }
+
     setSaving(true);
 
     const res = await fetch('/api/cash', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, currency, paymentMethod, paymentType, description: description || undefined }),
+      body: JSON.stringify({ amount: numAmount, currency, paymentMethod, paymentType, description: description || undefined }),
     });
 
     if (res.ok) {
       setDialogOpen(false);
       setAmount('');
       setDescription('');
+      toast.success('Запис додано');
       fetchCash();
     } else {
       const data = await res.json();

@@ -92,3 +92,8 @@ export type YearlySequence = Prisma.YearlySequenceModel
  * 
  */
 export type DescriptionSuggestion = Prisma.DescriptionSuggestionModel
+/**
+ * Model Claim
+ * 
+ */
+export type Claim = Prisma.ClaimModel

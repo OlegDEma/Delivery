@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatWeight } from '@/lib/utils/format';
@@ -28,6 +29,7 @@ interface TripParcel {
   totalWeight: number | null;
   totalPlacesCount: number;
   needsPackaging: boolean;
+  declaredValue: number | null;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { city: string; street: string | null; building: string | null; npWarehouseNum: string | null } | null;
@@ -93,6 +95,7 @@ export default function TripDetailPage() {
 
   return (
     <div className="max-w-3xl space-y-4">
+      <Breadcrumbs items={[{label: 'Рейси', href: '/trips'}, {label: 'Деталі рейсу'}]} />
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-1">
@@ -109,7 +112,48 @@ export default function TripDetailPage() {
           {trip.assignedCourier && ` | ${trip.assignedCourier.fullName}`}
         </div>
         {trip.notes && <div className="text-sm text-gray-400 mt-1">{trip.notes}</div>}
+        <div className="flex gap-2 mt-2">
+          <Button variant="outline" size="sm" onClick={() => {
+            // Open all print pages in one window
+            const ids = trip.parcels.map(p => p.id).join(',');
+            window.open(`/trips/${id}/print?ids=${ids}`, '_blank');
+          }}>
+            Друк всіх етикеток ({trip._count.parcels})
+          </Button>
+        </div>
       </div>
+
+      {/* Customs declaration summary */}
+      <Card>
+        <CardHeader className="py-2 px-3">
+          <CardTitle className="text-sm">Митна декларація</CardTitle>
+        </CardHeader>
+        <CardContent className="px-3 pb-3 pt-0">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div>
+              <div className="text-gray-500">Посилок</div>
+              <div className="font-bold text-lg">{trip._count.parcels}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Місць</div>
+              <div className="font-bold text-lg">{totalPlaces}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Загальна вага</div>
+              <div className="font-bold text-lg">{totalWeight.toFixed(1)} кг</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Оголошена вартість</div>
+              <div className="font-bold text-lg">
+                {trip.parcels.reduce((s, p) => s + (Number(p.declaredValue) || 0), 0).toFixed(2)} EUR
+              </div>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="mt-2" onClick={() => window.print()}>
+            Друкувати для митниці
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Status change */}
       <Card>

@@ -150,6 +150,7 @@ model Profile {
   scannedPlaces        ParcelPlace[]         @relation("PlaceScannedBy")
   warehouseActions     WarehouseInventory[]
   pricingUpdates       PricingConfig[]       @relation("PricingUpdatedBy")
+  createdClaims        Claim[]               @relation("ClaimCreatedBy")
 
   @@index([role])
   @@index([phone])
@@ -178,6 +179,7 @@ model Client {
   sentParcels      Parcel[]         @relation("ParcelSender")
   receivedParcels  Parcel[]         @relation("ParcelReceiver")
   routeTasks       RouteTask[]
+  claims           Claim[]
 
   @@index([phoneNormalized])
   @@index([lastName, firstName])
@@ -302,6 +304,7 @@ model Parcel {
   routeTasks        RouteTask[]
   warehouseActions  WarehouseInventory[]
   npSyncLogs        NpSyncLog[]
+  claims            Claim[]
 
   @@index([itn])
   @@index([npTtn])
@@ -509,4 +512,32 @@ model DescriptionSuggestion {
   usageCount Int    @default(1) @map("usage_count")
 
   @@map("description_suggestions")
+}
+
+enum ClaimStatus {
+  open
+  in_progress
+  resolved
+  rejected
+}
+
+model Claim {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parcelId    String      @map("parcel_id") @db.Uuid
+  clientId    String?     @map("client_id") @db.Uuid
+  type        String      // damage, lost, delay, other
+  description String
+  resolution  String?
+  status      ClaimStatus @default(open)
+  createdById String?     @map("created_by") @db.Uuid
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  parcel    Parcel   @relation(fields: [parcelId], references: [id])
+  client    Client?  @relation(fields: [clientId], references: [id])
+  createdBy Profile? @relation("ClaimCreatedBy", fields: [createdById], references: [id])
+
+  @@index([parcelId])
+  @@index([status])
+  @@map("claims")
 }

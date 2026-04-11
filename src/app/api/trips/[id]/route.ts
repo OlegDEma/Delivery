@@ -49,7 +49,62 @@ export async function PATCH(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = {};
-  if (body.status !== undefined) data.status = body.status;
+  if (body.status !== undefined) {
+    data.status = body.status;
+
+    // When trip starts moving — update all linked parcels
+    if (body.status === 'in_progress') {
+      const trip = await prisma.trip.findUnique({ where: { id }, select: { direction: true } });
+      if (trip) {
+        const newParcelStatus = trip.direction === 'eu_to_ua' ? 'in_transit_to_ua' : 'in_transit_to_eu';
+        const parcels = await prisma.parcel.findMany({
+          where: { tripId: id, status: { notIn: [newParcelStatus, 'delivered_ua', 'delivered_eu', 'not_received', 'refused', 'returned'] } },
+          select: { id: true },
+        });
+        for (const p of parcels) {
+          await prisma.parcel.update({
+            where: { id: p.id },
+            data: {
+              status: newParcelStatus as import('@/generated/prisma/client').ParcelStatus,
+              statusHistory: {
+                create: {
+                  status: newParcelStatus as import('@/generated/prisma/client').ParcelStatus,
+                  changedById: user.id,
+                  notes: 'Рейс розпочав рух',
+                },
+              },
+            },
+          });
+        }
+      }
+    }
+
+    // When trip completed (EU→UA) — parcels arrive at warehouse
+    if (body.status === 'completed') {
+      const trip = await prisma.trip.findUnique({ where: { id }, select: { direction: true } });
+      if (trip && trip.direction === 'eu_to_ua') {
+        const parcels = await prisma.parcel.findMany({
+          where: { tripId: id, status: 'in_transit_to_ua' },
+          select: { id: true },
+        });
+        for (const p of parcels) {
+          await prisma.parcel.update({
+            where: { id: p.id },
+            data: {
+              status: 'at_lviv_warehouse',
+              statusHistory: {
+                create: {
+                  status: 'at_lviv_warehouse',
+                  changedById: user.id,
+                  notes: 'Рейс завершено, посилка на складі',
+                },
+              },
+            },
+          });
+        }
+      }
+    }
+  }
   if (body.assignedCourierId !== undefined) data.assignedCourierId = body.assignedCourierId || null;
   if (body.secondCourierId !== undefined) data.secondCourierId = body.secondCourierId || null;
   if (body.arrivalDate !== undefined) data.arrivalDate = body.arrivalDate ? new Date(body.arrivalDate) : null;

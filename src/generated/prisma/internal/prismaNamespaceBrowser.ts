@@ -65,7 +65,8 @@ export const ModelName = {
   WarehouseInventory: 'WarehouseInventory',
   NpSyncLog: 'NpSyncLog',
   YearlySequence: 'YearlySequence',
-  DescriptionSuggestion: 'DescriptionSuggestion'
+  DescriptionSuggestion: 'DescriptionSuggestion',
+  Claim: 'Claim'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -370,6 +371,22 @@ export const DescriptionSuggestionScalarFieldEnum = {
 } as const
 
 export type DescriptionSuggestionScalarFieldEnum = (typeof DescriptionSuggestionScalarFieldEnum)[keyof typeof DescriptionSuggestionScalarFieldEnum]
+
+
+export const ClaimScalarFieldEnum = {
+  id: 'id',
+  parcelId: 'parcelId',
+  clientId: 'clientId',
+  type: 'type',
+  description: 'description',
+  resolution: 'resolution',
+  status: 'status',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClaimScalarFieldEnum = (typeof ClaimScalarFieldEnum)[keyof typeof ClaimScalarFieldEnum]
 
 
 export const SortOrder = {

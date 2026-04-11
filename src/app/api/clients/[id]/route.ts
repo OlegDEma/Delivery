@@ -33,7 +33,30 @@ export async function GET(
   });
 
   if (!client) return NextResponse.json({ error: 'Клієнта не знайдено' }, { status: 404 });
-  return NextResponse.json(client);
+
+  // Calculate stats
+  const [totalSent, totalReceived, totalSpent, unpaidCount] = await Promise.all([
+    prisma.parcel.count({ where: { senderId: id } }),
+    prisma.parcel.count({ where: { receiverId: id } }),
+    prisma.parcel.aggregate({
+      where: { OR: [{ senderId: id }, { receiverId: id }], isPaid: true },
+      _sum: { totalCost: true },
+    }),
+    prisma.parcel.count({
+      where: { OR: [{ senderId: id, payer: 'sender' }, { receiverId: id, payer: 'receiver' }], isPaid: false, totalCost: { gt: 0 } },
+    }),
+  ]);
+
+  return NextResponse.json({
+    ...client,
+    stats: {
+      totalSent,
+      totalReceived,
+      totalParcels: totalSent + totalReceived,
+      totalSpent: Number(totalSpent._sum.totalCost) || 0,
+      unpaidCount,
+    },
+  });
 }
 
 // PATCH /api/clients/[id]

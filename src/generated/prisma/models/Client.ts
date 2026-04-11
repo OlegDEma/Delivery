@@ -259,6 +259,7 @@ export type ClientWhereInput = {
   sentParcels?: Prisma.ParcelListRelationFilter
   receivedParcels?: Prisma.ParcelListRelationFilter
   routeTasks?: Prisma.RouteTaskListRelationFilter
+  claims?: Prisma.ClaimListRelationFilter
 }
 
 export type ClientOrderByWithRelationInput = {
@@ -281,6 +282,7 @@ export type ClientOrderByWithRelationInput = {
   sentParcels?: Prisma.ParcelOrderByRelationAggregateInput
   receivedParcels?: Prisma.ParcelOrderByRelationAggregateInput
   routeTasks?: Prisma.RouteTaskOrderByRelationAggregateInput
+  claims?: Prisma.ClaimOrderByRelationAggregateInput
 }
 
 export type ClientWhereUniqueInput = Prisma.AtLeast<{
@@ -306,6 +308,7 @@ export type ClientWhereUniqueInput = Prisma.AtLeast<{
   sentParcels?: Prisma.ParcelListRelationFilter
   receivedParcels?: Prisma.ParcelListRelationFilter
   routeTasks?: Prisma.RouteTaskListRelationFilter
+  claims?: Prisma.ClaimListRelationFilter
 }, "id" | "phone">
 
 export type ClientOrderByWithAggregationInput = {
@@ -367,6 +370,7 @@ export type ClientCreateInput = {
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelCreateNestedManyWithoutReceiverInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutClientInput
+  claims?: Prisma.ClaimCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateInput = {
@@ -388,6 +392,7 @@ export type ClientUncheckedCreateInput = {
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutClientInput
+  claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientUpdateInput = {
@@ -409,6 +414,7 @@ export type ClientUpdateInput = {
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUpdateManyWithoutReceiverNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutClientNestedInput
+  claims?: Prisma.ClaimUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateInput = {
@@ -430,6 +436,7 @@ export type ClientUncheckedUpdateInput = {
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutClientNestedInput
+  claims?: Prisma.ClaimUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateManyInput = {
@@ -661,6 +668,22 @@ export type ClientUpdateOneWithoutRouteTasksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ClientUpdateToOneWithWhereWithoutRouteTasksInput, Prisma.ClientUpdateWithoutRouteTasksInput>, Prisma.ClientUncheckedUpdateWithoutRouteTasksInput>
 }
 
+export type ClientCreateNestedOneWithoutClaimsInput = {
+  create?: Prisma.XOR<Prisma.ClientCreateWithoutClaimsInput, Prisma.ClientUncheckedCreateWithoutClaimsInput>
+  connectOrCreate?: Prisma.ClientCreateOrConnectWithoutClaimsInput
+  connect?: Prisma.ClientWhereUniqueInput
+}
+
+export type ClientUpdateOneWithoutClaimsNestedInput = {
+  create?: Prisma.XOR<Prisma.ClientCreateWithoutClaimsInput, Prisma.ClientUncheckedCreateWithoutClaimsInput>
+  connectOrCreate?: Prisma.ClientCreateOrConnectWithoutClaimsInput
+  upsert?: Prisma.ClientUpsertWithoutClaimsInput
+  disconnect?: Prisma.ClientWhereInput | boolean
+  delete?: Prisma.ClientWhereInput | boolean
+  connect?: Prisma.ClientWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ClientUpdateToOneWithWhereWithoutClaimsInput, Prisma.ClientUpdateWithoutClaimsInput>, Prisma.ClientUncheckedUpdateWithoutClaimsInput>
+}
+
 export type ClientCreateWithoutCreatedByInput = {
   id?: string
   phone: string
@@ -679,6 +702,7 @@ export type ClientCreateWithoutCreatedByInput = {
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelCreateNestedManyWithoutReceiverInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutClientInput
+  claims?: Prisma.ClaimCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutCreatedByInput = {
@@ -699,6 +723,7 @@ export type ClientUncheckedCreateWithoutCreatedByInput = {
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutClientInput
+  claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutCreatedByInput = {
@@ -765,6 +790,7 @@ export type ClientCreateWithoutAddressesInput = {
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelCreateNestedManyWithoutReceiverInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutClientInput
+  claims?: Prisma.ClaimCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutAddressesInput = {
@@ -785,6 +811,7 @@ export type ClientUncheckedCreateWithoutAddressesInput = {
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutClientInput
+  claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutAddressesInput = {
@@ -821,6 +848,7 @@ export type ClientUpdateWithoutAddressesInput = {
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUpdateManyWithoutReceiverNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutClientNestedInput
+  claims?: Prisma.ClaimUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutAddressesInput = {
@@ -841,6 +869,7 @@ export type ClientUncheckedUpdateWithoutAddressesInput = {
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutClientNestedInput
+  claims?: Prisma.ClaimUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateWithoutSentParcelsInput = {
@@ -861,6 +890,7 @@ export type ClientCreateWithoutSentParcelsInput = {
   addresses?: Prisma.ClientAddressCreateNestedManyWithoutClientInput
   receivedParcels?: Prisma.ParcelCreateNestedManyWithoutReceiverInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutClientInput
+  claims?: Prisma.ClaimCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutSentParcelsInput = {
@@ -881,6 +911,7 @@ export type ClientUncheckedCreateWithoutSentParcelsInput = {
   addresses?: Prisma.ClientAddressUncheckedCreateNestedManyWithoutClientInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutClientInput
+  claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutSentParcelsInput = {
@@ -906,6 +937,7 @@ export type ClientCreateWithoutReceivedParcelsInput = {
   addresses?: Prisma.ClientAddressCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutClientInput
+  claims?: Prisma.ClaimCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutReceivedParcelsInput = {
@@ -926,6 +958,7 @@ export type ClientUncheckedCreateWithoutReceivedParcelsInput = {
   addresses?: Prisma.ClientAddressUncheckedCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutClientInput
+  claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutReceivedParcelsInput = {
@@ -962,6 +995,7 @@ export type ClientUpdateWithoutSentParcelsInput = {
   addresses?: Prisma.ClientAddressUpdateManyWithoutClientNestedInput
   receivedParcels?: Prisma.ParcelUpdateManyWithoutReceiverNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutClientNestedInput
+  claims?: Prisma.ClaimUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutSentParcelsInput = {
@@ -982,6 +1016,7 @@ export type ClientUncheckedUpdateWithoutSentParcelsInput = {
   addresses?: Prisma.ClientAddressUncheckedUpdateManyWithoutClientNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutClientNestedInput
+  claims?: Prisma.ClaimUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUpsertWithoutReceivedParcelsInput = {
@@ -1013,6 +1048,7 @@ export type ClientUpdateWithoutReceivedParcelsInput = {
   addresses?: Prisma.ClientAddressUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutClientNestedInput
+  claims?: Prisma.ClaimUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutReceivedParcelsInput = {
@@ -1033,6 +1069,7 @@ export type ClientUncheckedUpdateWithoutReceivedParcelsInput = {
   addresses?: Prisma.ClientAddressUncheckedUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutClientNestedInput
+  claims?: Prisma.ClaimUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateWithoutRouteTasksInput = {
@@ -1053,6 +1090,7 @@ export type ClientCreateWithoutRouteTasksInput = {
   addresses?: Prisma.ClientAddressCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelCreateNestedManyWithoutReceiverInput
+  claims?: Prisma.ClaimCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutRouteTasksInput = {
@@ -1073,6 +1111,7 @@ export type ClientUncheckedCreateWithoutRouteTasksInput = {
   addresses?: Prisma.ClientAddressUncheckedCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
+  claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutRouteTasksInput = {
@@ -1109,6 +1148,7 @@ export type ClientUpdateWithoutRouteTasksInput = {
   addresses?: Prisma.ClientAddressUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUpdateManyWithoutReceiverNestedInput
+  claims?: Prisma.ClaimUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutRouteTasksInput = {
@@ -1129,6 +1169,107 @@ export type ClientUncheckedUpdateWithoutRouteTasksInput = {
   addresses?: Prisma.ClientAddressUncheckedUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
+  claims?: Prisma.ClaimUncheckedUpdateManyWithoutClientNestedInput
+}
+
+export type ClientCreateWithoutClaimsInput = {
+  id?: string
+  phone: string
+  phoneNormalized: string
+  firstName: string
+  lastName: string
+  middleName?: string | null
+  email?: string | null
+  clientType?: $Enums.ClientType
+  organizationName?: string | null
+  country?: $Enums.Country | null
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedClientsInput
+  addresses?: Prisma.ClientAddressCreateNestedManyWithoutClientInput
+  sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
+  receivedParcels?: Prisma.ParcelCreateNestedManyWithoutReceiverInput
+  routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutClientInput
+}
+
+export type ClientUncheckedCreateWithoutClaimsInput = {
+  id?: string
+  phone: string
+  phoneNormalized: string
+  firstName: string
+  lastName: string
+  middleName?: string | null
+  email?: string | null
+  clientType?: $Enums.ClientType
+  organizationName?: string | null
+  country?: $Enums.Country | null
+  notes?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  addresses?: Prisma.ClientAddressUncheckedCreateNestedManyWithoutClientInput
+  sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
+  receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
+  routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutClientInput
+}
+
+export type ClientCreateOrConnectWithoutClaimsInput = {
+  where: Prisma.ClientWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClientCreateWithoutClaimsInput, Prisma.ClientUncheckedCreateWithoutClaimsInput>
+}
+
+export type ClientUpsertWithoutClaimsInput = {
+  update: Prisma.XOR<Prisma.ClientUpdateWithoutClaimsInput, Prisma.ClientUncheckedUpdateWithoutClaimsInput>
+  create: Prisma.XOR<Prisma.ClientCreateWithoutClaimsInput, Prisma.ClientUncheckedCreateWithoutClaimsInput>
+  where?: Prisma.ClientWhereInput
+}
+
+export type ClientUpdateToOneWithWhereWithoutClaimsInput = {
+  where?: Prisma.ClientWhereInput
+  data: Prisma.XOR<Prisma.ClientUpdateWithoutClaimsInput, Prisma.ClientUncheckedUpdateWithoutClaimsInput>
+}
+
+export type ClientUpdateWithoutClaimsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientType?: Prisma.EnumClientTypeFieldUpdateOperationsInput | $Enums.ClientType
+  organizationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.ProfileUpdateOneWithoutCreatedClientsNestedInput
+  addresses?: Prisma.ClientAddressUpdateManyWithoutClientNestedInput
+  sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
+  receivedParcels?: Prisma.ParcelUpdateManyWithoutReceiverNestedInput
+  routeTasks?: Prisma.RouteTaskUpdateManyWithoutClientNestedInput
+}
+
+export type ClientUncheckedUpdateWithoutClaimsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientType?: Prisma.EnumClientTypeFieldUpdateOperationsInput | $Enums.ClientType
+  organizationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  addresses?: Prisma.ClientAddressUncheckedUpdateManyWithoutClientNestedInput
+  sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
+  receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
+  routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateManyCreatedByInput = {
@@ -1165,6 +1306,7 @@ export type ClientUpdateWithoutCreatedByInput = {
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUpdateManyWithoutReceiverNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutClientNestedInput
+  claims?: Prisma.ClaimUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutCreatedByInput = {
@@ -1185,6 +1327,7 @@ export type ClientUncheckedUpdateWithoutCreatedByInput = {
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutClientNestedInput
+  claims?: Prisma.ClaimUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateManyWithoutCreatedByInput = {
@@ -1213,6 +1356,7 @@ export type ClientCountOutputType = {
   sentParcels: number
   receivedParcels: number
   routeTasks: number
+  claims: number
 }
 
 export type ClientCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1220,6 +1364,7 @@ export type ClientCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   sentParcels?: boolean | ClientCountOutputTypeCountSentParcelsArgs
   receivedParcels?: boolean | ClientCountOutputTypeCountReceivedParcelsArgs
   routeTasks?: boolean | ClientCountOutputTypeCountRouteTasksArgs
+  claims?: boolean | ClientCountOutputTypeCountClaimsArgs
 }
 
 /**
@@ -1260,6 +1405,13 @@ export type ClientCountOutputTypeCountRouteTasksArgs<ExtArgs extends runtime.Typ
   where?: Prisma.RouteTaskWhereInput
 }
 
+/**
+ * ClientCountOutputType without action
+ */
+export type ClientCountOutputTypeCountClaimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ClaimWhereInput
+}
+
 
 export type ClientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1281,6 +1433,7 @@ export type ClientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   sentParcels?: boolean | Prisma.Client$sentParcelsArgs<ExtArgs>
   receivedParcels?: boolean | Prisma.Client$receivedParcelsArgs<ExtArgs>
   routeTasks?: boolean | Prisma.Client$routeTasksArgs<ExtArgs>
+  claims?: boolean | Prisma.Client$claimsArgs<ExtArgs>
   _count?: boolean | Prisma.ClientCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["client"]>
 
@@ -1344,6 +1497,7 @@ export type ClientInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   sentParcels?: boolean | Prisma.Client$sentParcelsArgs<ExtArgs>
   receivedParcels?: boolean | Prisma.Client$receivedParcelsArgs<ExtArgs>
   routeTasks?: boolean | Prisma.Client$routeTasksArgs<ExtArgs>
+  claims?: boolean | Prisma.Client$claimsArgs<ExtArgs>
   _count?: boolean | Prisma.ClientCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ClientIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1361,6 +1515,7 @@ export type $ClientPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     sentParcels: Prisma.$ParcelPayload<ExtArgs>[]
     receivedParcels: Prisma.$ParcelPayload<ExtArgs>[]
     routeTasks: Prisma.$RouteTaskPayload<ExtArgs>[]
+    claims: Prisma.$ClaimPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1776,6 +1931,7 @@ export interface Prisma__ClientClient<T, Null = never, ExtArgs extends runtime.T
   sentParcels<T extends Prisma.Client$sentParcelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$sentParcelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   receivedParcels<T extends Prisma.Client$receivedParcelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$receivedParcelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   routeTasks<T extends Prisma.Client$routeTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$routeTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RouteTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  claims<T extends Prisma.Client$claimsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$claimsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClaimPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2332,6 +2488,30 @@ export type Client$routeTasksArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.RouteTaskScalarFieldEnum | Prisma.RouteTaskScalarFieldEnum[]
+}
+
+/**
+ * Client.claims
+ */
+export type Client$claimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Claim
+   */
+  select?: Prisma.ClaimSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Claim
+   */
+  omit?: Prisma.ClaimOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClaimInclude<ExtArgs> | null
+  where?: Prisma.ClaimWhereInput
+  orderBy?: Prisma.ClaimOrderByWithRelationInput | Prisma.ClaimOrderByWithRelationInput[]
+  cursor?: Prisma.ClaimWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClaimScalarFieldEnum | Prisma.ClaimScalarFieldEnum[]
 }
 
 /**

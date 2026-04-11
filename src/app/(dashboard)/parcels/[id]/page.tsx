@@ -12,6 +12,12 @@ import { Label } from '@/components/ui/label';
 import { STATUS_LABELS, STATUS_COLORS, STATUS_FLOW_EU_TO_UA, STATUS_FLOW_UA_TO_EU, type ParcelStatusType } from '@/lib/constants/statuses';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDateTime, formatWeight } from '@/lib/utils/format';
+import { Breadcrumbs } from '@/components/shared/breadcrumbs';
+import { CopyButton } from '@/components/shared/copy-button';
+import { PhoneLink } from '@/components/shared/phone-link';
+import { AddressLink } from '@/components/shared/address-link';
+import { Textarea } from '@/components/ui/textarea';
+import { ShareButton } from '@/components/shared/share-button';
 
 interface ParcelDetail {
   id: string;
@@ -36,6 +42,7 @@ interface ParcelDetail {
   estimatedDeliveryStart: string | null;
   estimatedDeliveryEnd: string | null;
   isPaid: boolean;
+  totalCost: number | null;
   createdAt: string;
   sender: {
     firstName: string; lastName: string; phone: string;
@@ -144,6 +151,11 @@ export default function ParcelDetailPage() {
 
   return (
     <div className="max-w-2xl space-y-4">
+      <Breadcrumbs items={[
+        { label: 'Посилки', href: '/parcels' },
+        { label: parcel.internalNumber },
+      ]} />
+
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-1">
@@ -153,12 +165,18 @@ export default function ParcelDetailPage() {
           </Badge>
         </div>
         <div className="text-xs text-gray-400">
-          ІТН: {parcel.itn} | Створено: {formatDateTime(parcel.createdAt)}
+          ІТН: {parcel.itn} <CopyButton text={parcel.itn} />{parcel.npTtn && <> | ТТН: {parcel.npTtn} <CopyButton text={parcel.npTtn} /></>} | Створено: {formatDateTime(parcel.createdAt)}
           {parcel.createdBy && ` | ${parcel.createdBy.fullName}`}
         </div>
-        <Link href={`/parcels/${parcel.id}/print`}>
-          <Button variant="outline" size="sm" className="mt-2">Друк етикетки</Button>
-        </Link>
+        <div className="flex gap-2 mt-2">
+          <Link href={`/parcels/${parcel.id}/print`}>
+            <Button variant="outline" size="sm">Друк етикетки</Button>
+          </Link>
+          <Link href={`/parcels/new?repeat=${parcel.id}`}>
+            <Button variant="outline" size="sm">Повторити</Button>
+          </Link>
+          <ShareButton parcelNumber={parcel.internalNumber} />
+        </div>
       </div>
 
       {/* Status change */}
@@ -196,12 +214,10 @@ export default function ParcelDetailPage() {
           </CardHeader>
           <CardContent className="px-3 pb-3 pt-0">
             <div className="font-medium text-sm">{parcel.sender.lastName} {parcel.sender.firstName}</div>
-            <div className="text-sm text-gray-600">{parcel.sender.phone}</div>
+            <div className="text-sm"><PhoneLink phone={parcel.sender.phone} /></div>
             {parcel.senderAddress && (
               <div className="text-xs text-gray-400 mt-1">
-                {parcel.senderAddress.city}
-                {parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}
-                {parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}
+                <AddressLink address={`${parcel.senderAddress.city}${parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}${parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}`} />
                 {parcel.senderAddress.landmark ? ` (${parcel.senderAddress.landmark})` : ''}
               </div>
             )}
@@ -214,13 +230,10 @@ export default function ParcelDetailPage() {
           </CardHeader>
           <CardContent className="px-3 pb-3 pt-0">
             <div className="font-medium text-sm">{parcel.receiver.lastName} {parcel.receiver.firstName}</div>
-            <div className="text-sm text-gray-600">{parcel.receiver.phone}</div>
+            <div className="text-sm"><PhoneLink phone={parcel.receiver.phone} /></div>
             {parcel.receiverAddress && (
               <div className="text-xs text-gray-400 mt-1">
-                {COUNTRY_LABELS[parcel.receiverAddress.country as CountryCode] || parcel.receiverAddress.country},{' '}
-                {parcel.receiverAddress.city}
-                {parcel.receiverAddress.street ? `, ${parcel.receiverAddress.street}` : ''}
-                {parcel.receiverAddress.building ? ` ${parcel.receiverAddress.building}` : ''}
+                <AddressLink address={`${COUNTRY_LABELS[parcel.receiverAddress.country as CountryCode] || parcel.receiverAddress.country}, ${parcel.receiverAddress.city}${parcel.receiverAddress.street ? `, ${parcel.receiverAddress.street}` : ''}${parcel.receiverAddress.building ? ` ${parcel.receiverAddress.building}` : ''}`} />
                 {parcel.receiverAddress.apartment ? `, кв. ${parcel.receiverAddress.apartment}` : ''}
                 {parcel.receiverAddress.npWarehouseNum ? ` | НП №${parcel.receiverAddress.npWarehouseNum}` : ''}
                 {parcel.receiverAddress.landmark ? ` (${parcel.receiverAddress.landmark})` : ''}
@@ -324,6 +337,24 @@ export default function ParcelDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Mark as paid */}
+      {!parcel.isPaid && parcel.totalCost && (
+        <Button
+          variant="outline"
+          className="w-full text-green-600 border-green-200 hover:bg-green-50"
+          onClick={async () => {
+            await fetch(`/api/parcels/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ isPaid: true }),
+            });
+            fetchParcel();
+          }}
+        >
+          Позначити як оплачено ({parcel.totalCost} EUR)
+        </Button>
+      )}
 
       {/* Estimated delivery window */}
       <Card>
@@ -503,6 +534,34 @@ export default function ParcelDetailPage() {
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Notes */}
+      <Card>
+        <CardHeader className="py-2 px-3">
+          <CardTitle className="text-sm">Нотатки</CardTitle>
+        </CardHeader>
+        <CardContent className="px-3 pb-3 pt-0">
+          <Textarea
+            placeholder="Додати нотатку..."
+            defaultValue=""
+            id="parcel-note"
+            rows={2}
+          />
+          <Button size="sm" className="mt-2" onClick={async () => {
+            const note = (document.getElementById('parcel-note') as HTMLTextAreaElement).value;
+            if (!note.trim()) return;
+            await fetch(`/api/parcels/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: parcel.status, statusNote: note }),
+            });
+            (document.getElementById('parcel-note') as HTMLTextAreaElement).value = '';
+            fetchParcel();
+          }}>
+            Додати нотатку
+          </Button>
         </CardContent>
       </Card>
 

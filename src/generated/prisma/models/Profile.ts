@@ -227,6 +227,7 @@ export type ProfileWhereInput = {
   scannedPlaces?: Prisma.ParcelPlaceListRelationFilter
   warehouseActions?: Prisma.WarehouseInventoryListRelationFilter
   pricingUpdates?: Prisma.PricingConfigListRelationFilter
+  createdClaims?: Prisma.ClaimListRelationFilter
 }
 
 export type ProfileOrderByWithRelationInput = {
@@ -252,6 +253,7 @@ export type ProfileOrderByWithRelationInput = {
   scannedPlaces?: Prisma.ParcelPlaceOrderByRelationAggregateInput
   warehouseActions?: Prisma.WarehouseInventoryOrderByRelationAggregateInput
   pricingUpdates?: Prisma.PricingConfigOrderByRelationAggregateInput
+  createdClaims?: Prisma.ClaimOrderByRelationAggregateInput
 }
 
 export type ProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -280,6 +282,7 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   scannedPlaces?: Prisma.ParcelPlaceListRelationFilter
   warehouseActions?: Prisma.WarehouseInventoryListRelationFilter
   pricingUpdates?: Prisma.PricingConfigListRelationFilter
+  createdClaims?: Prisma.ClaimListRelationFilter
 }, "id" | "email">
 
 export type ProfileOrderByWithAggregationInput = {
@@ -335,6 +338,7 @@ export type ProfileCreateInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateInput = {
@@ -360,6 +364,7 @@ export type ProfileUncheckedCreateInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUpdateInput = {
@@ -385,6 +390,7 @@ export type ProfileUpdateInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateInput = {
@@ -410,6 +416,7 @@ export type ProfileUncheckedUpdateInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileCreateManyInput = {
@@ -720,6 +727,22 @@ export type ProfileUpdateOneWithoutWarehouseActionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutWarehouseActionsInput, Prisma.ProfileUpdateWithoutWarehouseActionsInput>, Prisma.ProfileUncheckedUpdateWithoutWarehouseActionsInput>
 }
 
+export type ProfileCreateNestedOneWithoutCreatedClaimsInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutCreatedClaimsInput, Prisma.ProfileUncheckedCreateWithoutCreatedClaimsInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutCreatedClaimsInput
+  connect?: Prisma.ProfileWhereUniqueInput
+}
+
+export type ProfileUpdateOneWithoutCreatedClaimsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutCreatedClaimsInput, Prisma.ProfileUncheckedCreateWithoutCreatedClaimsInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutCreatedClaimsInput
+  upsert?: Prisma.ProfileUpsertWithoutCreatedClaimsInput
+  disconnect?: Prisma.ProfileWhereInput | boolean
+  delete?: Prisma.ProfileWhereInput | boolean
+  connect?: Prisma.ProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutCreatedClaimsInput, Prisma.ProfileUpdateWithoutCreatedClaimsInput>, Prisma.ProfileUncheckedUpdateWithoutCreatedClaimsInput>
+}
+
 export type ProfileCreateWithoutCreatedClientsInput = {
   id: string
   email: string
@@ -742,6 +765,7 @@ export type ProfileCreateWithoutCreatedClientsInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutCreatedClientsInput = {
@@ -766,6 +790,7 @@ export type ProfileUncheckedCreateWithoutCreatedClientsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutCreatedClientsInput = {
@@ -806,6 +831,7 @@ export type ProfileUpdateWithoutCreatedClientsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutCreatedClientsInput = {
@@ -830,6 +856,7 @@ export type ProfileUncheckedUpdateWithoutCreatedClientsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileCreateWithoutAssignedTripsInput = {
@@ -854,6 +881,7 @@ export type ProfileCreateWithoutAssignedTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutAssignedTripsInput = {
@@ -878,6 +906,7 @@ export type ProfileUncheckedCreateWithoutAssignedTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutAssignedTripsInput = {
@@ -907,6 +936,7 @@ export type ProfileCreateWithoutSecondCourierTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutSecondCourierTripsInput = {
@@ -931,6 +961,7 @@ export type ProfileUncheckedCreateWithoutSecondCourierTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutSecondCourierTripsInput = {
@@ -960,6 +991,7 @@ export type ProfileCreateWithoutCreatedTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutCreatedTripsInput = {
@@ -984,6 +1016,7 @@ export type ProfileUncheckedCreateWithoutCreatedTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutCreatedTripsInput = {
@@ -1024,6 +1057,7 @@ export type ProfileUpdateWithoutAssignedTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutAssignedTripsInput = {
@@ -1048,6 +1082,7 @@ export type ProfileUncheckedUpdateWithoutAssignedTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUpsertWithoutSecondCourierTripsInput = {
@@ -1083,6 +1118,7 @@ export type ProfileUpdateWithoutSecondCourierTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutSecondCourierTripsInput = {
@@ -1107,6 +1143,7 @@ export type ProfileUncheckedUpdateWithoutSecondCourierTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUpsertWithoutCreatedTripsInput = {
@@ -1142,6 +1179,7 @@ export type ProfileUpdateWithoutCreatedTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutCreatedTripsInput = {
@@ -1166,6 +1204,7 @@ export type ProfileUncheckedUpdateWithoutCreatedTripsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileCreateWithoutCreatedParcelsInput = {
@@ -1190,6 +1229,7 @@ export type ProfileCreateWithoutCreatedParcelsInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutCreatedParcelsInput = {
@@ -1214,6 +1254,7 @@ export type ProfileUncheckedCreateWithoutCreatedParcelsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutCreatedParcelsInput = {
@@ -1243,6 +1284,7 @@ export type ProfileCreateWithoutAssignedParcelsInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutAssignedParcelsInput = {
@@ -1267,6 +1309,7 @@ export type ProfileUncheckedCreateWithoutAssignedParcelsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutAssignedParcelsInput = {
@@ -1307,6 +1350,7 @@ export type ProfileUpdateWithoutCreatedParcelsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutCreatedParcelsInput = {
@@ -1331,6 +1375,7 @@ export type ProfileUncheckedUpdateWithoutCreatedParcelsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUpsertWithoutAssignedParcelsInput = {
@@ -1366,6 +1411,7 @@ export type ProfileUpdateWithoutAssignedParcelsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutAssignedParcelsInput = {
@@ -1390,6 +1436,7 @@ export type ProfileUncheckedUpdateWithoutAssignedParcelsInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileCreateWithoutScannedPlacesInput = {
@@ -1414,6 +1461,7 @@ export type ProfileCreateWithoutScannedPlacesInput = {
   statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutScannedPlacesInput = {
@@ -1438,6 +1486,7 @@ export type ProfileUncheckedCreateWithoutScannedPlacesInput = {
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutScannedPlacesInput = {
@@ -1478,6 +1527,7 @@ export type ProfileUpdateWithoutScannedPlacesInput = {
   statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutScannedPlacesInput = {
@@ -1502,6 +1552,7 @@ export type ProfileUncheckedUpdateWithoutScannedPlacesInput = {
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileCreateWithoutStatusChangesInput = {
@@ -1526,6 +1577,7 @@ export type ProfileCreateWithoutStatusChangesInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutStatusChangesInput = {
@@ -1550,6 +1602,7 @@ export type ProfileUncheckedCreateWithoutStatusChangesInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutStatusChangesInput = {
@@ -1590,6 +1643,7 @@ export type ProfileUpdateWithoutStatusChangesInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutStatusChangesInput = {
@@ -1614,6 +1668,7 @@ export type ProfileUncheckedUpdateWithoutStatusChangesInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileCreateWithoutPricingUpdatesInput = {
@@ -1638,6 +1693,7 @@ export type ProfileCreateWithoutPricingUpdatesInput = {
   statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutPricingUpdatesInput = {
@@ -1662,6 +1718,7 @@ export type ProfileUncheckedCreateWithoutPricingUpdatesInput = {
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutPricingUpdatesInput = {
@@ -1702,6 +1759,7 @@ export type ProfileUpdateWithoutPricingUpdatesInput = {
   statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutPricingUpdatesInput = {
@@ -1726,6 +1784,7 @@ export type ProfileUncheckedUpdateWithoutPricingUpdatesInput = {
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileCreateWithoutCashReceivedInput = {
@@ -1750,6 +1809,7 @@ export type ProfileCreateWithoutCashReceivedInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutCashReceivedInput = {
@@ -1774,6 +1834,7 @@ export type ProfileUncheckedCreateWithoutCashReceivedInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutCashReceivedInput = {
@@ -1803,6 +1864,7 @@ export type ProfileCreateWithoutCashConfirmedInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutCashConfirmedInput = {
@@ -1827,6 +1889,7 @@ export type ProfileUncheckedCreateWithoutCashConfirmedInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutCashConfirmedInput = {
@@ -1867,6 +1930,7 @@ export type ProfileUpdateWithoutCashReceivedInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutCashReceivedInput = {
@@ -1891,6 +1955,7 @@ export type ProfileUncheckedUpdateWithoutCashReceivedInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUpsertWithoutCashConfirmedInput = {
@@ -1926,6 +1991,7 @@ export type ProfileUpdateWithoutCashConfirmedInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutCashConfirmedInput = {
@@ -1950,6 +2016,7 @@ export type ProfileUncheckedUpdateWithoutCashConfirmedInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileCreateWithoutAssignedRouteTasksInput = {
@@ -1974,6 +2041,7 @@ export type ProfileCreateWithoutAssignedRouteTasksInput = {
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutAssignedRouteTasksInput = {
@@ -1998,6 +2066,7 @@ export type ProfileUncheckedCreateWithoutAssignedRouteTasksInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutAssignedRouteTasksInput = {
@@ -2038,6 +2107,7 @@ export type ProfileUpdateWithoutAssignedRouteTasksInput = {
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutAssignedRouteTasksInput = {
@@ -2062,6 +2132,7 @@ export type ProfileUncheckedUpdateWithoutAssignedRouteTasksInput = {
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileCreateWithoutWarehouseActionsInput = {
@@ -2086,6 +2157,7 @@ export type ProfileCreateWithoutWarehouseActionsInput = {
   statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
   scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileUncheckedCreateWithoutWarehouseActionsInput = {
@@ -2110,6 +2182,7 @@ export type ProfileUncheckedCreateWithoutWarehouseActionsInput = {
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
   pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type ProfileCreateOrConnectWithoutWarehouseActionsInput = {
@@ -2150,6 +2223,7 @@ export type ProfileUpdateWithoutWarehouseActionsInput = {
   statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
   scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutWarehouseActionsInput = {
@@ -2174,6 +2248,123 @@ export type ProfileUncheckedUpdateWithoutWarehouseActionsInput = {
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
   pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type ProfileCreateWithoutCreatedClaimsInput = {
+  id: string
+  email: string
+  fullName: string
+  phone?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
+  assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
+  createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
+  secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
+  createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
+  cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
+  cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
+  statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
+  scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
+  warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
+  pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+}
+
+export type ProfileUncheckedCreateWithoutCreatedClaimsInput = {
+  id: string
+  email: string
+  fullName: string
+  phone?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
+  createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
+  cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
+  cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
+  statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
+  pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type ProfileCreateOrConnectWithoutCreatedClaimsInput = {
+  where: Prisma.ProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutCreatedClaimsInput, Prisma.ProfileUncheckedCreateWithoutCreatedClaimsInput>
+}
+
+export type ProfileUpsertWithoutCreatedClaimsInput = {
+  update: Prisma.XOR<Prisma.ProfileUpdateWithoutCreatedClaimsInput, Prisma.ProfileUncheckedUpdateWithoutCreatedClaimsInput>
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutCreatedClaimsInput, Prisma.ProfileUncheckedCreateWithoutCreatedClaimsInput>
+  where?: Prisma.ProfileWhereInput
+}
+
+export type ProfileUpdateToOneWithWhereWithoutCreatedClaimsInput = {
+  where?: Prisma.ProfileWhereInput
+  data: Prisma.XOR<Prisma.ProfileUpdateWithoutCreatedClaimsInput, Prisma.ProfileUncheckedUpdateWithoutCreatedClaimsInput>
+}
+
+export type ProfileUpdateWithoutCreatedClaimsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
+  assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
+  createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
+  createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
+  cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
+  cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
+  statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
+  scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
+  pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type ProfileUncheckedUpdateWithoutCreatedClaimsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
+  cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
+  statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
+  pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
 
@@ -2195,6 +2386,7 @@ export type ProfileCountOutputType = {
   scannedPlaces: number
   warehouseActions: number
   pricingUpdates: number
+  createdClaims: number
 }
 
 export type ProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2211,6 +2403,7 @@ export type ProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   scannedPlaces?: boolean | ProfileCountOutputTypeCountScannedPlacesArgs
   warehouseActions?: boolean | ProfileCountOutputTypeCountWarehouseActionsArgs
   pricingUpdates?: boolean | ProfileCountOutputTypeCountPricingUpdatesArgs
+  createdClaims?: boolean | ProfileCountOutputTypeCountCreatedClaimsArgs
 }
 
 /**
@@ -2314,6 +2507,13 @@ export type ProfileCountOutputTypeCountPricingUpdatesArgs<ExtArgs extends runtim
   where?: Prisma.PricingConfigWhereInput
 }
 
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountCreatedClaimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ClaimWhereInput
+}
+
 
 export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2338,6 +2538,7 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   scannedPlaces?: boolean | Prisma.Profile$scannedPlacesArgs<ExtArgs>
   warehouseActions?: boolean | Prisma.Profile$warehouseActionsArgs<ExtArgs>
   pricingUpdates?: boolean | Prisma.Profile$pricingUpdatesArgs<ExtArgs>
+  createdClaims?: boolean | Prisma.Profile$createdClaimsArgs<ExtArgs>
   _count?: boolean | Prisma.ProfileCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["profile"]>
 
@@ -2392,6 +2593,7 @@ export type ProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   scannedPlaces?: boolean | Prisma.Profile$scannedPlacesArgs<ExtArgs>
   warehouseActions?: boolean | Prisma.Profile$warehouseActionsArgs<ExtArgs>
   pricingUpdates?: boolean | Prisma.Profile$pricingUpdatesArgs<ExtArgs>
+  createdClaims?: boolean | Prisma.Profile$createdClaimsArgs<ExtArgs>
   _count?: boolean | Prisma.ProfileCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProfileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2413,6 +2615,7 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     scannedPlaces: Prisma.$ParcelPlacePayload<ExtArgs>[]
     warehouseActions: Prisma.$WarehouseInventoryPayload<ExtArgs>[]
     pricingUpdates: Prisma.$PricingConfigPayload<ExtArgs>[]
+    createdClaims: Prisma.$ClaimPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2831,6 +3034,7 @@ export interface Prisma__ProfileClient<T, Null = never, ExtArgs extends runtime.
   scannedPlaces<T extends Prisma.Profile$scannedPlacesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$scannedPlacesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelPlacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   warehouseActions<T extends Prisma.Profile$warehouseActionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$warehouseActionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WarehouseInventoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pricingUpdates<T extends Prisma.Profile$pricingUpdatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$pricingUpdatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PricingConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdClaims<T extends Prisma.Profile$createdClaimsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$createdClaimsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClaimPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3571,6 +3775,30 @@ export type Profile$pricingUpdatesArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.PricingConfigScalarFieldEnum | Prisma.PricingConfigScalarFieldEnum[]
+}
+
+/**
+ * Profile.createdClaims
+ */
+export type Profile$createdClaimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Claim
+   */
+  select?: Prisma.ClaimSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Claim
+   */
+  omit?: Prisma.ClaimOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClaimInclude<ExtArgs> | null
+  where?: Prisma.ClaimWhereInput
+  orderBy?: Prisma.ClaimOrderByWithRelationInput | Prisma.ClaimOrderByWithRelationInput[]
+  cursor?: Prisma.ClaimWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClaimScalarFieldEnum | Prisma.ClaimScalarFieldEnum[]
 }
 
 /**
