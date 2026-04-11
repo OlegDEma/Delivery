@@ -64,6 +64,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Користувачі', href: '/admin/users', roles: ['super_admin'] },
       { label: 'Тарифи', href: '/admin/pricing' },
       { label: 'Пункти збору', href: '/admin/collection-points' },
+      { label: 'Імпорт даних', href: '/admin/import' },
     ],
   },
 ];
