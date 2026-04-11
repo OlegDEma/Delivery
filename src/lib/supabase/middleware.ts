@@ -28,11 +28,15 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   // If no user and not on login page — redirect to login
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') ||
+  const isPublicPage = request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/register') ||
-    request.nextUrl.pathname.startsWith('/tracking');
+    request.nextUrl.pathname.startsWith('/tracking') ||
+    request.nextUrl.pathname.startsWith('/api/tracking') ||
+    request.nextUrl.pathname.startsWith('/api/collection-points') ||
+    request.nextUrl.pathname.startsWith('/api/descriptions') ||
+    request.nextUrl.pathname.startsWith('/receipt');
 
-  if (!user && !isAuthPage) {
+  if (!user && !isPublicPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

@@ -1,0 +1,121 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { formatCurrency } from '@/lib/utils/format';
+
+interface CostCalculatorProps {
+  direction: string;
+  senderCountry: string | null;
+  receiverCountry: string | null;
+  actualWeight: number;
+  volumetricWeight: number;
+  declaredValue: number;
+  needsPackaging: boolean;
+  isAddressDelivery: boolean;
+}
+
+interface CostBreakdown {
+  deliveryCost: number;
+  insuranceCost: number;
+  packagingCost: number;
+  addressDeliveryCost: number;
+  totalCost: number;
+  billableWeight: number;
+  pricePerKg: number;
+  weightType: string;
+}
+
+export function CostCalculator(props: CostCalculatorProps) {
+  const [cost, setCost] = useState<CostBreakdown | null>(null);
+  const [error, setError] = useState('');
+
+  const country = props.direction === 'eu_to_ua'
+    ? props.senderCountry
+    : props.receiverCountry;
+
+  useEffect(() => {
+    if (!country || props.actualWeight <= 0) {
+      setCost(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/parcels/calculate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            direction: props.direction,
+            country,
+            actualWeight: props.actualWeight,
+            volumetricWeight: props.volumetricWeight,
+            declaredValue: props.declaredValue,
+            needsPackaging: props.needsPackaging,
+            isAddressDelivery: props.isAddressDelivery,
+          }),
+        });
+        if (res.ok) {
+          setCost(await res.json());
+          setError('');
+        } else {
+          setCost(null);
+          setError('Тариф не знайдено');
+        }
+      } catch {
+        setCost(null);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [country, props.direction, props.actualWeight, props.volumetricWeight, props.declaredValue, props.needsPackaging, props.isAddressDelivery]);
+
+  if (!cost && !error) return null;
+
+  if (error) {
+    return <div className="text-xs text-yellow-600">{error}</div>;
+  }
+
+  if (!cost) return null;
+
+  const WEIGHT_TYPE_LABELS: Record<string, string> = {
+    actual: 'max(факт., об\'ємна)',
+    volumetric: 'об\'ємна',
+    average: 'середня',
+  };
+
+  return (
+    <div className="bg-blue-50 rounded-lg p-3 text-sm space-y-1">
+      <div className="font-medium text-blue-800 mb-1">Розрахунок вартості</div>
+      <div className="flex justify-between">
+        <span className="text-gray-600">Розрахункова вага ({WEIGHT_TYPE_LABELS[cost.weightType] || cost.weightType}):</span>
+        <span>{cost.billableWeight.toFixed(2)} кг</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-gray-600">Доставка ({cost.pricePerKg} EUR/кг):</span>
+        <span>{formatCurrency(cost.deliveryCost, 'EUR')}</span>
+      </div>
+      {cost.insuranceCost > 0 && (
+        <div className="flex justify-between">
+          <span className="text-gray-600">Страхування:</span>
+          <span>{formatCurrency(cost.insuranceCost, 'EUR')}</span>
+        </div>
+      )}
+      {cost.packagingCost > 0 && (
+        <div className="flex justify-between">
+          <span className="text-gray-600">Пакування:</span>
+          <span>{formatCurrency(cost.packagingCost, 'EUR')}</span>
+        </div>
+      )}
+      {cost.addressDeliveryCost > 0 && (
+        <div className="flex justify-between">
+          <span className="text-gray-600">Адресна доставка:</span>
+          <span>{formatCurrency(cost.addressDeliveryCost, 'EUR')}</span>
+        </div>
+      )}
+      <div className="flex justify-between font-bold border-t border-blue-200 pt-1 mt-1">
+        <span>Всього:</span>
+        <span className="text-blue-800">{formatCurrency(cost.totalCost, 'EUR')}</span>
+      </div>
+    </div>
+  );
+}
