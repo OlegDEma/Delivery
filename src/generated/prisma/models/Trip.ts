@@ -27,6 +27,7 @@ export type AggregateTrip = {
 }
 
 export type TripAvgAggregateOutputType = {
+  maxWeight: runtime.Decimal | null
   shortNumberCounterNl: number | null
   shortNumberCounterVienna: number | null
   shortNumberCounterLinz: number | null
@@ -35,6 +36,7 @@ export type TripAvgAggregateOutputType = {
 }
 
 export type TripSumAggregateOutputType = {
+  maxWeight: runtime.Decimal | null
   shortNumberCounterNl: number | null
   shortNumberCounterVienna: number | null
   shortNumberCounterLinz: number | null
@@ -52,6 +54,7 @@ export type TripMinAggregateOutputType = {
   assignedCourierId: string | null
   secondCourierId: string | null
   vehicleInfo: string | null
+  maxWeight: runtime.Decimal | null
   notes: string | null
   shortNumberCounterNl: number | null
   shortNumberCounterVienna: number | null
@@ -73,6 +76,7 @@ export type TripMaxAggregateOutputType = {
   assignedCourierId: string | null
   secondCourierId: string | null
   vehicleInfo: string | null
+  maxWeight: runtime.Decimal | null
   notes: string | null
   shortNumberCounterNl: number | null
   shortNumberCounterVienna: number | null
@@ -94,6 +98,7 @@ export type TripCountAggregateOutputType = {
   assignedCourierId: number
   secondCourierId: number
   vehicleInfo: number
+  maxWeight: number
   notes: number
   shortNumberCounterNl: number
   shortNumberCounterVienna: number
@@ -108,6 +113,7 @@ export type TripCountAggregateOutputType = {
 
 
 export type TripAvgAggregateInputType = {
+  maxWeight?: true
   shortNumberCounterNl?: true
   shortNumberCounterVienna?: true
   shortNumberCounterLinz?: true
@@ -116,6 +122,7 @@ export type TripAvgAggregateInputType = {
 }
 
 export type TripSumAggregateInputType = {
+  maxWeight?: true
   shortNumberCounterNl?: true
   shortNumberCounterVienna?: true
   shortNumberCounterLinz?: true
@@ -133,6 +140,7 @@ export type TripMinAggregateInputType = {
   assignedCourierId?: true
   secondCourierId?: true
   vehicleInfo?: true
+  maxWeight?: true
   notes?: true
   shortNumberCounterNl?: true
   shortNumberCounterVienna?: true
@@ -154,6 +162,7 @@ export type TripMaxAggregateInputType = {
   assignedCourierId?: true
   secondCourierId?: true
   vehicleInfo?: true
+  maxWeight?: true
   notes?: true
   shortNumberCounterNl?: true
   shortNumberCounterVienna?: true
@@ -175,6 +184,7 @@ export type TripCountAggregateInputType = {
   assignedCourierId?: true
   secondCourierId?: true
   vehicleInfo?: true
+  maxWeight?: true
   notes?: true
   shortNumberCounterNl?: true
   shortNumberCounterVienna?: true
@@ -283,6 +293,7 @@ export type TripGroupByOutputType = {
   assignedCourierId: string | null
   secondCourierId: string | null
   vehicleInfo: string | null
+  maxWeight: runtime.Decimal | null
   notes: string | null
   shortNumberCounterNl: number
   shortNumberCounterVienna: number
@@ -327,6 +338,7 @@ export type TripWhereInput = {
   assignedCourierId?: Prisma.UuidNullableFilter<"Trip"> | string | null
   secondCourierId?: Prisma.UuidNullableFilter<"Trip"> | string | null
   vehicleInfo?: Prisma.StringNullableFilter<"Trip"> | string | null
+  maxWeight?: Prisma.DecimalNullableFilter<"Trip"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.StringNullableFilter<"Trip"> | string | null
   shortNumberCounterNl?: Prisma.IntFilter<"Trip"> | number
   shortNumberCounterVienna?: Prisma.IntFilter<"Trip"> | number
@@ -353,6 +365,7 @@ export type TripOrderByWithRelationInput = {
   assignedCourierId?: Prisma.SortOrderInput | Prisma.SortOrder
   secondCourierId?: Prisma.SortOrderInput | Prisma.SortOrder
   vehicleInfo?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxWeight?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   shortNumberCounterNl?: Prisma.SortOrder
   shortNumberCounterVienna?: Prisma.SortOrder
@@ -382,6 +395,7 @@ export type TripWhereUniqueInput = Prisma.AtLeast<{
   assignedCourierId?: Prisma.UuidNullableFilter<"Trip"> | string | null
   secondCourierId?: Prisma.UuidNullableFilter<"Trip"> | string | null
   vehicleInfo?: Prisma.StringNullableFilter<"Trip"> | string | null
+  maxWeight?: Prisma.DecimalNullableFilter<"Trip"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.StringNullableFilter<"Trip"> | string | null
   shortNumberCounterNl?: Prisma.IntFilter<"Trip"> | number
   shortNumberCounterVienna?: Prisma.IntFilter<"Trip"> | number
@@ -408,6 +422,7 @@ export type TripOrderByWithAggregationInput = {
   assignedCourierId?: Prisma.SortOrderInput | Prisma.SortOrder
   secondCourierId?: Prisma.SortOrderInput | Prisma.SortOrder
   vehicleInfo?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxWeight?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   shortNumberCounterNl?: Prisma.SortOrder
   shortNumberCounterVienna?: Prisma.SortOrder
@@ -437,6 +452,7 @@ export type TripScalarWhereWithAggregatesInput = {
   assignedCourierId?: Prisma.UuidNullableWithAggregatesFilter<"Trip"> | string | null
   secondCourierId?: Prisma.UuidNullableWithAggregatesFilter<"Trip"> | string | null
   vehicleInfo?: Prisma.StringNullableWithAggregatesFilter<"Trip"> | string | null
+  maxWeight?: Prisma.DecimalNullableWithAggregatesFilter<"Trip"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Trip"> | string | null
   shortNumberCounterNl?: Prisma.IntWithAggregatesFilter<"Trip"> | number
   shortNumberCounterVienna?: Prisma.IntWithAggregatesFilter<"Trip"> | number
@@ -456,6 +472,7 @@ export type TripCreateInput = {
   arrivalDate?: Date | string | null
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -481,6 +498,7 @@ export type TripUncheckedCreateInput = {
   assignedCourierId?: string | null
   secondCourierId?: string | null
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -502,6 +520,7 @@ export type TripUpdateInput = {
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -527,6 +546,7 @@ export type TripUncheckedUpdateInput = {
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -550,6 +570,7 @@ export type TripCreateManyInput = {
   assignedCourierId?: string | null
   secondCourierId?: string | null
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -569,6 +590,7 @@ export type TripUpdateManyMutationInput = {
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -589,6 +611,7 @@ export type TripUncheckedUpdateManyInput = {
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -620,6 +643,7 @@ export type TripCountOrderByAggregateInput = {
   assignedCourierId?: Prisma.SortOrder
   secondCourierId?: Prisma.SortOrder
   vehicleInfo?: Prisma.SortOrder
+  maxWeight?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   shortNumberCounterNl?: Prisma.SortOrder
   shortNumberCounterVienna?: Prisma.SortOrder
@@ -632,6 +656,7 @@ export type TripCountOrderByAggregateInput = {
 }
 
 export type TripAvgOrderByAggregateInput = {
+  maxWeight?: Prisma.SortOrder
   shortNumberCounterNl?: Prisma.SortOrder
   shortNumberCounterVienna?: Prisma.SortOrder
   shortNumberCounterLinz?: Prisma.SortOrder
@@ -649,6 +674,7 @@ export type TripMaxOrderByAggregateInput = {
   assignedCourierId?: Prisma.SortOrder
   secondCourierId?: Prisma.SortOrder
   vehicleInfo?: Prisma.SortOrder
+  maxWeight?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   shortNumberCounterNl?: Prisma.SortOrder
   shortNumberCounterVienna?: Prisma.SortOrder
@@ -670,6 +696,7 @@ export type TripMinOrderByAggregateInput = {
   assignedCourierId?: Prisma.SortOrder
   secondCourierId?: Prisma.SortOrder
   vehicleInfo?: Prisma.SortOrder
+  maxWeight?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   shortNumberCounterNl?: Prisma.SortOrder
   shortNumberCounterVienna?: Prisma.SortOrder
@@ -682,6 +709,7 @@ export type TripMinOrderByAggregateInput = {
 }
 
 export type TripSumOrderByAggregateInput = {
+  maxWeight?: Prisma.SortOrder
   shortNumberCounterNl?: Prisma.SortOrder
   shortNumberCounterVienna?: Prisma.SortOrder
   shortNumberCounterLinz?: Prisma.SortOrder
@@ -837,6 +865,14 @@ export type EnumTripStatusFieldUpdateOperationsInput = {
   set?: $Enums.TripStatus
 }
 
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
 export type TripCreateNestedOneWithoutParcelsInput = {
   create?: Prisma.XOR<Prisma.TripCreateWithoutParcelsInput, Prisma.TripUncheckedCreateWithoutParcelsInput>
   connectOrCreate?: Prisma.TripCreateOrConnectWithoutParcelsInput
@@ -875,6 +911,7 @@ export type TripCreateWithoutAssignedCourierInput = {
   arrivalDate?: Date | string | null
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -898,6 +935,7 @@ export type TripUncheckedCreateWithoutAssignedCourierInput = {
   status?: $Enums.TripStatus
   secondCourierId?: string | null
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -929,6 +967,7 @@ export type TripCreateWithoutSecondCourierInput = {
   arrivalDate?: Date | string | null
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -952,6 +991,7 @@ export type TripUncheckedCreateWithoutSecondCourierInput = {
   status?: $Enums.TripStatus
   assignedCourierId?: string | null
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -983,6 +1023,7 @@ export type TripCreateWithoutCreatedByInput = {
   arrivalDate?: Date | string | null
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -1007,6 +1048,7 @@ export type TripUncheckedCreateWithoutCreatedByInput = {
   assignedCourierId?: string | null
   secondCourierId?: string | null
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -1058,6 +1100,7 @@ export type TripScalarWhereInput = {
   assignedCourierId?: Prisma.UuidNullableFilter<"Trip"> | string | null
   secondCourierId?: Prisma.UuidNullableFilter<"Trip"> | string | null
   vehicleInfo?: Prisma.StringNullableFilter<"Trip"> | string | null
+  maxWeight?: Prisma.DecimalNullableFilter<"Trip"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.StringNullableFilter<"Trip"> | string | null
   shortNumberCounterNl?: Prisma.IntFilter<"Trip"> | number
   shortNumberCounterVienna?: Prisma.IntFilter<"Trip"> | number
@@ -1109,6 +1152,7 @@ export type TripCreateWithoutParcelsInput = {
   arrivalDate?: Date | string | null
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -1133,6 +1177,7 @@ export type TripUncheckedCreateWithoutParcelsInput = {
   assignedCourierId?: string | null
   secondCourierId?: string | null
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -1169,6 +1214,7 @@ export type TripUpdateWithoutParcelsInput = {
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1193,6 +1239,7 @@ export type TripUncheckedUpdateWithoutParcelsInput = {
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1213,6 +1260,7 @@ export type TripCreateWithoutRouteTasksInput = {
   arrivalDate?: Date | string | null
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -1237,6 +1285,7 @@ export type TripUncheckedCreateWithoutRouteTasksInput = {
   assignedCourierId?: string | null
   secondCourierId?: string | null
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -1273,6 +1322,7 @@ export type TripUpdateWithoutRouteTasksInput = {
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1297,6 +1347,7 @@ export type TripUncheckedUpdateWithoutRouteTasksInput = {
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1318,6 +1369,7 @@ export type TripCreateManyAssignedCourierInput = {
   status?: $Enums.TripStatus
   secondCourierId?: string | null
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -1338,6 +1390,7 @@ export type TripCreateManySecondCourierInput = {
   status?: $Enums.TripStatus
   assignedCourierId?: string | null
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -1359,6 +1412,7 @@ export type TripCreateManyCreatedByInput = {
   assignedCourierId?: string | null
   secondCourierId?: string | null
   vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: string | null
   shortNumberCounterNl?: number
   shortNumberCounterVienna?: number
@@ -1377,6 +1431,7 @@ export type TripUpdateWithoutAssignedCourierInput = {
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1400,6 +1455,7 @@ export type TripUncheckedUpdateWithoutAssignedCourierInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1422,6 +1478,7 @@ export type TripUncheckedUpdateManyWithoutAssignedCourierInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1441,6 +1498,7 @@ export type TripUpdateWithoutSecondCourierInput = {
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1464,6 +1522,7 @@ export type TripUncheckedUpdateWithoutSecondCourierInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1486,6 +1545,7 @@ export type TripUncheckedUpdateManyWithoutSecondCourierInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1505,6 +1565,7 @@ export type TripUpdateWithoutCreatedByInput = {
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1529,6 +1590,7 @@ export type TripUncheckedUpdateWithoutCreatedByInput = {
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1551,6 +1613,7 @@ export type TripUncheckedUpdateManyWithoutCreatedByInput = {
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1611,6 +1674,7 @@ export type TripSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   assignedCourierId?: boolean
   secondCourierId?: boolean
   vehicleInfo?: boolean
+  maxWeight?: boolean
   notes?: boolean
   shortNumberCounterNl?: boolean
   shortNumberCounterVienna?: boolean
@@ -1638,6 +1702,7 @@ export type TripSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   assignedCourierId?: boolean
   secondCourierId?: boolean
   vehicleInfo?: boolean
+  maxWeight?: boolean
   notes?: boolean
   shortNumberCounterNl?: boolean
   shortNumberCounterVienna?: boolean
@@ -1662,6 +1727,7 @@ export type TripSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   assignedCourierId?: boolean
   secondCourierId?: boolean
   vehicleInfo?: boolean
+  maxWeight?: boolean
   notes?: boolean
   shortNumberCounterNl?: boolean
   shortNumberCounterVienna?: boolean
@@ -1686,6 +1752,7 @@ export type TripSelectScalar = {
   assignedCourierId?: boolean
   secondCourierId?: boolean
   vehicleInfo?: boolean
+  maxWeight?: boolean
   notes?: boolean
   shortNumberCounterNl?: boolean
   shortNumberCounterVienna?: boolean
@@ -1697,7 +1764,7 @@ export type TripSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TripOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "direction" | "country" | "departureDate" | "arrivalDate" | "status" | "assignedCourierId" | "secondCourierId" | "vehicleInfo" | "notes" | "shortNumberCounterNl" | "shortNumberCounterVienna" | "shortNumberCounterLinz" | "shortNumberCounterGeo" | "shortNumberCounterEuUa" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["trip"]>
+export type TripOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "direction" | "country" | "departureDate" | "arrivalDate" | "status" | "assignedCourierId" | "secondCourierId" | "vehicleInfo" | "maxWeight" | "notes" | "shortNumberCounterNl" | "shortNumberCounterVienna" | "shortNumberCounterLinz" | "shortNumberCounterGeo" | "shortNumberCounterEuUa" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["trip"]>
 export type TripInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignedCourier?: boolean | Prisma.Trip$assignedCourierArgs<ExtArgs>
   secondCourier?: boolean | Prisma.Trip$secondCourierArgs<ExtArgs>
@@ -1736,6 +1803,7 @@ export type $TripPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     assignedCourierId: string | null
     secondCourierId: string | null
     vehicleInfo: string | null
+    maxWeight: runtime.Decimal | null
     notes: string | null
     shortNumberCounterNl: number
     shortNumberCounterVienna: number
@@ -2182,6 +2250,7 @@ export interface TripFieldRefs {
   readonly assignedCourierId: Prisma.FieldRef<"Trip", 'String'>
   readonly secondCourierId: Prisma.FieldRef<"Trip", 'String'>
   readonly vehicleInfo: Prisma.FieldRef<"Trip", 'String'>
+  readonly maxWeight: Prisma.FieldRef<"Trip", 'Decimal'>
   readonly notes: Prisma.FieldRef<"Trip", 'String'>
   readonly shortNumberCounterNl: Prisma.FieldRef<"Trip", 'Int'>
   readonly shortNumberCounterVienna: Prisma.FieldRef<"Trip", 'Int'>

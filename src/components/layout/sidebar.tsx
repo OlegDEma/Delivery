@@ -45,6 +45,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Каса', href: '/cash-register' },
       { label: 'Борги', href: '/debts' },
       { label: 'Звіти', href: '/reports' },
+      { label: 'Аналітика', href: '/analytics' },
     ],
   },
   {

@@ -537,6 +537,45 @@ export default function ParcelDetailPage() {
         </CardContent>
       </Card>
 
+      {/* Photos */}
+      <Card>
+        <CardHeader className="py-2 px-3">
+          <CardTitle className="text-sm">Фото посилки</CardTitle>
+        </CardHeader>
+        <CardContent className="px-3 pb-3 pt-0">
+          {(parcel as unknown as { photos?: string[] }).photos && (parcel as unknown as { photos: string[] }).photos.length > 0 && (
+            <div className="flex gap-2 flex-wrap mb-2">
+              {(parcel as unknown as { photos: string[] }).photos.map((url, i) => (
+                <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                  <img src={url} alt={`Фото ${i + 1}`} className="w-20 h-20 object-cover rounded-lg border hover:opacity-80" />
+                </a>
+              ))}
+            </div>
+          )}
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-blue-600 hover:text-blue-800">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Додати фото
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('file', file);
+                await fetch(`/api/parcels/${id}/photos`, { method: 'POST', body: formData });
+                fetchParcel();
+              }}
+            />
+          </label>
+        </CardContent>
+      </Card>
+
       {/* Notes */}
       <Card>
         <CardHeader className="py-2 px-3">

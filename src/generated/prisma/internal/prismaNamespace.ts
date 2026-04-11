@@ -1709,6 +1709,7 @@ export const TripScalarFieldEnum = {
   assignedCourierId: 'assignedCourierId',
   secondCourierId: 'secondCourierId',
   vehicleInfo: 'vehicleInfo',
+  maxWeight: 'maxWeight',
   notes: 'notes',
   shortNumberCounterNl: 'shortNumberCounterNl',
   shortNumberCounterVienna: 'shortNumberCounterVienna',
@@ -1762,6 +1763,7 @@ export const ParcelScalarFieldEnum = {
   estimatedDeliveryEnd: 'estimatedDeliveryEnd',
   isPaid: 'isPaid',
   paidAt: 'paidAt',
+  photos: 'photos',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2127,20 +2129,6 @@ export type ListEnumTripStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
- * Reference to a field of type 'ShipmentType'
- */
-export type EnumShipmentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShipmentType'>
-    
-
-
-/**
- * Reference to a field of type 'ShipmentType[]'
- */
-export type ListEnumShipmentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShipmentType[]'>
-    
-
-
-/**
  * Reference to a field of type 'Decimal'
  */
 export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
@@ -2151,6 +2139,20 @@ export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'Decimal[]'
  */
 export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ShipmentType'
+ */
+export type EnumShipmentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShipmentType'>
+    
+
+
+/**
+ * Reference to a field of type 'ShipmentType[]'
+ */
+export type ListEnumShipmentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShipmentType[]'>
     
 
 

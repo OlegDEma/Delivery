@@ -152,6 +152,7 @@ export const TripScalarFieldEnum = {
   assignedCourierId: 'assignedCourierId',
   secondCourierId: 'secondCourierId',
   vehicleInfo: 'vehicleInfo',
+  maxWeight: 'maxWeight',
   notes: 'notes',
   shortNumberCounterNl: 'shortNumberCounterNl',
   shortNumberCounterVienna: 'shortNumberCounterVienna',
@@ -205,6 +206,7 @@ export const ParcelScalarFieldEnum = {
   estimatedDeliveryEnd: 'estimatedDeliveryEnd',
   isPaid: 'isPaid',
   paidAt: 'paidAt',
+  photos: 'photos',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

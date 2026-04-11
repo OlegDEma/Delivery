@@ -225,6 +225,7 @@ model Trip {
   assignedCourierId        String?    @map("assigned_courier_id") @db.Uuid
   secondCourierId          String?    @map("second_courier_id") @db.Uuid
   vehicleInfo              String?    @map("vehicle_info")
+  maxWeight                Decimal?   @map("max_weight") @db.Decimal(8, 2)
   notes                    String?
   shortNumberCounterNl     Int        @default(0) @map("short_number_counter_nl")
   shortNumberCounterVienna Int        @default(0) @map("short_number_counter_vienna")
@@ -287,6 +288,7 @@ model Parcel {
   estimatedDeliveryEnd   DateTime?    @map("estimated_delivery_end") @db.Timestamptz
   isPaid                Boolean       @default(false) @map("is_paid")
   paidAt                DateTime?     @map("paid_at") @db.Timestamptz
+  photos                String[]      @default([])
   createdAt             DateTime      @default(now()) @map("created_at") @db.Timestamptz
   updatedAt             DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
