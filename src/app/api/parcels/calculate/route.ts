@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import { calculateParcelCost } from '@/lib/utils/pricing';
 import { getBillableWeight } from '@/lib/utils/volumetric';
 
 // POST /api/parcels/calculate — calculate parcel cost based on pricing config
 export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const body = await request.json();
   const { direction, country, actualWeight, volumetricWeight, declaredValue, needsPackaging, isAddressDelivery } = body;
 

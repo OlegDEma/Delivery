@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
       receiverAddress: { select: { city: true, street: true, building: true, npWarehouseNum: true, country: true } },
     },
     orderBy: { createdAt: 'desc' },
+    take: 5000,
   });
 
   const wb = new ExcelJS.Workbook();

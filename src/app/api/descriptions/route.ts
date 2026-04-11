@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 // GET /api/descriptions?q=... — autocomplete for parcel descriptions
 export async function GET(request: NextRequest) {
@@ -22,6 +23,10 @@ export async function GET(request: NextRequest) {
 
 // POST /api/descriptions — increment or create suggestion
 export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const body = await request.json();
   const { text } = body;
   if (!text?.trim()) return NextResponse.json({ error: 'Text required' }, { status: 400 });

@@ -33,7 +33,7 @@ export default function ParcelsPage() {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
 
-  const fetchParcels = useCallback(async () => {
+  const fetchParcels = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set('q', search);
@@ -41,19 +41,27 @@ export default function ParcelsPage() {
     params.set('page', String(page));
     params.set('limit', '20');
 
-    const res = await fetch(`/api/parcels?${params}`);
-    if (res.ok) {
-      const data = await res.json();
-      setParcels(data.parcels);
-      setTotal(data.total);
-      setPages(data.pages);
+    try {
+      const res = await fetch(`/api/parcels?${params}`, { signal });
+      if (res.ok) {
+        const data = await res.json();
+        setParcels(data.parcels);
+        setTotal(data.total);
+        setPages(data.pages);
+      }
+    } catch (e) {
+      if (e instanceof DOMException && e.name === 'AbortError') return;
     }
     setLoading(false);
   }, [search, statusFilter, page]);
 
   useEffect(() => {
-    const timer = setTimeout(fetchParcels, 300);
-    return () => clearTimeout(timer);
+    const controller = new AbortController();
+    const timer = setTimeout(() => fetchParcels(controller.signal), 300);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [fetchParcels]);
 
   return (

@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pandoc \"/d/Delivery/Завдання_по_посилках_спрощений_варіант.docx\" -o /tmp/task1.md)"
+      "Bash(pandoc \"/d/Delivery/Завдання_по_посилках_спрощений_варіант.docx\" -o /tmp/task1.md)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
