@@ -34,6 +34,28 @@ export async function GET(request: NextRequest) {
         addresses: {
           orderBy: { usageCount: 'desc' },
         },
+        // Last parcel where this client was sender or receiver — to get last used address
+        sentParcels: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            receiverAddressId: true,
+            senderAddressId: true,
+            receiverAddress: {
+              select: { id: true, country: true, city: true, street: true, building: true, apartment: true, postalCode: true, landmark: true, npWarehouseNum: true, npPoshtamatNum: true, deliveryMethod: true, usageCount: true },
+            },
+          },
+        },
+        receivedParcels: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            receiverAddressId: true,
+            receiverAddress: {
+              select: { id: true, country: true, city: true, street: true, building: true, apartment: true, postalCode: true, landmark: true, npWarehouseNum: true, npPoshtamatNum: true, deliveryMethod: true, usageCount: true },
+            },
+          },
+        },
       },
       orderBy: { updatedAt: 'desc' },
       skip,
@@ -42,8 +64,32 @@ export async function GET(request: NextRequest) {
     prisma.client.count({ where }),
   ]);
 
+  // Reorder addresses: put last-used address from latest parcel first
+  const processedClients = clients.map(c => {
+    // Find address from last parcel
+    const lastSentAddr = c.sentParcels?.[0]?.senderAddressId
+      ? c.addresses.find(a => a.id === c.sentParcels[0].senderAddressId)
+      : null;
+    const lastRecvAddr = c.receivedParcels?.[0]?.receiverAddress || null;
+
+    let reorderedAddresses = [...c.addresses];
+    const lastAddrId = lastSentAddr?.id || lastRecvAddr?.id;
+    if (lastAddrId) {
+      // Move last-used address to top
+      const idx = reorderedAddresses.findIndex(a => a.id === lastAddrId);
+      if (idx > 0) {
+        const [addr] = reorderedAddresses.splice(idx, 1);
+        reorderedAddresses.unshift(addr);
+      }
+    }
+
+    // Remove parcel data from response (not needed by frontend)
+    const { sentParcels, receivedParcels, ...clientData } = c;
+    return { ...clientData, addresses: reorderedAddresses };
+  });
+
   return NextResponse.json({
-    clients,
+    clients: processedClients,
     total,
     page,
     pages: Math.ceil(total / limit),
