@@ -17,7 +17,7 @@ export const PARCEL_STATUSES = {
 export type ParcelStatusType = (typeof PARCEL_STATUSES)[keyof typeof PARCEL_STATUSES];
 
 export const STATUS_LABELS: Record<ParcelStatusType, string> = {
-  draft: 'Чернетка',
+  draft: 'Створена',
   accepted_for_transport_to_ua: 'Прийнято до перевезення в Україну',
   in_transit_to_ua: 'В дорозі до України',
   at_lviv_warehouse: 'На складі у Львові',

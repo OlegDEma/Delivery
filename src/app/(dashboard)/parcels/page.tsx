@@ -30,6 +30,7 @@ export default function ParcelsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dateFrom, setDateFrom] = useState('');
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
 
@@ -38,6 +39,7 @@ export default function ParcelsPage() {
     const params = new URLSearchParams();
     if (search) params.set('q', search);
     if (statusFilter !== 'all') params.set('status', statusFilter);
+    if (dateFrom) { params.set('dateFrom', dateFrom); params.set('dateTo', dateFrom); }
     params.set('page', String(page));
     params.set('limit', '20');
 
@@ -53,7 +55,7 @@ export default function ParcelsPage() {
       if (e instanceof DOMException && e.name === 'AbortError') return;
     }
     setLoading(false);
-  }, [search, statusFilter, page]);
+  }, [search, statusFilter, dateFrom, page]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -93,23 +95,26 @@ export default function ParcelsPage() {
           className="text-base md:max-w-xs"
         />
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v ?? 'all'); setPage(1); }}>
-          <SelectTrigger className="md:w-64">
+          <SelectTrigger className="md:w-56">
             <SelectValue>{statusFilter === 'all' ? 'Всі статуси' : (STATUS_LABELS[statusFilter as ParcelStatusType] || statusFilter)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Всі статуси</SelectItem>
-            <SelectItem value="draft">Чернетка</SelectItem>
-            <SelectItem value="accepted_for_transport_to_ua">Прийнято (→ UA)</SelectItem>
+            <SelectItem value="draft">Створена</SelectItem>
             <SelectItem value="in_transit_to_ua">В дорозі (→ UA)</SelectItem>
-            <SelectItem value="at_lviv_warehouse">На складі Львів</SelectItem>
             <SelectItem value="at_nova_poshta">На Новій пошті</SelectItem>
             <SelectItem value="delivered_ua">Доставлено (UA)</SelectItem>
-            <SelectItem value="accepted_for_transport_to_eu">Прийнято (→ EU)</SelectItem>
             <SelectItem value="in_transit_to_eu">В дорозі (→ EU)</SelectItem>
             <SelectItem value="delivered_eu">Доставлено (EU)</SelectItem>
             <SelectItem value="not_received">Не отримано</SelectItem>
           </SelectContent>
         </Select>
+        <Input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+          className="md:w-40"
+        />
       </div>
 
       {loading ? (
