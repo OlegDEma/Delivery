@@ -150,7 +150,7 @@ export function ClientCreateForm({ onSuccess, onCancel, initialPhone }: ClientCr
         <div className="space-y-2">
           <div>
             <Label>Населений пункт *</Label>
-            <Input value={city} onChange={(e) => setCity(e.target.value)} required />
+            <CapitalizeInput value={city} onChange={setCity} required />
           </div>
           {deliveryMethod === 'np_warehouse' ? (
             <div>
@@ -162,7 +162,7 @@ export function ClientCreateForm({ onSuccess, onCancel, initialPhone }: ClientCr
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label>Вулиця *</Label>
-                  <Input value={street} onChange={(e) => setStreet(e.target.value)} required />
+                  <CapitalizeInput value={street} onChange={setStreet} required />
                 </div>
                 <div>
                   <Label>Будинок *</Label>

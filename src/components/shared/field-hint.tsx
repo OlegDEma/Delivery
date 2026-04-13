@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
 interface FieldHintProps {
   text: string;
@@ -8,46 +8,52 @@ interface FieldHintProps {
 
 export function FieldHint({ text }: FieldHintProps) {
   const [show, setShow] = useState(false);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const btnRef = useRef<HTMLSpanElement>(null);
 
-  // Adjust position to stay within viewport
-  useEffect(() => {
-    if (show && tooltipRef.current) {
-      const rect = tooltipRef.current.getBoundingClientRect();
-      if (rect.left < 8) {
-        tooltipRef.current.style.left = '0';
-        tooltipRef.current.style.transform = 'none';
-      }
-      if (rect.right > window.innerWidth - 8) {
-        tooltipRef.current.style.left = 'auto';
-        tooltipRef.current.style.right = '0';
-        tooltipRef.current.style.transform = 'none';
-      }
+  const showTooltip = useCallback(() => {
+    if (btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      // Position above the button, clamped to viewport
+      let left = rect.left + rect.width / 2;
+      const top = rect.top - 8;
+
+      // Clamp horizontal to keep tooltip visible
+      left = Math.max(140, Math.min(left, window.innerWidth - 140));
+
+      setPos({ top, left });
     }
-  }, [show]);
+    setShow(true);
+  }, []);
 
   return (
-    <span className="relative inline-block ml-1">
-      <button
-        ref={buttonRef}
-        type="button"
-        className="w-5 h-5 rounded-full bg-gray-200 text-gray-500 text-xs font-bold inline-flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition-colors"
-        onClick={() => setShow(!show)}
+    <span
+      className="relative inline-block ml-1"
+      onMouseEnter={showTooltip}
+      onMouseLeave={() => setShow(false)}
+      onTouchStart={showTooltip}
+      onTouchEnd={() => setTimeout(() => setShow(false), 3000)}
+    >
+      <span
+        ref={btnRef}
+        className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 text-xs font-bold inline-flex items-center justify-center cursor-help"
       >
         і
-      </button>
-      {show && (
-        <>
-          {/* Backdrop to close on tap */}
-          <div className="fixed inset-0 z-[9998]" onClick={() => setShow(false)} />
+      </span>
+      {show && pos && (
+        <div
+          className="fixed z-[99999] bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl leading-relaxed w-64 pointer-events-none"
+          style={{
+            top: pos.top,
+            left: pos.left,
+            transform: 'translate(-50%, -100%)',
+          }}
+        >
+          {text}
           <div
-            ref={tooltipRef}
-            className="absolute z-[9999] bottom-7 left-1/2 -translate-x-1/2 w-64 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl leading-relaxed"
-          >
-            {text}
-          </div>
-        </>
+            className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"
+          />
+        </div>
       )}
     </span>
   );
