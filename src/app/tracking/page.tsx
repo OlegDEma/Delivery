@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -30,16 +30,23 @@ export default function TrackingPage() {
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
 
-  async function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    if (!query.trim()) return;
+  // Auto-search from URL param (when opened from QR code)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) {
+      setQuery(q);
+      doSearch(q);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  async function doSearch(q: string) {
     setLoading(true);
     setError('');
     setResult(null);
     setSearched(true);
 
-    const res = await fetch(`/api/tracking?q=${encodeURIComponent(query.trim())}`);
+    const res = await fetch(`/api/tracking?q=${encodeURIComponent(q)}`);
     if (res.ok) {
       setResult(await res.json());
     } else {
@@ -47,6 +54,12 @@ export default function TrackingPage() {
       setError(data.error || 'Посилку не знайдено');
     }
     setLoading(false);
+  }
+
+  async function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    if (!query.trim()) return;
+    doSearch(query.trim());
   }
 
   return (

@@ -41,9 +41,12 @@ export default function PrintLabelPage() {
     if (!data) return;
     async function generateQR() {
       const codes: Record<string, string> = {};
+      const baseUrl = window.location.origin;
       for (const place of data!.places) {
-        const qrData = place.itnPlace || data!.itn;
-        codes[qrData] = await QRCode.toDataURL(qrData, { width: 100, margin: 1 });
+        const itnCode = place.itnPlace || data!.itn;
+        // QR contains URL so any phone camera opens tracking directly
+        const qrUrl = `${baseUrl}/tracking?q=${encodeURIComponent(itnCode)}`;
+        codes[itnCode] = await QRCode.toDataURL(qrUrl, { width: 100, margin: 1 });
       }
       setQrCodes(codes);
     }

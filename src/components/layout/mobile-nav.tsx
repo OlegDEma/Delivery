@@ -26,6 +26,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     items: [
       { label: 'Головна', href: '/' },
+      { label: 'Сканер QR', href: '/scan' },
       { label: 'Посилки', href: '/parcels' },
       { label: 'Мої посилки', href: '/my-parcels', roles: ['driver_courier'] },
       { label: 'Клієнти', href: '/clients' },
