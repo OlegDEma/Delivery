@@ -73,6 +73,10 @@ export default function ClientDetailPage() {
   const [addrLandmark, setAddrLandmark] = useState('');
   const [addrNpWarehouse, setAddrNpWarehouse] = useState('');
 
+  // Edit address
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [editAddr, setEditAddr] = useState({ city: '', street: '', building: '', npWarehouseNum: '', landmark: '' });
+
   async function fetchClient() {
     const res = await fetch(`/api/clients/${id}`);
     if (res.ok) {
@@ -282,29 +286,93 @@ export default function ClientDetailPage() {
         <CardContent className="px-0 pb-0">
           <div className="divide-y">
             {client.addresses.map(a => (
-              <div key={a.id} className="px-4 py-2 flex items-center justify-between">
-                <div>
-                  <div className="text-sm">
-                    {COUNTRY_LABELS[a.country as CountryCode]}, {a.city}
-                    {a.street ? `, ${a.street}` : ''}
-                    {a.building ? ` ${a.building}` : ''}
-                    {a.apartment ? `, кв. ${a.apartment}` : ''}
+              <div key={a.id} className="px-4 py-2">
+                {editingAddressId === a.id ? (
+                  /* Inline edit form */
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Місто</Label>
+                        <Input value={editAddr.city} onChange={(e) => setEditAddr({...editAddr, city: e.target.value})} />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Вулиця</Label>
+                        <Input value={editAddr.street} onChange={(e) => setEditAddr({...editAddr, street: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <Label className="text-xs">Будинок</Label>
+                        <Input value={editAddr.building} onChange={(e) => setEditAddr({...editAddr, building: e.target.value})} />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Склад НП</Label>
+                        <Input value={editAddr.npWarehouseNum} onChange={(e) => setEditAddr({...editAddr, npWarehouseNum: e.target.value})} />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Орієнтир</Label>
+                        <Input value={editAddr.landmark} onChange={(e) => setEditAddr({...editAddr, landmark: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={async () => {
+                        await fetch(`/api/clients/${id}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'updateAddress', addressId: a.id, address: editAddr }),
+                        });
+                        setEditingAddressId(null);
+                        fetchClient();
+                      }}>Зберегти</Button>
+                      <Button size="sm" variant="outline" onClick={() => setEditingAddressId(null)}>Скасувати</Button>
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-400">
-                    {a.npWarehouseNum && `НП №${a.npWarehouseNum} | `}
-                    {a.landmark && `${a.landmark} | `}
-                    {a.postalCode && `${a.postalCode} | `}
-                    Використано: {a.usageCount}
+                ) : (
+                  /* Display mode */
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm">
+                        {COUNTRY_LABELS[a.country as CountryCode]}, {a.city}
+                        {a.street ? `, ${a.street}` : ''}
+                        {a.building ? ` ${a.building}` : ''}
+                        {a.apartment ? `, кв. ${a.apartment}` : ''}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {a.npWarehouseNum && `НП №${a.npWarehouseNum} | `}
+                        {a.landmark && `${a.landmark} | `}
+                        {a.postalCode && `${a.postalCode} | `}
+                        Використано: {a.usageCount}
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-blue-600 text-xs"
+                        onClick={() => {
+                          setEditingAddressId(a.id);
+                          setEditAddr({
+                            city: a.city || '',
+                            street: a.street || '',
+                            building: a.building || '',
+                            npWarehouseNum: a.npWarehouseNum || '',
+                            landmark: a.landmark || '',
+                          });
+                        }}
+                      >
+                        Ред.
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-400 hover:text-red-600"
+                        onClick={() => handleDeleteAddress(a.id)}
+                      >
+                        &times;
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-400 hover:text-red-600"
-                  onClick={() => handleDeleteAddress(a.id)}
-                >
-                  &times;
-                </Button>
+                )}
               </div>
             ))}
             {client.addresses.length === 0 && (

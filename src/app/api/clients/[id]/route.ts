@@ -108,6 +108,26 @@ export async function PATCH(
     return NextResponse.json(address, { status: 201 });
   }
 
+  // Update address
+  if (body.action === 'updateAddress') {
+    const addr = body.address;
+    const updated = await prisma.clientAddress.update({
+      where: { id: body.addressId },
+      data: {
+        ...(addr.country !== undefined && { country: addr.country }),
+        ...(addr.city !== undefined && { city: addr.city }),
+        ...(addr.street !== undefined && { street: addr.street || null }),
+        ...(addr.building !== undefined && { building: addr.building || null }),
+        ...(addr.apartment !== undefined && { apartment: addr.apartment || null }),
+        ...(addr.postalCode !== undefined && { postalCode: addr.postalCode || null }),
+        ...(addr.landmark !== undefined && { landmark: addr.landmark || null }),
+        ...(addr.npWarehouseNum !== undefined && { npWarehouseNum: addr.npWarehouseNum || null }),
+        ...(addr.deliveryMethod !== undefined && { deliveryMethod: addr.deliveryMethod }),
+      },
+    });
+    return NextResponse.json(updated);
+  }
+
   // Delete address
   if (body.action === 'deleteAddress') {
     await prisma.clientAddress.delete({ where: { id: body.addressId } });
