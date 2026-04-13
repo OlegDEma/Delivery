@@ -13,6 +13,7 @@ import { ClientSearch } from '@/components/clients/client-search';
 import { DescriptionAutocomplete } from '@/components/parcels/description-autocomplete';
 import { CostCalculator } from '@/components/parcels/cost-calculator';
 import { FieldHint } from '@/components/shared/field-hint';
+import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 
 interface SelectedClient {
@@ -100,10 +101,19 @@ export default function NewParcelPage() {
   // Receiver (first, as per TZ)
   const [receiver, setReceiver] = useState<SelectedClient | null>(null);
   const [receiverAddressId, setReceiverAddressId] = useState<string>('');
+  const [recvDeliveryMethod, setRecvDeliveryMethod] = useState<string>('address');
+  const [recvCity, setRecvCity] = useState('');
+  const [recvStreet, setRecvStreet] = useState('');
+  const [recvBuilding, setRecvBuilding] = useState('');
+  const [recvNpWarehouse, setRecvNpWarehouse] = useState('');
+  const [recvLandmark, setRecvLandmark] = useState('');
 
   // Sender
   const [sender, setSender] = useState<SelectedClient | null>(null);
   const [senderAddressId, setSenderAddressId] = useState<string>('');
+  const [senderCity, setSenderCity] = useState('');
+  const [senderStreet, setSenderStreet] = useState('');
+  const [senderBuilding, setSenderBuilding] = useState('');
 
   // Parcel details
   const [direction, setDirection] = useState<string>('eu_to_ua');
@@ -165,18 +175,33 @@ export default function NewParcelPage() {
     setPlaces(updated);
   }
 
-  // Auto-select first address when client selected
+  // Auto-select first address and fill editable fields
   function handleReceiverSelect(client: SelectedClient) {
     setReceiver(client);
-    if (client.addresses.length > 0) {
-      setReceiverAddressId(client.addresses[0].id);
+    const addr = client.addresses[0];
+    if (addr) {
+      setReceiverAddressId(addr.id);
+      setRecvDeliveryMethod(addr.deliveryMethod || 'address');
+      setRecvCity(addr.city || '');
+      setRecvStreet(addr.street || '');
+      setRecvBuilding(addr.building || '');
+      setRecvNpWarehouse(addr.npWarehouseNum || '');
+      setRecvLandmark(addr.landmark || '');
+    } else {
+      setRecvCity(''); setRecvStreet(''); setRecvBuilding(''); setRecvNpWarehouse(''); setRecvLandmark('');
     }
   }
 
   function handleSenderSelect(client: SelectedClient) {
     setSender(client);
-    if (client.addresses.length > 0) {
-      setSenderAddressId(client.addresses[0].id);
+    const addr = client.addresses[0];
+    if (addr) {
+      setSenderAddressId(addr.id);
+      setSenderCity(addr.city || '');
+      setSenderStreet(addr.street || '');
+      setSenderBuilding(addr.building || '');
+    } else {
+      setSenderCity(''); setSenderStreet(''); setSenderBuilding('');
     }
   }
 
@@ -316,24 +341,77 @@ export default function NewParcelPage() {
             <ClientSearch
               label="Пошук отримувача (телефон або прізвище)"
               onSelect={handleReceiverSelect}
-              onClear={() => { setReceiver(null); setReceiverAddressId(''); }}
+              onClear={() => { setReceiver(null); setReceiverAddressId(''); setRecvCity(''); setRecvStreet(''); setRecvBuilding(''); setRecvNpWarehouse(''); setRecvLandmark(''); }}
               selected={receiver}
             />
-            {receiver && receiver.addresses.length > 1 && (
-              <div>
-                <Label className="text-xs text-gray-500">Адреса доставки</Label>
-                <Select value={receiverAddressId} onValueChange={(v) => setReceiverAddressId(v ?? '')}>
-                  <SelectTrigger><SelectValue placeholder="Виберіть адресу" /></SelectTrigger>
-                  <SelectContent>
-                    {receiver.addresses.map(a => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.city}{a.street ? `, ${a.street}` : ''}{a.building ? ` ${a.building}` : ''}
-                        {a.npWarehouseNum ? ` (НП ${a.npWarehouseNum})` : ''}
-                        {a.landmark ? ` — ${a.landmark}` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {/* Editable address fields — auto-filled from last parcel, can be changed */}
+            {receiver && (
+              <div className="border-t pt-2 mt-2 space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-gray-500 font-medium">Адреса доставки</Label>
+                  {receiver.addresses.length > 1 && (
+                    <Select value={receiverAddressId} onValueChange={(v) => {
+                      const addr = receiver.addresses.find(a => a.id === (v ?? ''));
+                      if (addr) {
+                        setReceiverAddressId(addr.id);
+                        setRecvDeliveryMethod(addr.deliveryMethod || 'address');
+                        setRecvCity(addr.city || '');
+                        setRecvStreet(addr.street || '');
+                        setRecvBuilding(addr.building || '');
+                        setRecvNpWarehouse(addr.npWarehouseNum || '');
+                        setRecvLandmark(addr.landmark || '');
+                      }
+                    }}>
+                      <SelectTrigger className="h-7 text-xs w-48">
+                        <SelectValue>{receiver.addresses.find(a => a.id === receiverAddressId)?.city || 'Інша адреса'}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {receiver.addresses.map(a => (
+                          <SelectItem key={a.id} value={a.id}>
+                            {a.city}{a.npWarehouseNum ? ` НП ${a.npWarehouseNum}` : ''}{a.street ? `, ${a.street}` : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                <div>
+                  <Label className="text-xs">Метод доставки</Label>
+                  <Select value={recvDeliveryMethod} onValueChange={(v) => setRecvDeliveryMethod(v ?? 'address')}>
+                    <SelectTrigger className="h-8"><SelectValue>{recvDeliveryMethod === 'np_warehouse' ? 'Відділення НП' : 'Адреса'}</SelectValue></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="address">Адреса</SelectItem>
+                      <SelectItem value="np_warehouse">Відділення НП</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">Населений пункт</Label>
+                  <CapitalizeInput value={recvCity} onChange={setRecvCity} placeholder="Львів" />
+                </div>
+                {recvDeliveryMethod === 'np_warehouse' ? (
+                  <div>
+                    <Label className="text-xs">Номер складу/поштомату НП</Label>
+                    <Input value={recvNpWarehouse} onChange={(e) => setRecvNpWarehouse(e.target.value)} placeholder="1" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Вулиця</Label>
+                        <CapitalizeInput value={recvStreet} onChange={setRecvStreet} />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Будинок</Label>
+                        <Input value={recvBuilding} onChange={(e) => setRecvBuilding(e.target.value)} />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Орієнтир</Label>
+                      <Input value={recvLandmark} onChange={(e) => setRecvLandmark(e.target.value)} placeholder="Біля магазину..." />
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </CardContent>
@@ -350,22 +428,26 @@ export default function NewParcelPage() {
             <ClientSearch
               label="Пошук відправника (телефон або прізвище)"
               onSelect={handleSenderSelect}
-              onClear={() => { setSender(null); setSenderAddressId(''); }}
+              onClear={() => { setSender(null); setSenderAddressId(''); setSenderCity(''); setSenderStreet(''); setSenderBuilding(''); }}
               selected={sender}
             />
-            {sender && sender.addresses.length > 1 && (
-              <div>
-                <Label className="text-xs text-gray-500">Адреса відправника</Label>
-                <Select value={senderAddressId} onValueChange={(v) => setSenderAddressId(v ?? '')}>
-                  <SelectTrigger><SelectValue placeholder="Виберіть адресу" /></SelectTrigger>
-                  <SelectContent>
-                    {sender.addresses.map(a => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.city}{a.street ? `, ${a.street}` : ''}{a.building ? ` ${a.building}` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {sender && (
+              <div className="border-t pt-2 mt-2 space-y-2">
+                <Label className="text-xs text-gray-500 font-medium">Адреса відправника</Label>
+                <div>
+                  <Label className="text-xs">Населений пункт</Label>
+                  <CapitalizeInput value={senderCity} onChange={setSenderCity} placeholder="Амстердам" />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">Вулиця</Label>
+                    <CapitalizeInput value={senderStreet} onChange={setSenderStreet} />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Будинок</Label>
+                    <Input value={senderBuilding} onChange={(e) => setSenderBuilding(e.target.value)} />
+                  </div>
+                </div>
               </div>
             )}
           </CardContent>
