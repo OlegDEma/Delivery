@@ -16,13 +16,18 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit')) || 20));
   const skip = (page - 1) * limit;
 
+  const normalized = normalizePhone(q || '');
+  const isPhoneQuery = normalized.length >= 3;
+
   const where = q
     ? {
         OR: [
-          { phoneNormalized: { contains: normalizePhone(q) } },
+          ...(isPhoneQuery ? [
+            { phoneNormalized: { contains: normalized } },
+            { phone: { contains: q } },
+          ] : []),
           { lastName: { contains: q, mode: 'insensitive' as const } },
           { firstName: { contains: q, mode: 'insensitive' as const } },
-          { phone: { contains: q } },
         ],
       }
     : {};
