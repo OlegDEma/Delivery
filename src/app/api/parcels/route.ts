@@ -44,12 +44,17 @@ export async function GET(request: NextRequest) {
     if (dateTo) where.createdAt.lte = new Date(dateTo + 'T23:59:59Z');
   }
   if (q) {
+    // If query looks like place ITN (contains -), also search by base ITN
+    const baseItn = q.includes('-') ? q.split('-')[0] : null;
+
     where.OR = [
       { itn: { contains: q } },
-      { internalNumber: { contains: q, mode: 'insensitive' } },
+      ...(baseItn ? [{ itn: { contains: baseItn } }] : []),
+      { internalNumber: { contains: q, mode: 'insensitive' as const } },
       { npTtn: { contains: q } },
-      { sender: { lastName: { contains: q, mode: 'insensitive' } } },
-      { receiver: { lastName: { contains: q, mode: 'insensitive' } } },
+      { places: { some: { itnPlace: q } } },
+      { sender: { lastName: { contains: q, mode: 'insensitive' as const } } },
+      { receiver: { lastName: { contains: q, mode: 'insensitive' as const } } },
       { sender: { phone: { contains: q } } },
       { receiver: { phone: { contains: q } } },
     ];

@@ -15,8 +15,10 @@ export async function GET(request: NextRequest) {
     where: {
       OR: [
         { itn: q },
+        ...(q.includes('-') ? [{ itn: q.split('-')[0] }] : []),
         { internalNumber: { contains: q, mode: 'insensitive' } },
         { npTtn: q },
+        { places: { some: { itnPlace: q } } },
       ],
     },
     select: {

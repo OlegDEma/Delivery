@@ -15,17 +15,28 @@ export default function ScanPage() {
   const [lastResult, setLastResult] = useState('');
   const scannerRef = useRef<HTMLDivElement>(null);
   const html5QrCodeRef = useRef<unknown>(null);
+  const scannerRunningRef = useRef(false);
+
+  async function safeStopScanner() {
+    if (!html5QrCodeRef.current || !scannerRunningRef.current) return;
+    try {
+      scannerRunningRef.current = false;
+      await (html5QrCodeRef.current as { stop: () => Promise<void> }).stop();
+    } catch {
+      // Already stopped — ignore
+    }
+  }
 
   async function startScanner() {
     setError('');
     setScanning(true);
 
     try {
-      // Dynamic import to avoid SSR issues
       const { Html5Qrcode } = await import('html5-qrcode');
 
       const scanner = new Html5Qrcode('qr-reader');
       html5QrCodeRef.current = scanner;
+      scannerRunningRef.current = true;
 
       await scanner.start(
         { facingMode: 'environment' },
@@ -35,35 +46,26 @@ export default function ScanPage() {
           aspectRatio: 1,
         },
         (decodedText) => {
-          // QR decoded!
           handleQRResult(decodedText);
-          scanner.stop().catch(() => {});
+          safeStopScanner();
           setScanning(false);
         },
-        () => {
-          // Scan error (not found yet) — ignore
-        }
+        () => {}
       );
-    } catch (err) {
+    } catch {
       setError('Не вдалось відкрити камеру. Перевірте дозвіл на використання камери.');
       setScanning(false);
+      scannerRunningRef.current = false;
     }
   }
 
   function stopScanner() {
-    if (html5QrCodeRef.current) {
-      (html5QrCodeRef.current as { stop: () => Promise<void> }).stop().catch(() => {});
-    }
+    safeStopScanner();
     setScanning(false);
   }
 
   useEffect(() => {
-    return () => {
-      // Cleanup on unmount
-      if (html5QrCodeRef.current) {
-        (html5QrCodeRef.current as { stop: () => Promise<void> }).stop().catch(() => {});
-      }
-    };
+    return () => { safeStopScanner(); };
   }, []);
 
   function handleQRResult(text: string) {
