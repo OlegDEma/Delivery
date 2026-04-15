@@ -62,19 +62,59 @@ export async function PATCH(
 
   // Status change
   if (body.status) {
-    const updated = await prisma.parcel.update({
-      where: { id },
-      data: {
-        status: body.status as ParcelStatus,
-        statusHistory: {
-          create: {
-            status: body.status as ParcelStatus,
-            changedById: user.id,
-            notes: body.statusNote || null,
-            location: body.location || null,
-          },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const statusUpdateData: any = {
+      status: body.status as ParcelStatus,
+      statusHistory: {
+        create: {
+          status: body.status as ParcelStatus,
+          changedById: user.id,
+          notes: body.statusNote || null,
+          location: body.location || null,
         },
       },
+    };
+
+    // Auto-link to nearest trip when status becomes "Прийнято до перевезення"
+    const acceptedStatuses = ['accepted_for_transport_to_ua', 'accepted_for_transport_to_eu'];
+    if (acceptedStatuses.includes(body.status) && !parcel.tripId) {
+      const direction = body.status === 'accepted_for_transport_to_ua' ? 'eu_to_ua' : 'ua_to_eu';
+
+      // Find receiver address to determine country (for outbound trips from EU)
+      const receiverAddr = parcel.receiverAddressId
+        ? await prisma.clientAddress.findUnique({ where: { id: parcel.receiverAddressId } })
+        : null;
+      const senderAddr = parcel.senderAddressId
+        ? await prisma.clientAddress.findUnique({ where: { id: parcel.senderAddressId } })
+        : null;
+
+      // For EU→UA: country is sender's country; For UA→EU: country is receiver's country
+      const targetCountry = direction === 'eu_to_ua'
+        ? senderAddr?.country
+        : receiverAddr?.country;
+
+      // Find nearest planned trip with matching direction (and country if known)
+      const nearestTrip = await prisma.trip.findFirst({
+        where: {
+          direction,
+          status: 'planned',
+          departureDate: { gte: new Date() },
+          ...(targetCountry && targetCountry !== 'UA' ? { country: targetCountry } : {}),
+        },
+        orderBy: { departureDate: 'asc' },
+      });
+
+      if (nearestTrip) {
+        statusUpdateData.tripId = nearestTrip.id;
+        statusUpdateData.statusHistory.create.notes =
+          (body.statusNote ? body.statusNote + '. ' : '') +
+          `Автоматично прив'язано до рейсу ${nearestTrip.country} ${new Date(nearestTrip.departureDate).toLocaleDateString('uk-UA')}`;
+      }
+    }
+
+    const updated = await prisma.parcel.update({
+      where: { id },
+      data: statusUpdateData,
     });
     return NextResponse.json(updated);
   }
