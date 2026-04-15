@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit')) || 20));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = {};
+  const where: any = { deletedAt: null };
 
   if (status) where.status = status;
   if (tripId) where.tripId = tripId;

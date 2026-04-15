@@ -30,6 +30,9 @@ interface RouteItem {
     landmark: string | null;
     npWarehouseNum: string | null;
   } | null;
+  routeTaskStatus: string | null;
+  routeTaskFailReason: string | null;
+  routeTaskReschedDate: string | null;
 }
 
 type TaskStatus = 'pending' | 'address_confirmed' | 'in_navigator' | 'completed' | 'not_completed' | 'rescheduled';
@@ -88,10 +91,18 @@ export default function RoutesPage() {
         return codeA.localeCompare(codeB);
       });
       setParcels(sorted);
-      // Init task statuses
+      // Init task statuses from DB
       const statuses: Record<string, TaskStatus> = {};
-      sorted.forEach(p => { statuses[p.id] = 'pending'; });
+      const reasons: Record<string, string> = {};
+      const rescheds: Record<string, string> = {};
+      sorted.forEach(p => {
+        statuses[p.id] = (p.routeTaskStatus as TaskStatus) || 'pending';
+        if (p.routeTaskFailReason) reasons[p.id] = p.routeTaskFailReason;
+        if (p.routeTaskReschedDate) rescheds[p.id] = p.routeTaskReschedDate.split('T')[0];
+      });
       setTaskStatuses(statuses);
+      setFailureReasons(reasons);
+      setReschedDates(rescheds);
     }
     setLoading(false);
   }, [dateFilter]);
@@ -141,6 +152,29 @@ export default function RoutesPage() {
 
   function updateTaskStatus(parcelId: string, status: TaskStatus) {
     setTaskStatuses(prev => ({ ...prev, [parcelId]: status }));
+    fetch(`/api/parcels/${parcelId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ routeTaskStatus: status }),
+    });
+  }
+
+  function updateFailReason(parcelId: string, reason: string) {
+    setFailureReasons(prev => ({ ...prev, [parcelId]: reason }));
+    fetch(`/api/parcels/${parcelId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ routeTaskFailReason: reason }),
+    });
+  }
+
+  function updateReschedDate(parcelId: string, date: string) {
+    setReschedDates(prev => ({ ...prev, [parcelId]: date }));
+    fetch(`/api/parcels/${parcelId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ routeTaskReschedDate: date || null }),
+    });
   }
 
   const completedCount = Object.values(taskStatuses).filter(s => s === 'completed').length;
@@ -264,7 +298,7 @@ export default function RoutesPage() {
                       className="h-7 text-xs w-40"
                       placeholder="Причина..."
                       value={failureReasons[p.id] || ''}
-                      onChange={(e) => setFailureReasons(prev => ({ ...prev, [p.id]: e.target.value }))}
+                      onChange={(e) => updateFailReason(p.id, e.target.value)}
                     />
                   )}
                   {ts === 'rescheduled' && (
@@ -272,7 +306,7 @@ export default function RoutesPage() {
                       type="date"
                       className="h-7 text-xs w-36"
                       value={reschedDates[p.id] || ''}
-                      onChange={(e) => setReschedDates(prev => ({ ...prev, [p.id]: e.target.value }))}
+                      onChange={(e) => updateReschedDate(p.id, e.target.value)}
                     />
                   )}
 

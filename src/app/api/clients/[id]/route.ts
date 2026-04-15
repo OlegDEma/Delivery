@@ -15,16 +15,18 @@ export async function GET(
 
   const { id } = await params;
 
-  const client = await prisma.client.findUnique({
-    where: { id },
+  const client = await prisma.client.findFirst({
+    where: { id, deletedAt: null },
     include: {
       addresses: { orderBy: { usageCount: 'desc' } },
       sentParcels: {
+        where: { deletedAt: null },
         take: 10,
         orderBy: { createdAt: 'desc' },
         select: { id: true, internalNumber: true, status: true, createdAt: true },
       },
       receivedParcels: {
+        where: { deletedAt: null },
         take: 10,
         orderBy: { createdAt: 'desc' },
         select: { id: true, internalNumber: true, status: true, createdAt: true },
@@ -36,14 +38,14 @@ export async function GET(
 
   // Calculate stats
   const [totalSent, totalReceived, totalSpent, unpaidCount] = await Promise.all([
-    prisma.parcel.count({ where: { senderId: id } }),
-    prisma.parcel.count({ where: { receiverId: id } }),
+    prisma.parcel.count({ where: { deletedAt: null, senderId: id } }),
+    prisma.parcel.count({ where: { deletedAt: null, receiverId: id } }),
     prisma.parcel.aggregate({
-      where: { OR: [{ senderId: id }, { receiverId: id }], isPaid: true },
+      where: { deletedAt: null, OR: [{ senderId: id }, { receiverId: id }], isPaid: true },
       _sum: { totalCost: true },
     }),
     prisma.parcel.count({
-      where: { OR: [{ senderId: id, payer: 'sender' }, { receiverId: id, payer: 'receiver' }], isPaid: false, totalCost: { gt: 0 } },
+      where: { deletedAt: null, OR: [{ senderId: id, payer: 'sender' }, { receiverId: id, payer: 'receiver' }], isPaid: false, totalCost: { gt: 0 } },
     }),
   ]);
 
@@ -135,4 +137,28 @@ export async function PATCH(
   }
 
   return NextResponse.json({ error: 'Невідома дія' }, { status: 400 });
+}
+
+// DELETE /api/clients/[id] — soft delete
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { id } = await params;
+
+  const client = await prisma.client.findFirst({ where: { id, deletedAt: null } });
+  if (!client) {
+    return NextResponse.json({ error: 'Клієнта не знайдено' }, { status: 404 });
+  }
+
+  await prisma.client.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
+
+  return NextResponse.json({ success: true });
 }

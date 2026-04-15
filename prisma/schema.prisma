@@ -172,6 +172,7 @@ model Client {
   createdById      String?    @map("created_by") @db.Uuid
   createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt        DateTime?  @map("deleted_at") @db.Timestamptz
 
   // Relations
   createdBy        Profile?         @relation("ClientCreatedBy", fields: [createdById], references: [id])
@@ -289,6 +290,12 @@ model Parcel {
   isPaid                Boolean       @default(false) @map("is_paid")
   paidAt                DateTime?     @map("paid_at") @db.Timestamptz
   photos                String[]      @default([])
+  // Route task status (for daily route sheet)
+  routeTaskStatus       String?       @map("route_task_status") // pending/address_confirmed/in_navigator/completed/not_completed/rescheduled
+  routeTaskFailReason   String?       @map("route_task_fail_reason")
+  routeTaskReschedDate  DateTime?     @map("route_task_reschedule_date") @db.Date
+  // Soft delete
+  deletedAt             DateTime?     @map("deleted_at") @db.Timestamptz
   createdAt             DateTime      @default(now()) @map("created_at") @db.Timestamptz
   updatedAt             DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 

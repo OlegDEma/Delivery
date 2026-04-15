@@ -34,6 +34,20 @@ export default function AdminUsersPage() {
   const [newFullName, setNewFullName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newRole, setNewRole] = useState<Role>('driver_courier');
+  const [resetInfo, setResetInfo] = useState<{ userName: string; password: string } | null>(null);
+
+  async function handleResetPassword(userId: string, userName: string) {
+    if (!confirm(`Скинути пароль для ${userName}? Буде згенеровано новий пароль.`)) return;
+    const res = await fetch(`/api/users/${userId}/reset-password`, { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      setResetInfo({ userName, password: data.password });
+      setTimeout(() => setResetInfo(null), 30000);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert('Помилка: ' + (data.error || 'невідома'));
+    }
+  }
 
   async function handleToggleActive(userId: string, isActive: boolean) {
     await fetch(`/api/users/${userId}`, {
@@ -117,6 +131,25 @@ export default function AdminUsersPage() {
 
   return (
     <div>
+      {resetInfo && (
+        <div className="fixed top-4 right-4 z-50 bg-yellow-50 border border-yellow-300 rounded-lg shadow-lg p-4 max-w-sm">
+          <div className="text-sm font-medium text-yellow-900 mb-1">
+            Новий пароль для {resetInfo.userName}
+          </div>
+          <div className="font-mono text-base bg-white border rounded px-2 py-1 select-all break-all">
+            {resetInfo.password}
+          </div>
+          <div className="text-xs text-yellow-700 mt-2">
+            Зберігається 30 секунд. Скопіюйте зараз.
+          </div>
+          <button
+            onClick={() => setResetInfo(null)}
+            className="mt-2 text-xs text-yellow-800 underline"
+          >
+            Закрити
+          </button>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Користувачі</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -224,6 +257,14 @@ export default function AdminUsersPage() {
                           className="text-xs"
                         >
                           {u.isActive ? 'Блок.' : 'Розблок.'}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleResetPassword(u.id, u.fullName)}
+                          className="text-xs"
+                        >
+                          Скинути пароль
                         </Button>
                         <Button
                           variant="ghost"

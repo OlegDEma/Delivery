@@ -10,6 +10,7 @@ export async function GET() {
 
   const unpaidParcels = await prisma.parcel.findMany({
     where: {
+      deletedAt: null,
       isPaid: false,
       totalCost: { not: null, gt: 0 },
       status: { notIn: ['draft', 'returned'] },

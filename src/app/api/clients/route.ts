@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
 
   const where = q
     ? {
+        deletedAt: null,
         OR: [
           ...(isPhoneQuery ? [
             { phoneNormalized: { contains: normalized } },
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
           { firstName: { contains: q, mode: 'insensitive' as const } },
         ],
       }
-    : {};
+    : { deletedAt: null };
 
   const [clients, total] = await Promise.all([
     prisma.client.findMany({

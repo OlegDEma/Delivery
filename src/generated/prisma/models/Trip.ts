@@ -857,10 +857,6 @@ export type EnumDirectionFieldUpdateOperationsInput = {
   set?: $Enums.Direction
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type EnumTripStatusFieldUpdateOperationsInput = {
   set?: $Enums.TripStatus
 }

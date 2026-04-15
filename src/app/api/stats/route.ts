@@ -24,15 +24,15 @@ export async function GET() {
     pendingOrders,
     upcomingTrip,
   ] = await Promise.all([
-    prisma.parcel.count(),
-    prisma.parcel.count({ where: { createdAt: { gte: today } } }),
-    prisma.parcel.count({ where: { status: 'at_lviv_warehouse' } }),
-    prisma.parcel.count({ where: { status: { in: ['in_transit_to_ua', 'in_transit_to_eu'] } } }),
-    prisma.parcel.count({ where: { status: { in: ['delivered_ua', 'delivered_eu'] } } }),
-    prisma.client.count(),
+    prisma.parcel.count({ where: { deletedAt: null } }),
+    prisma.parcel.count({ where: { deletedAt: null, createdAt: { gte: today } } }),
+    prisma.parcel.count({ where: { deletedAt: null, status: 'at_lviv_warehouse' } }),
+    prisma.parcel.count({ where: { deletedAt: null, status: { in: ['in_transit_to_ua', 'in_transit_to_eu'] } } }),
+    prisma.parcel.count({ where: { deletedAt: null, status: { in: ['delivered_ua', 'delivered_eu'] } } }),
+    prisma.client.count({ where: { deletedAt: null } }),
     prisma.trip.count({ where: { status: { in: ['planned', 'in_progress'] } } }),
-    prisma.parcel.count({ where: { isPaid: false, totalCost: { gt: 0 }, status: { notIn: ['draft', 'returned'] } } }),
-    prisma.parcel.count({ where: { status: 'draft', createdSource: { in: ['client_web', 'client_telegram'] } } }),
+    prisma.parcel.count({ where: { deletedAt: null, isPaid: false, totalCost: { gt: 0 }, status: { notIn: ['draft', 'returned'] } } }),
+    prisma.parcel.count({ where: { deletedAt: null, status: 'draft', createdSource: { in: ['client_web', 'client_telegram'] } } }),
     prisma.trip.findFirst({
       where: { status: 'planned', departureDate: { gte: today } },
       orderBy: { departureDate: 'asc' },
@@ -42,7 +42,7 @@ export async function GET() {
 
   // Unpaid total
   const unpaidTotal = await prisma.parcel.aggregate({
-    where: { isPaid: false, totalCost: { gt: 0 }, status: { notIn: ['draft', 'returned'] } },
+    where: { deletedAt: null, isPaid: false, totalCost: { gt: 0 }, status: { notIn: ['draft', 'returned'] } },
     _sum: { totalCost: true },
   });
 
@@ -58,6 +58,7 @@ export async function GET() {
 
   // Recent parcels
   const recentParcels = await prisma.parcel.findMany({
+    where: { deletedAt: null },
     take: 5,
     orderBy: { createdAt: 'desc' },
     select: {

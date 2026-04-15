@@ -114,7 +114,8 @@ export const ClientScalarFieldEnum = {
   notes: 'notes',
   createdById: 'createdById',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type ClientScalarFieldEnum = (typeof ClientScalarFieldEnum)[keyof typeof ClientScalarFieldEnum]
@@ -207,6 +208,10 @@ export const ParcelScalarFieldEnum = {
   isPaid: 'isPaid',
   paidAt: 'paidAt',
   photos: 'photos',
+  routeTaskStatus: 'routeTaskStatus',
+  routeTaskFailReason: 'routeTaskFailReason',
+  routeTaskReschedDate: 'routeTaskReschedDate',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

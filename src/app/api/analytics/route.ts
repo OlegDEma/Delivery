@@ -14,18 +14,19 @@ export async function GET() {
 
   // This month vs last month
   const [thisMonthParcels, lastMonthParcels, thisMonthRevenue, lastMonthRevenue, thisMonthClients, lastMonthClients, thisMonthWeight, lastMonthWeight] = await Promise.all([
-    prisma.parcel.count({ where: { createdAt: { gte: thisMonthStart } } }),
-    prisma.parcel.count({ where: { createdAt: { gte: lastMonthStart, lte: lastMonthEnd } } }),
-    prisma.parcel.aggregate({ where: { createdAt: { gte: thisMonthStart }, isPaid: true }, _sum: { totalCost: true } }),
-    prisma.parcel.aggregate({ where: { createdAt: { gte: lastMonthStart, lte: lastMonthEnd }, isPaid: true }, _sum: { totalCost: true } }),
-    prisma.client.count({ where: { createdAt: { gte: thisMonthStart } } }),
-    prisma.client.count({ where: { createdAt: { gte: lastMonthStart, lte: lastMonthEnd } } }),
-    prisma.parcel.aggregate({ where: { createdAt: { gte: thisMonthStart } }, _sum: { totalWeight: true } }),
-    prisma.parcel.aggregate({ where: { createdAt: { gte: lastMonthStart, lte: lastMonthEnd } }, _sum: { totalWeight: true } }),
+    prisma.parcel.count({ where: { deletedAt: null, createdAt: { gte: thisMonthStart } } }),
+    prisma.parcel.count({ where: { deletedAt: null, createdAt: { gte: lastMonthStart, lte: lastMonthEnd } } }),
+    prisma.parcel.aggregate({ where: { deletedAt: null, createdAt: { gte: thisMonthStart }, isPaid: true }, _sum: { totalCost: true } }),
+    prisma.parcel.aggregate({ where: { deletedAt: null, createdAt: { gte: lastMonthStart, lte: lastMonthEnd }, isPaid: true }, _sum: { totalCost: true } }),
+    prisma.client.count({ where: { deletedAt: null, createdAt: { gte: thisMonthStart } } }),
+    prisma.client.count({ where: { deletedAt: null, createdAt: { gte: lastMonthStart, lte: lastMonthEnd } } }),
+    prisma.parcel.aggregate({ where: { deletedAt: null, createdAt: { gte: thisMonthStart } }, _sum: { totalWeight: true } }),
+    prisma.parcel.aggregate({ where: { deletedAt: null, createdAt: { gte: lastMonthStart, lte: lastMonthEnd } }, _sum: { totalWeight: true } }),
   ]);
 
   // Top clients (by number of parcels, all time)
   const allParcels = await prisma.parcel.findMany({
+    where: { deletedAt: null },
     select: { senderId: true, receiverId: true, totalCost: true, totalWeight: true },
   });
 

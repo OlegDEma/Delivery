@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
   // Search by ITN, internal number, or NP TTN
   const parcel = await prisma.parcel.findFirst({
     where: {
+      deletedAt: null,
       OR: [
         { itn: q },
         ...(q.includes('-') ? [{ itn: q.split('-')[0] }] : []),

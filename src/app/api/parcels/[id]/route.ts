@@ -14,8 +14,8 @@ export async function GET(
 
   const { id } = await params;
 
-  const parcel = await prisma.parcel.findUnique({
-    where: { id },
+  const parcel = await prisma.parcel.findFirst({
+    where: { id, deletedAt: null },
     include: {
       sender: {
         include: { addresses: { orderBy: { usageCount: 'desc' } } },
@@ -55,7 +55,7 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
 
-  const parcel = await prisma.parcel.findUnique({ where: { id } });
+  const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null } });
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }
@@ -139,6 +139,12 @@ export async function PATCH(
   if (body.payer !== undefined) updateData.payer = body.payer;
   if (body.paymentMethod !== undefined) updateData.paymentMethod = body.paymentMethod;
   if (body.paymentInUkraine !== undefined) updateData.paymentInUkraine = body.paymentInUkraine;
+  // Route task fields
+  if (body.routeTaskStatus !== undefined) updateData.routeTaskStatus = body.routeTaskStatus || null;
+  if (body.routeTaskFailReason !== undefined) updateData.routeTaskFailReason = body.routeTaskFailReason || null;
+  if (body.routeTaskReschedDate !== undefined) {
+    updateData.routeTaskReschedDate = body.routeTaskReschedDate ? new Date(body.routeTaskReschedDate) : null;
+  }
 
   const updated = await prisma.parcel.update({
     where: { id },
@@ -146,4 +152,28 @@ export async function PATCH(
   });
 
   return NextResponse.json(updated);
+}
+
+// DELETE /api/parcels/[id] — soft delete
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { id } = await params;
+
+  const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null } });
+  if (!parcel) {
+    return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
+  }
+
+  await prisma.parcel.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
+
+  return NextResponse.json({ success: true });
 }

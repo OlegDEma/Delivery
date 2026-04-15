@@ -39,6 +39,7 @@ export type ClientMinAggregateOutputType = {
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
 }
 
 export type ClientMaxAggregateOutputType = {
@@ -56,6 +57,7 @@ export type ClientMaxAggregateOutputType = {
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
 }
 
 export type ClientCountAggregateOutputType = {
@@ -73,6 +75,7 @@ export type ClientCountAggregateOutputType = {
   createdById: number
   createdAt: number
   updatedAt: number
+  deletedAt: number
   _all: number
 }
 
@@ -92,6 +95,7 @@ export type ClientMinAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
 }
 
 export type ClientMaxAggregateInputType = {
@@ -109,6 +113,7 @@ export type ClientMaxAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
 }
 
 export type ClientCountAggregateInputType = {
@@ -126,6 +131,7 @@ export type ClientCountAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -216,6 +222,7 @@ export type ClientGroupByOutputType = {
   createdById: string | null
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
   _count: ClientCountAggregateOutputType | null
   _min: ClientMinAggregateOutputType | null
   _max: ClientMaxAggregateOutputType | null
@@ -254,6 +261,7 @@ export type ClientWhereInput = {
   createdById?: Prisma.UuidNullableFilter<"Client"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Client"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Client"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Client"> | Date | string | null
   createdBy?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   addresses?: Prisma.ClientAddressListRelationFilter
   sentParcels?: Prisma.ParcelListRelationFilter
@@ -277,6 +285,7 @@ export type ClientOrderByWithRelationInput = {
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdBy?: Prisma.ProfileOrderByWithRelationInput
   addresses?: Prisma.ClientAddressOrderByRelationAggregateInput
   sentParcels?: Prisma.ParcelOrderByRelationAggregateInput
@@ -303,6 +312,7 @@ export type ClientWhereUniqueInput = Prisma.AtLeast<{
   createdById?: Prisma.UuidNullableFilter<"Client"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Client"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Client"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Client"> | Date | string | null
   createdBy?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   addresses?: Prisma.ClientAddressListRelationFilter
   sentParcels?: Prisma.ParcelListRelationFilter
@@ -326,6 +336,7 @@ export type ClientOrderByWithAggregationInput = {
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ClientCountOrderByAggregateInput
   _max?: Prisma.ClientMaxOrderByAggregateInput
   _min?: Prisma.ClientMinOrderByAggregateInput
@@ -349,6 +360,7 @@ export type ClientScalarWhereWithAggregatesInput = {
   createdById?: Prisma.UuidNullableWithAggregatesFilter<"Client"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Client"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Client"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Client"> | Date | string | null
 }
 
 export type ClientCreateInput = {
@@ -365,6 +377,7 @@ export type ClientCreateInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedClientsInput
   addresses?: Prisma.ClientAddressCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
@@ -388,6 +401,7 @@ export type ClientUncheckedCreateInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   addresses?: Prisma.ClientAddressUncheckedCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
@@ -409,6 +423,7 @@ export type ClientUpdateInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedClientsNestedInput
   addresses?: Prisma.ClientAddressUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
@@ -432,6 +447,7 @@ export type ClientUncheckedUpdateInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addresses?: Prisma.ClientAddressUncheckedUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
@@ -454,6 +470,7 @@ export type ClientCreateManyInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type ClientUpdateManyMutationInput = {
@@ -470,6 +487,7 @@ export type ClientUpdateManyMutationInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ClientUncheckedUpdateManyInput = {
@@ -487,6 +505,7 @@ export type ClientUncheckedUpdateManyInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ClientListRelationFilter = {
@@ -514,6 +533,7 @@ export type ClientCountOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type ClientMaxOrderByAggregateInput = {
@@ -531,6 +551,7 @@ export type ClientMaxOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type ClientMinOrderByAggregateInput = {
@@ -548,6 +569,7 @@ export type ClientMinOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type ClientScalarRelationFilter = {
@@ -608,6 +630,10 @@ export type EnumClientTypeFieldUpdateOperationsInput = {
 
 export type NullableEnumCountryFieldUpdateOperationsInput = {
   set?: $Enums.Country | null
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type ClientCreateNestedOneWithoutAddressesInput = {
@@ -698,6 +724,7 @@ export type ClientCreateWithoutCreatedByInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   addresses?: Prisma.ClientAddressCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelCreateNestedManyWithoutReceiverInput
@@ -719,6 +746,7 @@ export type ClientUncheckedCreateWithoutCreatedByInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   addresses?: Prisma.ClientAddressUncheckedCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
@@ -770,6 +798,7 @@ export type ClientScalarWhereInput = {
   createdById?: Prisma.UuidNullableFilter<"Client"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Client"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Client"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Client"> | Date | string | null
 }
 
 export type ClientCreateWithoutAddressesInput = {
@@ -786,6 +815,7 @@ export type ClientCreateWithoutAddressesInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedClientsInput
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelCreateNestedManyWithoutReceiverInput
@@ -808,6 +838,7 @@ export type ClientUncheckedCreateWithoutAddressesInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutClientInput
@@ -844,6 +875,7 @@ export type ClientUpdateWithoutAddressesInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedClientsNestedInput
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUpdateManyWithoutReceiverNestedInput
@@ -866,6 +898,7 @@ export type ClientUncheckedUpdateWithoutAddressesInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutClientNestedInput
@@ -886,6 +919,7 @@ export type ClientCreateWithoutSentParcelsInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedClientsInput
   addresses?: Prisma.ClientAddressCreateNestedManyWithoutClientInput
   receivedParcels?: Prisma.ParcelCreateNestedManyWithoutReceiverInput
@@ -908,6 +942,7 @@ export type ClientUncheckedCreateWithoutSentParcelsInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   addresses?: Prisma.ClientAddressUncheckedCreateNestedManyWithoutClientInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutClientInput
@@ -933,6 +968,7 @@ export type ClientCreateWithoutReceivedParcelsInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedClientsInput
   addresses?: Prisma.ClientAddressCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
@@ -955,6 +991,7 @@ export type ClientUncheckedCreateWithoutReceivedParcelsInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   addresses?: Prisma.ClientAddressUncheckedCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutClientInput
@@ -991,6 +1028,7 @@ export type ClientUpdateWithoutSentParcelsInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedClientsNestedInput
   addresses?: Prisma.ClientAddressUpdateManyWithoutClientNestedInput
   receivedParcels?: Prisma.ParcelUpdateManyWithoutReceiverNestedInput
@@ -1013,6 +1051,7 @@ export type ClientUncheckedUpdateWithoutSentParcelsInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addresses?: Prisma.ClientAddressUncheckedUpdateManyWithoutClientNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutClientNestedInput
@@ -1044,6 +1083,7 @@ export type ClientUpdateWithoutReceivedParcelsInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedClientsNestedInput
   addresses?: Prisma.ClientAddressUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
@@ -1066,6 +1106,7 @@ export type ClientUncheckedUpdateWithoutReceivedParcelsInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addresses?: Prisma.ClientAddressUncheckedUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutClientNestedInput
@@ -1086,6 +1127,7 @@ export type ClientCreateWithoutRouteTasksInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedClientsInput
   addresses?: Prisma.ClientAddressCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
@@ -1108,6 +1150,7 @@ export type ClientUncheckedCreateWithoutRouteTasksInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   addresses?: Prisma.ClientAddressUncheckedCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
@@ -1144,6 +1187,7 @@ export type ClientUpdateWithoutRouteTasksInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedClientsNestedInput
   addresses?: Prisma.ClientAddressUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
@@ -1166,6 +1210,7 @@ export type ClientUncheckedUpdateWithoutRouteTasksInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addresses?: Prisma.ClientAddressUncheckedUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
@@ -1186,6 +1231,7 @@ export type ClientCreateWithoutClaimsInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedClientsInput
   addresses?: Prisma.ClientAddressCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelCreateNestedManyWithoutSenderInput
@@ -1208,6 +1254,7 @@ export type ClientUncheckedCreateWithoutClaimsInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   addresses?: Prisma.ClientAddressUncheckedCreateNestedManyWithoutClientInput
   sentParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutSenderInput
   receivedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutReceiverInput
@@ -1244,6 +1291,7 @@ export type ClientUpdateWithoutClaimsInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedClientsNestedInput
   addresses?: Prisma.ClientAddressUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
@@ -1266,6 +1314,7 @@ export type ClientUncheckedUpdateWithoutClaimsInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addresses?: Prisma.ClientAddressUncheckedUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
@@ -1286,6 +1335,7 @@ export type ClientCreateManyCreatedByInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type ClientUpdateWithoutCreatedByInput = {
@@ -1302,6 +1352,7 @@ export type ClientUpdateWithoutCreatedByInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addresses?: Prisma.ClientAddressUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUpdateManyWithoutReceiverNestedInput
@@ -1323,6 +1374,7 @@ export type ClientUncheckedUpdateWithoutCreatedByInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addresses?: Prisma.ClientAddressUncheckedUpdateManyWithoutClientNestedInput
   sentParcels?: Prisma.ParcelUncheckedUpdateManyWithoutSenderNestedInput
   receivedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutReceiverNestedInput
@@ -1344,6 +1396,7 @@ export type ClientUncheckedUpdateManyWithoutCreatedByInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -1428,6 +1481,7 @@ export type ClientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   createdBy?: boolean | Prisma.Client$createdByArgs<ExtArgs>
   addresses?: boolean | Prisma.Client$addressesArgs<ExtArgs>
   sentParcels?: boolean | Prisma.Client$sentParcelsArgs<ExtArgs>
@@ -1452,6 +1506,7 @@ export type ClientSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   createdBy?: boolean | Prisma.Client$createdByArgs<ExtArgs>
 }, ExtArgs["result"]["client"]>
 
@@ -1470,6 +1525,7 @@ export type ClientSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   createdBy?: boolean | Prisma.Client$createdByArgs<ExtArgs>
 }, ExtArgs["result"]["client"]>
 
@@ -1488,9 +1544,10 @@ export type ClientSelectScalar = {
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
 }
 
-export type ClientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "phoneNormalized" | "firstName" | "lastName" | "middleName" | "email" | "clientType" | "organizationName" | "country" | "notes" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["client"]>
+export type ClientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "phoneNormalized" | "firstName" | "lastName" | "middleName" | "email" | "clientType" | "organizationName" | "country" | "notes" | "createdById" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["client"]>
 export type ClientInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.Client$createdByArgs<ExtArgs>
   addresses?: boolean | Prisma.Client$addressesArgs<ExtArgs>
@@ -1532,6 +1589,7 @@ export type $ClientPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     createdById: string | null
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
   }, ExtArgs["result"]["client"]>
   composites: {}
 }
@@ -1975,6 +2033,7 @@ export interface ClientFieldRefs {
   readonly createdById: Prisma.FieldRef<"Client", 'String'>
   readonly createdAt: Prisma.FieldRef<"Client", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Client", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"Client", 'DateTime'>
 }
     
 
