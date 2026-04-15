@@ -93,6 +93,26 @@ export async function GET() {
     };
   });
 
+  // Monthly breakdown — last 6 months
+  const monthly: { month: string; parcels: number; revenue: number }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const mStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const mEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+    const [count, revenueAgg] = await Promise.all([
+      prisma.parcel.count({ where: { deletedAt: null, createdAt: { gte: mStart, lte: mEnd } } }),
+      prisma.parcel.aggregate({
+        where: { deletedAt: null, createdAt: { gte: mStart, lte: mEnd }, isPaid: true },
+        _sum: { totalCost: true },
+      }),
+    ]);
+    const ym = `${mStart.getFullYear()}-${String(mStart.getMonth() + 1).padStart(2, '0')}`;
+    monthly.push({
+      month: ym,
+      parcels: count,
+      revenue: Math.round((Number(revenueAgg._sum.totalCost) || 0) * 100) / 100,
+    });
+  }
+
   return NextResponse.json({
     comparison: {
       thisMonth: {
@@ -110,5 +130,6 @@ export async function GET() {
     },
     topClients,
     tripCapacity,
+    monthly,
   });
 }

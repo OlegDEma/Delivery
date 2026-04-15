@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatDateTime } from '@/lib/utils/format';
+import { EmptyState } from '@/components/shared/empty-state';
 
 interface Claim {
   id: string;
@@ -157,7 +158,7 @@ export default function ClaimsPage() {
               </div>
             </div>
           ))}
-          {claims.length === 0 && <div className="text-center py-8 text-gray-500">Немає претензій</div>}
+          {claims.length === 0 && <EmptyState title="Ще немає претензій" />}
         </div>
       )}
     </div>

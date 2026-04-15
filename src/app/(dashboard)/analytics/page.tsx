@@ -37,10 +37,17 @@ interface TripCapacity {
   usagePercent: number;
 }
 
+interface MonthlyEntry {
+  month: string;
+  parcels: number;
+  revenue: number;
+}
+
 interface Analytics {
   comparison: { thisMonth: ComparisonData; lastMonth: ComparisonData };
   topClients: TopClient[];
   tripCapacity: TripCapacity[];
+  monthly: MonthlyEntry[];
 }
 
 function ChangeIndicator({ current, previous }: { current: number; previous: number }) {
@@ -122,6 +129,35 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Monthly chart — last 6 months */}
+      {data.monthly && data.monthly.length > 0 && (
+        <Card className="mb-4">
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-base">Останні 6 місяців</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4">
+            {(() => {
+              const max = Math.max(1, ...data.monthly.map(m => m.parcels));
+              return (
+                <div className="space-y-2">
+                  {data.monthly.map(m => (
+                    <div key={m.month}>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>{m.month}</span>
+                        <span>{m.parcels} пос. / {m.revenue} EUR</span>
+                      </div>
+                      <div className="h-2 bg-gray-100 rounded">
+                        <div className="h-2 bg-blue-500 rounded" style={{ width: `${(m.parcels / max) * 100}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Top clients */}

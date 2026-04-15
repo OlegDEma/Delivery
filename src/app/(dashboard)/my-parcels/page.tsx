@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatWeight, formatCurrency } from '@/lib/utils/format';
+import { ListSkeleton } from '@/components/shared/skeleton';
 
 interface ParcelItem {
   id: string;
@@ -155,7 +156,7 @@ export default function MyParcelsPage() {
       )}
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Завантаження...</div>
+        <ListSkeleton />
       ) : (
         <div className="bg-white rounded-lg border divide-y">
           {parcels.map((p) => (

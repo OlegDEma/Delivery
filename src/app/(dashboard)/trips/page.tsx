@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDate } from '@/lib/utils/format';
+import { ListSkeleton } from '@/components/shared/skeleton';
+import { EmptyState } from '@/components/shared/empty-state';
 
 interface Trip {
   id: string;
@@ -129,7 +131,9 @@ export default function TripsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Завантаження...</div>
+        <ListSkeleton />
+      ) : trips.length === 0 ? (
+        <EmptyState title="Ще немає рейсів" />
       ) : (
         <div className="bg-white rounded-lg border divide-y">
           {trips.map(trip => (
@@ -157,9 +161,6 @@ export default function TripsPage() {
               </div>
             </Link>
           ))}
-          {trips.length === 0 && (
-            <div className="text-center py-8 text-gray-500">Немає рейсів</div>
-          )}
         </div>
       )}
     </div>

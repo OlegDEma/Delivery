@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate } from '@/lib/utils/format';
+import { ListSkeleton } from '@/components/shared/skeleton';
 
 interface ParcelItem {
   id: string;
@@ -103,7 +104,7 @@ export default function AvailableParcelsPage() {
       )}
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Завантаження...</div>
+        <ListSkeleton />
       ) : (
         <div className="bg-white rounded-lg border divide-y">
           {parcels.map(p => (

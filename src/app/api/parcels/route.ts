@@ -23,6 +23,10 @@ export async function GET(request: NextRequest) {
   const q = searchParams.get('q');
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit')) || 20));
+  const sortByParam = searchParams.get('sortBy') || 'createdAt';
+  const sortOrderParam = searchParams.get('sortOrder') === 'asc' ? 'asc' : 'desc';
+  const allowedSortFields = ['createdAt', 'totalWeight', 'internalNumber', 'totalCost'] as const;
+  const sortBy = (allowedSortFields as readonly string[]).includes(sortByParam) ? sortByParam : 'createdAt';
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = { deletedAt: null };
@@ -69,7 +73,7 @@ export async function GET(request: NextRequest) {
         receiverAddress: { select: { city: true, street: true, building: true, npWarehouseNum: true, deliveryMethod: true } },
         places: { orderBy: { placeNumber: 'asc' } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { [sortBy]: sortOrderParam },
       skip: (page - 1) * limit,
       take: limit,
     }),

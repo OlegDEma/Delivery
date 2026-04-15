@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
+import { ListSkeleton } from '@/components/shared/skeleton';
+import { EmptyState } from '@/components/shared/empty-state';
 
 interface DebtParcel {
   id: string;
@@ -41,7 +43,7 @@ export default function DebtsPage() {
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   }
 
-  if (loading) return <div className="text-center py-12 text-gray-500">Завантаження...</div>;
+  if (loading) return <ListSkeleton />;
 
   return (
     <div>
@@ -56,6 +58,9 @@ export default function DebtsPage() {
         </div>
       </div>
 
+      {debts.length === 0 ? (
+        <EmptyState title="✅ Немає боргів! Все оплачено." />
+      ) : (
       <div className="bg-white rounded-lg border divide-y">
         {debts.map(d => {
           const days = getDaysOverdue(d.oldestDate);
@@ -100,10 +105,8 @@ export default function DebtsPage() {
             </div>
           );
         })}
-        {debts.length === 0 && (
-          <div className="text-center py-8 text-gray-500">Немає боргів — все оплачено!</div>
-        )}
       </div>
+      )}
     </div>
   );
 }

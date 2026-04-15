@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import Link from 'next/link';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { ClientCreateForm } from '@/components/clients/client-create-form';
+import { ListSkeleton } from '@/components/shared/skeleton';
+import { EmptyState } from '@/components/shared/empty-state';
 
 interface ClientAddress {
   id: string;
@@ -93,7 +95,15 @@ export default function ClientsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Завантаження...</div>
+        <ListSkeleton />
+      ) : clients.length === 0 ? (
+        search ? (
+          <div className="bg-white rounded-lg border">
+            <div className="text-center py-8 text-gray-500">Нічого не знайдено</div>
+          </div>
+        ) : (
+          <EmptyState title="Ще немає клієнтів" description="Скористайтеся кнопкою + Додати вгорі сторінки" />
+        )
       ) : (
         <div className="bg-white rounded-lg border divide-y">
           {clients.map((c) => (
@@ -124,11 +134,6 @@ export default function ClientsPage() {
               </div>
             </Link>
           ))}
-          {clients.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              {search ? 'Нічого не знайдено' : 'Немає клієнтів'}
-            </div>
-          )}
         </div>
       )}
     </div>
