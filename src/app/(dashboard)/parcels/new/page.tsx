@@ -15,6 +15,9 @@ import { CostCalculator } from '@/components/parcels/cost-calculator';
 import { FieldHint } from '@/components/shared/field-hint';
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
+import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { formatDate } from '@/lib/utils/format';
+import { cn } from '@/lib/utils';
 
 interface SelectedClient {
   id: string;
@@ -145,14 +148,30 @@ export default function NewParcelPage() {
   const [needsPackaging, setNeedsPackaging] = useState(false);
 
   // Trip date
-  const [tripDateMode, setTripDateMode] = useState<string>('none');
-  const [customTripDate, setCustomTripDate] = useState('');
-  const [trips, setTrips] = useState<{ id: string; departureDate: string; country: string; direction: string }[]>([]);
+  const [tripDateMode, setTripDateMode] = useState<string>('trip'); // 'trip' | 'custom'
+  const [trips, setTrips] = useState<{
+    id: string;
+    departureDate: string;
+    country: string;
+    direction: string;
+    status: string;
+    assignedCourier: { fullName: string } | null;
+    _count: { parcels: number };
+  }[]>([]);
   const [selectedTripId, setSelectedTripId] = useState('');
 
   useEffect(() => {
     fetch('/api/trips').then(r => r.ok ? r.json() : []).then(setTrips);
   }, []);
+
+  // Clear selected trip if direction no longer matches
+  useEffect(() => {
+    if (!selectedTripId) return;
+    const selected = trips.find(t => t.id === selectedTripId);
+    if (selected && selected.direction !== direction) {
+      setSelectedTripId('');
+    }
+  }, [direction, selectedTripId, trips]);
 
   function addPlace() {
     if (places.length >= 10) return;
@@ -246,12 +265,8 @@ export default function NewParcelPage() {
       return;
     }
 
-    if (tripDateMode === 'none') {
-      setError('Виберіть дату рейсу — це обов\'язкове поле');
-      return;
-    }
-    if (tripDateMode === 'custom' && !customTripDate) {
-      setError('Вкажіть дату рейсу');
+    if (tripDateMode === 'trip' && !selectedTripId) {
+      setError('Виберіть рейс зі списку або натисніть «Без рейсу»');
       return;
     }
 
@@ -659,36 +674,110 @@ export default function NewParcelPage() {
           </CardContent>
         </Card>
 
-        {/* Trip date */}
+        {/* Trip selection */}
         <Card>
           <CardHeader className="py-3 px-4">
-            <CardTitle className="text-base">Дата рейсу</CardTitle>
+            <CardTitle className="text-base">
+              Рейс {direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 space-y-2">
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm">
-                <input type="radio" name="tripDate" value="nearest_nl" checked={tripDateMode === 'nearest_nl'}
-                  onChange={() => { setTripDateMode('nearest_nl'); const t = trips.find(t => t.country === 'NL' && t.direction === direction); if (t) setSelectedTripId(t.id); }} />
-                Найближчий рейс до Нідерландів
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="radio" name="tripDate" value="nearest_at" checked={tripDateMode === 'nearest_at'}
-                  onChange={() => { setTripDateMode('nearest_at'); const t = trips.find(t => t.country === 'AT' && t.direction === direction); if (t) setSelectedTripId(t.id); }} />
-                Найближчий рейс до Австрії
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="radio" name="tripDate" value="custom" checked={tripDateMode === 'custom'}
-                  onChange={() => setTripDateMode('custom')} />
-                Інше
-              </label>
-              {tripDateMode === 'custom' && (
-                <Input type="date" value={customTripDate} onChange={(e) => setCustomTripDate(e.target.value)} className="w-44" />
-              )}
-              <label className="flex items-center gap-2 text-sm text-gray-500">
-                <input type="radio" name="tripDate" value="none" checked={tripDateMode === 'none'}
-                  onChange={() => { setTripDateMode('none'); setSelectedTripId(''); }} />
-                Не вказувати
-              </label>
+          <CardContent className="px-4 pb-4 pt-0 space-y-3">
+            {(() => {
+              const directionTrips = trips
+                .filter(t => t.direction === direction && (t.status === 'planned' || t.status === 'in_progress'))
+                .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+
+              if (directionTrips.length === 0 && tripDateMode === 'trip') {
+                return (
+                  <div className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 border border-dashed">
+                    Немає активних рейсів у цьому напрямку.
+                    Створіть рейс у розділі «Рейси» або виберіть «Інша дата» нижче.
+                  </div>
+                );
+              }
+
+              return null;
+            })()}
+
+            {tripDateMode === 'trip' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {trips
+                  .filter(t => t.direction === direction && (t.status === 'planned' || t.status === 'in_progress'))
+                  .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime())
+                  .map(t => {
+                    const isSelected = selectedTripId === t.id;
+                    const countryLabel = COUNTRY_LABELS[t.country as CountryCode] || t.country;
+                    const routeLabel = direction === 'eu_to_ua'
+                      ? `${countryLabel} → UA`
+                      : `UA → ${countryLabel}`;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setSelectedTripId(t.id)}
+                        className={cn(
+                          'text-left border rounded-lg p-3 transition-all',
+                          isSelected
+                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                        )}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-sm">{routeLabel}</span>
+                          {t.status === 'in_progress' ? (
+                            <span className="text-[10px] font-medium uppercase tracking-wider text-yellow-700 bg-yellow-100 px-1.5 py-0.5 rounded">В дорозі</span>
+                          ) : (
+                            <span className="text-[10px] font-medium uppercase tracking-wider text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">Заплановано</span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          📅 {formatDate(t.departureDate)}
+                        </div>
+                        {t.assignedCourier && (
+                          <div className="text-xs text-gray-500 mt-0.5 truncate">
+                            👤 {t.assignedCourier.fullName}
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-400 mt-0.5">
+                          📦 {t._count.parcels} посилок
+                        </div>
+                      </button>
+                    );
+                  })}
+              </div>
+            )}
+
+            {tripDateMode === 'custom' && (
+              <div className="text-sm text-gray-600 bg-amber-50 rounded-lg p-3 border border-amber-200">
+                ⚠️ Посилка буде створена без рейсу. Ви зможете прив&apos;язати її до рейсу пізніше в деталях посилки.
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-1 border-t">
+              <button
+                type="button"
+                onClick={() => { setTripDateMode('trip'); }}
+                className={cn(
+                  'text-xs px-2 py-1 rounded border transition-colors',
+                  tripDateMode === 'trip'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700 font-medium'
+                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                )}
+              >
+                Вибрати зі списку рейсів
+              </button>
+              <button
+                type="button"
+                onClick={() => { setTripDateMode('custom'); setSelectedTripId(''); }}
+                className={cn(
+                  'text-xs px-2 py-1 rounded border transition-colors',
+                  tripDateMode === 'custom'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700 font-medium'
+                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                )}
+              >
+                Без рейсу
+              </button>
             </div>
           </CardContent>
         </Card>
