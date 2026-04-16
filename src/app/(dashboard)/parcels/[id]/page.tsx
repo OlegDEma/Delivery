@@ -21,6 +21,7 @@ import { ShareButton } from '@/components/shared/share-button';
 import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
 import { ParcelPaymentCard } from '@/components/parcels/parcel-payment-card';
 import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
+import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { toast } from 'sonner';
 
 interface ParcelDetail {
@@ -83,7 +84,7 @@ export default function ParcelDetailPage() {
   const [newStatus, setNewStatus] = useState('');
   const [npTtn, setNpTtn] = useState('');
   const [saving, setSaving] = useState(false);
-  const [trips, setTrips] = useState<{ id: string; departureDate: string; country: string; direction: string }[]>([]);
+  const [trips, setTrips] = useState<TripOption[]>([]);
   const [couriers, setCouriers] = useState<{ id: string; fullName: string }[]>([]);
 
   useEffect(() => {
@@ -369,32 +370,18 @@ export default function ParcelDetailPage() {
       {/* Assign trip & courier */}
       <Card>
         <CardHeader className="py-2 px-3">
-          <CardTitle className="text-sm">Рейс та кур&apos;єр</CardTitle>
+          <CardTitle className="text-sm">
+            Рейс {parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}
+          </CardTitle>
         </CardHeader>
-        <CardContent className="px-3 pb-3 pt-0 space-y-2">
-          <div>
-            <Label className="text-xs">Рейс</Label>
-            <Select
-              value={parcel.trip?.id || '_none'}
-              onValueChange={(v) => handleAssignTrip(v === '_none' ? '' : (v ?? ''))}
-            >
-              <SelectTrigger>
-                <SelectValue>
-                  {parcel.trip
-                    ? `${parcel.trip.country} ${parcel.trip.direction === 'eu_to_ua' ? '→UA' : '←UA'} ${new Date(parcel.trip.departureDate).toLocaleDateString('uk-UA')}`
-                    : "Не прив'язано"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="_none">Не прив&apos;язано</SelectItem>
-                {trips.map(t => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.country} {t.direction === 'eu_to_ua' ? '→UA' : '←UA'} {new Date(t.departureDate).toLocaleDateString('uk-UA')}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <CardContent className="px-3 pb-3 pt-0 space-y-3">
+          <TripSelector
+            trips={trips}
+            direction={parcel.direction}
+            selectedTripId={parcel.trip?.id || ''}
+            onChange={(tripId) => handleAssignTrip(tripId)}
+            compact
+          />
           <div>
             <Label className="text-xs">Кур&apos;єр</Label>
             <Select

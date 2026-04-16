@@ -15,9 +15,8 @@ import { CostCalculator } from '@/components/parcels/cost-calculator';
 import { FieldHint } from '@/components/shared/field-hint';
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
-import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
-import { formatDate } from '@/lib/utils/format';
 import { cn } from '@/lib/utils';
+import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 
 interface SelectedClient {
   id: string;
@@ -149,15 +148,7 @@ export default function NewParcelPage() {
 
   // Trip date
   const [tripDateMode, setTripDateMode] = useState<string>('trip'); // 'trip' | 'custom'
-  const [trips, setTrips] = useState<{
-    id: string;
-    departureDate: string;
-    country: string;
-    direction: string;
-    status: string;
-    assignedCourier: { fullName: string } | null;
-    _count: { parcels: number };
-  }[]>([]);
+  const [trips, setTrips] = useState<TripOption[]>([]);
   const [selectedTripId, setSelectedTripId] = useState('');
 
   useEffect(() => {
@@ -682,69 +673,14 @@ export default function NewParcelPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-3">
-            {(() => {
-              const directionTrips = trips
-                .filter(t => t.direction === direction && (t.status === 'planned' || t.status === 'in_progress'))
-                .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
-
-              if (directionTrips.length === 0 && tripDateMode === 'trip') {
-                return (
-                  <div className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 border border-dashed">
-                    Немає активних рейсів у цьому напрямку.
-                    Створіть рейс у розділі «Рейси» або виберіть «Інша дата» нижче.
-                  </div>
-                );
-              }
-
-              return null;
-            })()}
-
             {tripDateMode === 'trip' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {trips
-                  .filter(t => t.direction === direction && (t.status === 'planned' || t.status === 'in_progress'))
-                  .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime())
-                  .map(t => {
-                    const isSelected = selectedTripId === t.id;
-                    const countryLabel = COUNTRY_LABELS[t.country as CountryCode] || t.country;
-                    const routeLabel = direction === 'eu_to_ua'
-                      ? `${countryLabel} → UA`
-                      : `UA → ${countryLabel}`;
-                    return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => setSelectedTripId(t.id)}
-                        className={cn(
-                          'text-left border rounded-lg p-3 transition-all',
-                          isSelected
-                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                        )}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-sm">{routeLabel}</span>
-                          {t.status === 'in_progress' ? (
-                            <span className="text-[10px] font-medium uppercase tracking-wider text-yellow-700 bg-yellow-100 px-1.5 py-0.5 rounded">В дорозі</span>
-                          ) : (
-                            <span className="text-[10px] font-medium uppercase tracking-wider text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">Заплановано</span>
-                          )}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          📅 {formatDate(t.departureDate)}
-                        </div>
-                        {t.assignedCourier && (
-                          <div className="text-xs text-gray-500 mt-0.5 truncate">
-                            👤 {t.assignedCourier.fullName}
-                          </div>
-                        )}
-                        <div className="text-xs text-gray-400 mt-0.5">
-                          📦 {t._count.parcels} посилок
-                        </div>
-                      </button>
-                    );
-                  })}
-              </div>
+              <TripSelector
+                trips={trips}
+                direction={direction}
+                selectedTripId={selectedTripId}
+                onChange={setSelectedTripId}
+                allowNone={false}
+              />
             )}
 
             {tripDateMode === 'custom' && (

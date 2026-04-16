@@ -41,11 +41,20 @@ export function ParcelPaymentCard({ parcel, onUpdate }: ParcelPaymentCardProps) 
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState<PaymentEntry[]>([]);
 
-  const defaultAmount = parcel.totalCost || parcel.declaredValue || 0;
-  const [amount, setAmount] = useState(String(defaultAmount));
+  // IMPORTANT: payment amount must be the DELIVERY COST (calculated from
+  // weight & dimensions), never the declared value. Declared value is what
+  // the client says the goods are worth (for insurance/customs) — not what
+  // they pay for shipping.
+  const defaultAmount = parcel.totalCost ? String(parcel.totalCost) : '';
+  const [amount, setAmount] = useState(defaultAmount);
   const [currency, setCurrency] = useState(parcel.costCurrency || 'EUR');
   const [method, setMethod] = useState(parcel.paymentMethod || 'cash');
   const [description, setDescription] = useState('');
+
+  // Reset amount when parcel's totalCost changes (e.g. after recalc)
+  useEffect(() => {
+    setAmount(parcel.totalCost ? String(parcel.totalCost) : '');
+  }, [parcel.totalCost]);
 
   async function loadHistory() {
     const res = await fetch(`/api/parcels/${parcel.id}/payment`);
@@ -119,13 +128,23 @@ export function ParcelPaymentCard({ parcel, onUpdate }: ParcelPaymentCardProps) 
         <CardContent className="px-3 pb-3 pt-0 space-y-2">
           {/* Summary */}
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">До оплати</span>
+            <span className="text-gray-500">До оплати (вартість послуг)</span>
             <span className="font-semibold">
               {parcel.totalCost
                 ? formatCurrency(Number(parcel.totalCost), parcel.costCurrency || 'EUR')
                 : 'не розраховано'}
             </span>
           </div>
+
+          {!parcel.totalCost && !parcel.isPaid && (
+            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+              ⚠️ Вартість послуг ще не розрахована. Перед прийняттям оплати
+              вкажіть вагу та розміри у блоці «Місця» — вартість підрахується
+              за вагою + пакування + адресна доставка. Оголошена вартість
+              ({parcel.declaredValue ? Number(parcel.declaredValue).toFixed(2) + ' EUR' : '—'}) —
+              це заявлена вартість речей, а не плата за доставку.
+            </div>
+          )}
 
           {/* Status + Action */}
           {parcel.isPaid ? (
@@ -197,6 +216,16 @@ export function ParcelPaymentCard({ parcel, onUpdate }: ParcelPaymentCardProps) 
             <DialogTitle>Прийняти оплату</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAccept} className="space-y-3">
+            {parcel.totalCost ? (
+              <div className="text-xs text-gray-600 bg-blue-50 border border-blue-200 rounded p-2">
+                Вартість послуг (за вагою та розмірами): <b>{formatCurrency(Number(parcel.totalCost), parcel.costCurrency || 'EUR')}</b>
+              </div>
+            ) : (
+              <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+                ⚠️ Вартість послуг не розрахована. Введіть суму вручну або
+                спершу вкажіть вагу/розміри у блоці «Місця».
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label>Сума *</Label>
@@ -209,6 +238,7 @@ export function ParcelPaymentCard({ parcel, onUpdate }: ParcelPaymentCardProps) 
                   required
                   autoFocus
                   className="text-base"
+                  placeholder="0.00"
                 />
               </div>
               <div>
