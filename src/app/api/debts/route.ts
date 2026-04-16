@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { requireRole } from '@/lib/auth/guards';
+import { FINANCE_ROLES } from '@/lib/constants/roles';
 
 // GET /api/debts — parcels not paid, grouped by client
 export async function GET() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireRole(FINANCE_ROLES);
+  if (!guard.ok) return guard.response;
 
   const unpaidParcels = await prisma.parcel.findMany({
     where: {

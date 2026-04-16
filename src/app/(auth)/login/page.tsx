@@ -28,18 +28,33 @@ export default function LoginPage() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (authError) {
+    if (authError || !authData.user) {
       setError('Невірний email або пароль');
       setLoading(false);
       return;
     }
 
-    router.push('/');
+    // Role-based redirect: clients → /my-orders, staff → /
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, is_active')
+      .eq('id', authData.user.id)
+      .maybeSingle();
+
+    if (!profile || profile.is_active === false) {
+      await supabase.auth.signOut();
+      setError('Обліковий запис неактивний. Зверніться до адміністратора.');
+      setLoading(false);
+      return;
+    }
+
+    const target = profile.role === 'client' ? '/my-orders' : '/';
+    router.push(target);
     router.refresh();
   }
 

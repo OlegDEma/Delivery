@@ -119,7 +119,13 @@ export default function AdminUsersPage() {
     setSaving(false);
   }
 
-  const ROLE_LABEL_MAP: Record<string, string> = { driver_courier: "Водій-кур'єр", warehouse_worker: 'Працівник складу', admin: 'Адмін', super_admin: 'Суперадмін' };
+  const ROLE_LABEL_MAP: Record<string, string> = {
+    driver_courier: 'Водій',
+    warehouse_worker: 'Працівник складу',
+    cashier: 'Касир',
+    admin: 'Адмін',
+    super_admin: 'Суперадмін',
+  };
 
   if (currentRole !== 'super_admin') {
     return (
@@ -201,8 +207,9 @@ export default function AdminUsersPage() {
                     <SelectValue>{ROLE_LABEL_MAP[newRole]}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="driver_courier">Водій-кур&apos;єр</SelectItem>
+                    <SelectItem value="driver_courier">Водій</SelectItem>
                     <SelectItem value="warehouse_worker">Працівник складу</SelectItem>
+                    <SelectItem value="cashier">Касир</SelectItem>
                     <SelectItem value="admin">Адмін</SelectItem>
                     <SelectItem value="super_admin">Суперадмін</SelectItem>
                   </SelectContent>

@@ -33,38 +33,39 @@ const NAV_GROUPS: NavGroup[] = [
   {
     items: [
       { label: 'Головна', href: '/', icon: Home },
-      { label: 'Сканер QR', href: '/scan', icon: ScanLine },
+      { label: 'Сканер QR', href: '/scan', icon: ScanLine, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
     ],
   },
   {
     title: 'Замовлення',
     items: [
-      { label: 'Посилки', href: '/parcels', icon: Package },
+      { label: 'Посилки', href: '/parcels', icon: Package, roles: ['super_admin', 'admin', 'cashier', 'warehouse_worker'] },
       { label: 'Мої посилки', href: '/my-parcels', icon: Truck, roles: ['driver_courier'] },
-      { label: 'Доступні', href: '/parcels/available', icon: PackageOpen },
+      { label: 'Доступні', href: '/parcels/available', icon: PackageOpen, roles: ['super_admin', 'admin', 'driver_courier'] },
       { label: 'Замовлення клієнтів', href: '/parcels/pending-orders', icon: ClipboardList, roles: ['super_admin', 'admin', 'driver_courier'] },
-      { label: 'Претензії', href: '/claims', icon: AlertTriangle },
-      { label: 'Клієнти', href: '/clients', icon: Users },
+      { label: 'Претензії', href: '/claims', icon: AlertTriangle, roles: ['super_admin', 'admin', 'driver_courier'] },
+      { label: 'Клієнти', href: '/clients', icon: Users, roles: ['super_admin', 'admin', 'cashier'] },
     ],
   },
   {
     title: 'Логістика',
+    roles: ['super_admin', 'admin', 'driver_courier', 'warehouse_worker'],
     items: [
-      { label: 'Поїздки', href: '/journeys', icon: Route },
-      { label: 'Рейси', href: '/trips', icon: Truck },
-      { label: 'Календар', href: '/calendar', icon: Calendar },
+      { label: 'Поїздки', href: '/journeys', icon: Route, roles: ['super_admin', 'admin', 'driver_courier'] },
+      { label: 'Рейси', href: '/trips', icon: Truck, roles: ['super_admin', 'admin', 'driver_courier'] },
+      { label: 'Календар', href: '/calendar', icon: Calendar, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
       { label: 'Маршрути', href: '/routes', icon: Map, roles: ['super_admin', 'admin', 'driver_courier'] },
       { label: 'Склад', href: '/warehouse', icon: Warehouse, roles: ['super_admin', 'admin', 'warehouse_worker'] },
     ],
   },
   {
     title: 'Фінанси',
-    roles: ['super_admin', 'admin'],
+    roles: ['super_admin', 'admin', 'cashier'],
     items: [
       { label: 'Каса', href: '/cash-register', icon: Wallet },
       { label: 'Борги', href: '/debts', icon: AlertCircle },
       { label: 'Звіти', href: '/reports', icon: FileText },
-      { label: 'Аналітика', href: '/analytics', icon: BarChart3 },
+      { label: 'Аналітика', href: '/analytics', icon: BarChart3, roles: ['super_admin', 'admin'] },
     ],
   },
   {
@@ -74,7 +75,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Користувачі', href: '/admin/users', icon: UserCog, roles: ['super_admin'] },
       { label: 'Тарифи', href: '/admin/pricing', icon: Tags },
       { label: 'Пункти збору', href: '/admin/collection-points', icon: MapPin },
-      { label: 'Імпорт даних', href: '/admin/import', icon: Upload },
+      { label: 'Імпорт даних', href: '/admin/import', icon: Upload, roles: ['super_admin'] },
     ],
   },
 ];

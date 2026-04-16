@@ -12,6 +12,7 @@
 export const UserRole = {
   super_admin: 'super_admin',
   admin: 'admin',
+  cashier: 'cashier',
   warehouse_worker: 'warehouse_worker',
   driver_courier: 'driver_courier',
   client: 'client'

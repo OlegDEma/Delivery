@@ -21,6 +21,7 @@ export async function GET() {
 
   const parcels = await prisma.parcel.findMany({
     where: {
+      deletedAt: null,
       OR: [{ senderId: client.id }, { receiverId: client.id }],
     },
     include: {
