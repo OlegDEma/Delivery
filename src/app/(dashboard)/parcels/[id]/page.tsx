@@ -18,6 +18,8 @@ import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
 import { Textarea } from '@/components/ui/textarea';
 import { ShareButton } from '@/components/shared/share-button';
+import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
+import { ParcelPaymentCard } from '@/components/parcels/parcel-payment-card';
 
 interface ParcelDetail {
   id: string;
@@ -282,79 +284,11 @@ export default function ParcelDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Payment & Details */}
-      <Card>
-        <CardHeader className="py-2 px-3">
-          <CardTitle className="text-sm">Деталі</CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3 pt-0 text-sm space-y-1">
-          <div className="flex justify-between">
-            <span className="text-gray-500">Напрямок</span>
-            <span>{parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}</span>
-          </div>
-          {parcel.description && (
-            <div className="flex justify-between">
-              <span className="text-gray-500">Опис</span>
-              <span>{parcel.description}</span>
-            </div>
-          )}
-          {parcel.declaredValue && (
-            <div className="flex justify-between">
-              <span className="text-gray-500">Оголошена вартість</span>
-              <span>{Number(parcel.declaredValue).toFixed(2)} EUR</span>
-            </div>
-          )}
-          <div className="flex justify-between">
-            <span className="text-gray-500">Платник</span>
-            <span>{parcel.payer === 'sender' ? 'Відправник' : 'Отримувач'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Оплата</span>
-            <span>
-              {parcel.paymentMethod === 'cash' ? 'Готівка' : 'Безготівка'}
-              {parcel.paymentInUkraine ? ' (в Україні)' : ''}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Сплачено</span>
-            <span>{parcel.isPaid ? 'Так' : 'Ні'}</span>
-          </div>
-          {parcel.assignedCourier && (
-            <div className="flex justify-between">
-              <span className="text-gray-500">Кур&apos;єр</span>
-              <span>{parcel.assignedCourier.fullName}</span>
-            </div>
-          )}
-          {parcel.estimatedDeliveryStart && parcel.estimatedDeliveryEnd && (
-            <div className="flex justify-between">
-              <span className="text-gray-500">Вікно доставки</span>
-              <span>
-                {new Date(parcel.estimatedDeliveryStart).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
-                {' — '}
-                {new Date(parcel.estimatedDeliveryEnd).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Details (editable) */}
+      <ParcelDetailsCard parcel={parcel} onUpdate={fetchParcel} />
 
-      {/* Mark as paid */}
-      {!parcel.isPaid && parcel.totalCost && (
-        <Button
-          variant="outline"
-          className="w-full text-green-600 border-green-200 hover:bg-green-50"
-          onClick={async () => {
-            await fetch(`/api/parcels/${id}`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ isPaid: true }),
-            });
-            fetchParcel();
-          }}
-        >
-          Позначити як оплачено ({parcel.totalCost} EUR)
-        </Button>
-      )}
+      {/* Payment card */}
+      <ParcelPaymentCard parcel={parcel} onUpdate={fetchParcel} />
 
       {/* Estimated delivery window */}
       <Card>
