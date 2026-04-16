@@ -139,11 +139,46 @@ export async function PATCH(
   if (body.payer !== undefined) updateData.payer = body.payer;
   if (body.paymentMethod !== undefined) updateData.paymentMethod = body.paymentMethod;
   if (body.paymentInUkraine !== undefined) updateData.paymentInUkraine = body.paymentInUkraine;
+  if (body.shipmentType !== undefined) updateData.shipmentType = body.shipmentType;
   // Route task fields
   if (body.routeTaskStatus !== undefined) updateData.routeTaskStatus = body.routeTaskStatus || null;
   if (body.routeTaskFailReason !== undefined) updateData.routeTaskFailReason = body.routeTaskFailReason || null;
   if (body.routeTaskReschedDate !== undefined) {
     updateData.routeTaskReschedDate = body.routeTaskReschedDate ? new Date(body.routeTaskReschedDate) : null;
+  }
+
+  // Places array update — replaces dimensions/weight per place
+  // Body format: { places: [{ id?, placeNumber, weight, length?, width?, height? }] }
+  if (Array.isArray(body.places)) {
+    let totalWeight = 0;
+    let totalVolWeight = 0;
+
+    for (const p of body.places) {
+      const w = Number(p.weight) || 0;
+      const l = p.length != null ? Number(p.length) : null;
+      const wd = p.width != null ? Number(p.width) : null;
+      const h = p.height != null ? Number(p.height) : null;
+      const volW = l && wd && h ? Number(((l * wd * h) / 4000).toFixed(2)) : 0;
+      totalWeight += w;
+      totalVolWeight += volW;
+
+      if (p.id) {
+        await prisma.parcelPlace.update({
+          where: { id: p.id },
+          data: {
+            weight: w,
+            length: l,
+            width: wd,
+            height: h,
+            volumetricWeight: volW || null,
+            ...(p.needsPackaging !== undefined ? { needsPackaging: p.needsPackaging } : {}),
+          },
+        });
+      }
+    }
+
+    updateData.totalWeight = totalWeight;
+    updateData.totalVolumetricWeight = totalVolWeight;
   }
 
   const updated = await prisma.parcel.update({

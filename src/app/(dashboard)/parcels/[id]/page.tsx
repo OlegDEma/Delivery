@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { STATUS_LABELS, STATUS_COLORS, STATUS_FLOW_EU_TO_UA, STATUS_FLOW_UA_TO_EU, type ParcelStatusType } from '@/lib/constants/statuses';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
-import { formatDateTime, formatWeight } from '@/lib/utils/format';
+import { formatDateTime } from '@/lib/utils/format';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { CopyButton } from '@/components/shared/copy-button';
 import { PhoneLink } from '@/components/shared/phone-link';
@@ -20,6 +20,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { ShareButton } from '@/components/shared/share-button';
 import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
 import { ParcelPaymentCard } from '@/components/parcels/parcel-payment-card';
+import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
+import { toast } from 'sonner';
 
 interface ParcelDetail {
   id: string;
@@ -46,6 +48,7 @@ interface ParcelDetail {
   isPaid: boolean;
   totalCost: number | null;
   createdAt: string;
+  createdSource: string | null;
   sender: {
     firstName: string; lastName: string; phone: string;
     addresses: { city: string; street: string | null; country: string }[];
@@ -60,7 +63,7 @@ interface ParcelDetail {
     landmark: string | null; npWarehouseNum: string | null; deliveryMethod: string; country: string;
   } | null;
   places: {
-    placeNumber: number; weight: number | null; length: number | null;
+    id: string; placeNumber: number; weight: number | null; length: number | null;
     width: number | null; height: number | null; volumetricWeight: number | null;
     needsPackaging: boolean; packagingDone: boolean; itnPlace: string | null;
   }[];
@@ -118,6 +121,29 @@ export default function ParcelDetailPage() {
     setLoading(false);
   }
 
+  async function handleConfirmClientOrder() {
+    if (!parcel) return;
+    const targetStatus = parcel.direction === 'eu_to_ua'
+      ? 'accepted_for_transport_to_ua'
+      : 'accepted_for_transport_to_eu';
+    setSaving(true);
+    const res = await fetch(`/api/parcels/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        status: targetStatus,
+        statusNote: 'Замовлення клієнта підтверджено',
+      }),
+    });
+    setSaving(false);
+    if (res.ok) {
+      toast.success('Замовлення підтверджено і прийнято до перевезення');
+      fetchParcel();
+    } else {
+      toast.error('Помилка підтвердження');
+    }
+  }
+
   useEffect(() => { fetchParcel(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleStatusChange() {
@@ -151,12 +177,41 @@ export default function ParcelDetailPage() {
   const currentIdx = statusFlow.indexOf(parcel.status);
   const nextStatuses = currentIdx >= 0 ? statusFlow.slice(currentIdx + 1) : [];
 
+  const isClientOrderPending =
+    parcel.status === 'draft' &&
+    (parcel.createdSource === 'client_web' || parcel.createdSource === 'client_telegram');
+
   return (
     <div className="max-w-2xl space-y-4">
       <Breadcrumbs items={[
         { label: 'Посилки', href: '/parcels' },
         { label: parcel.internalNumber },
       ]} />
+
+      {/* Client order — awaiting confirmation */}
+      {isClientOrderPending && (
+        <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="text-2xl">⚠️</div>
+            <div className="flex-1">
+              <div className="font-semibold text-yellow-900 mb-1">
+                Замовлення клієнта — очікує підтвердження
+              </div>
+              <div className="text-sm text-yellow-800 mb-3">
+                Перевірте дані (адреси, вагу, розміри, опис), внесіть корективи і натисніть «Підтвердити».
+                Статус зміниться на «Прийнято до перевезення» і посилка буде автоматично прив&apos;язана до найближчого рейсу.
+              </div>
+              <Button
+                onClick={handleConfirmClientOrder}
+                disabled={saving}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white"
+              >
+                {saving ? 'Підтвердження...' : '✓ Підтвердити замовлення'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div>
@@ -245,44 +300,13 @@ export default function ParcelDetailPage() {
         </Card>
       </div>
 
-      {/* Places */}
-      <Card>
-        <CardHeader className="py-2 px-3">
-          <CardTitle className="text-sm">Місця ({parcel.totalPlacesCount})</CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3 pt-0">
-          <div className="space-y-2">
-            {parcel.places.map(place => (
-              <div key={place.placeNumber} className="flex items-center justify-between text-sm border-b pb-1 last:border-0">
-                <div>
-                  <span className="font-medium">#{place.placeNumber}</span>
-                  {place.itnPlace && (
-                    <span className="text-xs text-gray-400 ml-2 font-mono">{place.itnPlace}</span>
-                  )}
-                  {place.needsPackaging && (
-                    <Badge variant="secondary" className="ml-2 text-xs">
-                      {place.packagingDone ? 'Запаковано' : 'Пакування'}
-                    </Badge>
-                  )}
-                </div>
-                <div className="text-right text-xs text-gray-600">
-                  {place.weight ? formatWeight(Number(place.weight)) : '—'}
-                  {place.length && place.width && place.height && (
-                    <span className="ml-2">{Number(place.length)}x{Number(place.width)}x{Number(place.height)} см</span>
-                  )}
-                  {place.volumetricWeight && Number(place.volumetricWeight) > 0 && (
-                    <span className="ml-2 text-gray-400">(об. {formatWeight(Number(place.volumetricWeight))})</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-2 pt-2 border-t flex justify-between text-sm font-medium">
-            <span>Загальна вага</span>
-            <span>{parcel.totalWeight ? formatWeight(Number(parcel.totalWeight)) : '—'}</span>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Places (editable) */}
+      <ParcelPlacesCard
+        parcelId={parcel.id}
+        places={parcel.places}
+        totalWeight={parcel.totalWeight}
+        onUpdate={fetchParcel}
+      />
 
       {/* Details (editable) */}
       <ParcelDetailsCard parcel={parcel} onUpdate={fetchParcel} />

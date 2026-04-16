@@ -17,7 +17,7 @@ interface Trip {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  planned: 'bg-blue-500', in_progress: 'bg-yellow-500', completed: 'bg-green-500', cancelled: 'bg-gray-400',
+  planned: 'bg-blue-500', in_progress: 'bg-yellow-500', completed: 'bg-green-500', cancelled: 'bg-red-500',
 };
 
 const DAY_NAMES = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
@@ -110,10 +110,11 @@ export default function CalendarPage() {
       </div>
 
       {/* Legend */}
-      <div className="flex gap-4 mt-3 text-xs text-gray-500">
+      <div className="flex flex-wrap gap-4 mt-3 text-xs text-gray-500">
         <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-blue-500" /> Заплановано</div>
         <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-yellow-500" /> В дорозі</div>
         <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-green-500" /> Завершено</div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-red-500" /> Скасовано</div>
       </div>
     </div>
   );

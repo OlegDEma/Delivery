@@ -9,7 +9,7 @@ import {
   Wallet, AlertCircle, BarChart3, FileText,
   PackageOpen, ClipboardList, AlertTriangle,
   UserCog, Tags, MapPin, Upload,
-  LogOut, Menu,
+  LogOut, Menu, ChevronDown,
   type LucideIcon,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -29,6 +29,7 @@ interface NavGroup {
   title?: string;
   items: NavItem[];
   roles?: Role[];
+  collapsible?: boolean;
 }
 
 const NAV_GROUPS: NavGroup[] = [
@@ -62,6 +63,7 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: 'Фінанси',
+    collapsible: true,
     roles: ['super_admin', 'admin', 'cashier'],
     items: [
       { label: 'Каса', href: '/cash-register', icon: Wallet },
@@ -72,6 +74,7 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: 'Адміністрування',
+    collapsible: true,
     roles: ['super_admin', 'admin'],
     items: [
       { label: 'Користувачі', href: '/admin/users', icon: UserCog, roles: ['super_admin'] },
@@ -91,9 +94,14 @@ function getInitials(name: string | null | undefined): string {
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const pathname = usePathname();
   const router = useRouter();
   const { role, fullName } = useAuth();
+
+  function toggleGroup(title: string) {
+    setOpenGroups(prev => ({ ...prev, [title]: !prev[title] }));
+  }
 
   async function handleLogout() {
     const supabase = createClient();
@@ -142,14 +150,33 @@ export function MobileNav() {
               );
               if (visibleItems.length === 0) return null;
 
+              const hasActiveChild = visibleItems.some(
+                item => pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+              );
+              const isCollapsible = group.collapsible && !!group.title;
+              const isOpen = !isCollapsible || hasActiveChild || openGroups[group.title!];
+
               return (
                 <div key={gi} className={gi > 0 ? 'mt-5' : ''}>
                   {group.title && (
-                    <div className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                      {group.title}
-                    </div>
+                    isCollapsible ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleGroup(group.title!)}
+                        className="w-full flex items-center justify-between px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700"
+                      >
+                        <span>{group.title}</span>
+                        <ChevronDown
+                          className={cn('w-3 h-3 transition-transform', isOpen ? 'rotate-0' : '-rotate-90')}
+                        />
+                      </button>
+                    ) : (
+                      <div className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                        {group.title}
+                      </div>
+                    )
                   )}
-                  <div className="space-y-0.5">
+                  {isOpen && (<div className="space-y-0.5">
                     {visibleItems.map(item => {
                       const isActive = pathname === item.href ||
                         (item.href !== '/' && pathname.startsWith(item.href));
@@ -177,7 +204,7 @@ export function MobileNav() {
                         </Link>
                       );
                     })}
-                  </div>
+                  </div>)}
                 </div>
               );
             })}

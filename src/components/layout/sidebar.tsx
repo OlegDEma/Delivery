@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -8,7 +9,7 @@ import {
   Wallet, AlertCircle, BarChart3, FileText,
   PackageOpen, ClipboardList, AlertTriangle,
   UserCog, Tags, MapPin, Upload,
-  Search, LogOut,
+  Search, LogOut, ChevronDown,
   type LucideIcon,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -27,6 +28,8 @@ interface NavGroup {
   title?: string;
   items: NavItem[];
   roles?: Role[];
+  /** If true, group starts collapsed (user clicks title to expand). */
+  collapsible?: boolean;
 }
 
 const NAV_GROUPS: NavGroup[] = [
@@ -60,6 +63,7 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: 'Фінанси',
+    collapsible: true,
     roles: ['super_admin', 'admin', 'cashier'],
     items: [
       { label: 'Каса', href: '/cash-register', icon: Wallet },
@@ -70,6 +74,7 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: 'Адміністрування',
+    collapsible: true,
     roles: ['super_admin', 'admin'],
     items: [
       { label: 'Користувачі', href: '/admin/users', icon: UserCog, roles: ['super_admin'] },
@@ -91,6 +96,11 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { role, fullName } = useAuth();
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+
+  function toggleGroup(title: string) {
+    setOpenGroups(prev => ({ ...prev, [title]: !prev[title] }));
+  }
 
   async function handleLogout() {
     const supabase = createClient();
@@ -142,41 +152,66 @@ export function Sidebar() {
           );
           if (visibleItems.length === 0) return null;
 
+          // Collapsible logic: open if user manually toggled OR a child is active
+          const hasActiveChild = visibleItems.some(
+            item => pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+          );
+          const isCollapsible = group.collapsible && !!group.title;
+          const isOpen = !isCollapsible || hasActiveChild || openGroups[group.title!];
+
           return (
             <div key={gi} className={gi > 0 ? 'mt-5' : ''}>
               {group.title && (
-                <div className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                  {group.title}
+                isCollapsible ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.title!)}
+                    className="w-full flex items-center justify-between px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    <span>{group.title}</span>
+                    <ChevronDown
+                      className={cn(
+                        'w-3 h-3 transition-transform',
+                        isOpen ? 'rotate-0' : '-rotate-90'
+                      )}
+                    />
+                  </button>
+                ) : (
+                  <div className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                    {group.title}
+                  </div>
+                )
+              )}
+              {isOpen && (
+                <div className="space-y-0.5">
+                  {visibleItems.map(item => {
+                    const isActive = pathname === item.href ||
+                      (item.href !== '/' && pathname.startsWith(item.href));
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={cn(
+                          'group relative flex items-center gap-2.5 px-3 py-1.5 text-sm rounded-md transition-colors',
+                          isActive
+                            ? 'bg-blue-50 text-blue-700 font-medium'
+                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-normal'
+                        )}
+                      >
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-blue-600 rounded-r-full" />
+                        )}
+                        <Icon className={cn(
+                          'w-4 h-4 shrink-0',
+                          isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
+                        )} />
+                        <span className="truncate">{item.label}</span>
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
-              <div className="space-y-0.5">
-                {visibleItems.map(item => {
-                  const isActive = pathname === item.href ||
-                    (item.href !== '/' && pathname.startsWith(item.href));
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        'group relative flex items-center gap-2.5 px-3 py-1.5 text-sm rounded-md transition-colors',
-                        isActive
-                          ? 'bg-blue-50 text-blue-700 font-medium'
-                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-normal'
-                      )}
-                    >
-                      {isActive && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-blue-600 rounded-r-full" />
-                      )}
-                      <Icon className={cn(
-                        'w-4 h-4 shrink-0',
-                        isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
-                      )} />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
             </div>
           );
         })}

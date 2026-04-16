@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDate, formatWeight } from '@/lib/utils/format';
@@ -9,6 +11,7 @@ import { formatDate, formatWeight } from '@/lib/utils/format';
 interface PendingParcel {
   id: string;
   internalNumber: string;
+  direction: string;
   status: string;
   totalPlacesCount: number;
   totalWeight: number | null;
@@ -20,52 +23,100 @@ interface PendingParcel {
 }
 
 export default function PendingOrdersPage() {
+  const router = useRouter();
   const [parcels, setParcels] = useState<PendingParcel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirming, setConfirming] = useState<string | null>(null);
 
   async function fetchPending() {
     setLoading(true);
     const res = await fetch('/api/parcels?status=draft&limit=50');
     if (res.ok) {
       const data = await res.json();
-      // Show only client-created orders
-      setParcels(data.parcels.filter((p: PendingParcel) => p.createdSource === 'client_web' || p.createdSource === 'client_telegram'));
+      setParcels(
+        data.parcels.filter(
+          (p: PendingParcel) =>
+            p.createdSource === 'client_web' || p.createdSource === 'client_telegram'
+        )
+      );
     }
     setLoading(false);
   }
 
-  useEffect(() => { fetchPending(); }, []);
+  useEffect(() => {
+    fetchPending();
+  }, []);
 
-  async function handleConfirm(parcelId: string) {
-    const direction = parcels.find(p => p.id === parcelId);
-    const status = direction ? 'accepted_for_transport_to_ua' : 'accepted_for_transport_to_ua';
-    await fetch(`/api/parcels/${parcelId}`, {
+  async function handleQuickConfirm(parcel: PendingParcel, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!confirm(`Підтвердити замовлення ${parcel.internalNumber} без перевірки деталей?`)) {
+      return;
+    }
+
+    setConfirming(parcel.id);
+    const targetStatus =
+      parcel.direction === 'eu_to_ua'
+        ? 'accepted_for_transport_to_ua'
+        : 'accepted_for_transport_to_eu';
+
+    const res = await fetch(`/api/parcels/${parcel.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, statusNote: 'Підтверджено кур\'єром' }),
+      body: JSON.stringify({
+        status: targetStatus,
+        statusNote: 'Замовлення клієнта підтверджено',
+      }),
     });
-    fetchPending();
+    setConfirming(null);
+
+    if (res.ok) {
+      toast.success('Підтверджено');
+      fetchPending();
+    } else {
+      toast.error('Помилка підтвердження');
+    }
   }
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-1">Замовлення клієнтів</h1>
-      <p className="text-sm text-gray-500 mb-4">Замовлення створені клієнтами на сайті, які потребують перевірки та підтвердження</p>
+      <p className="text-sm text-gray-500 mb-4">
+        Клацніть на замовлення щоб відкрити і повністю відредагувати перед підтвердженням
+      </p>
 
       {loading ? (
         <div className="text-center py-12 text-gray-500">Завантаження...</div>
       ) : (
         <div className="bg-white rounded-lg border divide-y">
           {parcels.map(p => (
-            <div key={p.id} className="p-3">
+            <div
+              key={p.id}
+              onClick={() => router.push(`/parcels/${p.id}`)}
+              className="p-3 hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition-colors"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  router.push(`/parcels/${p.id}`);
+                }
+              }}
+            >
               <div className="flex items-start justify-between gap-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
-                    <Badge className="text-xs bg-yellow-100 text-yellow-800">Очікує підтвердження</Badge>
+                    <Badge className="text-xs bg-yellow-100 text-yellow-800">
+                      Очікує підтвердження
+                    </Badge>
                     <Badge variant="secondary" className="text-xs">
                       {p.createdSource === 'client_web' ? 'Сайт' : 'Telegram'}
                     </Badge>
+                    <span className="text-xs text-gray-400">
+                      {p.direction === 'eu_to_ua' ? 'EU → UA' : 'UA → EU'}
+                    </span>
                   </div>
                   <div className="text-sm">
                     <span className="text-gray-500">Від:</span> {p.sender.lastName} {p.sender.firstName}
@@ -77,19 +128,31 @@ export default function PendingOrdersPage() {
                   </div>
                   {p.receiverAddress && (
                     <div className="text-xs text-gray-400">
-                      {p.receiverAddress.city}{p.receiverAddress.street ? `, ${p.receiverAddress.street}` : ''}
+                      {p.receiverAddress.city}
+                      {p.receiverAddress.street ? `, ${p.receiverAddress.street}` : ''}
                     </div>
                   )}
                   <div className="text-xs text-gray-400 mt-1">
-                    {formatDate(p.createdAt)} | {p.totalPlacesCount} місць | {p.totalWeight ? formatWeight(Number(p.totalWeight)) : '—'}
+                    {formatDate(p.createdAt)} | {p.totalPlacesCount} місць |{' '}
+                    {p.totalWeight ? formatWeight(Number(p.totalWeight)) : '—'}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 shrink-0">
-                  <Link href={`/parcels/${p.id}`}>
-                    <Button variant="outline" size="sm" className="w-full">Перевірити</Button>
+                  <Link
+                    href={`/parcels/${p.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Button variant="outline" size="sm" className="w-full">
+                      Відкрити
+                    </Button>
                   </Link>
-                  <Button size="sm" onClick={() => handleConfirm(p.id)} className="w-full">
-                    Підтвердити
+                  <Button
+                    size="sm"
+                    onClick={(e) => handleQuickConfirm(p, e)}
+                    disabled={confirming === p.id}
+                    className="w-full"
+                  >
+                    {confirming === p.id ? '...' : 'Швидке підтвердження'}
                   </Button>
                 </div>
               </div>
