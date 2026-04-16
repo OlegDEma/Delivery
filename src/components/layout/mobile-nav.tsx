@@ -3,16 +3,25 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import {
+  Home, ScanLine, Package, Truck, Users,
+  Route, Calendar, Map, Warehouse,
+  Wallet, AlertCircle, BarChart3, FileText,
+  PackageOpen, ClipboardList, AlertTriangle,
+  UserCog, Tags, MapPin, Upload,
+  LogOut, Menu,
+  type LucideIcon,
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLE_LABELS, type Role } from '@/lib/constants/roles';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 
 interface NavItem {
   label: string;
   href: string;
+  icon: LucideIcon;
   roles?: Role[];
 }
 
@@ -25,53 +34,59 @@ interface NavGroup {
 const NAV_GROUPS: NavGroup[] = [
   {
     items: [
-      { label: 'Головна', href: '/' },
-      { label: 'Сканер QR', href: '/scan' },
-      { label: 'Посилки', href: '/parcels' },
-      { label: 'Мої посилки', href: '/my-parcels', roles: ['driver_courier'] },
-      { label: 'Клієнти', href: '/clients' },
+      { label: 'Головна', href: '/', icon: Home },
+      { label: 'Сканер QR', href: '/scan', icon: ScanLine },
+    ],
+  },
+  {
+    title: 'Замовлення',
+    items: [
+      { label: 'Посилки', href: '/parcels', icon: Package },
+      { label: 'Мої посилки', href: '/my-parcels', icon: Truck, roles: ['driver_courier'] },
+      { label: 'Доступні', href: '/parcels/available', icon: PackageOpen },
+      { label: 'Замовлення', href: '/parcels/pending-orders', icon: ClipboardList, roles: ['super_admin', 'admin', 'driver_courier'] },
+      { label: 'Претензії', href: '/claims', icon: AlertTriangle },
+      { label: 'Клієнти', href: '/clients', icon: Users },
     ],
   },
   {
     title: 'Логістика',
     items: [
-      { label: 'Поїздки', href: '/journeys' },
-      { label: 'Рейси', href: '/trips' },
-      { label: 'Календар', href: '/calendar' },
-      { label: 'Маршрути', href: '/routes', roles: ['super_admin', 'admin', 'driver_courier'] },
-      { label: 'Склад', href: '/warehouse', roles: ['super_admin', 'admin', 'warehouse_worker'] },
+      { label: 'Поїздки', href: '/journeys', icon: Route },
+      { label: 'Рейси', href: '/trips', icon: Truck },
+      { label: 'Календар', href: '/calendar', icon: Calendar },
+      { label: 'Маршрути', href: '/routes', icon: Map, roles: ['super_admin', 'admin', 'driver_courier'] },
+      { label: 'Склад', href: '/warehouse', icon: Warehouse, roles: ['super_admin', 'admin', 'warehouse_worker'] },
     ],
   },
   {
     title: 'Фінанси',
     roles: ['super_admin', 'admin'],
     items: [
-      { label: 'Каса', href: '/cash-register' },
-      { label: 'Борги', href: '/debts' },
-      { label: 'Звіти', href: '/reports' },
-      { label: 'Аналітика', href: '/analytics' },
+      { label: 'Каса', href: '/cash-register', icon: Wallet },
+      { label: 'Борги', href: '/debts', icon: AlertCircle },
+      { label: 'Звіти', href: '/reports', icon: FileText },
+      { label: 'Аналітика', href: '/analytics', icon: BarChart3 },
     ],
   },
   {
-    title: 'Інше',
-    items: [
-      { label: 'Пошук', href: '/search' },
-      { label: 'Доступні', href: '/parcels/available' },
-      { label: 'Замовлення', href: '/parcels/pending-orders', roles: ['super_admin', 'admin', 'driver_courier'] },
-      { label: 'Претензії', href: '/claims' },
-    ],
-  },
-  {
-    title: 'Налаштування',
+    title: 'Адміністрування',
     roles: ['super_admin', 'admin'],
     items: [
-      { label: 'Користувачі', href: '/admin/users', roles: ['super_admin'] },
-      { label: 'Тарифи', href: '/admin/pricing' },
-      { label: 'Пункти збору', href: '/admin/collection-points' },
-      { label: 'Імпорт даних', href: '/admin/import' },
+      { label: 'Користувачі', href: '/admin/users', icon: UserCog, roles: ['super_admin'] },
+      { label: 'Тарифи', href: '/admin/pricing', icon: Tags },
+      { label: 'Пункти збору', href: '/admin/collection-points', icon: MapPin },
+      { label: 'Імпорт даних', href: '/admin/import', icon: Upload },
     ],
   },
 ];
+
+function getInitials(name: string | null | undefined): string {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -88,24 +103,34 @@ export function MobileNav() {
   }
 
   return (
-    <div className="md:hidden flex items-center justify-between h-14 px-4 border-b bg-white sticky top-0 z-50">
-      <Link href="/" className="text-lg font-bold text-blue-700">
-        Delivery
+    <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-gray-200 bg-white sticky top-0 z-50">
+      <Link href="/" className="flex items-center gap-2">
+        <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white text-xs font-bold">
+          D
+        </div>
+        <span className="text-base font-semibold text-gray-900 tracking-tight">
+          Delivery
+        </span>
       </Link>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger
           render={
-            <Button variant="ghost" size="sm" className="px-2" aria-label="Відкрити меню">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </Button>
+            <button className="p-2 -mr-2 text-gray-600 hover:text-gray-900" aria-label="Відкрити меню">
+              <Menu className="w-6 h-6" aria-hidden="true" />
+            </button>
           }
         />
-        <SheetContent side="left" className="w-72 p-0">
-          <SheetTitle className="px-6 py-4 border-b text-lg font-bold text-blue-700">
-            Delivery
+        <SheetContent side="left" className="w-72 p-0 flex flex-col">
+          <SheetTitle className="flex items-center h-14 px-5 border-b border-gray-200 shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white text-xs font-bold">
+                D
+              </div>
+              <span className="text-base font-semibold text-gray-900 tracking-tight">
+                Delivery
+              </span>
+            </div>
           </SheetTitle>
 
           <nav className="flex-1 px-3 py-3 overflow-y-auto">
@@ -117,40 +142,67 @@ export function MobileNav() {
               if (visibleItems.length === 0) return null;
 
               return (
-                <div key={gi} className={gi > 0 ? 'mt-3' : ''}>
+                <div key={gi} className={gi > 0 ? 'mt-5' : ''}>
                   {group.title && (
-                    <div className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                    <div className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       {group.title}
                     </div>
                   )}
-                  {visibleItems.map(item => {
-                    const isActive = pathname === item.href ||
-                      (item.href !== '/' && pathname.startsWith(item.href));
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className={cn(
-                          'flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors',
-                          isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    );
-                  })}
+                  <div className="space-y-0.5">
+                    {visibleItems.map(item => {
+                      const isActive = pathname === item.href ||
+                        (item.href !== '/' && pathname.startsWith(item.href));
+                      const Icon = item.icon;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setOpen(false)}
+                          className={cn(
+                            'group relative flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-colors',
+                            isActive
+                              ? 'bg-blue-50 text-blue-700 font-medium'
+                              : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-normal'
+                          )}
+                        >
+                          {isActive && (
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-blue-600 rounded-r-full" />
+                          )}
+                          <Icon className={cn(
+                            'w-4 h-4 shrink-0',
+                            isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
+                          )} />
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}
           </nav>
 
-          <div className="p-4 border-t mt-auto">
-            <div className="text-sm font-medium text-gray-900">{fullName || 'Користувач'}</div>
-            <div className="text-xs text-gray-500 mb-3">{role ? ROLE_LABELS[role] : ''}</div>
-            <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
+          <div className="p-3 border-t border-gray-200 shrink-0">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                {getInitials(fullName)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-gray-900 truncate leading-tight">
+                  {fullName || 'Користувач'}
+                </div>
+                <div className="text-xs text-gray-500 truncate leading-tight">
+                  {role ? ROLE_LABELS[role] : ''}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-md transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
               Вийти
-            </Button>
+            </button>
           </div>
         </SheetContent>
       </Sheet>
