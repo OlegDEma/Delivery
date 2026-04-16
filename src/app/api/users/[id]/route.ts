@@ -19,6 +19,31 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
 
+  // Safety: can't change own role or deactivate self — otherwise super_admin
+  // can lock themselves out of the system
+  if (id === user.id) {
+    if (body.role !== undefined && body.role !== profile.role) {
+      return NextResponse.json(
+        { error: 'Не можна змінити свою роль — зверніться до іншого Суперадміна' },
+        { status: 400 }
+      );
+    }
+    if (body.isActive === false) {
+      return NextResponse.json(
+        { error: 'Не можна деактивувати свій акаунт' },
+        { status: 400 }
+      );
+    }
+  }
+
+  // Validate role value
+  if (body.role !== undefined) {
+    const validRoles = ['super_admin', 'admin', 'cashier', 'warehouse_worker', 'driver_courier', 'client'];
+    if (!validRoles.includes(body.role)) {
+      return NextResponse.json({ error: 'Невалідна роль' }, { status: 400 });
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = {};
   if (body.role !== undefined) data.role = body.role;

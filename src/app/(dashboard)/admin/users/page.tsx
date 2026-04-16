@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLE_LABELS, type Role } from '@/lib/constants/roles';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ interface UserProfile {
 }
 
 export default function AdminUsersPage() {
-  const { role: currentRole } = useAuth();
+  const { role: currentRole, user: currentUser } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -64,13 +65,39 @@ export default function AdminUsersPage() {
     fetchUsers();
   }
 
-  async function handleChangeRole(userId: string, role: string) {
-    await fetch(`/api/users/${userId}`, {
+  async function handleChangeRole(user: UserProfile, newRole: Role) {
+    if (newRole === user.role) return;
+
+    // Extra guard for dangerous transitions
+    const wasAdmin = user.role === 'super_admin' || user.role === 'admin';
+    const becomesLowPriv = !['super_admin', 'admin'].includes(newRole);
+    if (wasAdmin && becomesLowPriv) {
+      if (!confirm(
+        `Ви збираєтесь знизити роль «${user.fullName}» з ${ROLE_LABELS[user.role]} до ${ROLE_LABELS[newRole]}. Цей користувач втратить адміністративні права. Продовжити?`
+      )) return;
+    } else if (newRole === 'client') {
+      if (!confirm(
+        `Змінити роль «${user.fullName}» на Клієнт? Він більше не зможе заходити в адмінку, тільки у /my-orders.`
+      )) return;
+    } else if (newRole === 'super_admin') {
+      if (!confirm(
+        `Надати «${user.fullName}» роль Суперадмін? Він зможе керувати всіма користувачами, тарифами, імпортом.`
+      )) return;
+    }
+
+    const res = await fetch(`/api/users/${user.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role }),
+      body: JSON.stringify({ role: newRole }),
     });
-    fetchUsers();
+
+    if (res.ok) {
+      toast.success(`Роль змінено на «${ROLE_LABELS[newRole]}»`);
+      fetchUsers();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      toast.error(err.error || 'Помилка зміни ролі');
+    }
   }
 
   async function fetchUsers() {
@@ -248,7 +275,28 @@ export default function AdminUsersPage() {
                     <td className="px-4 py-3 text-gray-600">{u.email}</td>
                     <td className="px-4 py-3 text-gray-600">{u.phone || '—'}</td>
                     <td className="px-4 py-3">
-                      <Badge variant="secondary">{ROLE_LABELS[u.role]}</Badge>
+                      {currentUser?.id === u.id ? (
+                        <Badge variant="secondary" title="Не можна змінити свою роль">
+                          {ROLE_LABELS[u.role]} (Ви)
+                        </Badge>
+                      ) : (
+                        <Select
+                          value={u.role}
+                          onValueChange={(v) => handleChangeRole(u, (v ?? u.role) as Role)}
+                        >
+                          <SelectTrigger className="h-8 w-[170px]">
+                            <SelectValue>{ROLE_LABELS[u.role]}</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="client">Клієнт</SelectItem>
+                            <SelectItem value="driver_courier">Водій</SelectItem>
+                            <SelectItem value="warehouse_worker">Працівник складу</SelectItem>
+                            <SelectItem value="cashier">Касир</SelectItem>
+                            <SelectItem value="admin">Адмін</SelectItem>
+                            <SelectItem value="super_admin">Суперадмін</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={u.isActive ? 'default' : 'destructive'}>
@@ -257,14 +305,16 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleToggleActive(u.id, u.isActive)}
-                          className="text-xs"
-                        >
-                          {u.isActive ? 'Блок.' : 'Розблок.'}
-                        </Button>
+                        {currentUser?.id !== u.id && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleActive(u.id, u.isActive)}
+                            className="text-xs"
+                          >
+                            {u.isActive ? 'Блок.' : 'Розблок.'}
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -273,14 +323,16 @@ export default function AdminUsersPage() {
                         >
                           Скинути пароль
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteUser(u.id)}
-                          className="text-xs text-red-500 hover:text-red-700"
-                        >
-                          Видалити
-                        </Button>
+                        {currentUser?.id !== u.id && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteUser(u.id)}
+                            className="text-xs text-red-500 hover:text-red-700"
+                          >
+                            Видалити
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -292,14 +344,69 @@ export default function AdminUsersPage() {
           {/* Mobile cards */}
           <div className="md:hidden divide-y">
             {users.map((u) => (
-              <div key={u.id} className="p-4 space-y-1">
-                <div className="font-medium">{u.fullName}</div>
-                <div className="text-sm text-gray-500">{u.email}</div>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="secondary">{ROLE_LABELS[u.role]}</Badge>
-                  <Badge variant={u.isActive ? 'default' : 'destructive'}>
-                    {u.isActive ? 'Активний' : 'Заблокований'}
+              <div key={u.id} className="p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium">{u.fullName}</div>
+                    <div className="text-sm text-gray-500 truncate">{u.email}</div>
+                    {u.phone && <div className="text-sm text-gray-500">{u.phone}</div>}
+                  </div>
+                  <Badge variant={u.isActive ? 'default' : 'destructive'} className="shrink-0">
+                    {u.isActive ? 'Активний' : 'Заблок.'}
                   </Badge>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">Роль</Label>
+                  {currentUser?.id === u.id ? (
+                    <div className="text-sm">
+                      <Badge variant="secondary">{ROLE_LABELS[u.role]} (Ви)</Badge>
+                    </div>
+                  ) : (
+                    <Select
+                      value={u.role}
+                      onValueChange={(v) => handleChangeRole(u, (v ?? u.role) as Role)}
+                    >
+                      <SelectTrigger className="h-9 w-full">
+                        <SelectValue>{ROLE_LABELS[u.role]}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="client">Клієнт</SelectItem>
+                        <SelectItem value="driver_courier">Водій</SelectItem>
+                        <SelectItem value="warehouse_worker">Працівник складу</SelectItem>
+                        <SelectItem value="cashier">Касир</SelectItem>
+                        <SelectItem value="admin">Адмін</SelectItem>
+                        <SelectItem value="super_admin">Суперадмін</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1 pt-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleToggleActive(u.id, u.isActive)}
+                    className="text-xs h-8"
+                  >
+                    {u.isActive ? 'Заблокувати' : 'Розблокувати'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleResetPassword(u.id, u.fullName)}
+                    className="text-xs h-8"
+                  >
+                    Скинути пароль
+                  </Button>
+                  {currentUser?.id !== u.id && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteUser(u.id)}
+                      className="text-xs h-8 text-red-500 hover:text-red-700"
+                    >
+                      Видалити
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
