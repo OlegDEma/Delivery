@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { startOfKyivToday } from '@/lib/utils/tz';
 
 export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  // "Today" in operational TZ (Europe/Kyiv), not server-local midnight — on Vercel
+  // the server runs in UTC, so without this a parcel created at 01:30 Kyiv time
+  // would not count as "today" until 02:00/03:00 UTC rolled over.
+  const today = startOfKyivToday();
 
   const [
     totalParcels,

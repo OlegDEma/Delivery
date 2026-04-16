@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDateTime, formatCurrency, formatDate } from '@/lib/utils/format';
+import { kyivYmd } from '@/lib/utils/tz';
 
 interface Activity {
   id: string;
@@ -108,24 +109,31 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Stats grid */}
+      {/* Stats grid — every card is a deep link into the parcels list or
+          warehouse screen, pre-filtered to the matching slice. */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Link href="/parcels" className="bg-white rounded-lg border p-4 hover:shadow transition-shadow">
           <div className="text-sm text-gray-500">Всього посилок</div>
           <div className="text-3xl font-bold mt-1">{stats.totalParcels}</div>
         </Link>
-        <div className="bg-white rounded-lg border p-4">
+        <Link
+          href={`/parcels?dateFrom=${kyivYmd()}`}
+          className="bg-white rounded-lg border p-4 hover:shadow transition-shadow"
+        >
           <div className="text-sm text-gray-500">Сьогодні</div>
           <div className="text-3xl font-bold mt-1 text-blue-600">{stats.todayParcels}</div>
-        </div>
+        </Link>
         <Link href="/warehouse" className="bg-white rounded-lg border p-4 hover:shadow transition-shadow">
           <div className="text-sm text-gray-500">На складі</div>
           <div className="text-3xl font-bold mt-1 text-purple-600">{stats.atWarehouse}</div>
         </Link>
-        <div className="bg-white rounded-lg border p-4">
+        <Link
+          href="/parcels?status=in_transit"
+          className="bg-white rounded-lg border p-4 hover:shadow transition-shadow"
+        >
           <div className="text-sm text-gray-500">В дорозі</div>
           <div className="text-3xl font-bold mt-1 text-indigo-600">{stats.inTransit}</div>
-        </div>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

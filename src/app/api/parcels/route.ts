@@ -5,6 +5,7 @@ import { ROLES } from '@/lib/constants/roles';
 import { parseBody, createParcelSchema } from '@/lib/validators';
 import { createParcel } from '@/lib/services/parcel-creation';
 import { logger } from '@/lib/logger';
+import { kyivDateRange } from '@/lib/utils/tz';
 import type { Prisma } from '@/generated/prisma/client';
 
 // GET /api/parcels — staff only. Drivers see only their own + unassigned.
@@ -34,7 +35,19 @@ export async function GET(request: NextRequest) {
 
   const where: Prisma.ParcelWhereInput = { deletedAt: null };
 
-  if (status) where.status = status as Prisma.ParcelWhereInput['status'];
+  if (status) {
+    // Virtual statuses for dashboard shortcuts — combine both directions.
+    const virtualGroups: Record<string, string[]> = {
+      in_transit: ['in_transit_to_ua', 'in_transit_to_eu'],
+      at_warehouse: ['at_lviv_warehouse', 'at_eu_warehouse'],
+      delivered: ['delivered_ua', 'delivered_eu'],
+    };
+    if (virtualGroups[status]) {
+      where.status = { in: virtualGroups[status] } as Prisma.ParcelWhereInput['status'];
+    } else {
+      where.status = status as Prisma.ParcelWhereInput['status'];
+    }
+  }
   if (tripId) where.tripId = tripId;
   if (courierId) where.assignedCourierId = courierId;
   if (unassigned === '1') where.assignedCourierId = null;
@@ -59,14 +72,9 @@ export async function GET(request: NextRequest) {
     where.receiver = { phone: { contains: receiverPhone } };
   }
   if (dateFrom || dateTo) {
-    // Interpret dates in Europe/Kyiv (operational TZ). 'YYYY-MM-DD' from UI is
-    // treated as "all day in Kyiv" → shift end-of-day by -2h from UTC so that
-    // it actually covers 23:59 local time for both DST and standard offsets.
-    // Quick practical approach: accept that dateTo covers until 23:59:59 UTC
-    // which in Kyiv is already next morning — more inclusive is fine.
-    where.createdAt = {};
-    if (dateFrom) where.createdAt.gte = new Date(dateFrom + 'T00:00:00+02:00');
-    if (dateTo) where.createdAt.lte = new Date(dateTo + 'T23:59:59.999+03:00');
+    // "YYYY-MM-DD" from the UI is a calendar day in Europe/Kyiv; kyivDateRange
+    // converts it to the correct UTC bounds (handles DST).
+    where.createdAt = kyivDateRange(dateFrom, dateTo);
   }
   if (q) {
     // If query looks like place ITN (contains -), also search by base ITN

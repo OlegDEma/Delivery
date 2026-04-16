@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireStaff } from '@/lib/auth/guards';
 import ExcelJS from 'exceljs';
+import { kyivDateRange } from '@/lib/utils/tz';
 import type { Prisma, ParcelStatus } from '@/generated/prisma/client';
 
 // GET /api/parcels/export?status=...&dateFrom=...&dateTo=...&tripId=...
@@ -19,9 +20,7 @@ export async function GET(request: NextRequest) {
   if (status) where.status = status as ParcelStatus;
   if (tripId) where.tripId = tripId;
   if (dateFrom || dateTo) {
-    where.createdAt = {};
-    if (dateFrom) where.createdAt.gte = new Date(dateFrom + 'T00:00:00+02:00');
-    if (dateTo) where.createdAt.lte = new Date(dateTo + 'T23:59:59.999+03:00');
+    where.createdAt = kyivDateRange(dateFrom, dateTo);
   }
 
   const parcels = await prisma.parcel.findMany({

@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { parseBody } from '@/lib/validators';
 import { paymentMethodSchema, positiveMoneySchema, uuidSchema } from '@/lib/validators/common';
 import { logger } from '@/lib/logger';
+import { kyivDateRange } from '@/lib/utils/tz';
 
 // POST body schema — kept local since it's only used here.
 const cashEntrySchema = z.object({
@@ -31,9 +32,7 @@ export async function GET(request: NextRequest) {
   const where: Prisma.CashRegisterWhereInput = {};
   if (receivedBy) where.receivedById = receivedBy;
   if (dateFrom || dateTo) {
-    where.createdAt = {};
-    if (dateFrom) where.createdAt.gte = new Date(dateFrom + 'T00:00:00+02:00');
-    if (dateTo) where.createdAt.lte = new Date(dateTo + 'T23:59:59.999+03:00');
+    where.createdAt = kyivDateRange(dateFrom, dateTo);
   }
 
   const [entries, totals] = await Promise.all([

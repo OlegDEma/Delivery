@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +38,13 @@ const SORT_OPTIONS: { value: string; label: string; sortBy: string; sortOrder: '
   { value: 'internalNumber-desc', label: 'Внутрішній № ↓', sortBy: 'internalNumber', sortOrder: 'desc' },
 ];
 
+// Virtual filter values (combine both directions) — supported in /api/parcels.
+const VIRTUAL_STATUS_LABELS: Record<string, string> = {
+  in_transit: 'В дорозі (обидва напрямки)',
+  at_warehouse: 'На складі (Львів + ЄС)',
+  delivered: 'Доставлено (обидва напрямки)',
+};
+
 const BULK_STATUS_OPTIONS: ParcelStatusType[] = [
   'draft',
   'accepted_for_transport_to_ua',
@@ -51,13 +59,30 @@ const BULK_STATUS_OPTIONS: ParcelStatusType[] = [
   'not_received',
 ];
 
+// Top-level page wrapper — useSearchParams() requires a Suspense boundary in Next 15+
+// because it opts the subtree out of static prerendering.
 export default function ParcelsPage() {
+  return (
+    <Suspense fallback={<ListSkeleton />}>
+      <ParcelsContent />
+    </Suspense>
+  );
+}
+
+function ParcelsContent() {
+  // Read initial filter state from URL so deep-links from the dashboard cards
+  // (e.g. "?status=in_transit", "?dateFrom=2026-04-16") pre-filter the list.
+  const searchParams = useSearchParams();
+  const initialStatus = searchParams.get('status') || 'all';
+  const initialDateFrom = searchParams.get('dateFrom') || '';
+  const initialSearch = searchParams.get('q') || '';
+
   const [parcels, setParcels] = useState<ParcelListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [dateFrom, setDateFrom] = useState('');
+  const [search, setSearch] = useState(initialSearch);
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
+  const [dateFrom, setDateFrom] = useState(initialDateFrom);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [sortValue, setSortValue] = useState('createdAt-desc');
@@ -212,15 +237,25 @@ export default function ParcelsPage() {
         />
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v ?? 'all'); setPage(1); }}>
           <SelectTrigger className="md:w-56">
-            <SelectValue>{statusFilter === 'all' ? 'Всі статуси' : (STATUS_LABELS[statusFilter as ParcelStatusType] || statusFilter)}</SelectValue>
+            <SelectValue>{
+              statusFilter === 'all'
+                ? 'Всі статуси'
+                : VIRTUAL_STATUS_LABELS[statusFilter]
+                  || STATUS_LABELS[statusFilter as ParcelStatusType]
+                  || statusFilter
+            }</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Всі статуси</SelectItem>
             <SelectItem value="draft">Створена</SelectItem>
+            <SelectItem value="in_transit">В дорозі (обидва напрямки)</SelectItem>
             <SelectItem value="in_transit_to_ua">В дорозі (→ UA)</SelectItem>
+            <SelectItem value="in_transit_to_eu">В дорозі (→ EU)</SelectItem>
+            <SelectItem value="at_warehouse">На складі (Львів + ЄС)</SelectItem>
+            <SelectItem value="at_lviv_warehouse">На складі у Львові</SelectItem>
+            <SelectItem value="at_eu_warehouse">На складі в ЄС</SelectItem>
             <SelectItem value="at_nova_poshta">На Новій пошті</SelectItem>
             <SelectItem value="delivered_ua">Доставлено (UA)</SelectItem>
-            <SelectItem value="in_transit_to_eu">В дорозі (→ EU)</SelectItem>
             <SelectItem value="delivered_eu">Доставлено (EU)</SelectItem>
             <SelectItem value="not_received">Не отримано</SelectItem>
           </SelectContent>
