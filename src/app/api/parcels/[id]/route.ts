@@ -210,7 +210,20 @@ export async function PATCH(
 
     // Recalculate delivery cost using active pricing config
     try {
-      // Country: for EU→UA it's the sender's, for UA→EU it's the receiver's
+      // Country for pricing lookup. Priority:
+      //  - EU→UA: trip.country (EU side) → collectionPoint.country → senderAddr.country
+      //  - UA→EU: trip.country (EU side) → receiverAddr.country
+      // The sender's own registered address may be UA (Ukrainian living in NL),
+      // so we prefer actual logistics data (trip / collection point).
+      const trip = parcel.tripId
+        ? await prisma.trip.findUnique({ where: { id: parcel.tripId }, select: { country: true } })
+        : null;
+      const collectionPoint = parcel.collectionPointId
+        ? await prisma.collectionPoint.findUnique({
+            where: { id: parcel.collectionPointId },
+            select: { country: true },
+          })
+        : null;
       const senderAddr = parcel.senderAddressId
         ? await prisma.clientAddress.findUnique({ where: { id: parcel.senderAddressId } })
         : null;
@@ -218,9 +231,10 @@ export async function PATCH(
         ? await prisma.clientAddress.findUnique({ where: { id: parcel.receiverAddressId } })
         : null;
 
+      const tripCountryIfEu = trip?.country && trip.country !== 'UA' ? trip.country : null;
       const country = parcel.direction === 'eu_to_ua'
-        ? senderAddr?.country
-        : receiverAddr?.country;
+        ? (tripCountryIfEu || collectionPoint?.country || senderAddr?.country)
+        : (tripCountryIfEu || receiverAddr?.country);
 
       if (country && country !== 'UA') {
         const pricing = await prisma.pricingConfig.findFirst({

@@ -36,6 +36,19 @@ export function CostCalculator(props: CostCalculatorProps) {
   useEffect(() => {
     if (!country || props.actualWeight <= 0) {
       setCost(null);
+      setError('');
+      return;
+    }
+
+    // For eu_to_ua we need an EU country, for ua_to_eu also an EU country on the
+    // receiver side. UA pricing configs don't exist by design.
+    if (country === 'UA') {
+      setCost(null);
+      setError(
+        props.direction === 'eu_to_ua'
+          ? 'Не визначено європейську країну збору. Привʼяжіть рейс або пункт збору.'
+          : 'Не визначено країну отримувача.'
+      );
       return;
     }
 
@@ -59,7 +72,7 @@ export function CostCalculator(props: CostCalculatorProps) {
           setError('');
         } else {
           setCost(null);
-          setError('Тариф не знайдено');
+          setError(`Тариф для ${country} ${props.direction === 'eu_to_ua' ? '→' : '←'} UA не знайдено. Створіть його у «Адміністрування → Тарифи».`);
         }
       } catch {
         setCost(null);
@@ -72,7 +85,11 @@ export function CostCalculator(props: CostCalculatorProps) {
   if (!cost && !error) return null;
 
   if (error) {
-    return <div className="text-xs text-yellow-600">{error}</div>;
+    return (
+      <div className="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded p-2">
+        ⚠️ {error}
+      </div>
+    );
   }
 
   if (!cost) return null;

@@ -319,7 +319,17 @@ export default function ParcelDetailPage() {
         places={parcel.places}
         totalWeight={parcel.totalWeight}
         direction={parcel.direction}
-        senderCountry={parcel.senderAddress?.country || parcel.sender.addresses[0]?.country || null}
+        // For pricing lookup: the EU country is determined by (in order)
+        // trip.country → collectionPoint.country → sender's address country.
+        // Sender's registered address may be in UA (e.g. Ukrainian living in NL),
+        // so we prefer actual logistics data.
+        senderCountry={
+          (parcel.trip?.country && parcel.trip.country !== 'UA' ? parcel.trip.country : null)
+          || parcel.collectionPoint?.country
+          || parcel.senderAddress?.country
+          || parcel.sender.addresses[0]?.country
+          || null
+        }
         receiverCountry={parcel.receiverAddress?.country || null}
         receiverDeliveryMethod={parcel.receiverAddress?.deliveryMethod || null}
         declaredValue={parcel.declaredValue}
