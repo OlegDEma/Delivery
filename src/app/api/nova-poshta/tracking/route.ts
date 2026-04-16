@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const info = result.data[0];
     if (info) {
       // Update NP tracking status in our DB
-      const parcel = await prisma.parcel.findFirst({ where: { npTtn: ttn } });
+      const parcel = await prisma.parcel.findFirst({ where: { npTtn: ttn, deletedAt: null } });
       if (parcel) {
         await prisma.parcel.update({
           where: { id: parcel.id },
@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
   // Get all parcels with NP TTN that are not delivered
   const parcels = await prisma.parcel.findMany({
     where: {
+      deletedAt: null,
       npTtn: { not: null },
       status: { in: ['at_nova_poshta', 'at_lviv_warehouse'] },
     },

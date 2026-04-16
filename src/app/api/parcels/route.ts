@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { generateITN, generateInternalNumber, generatePlaceITN } from '@/lib/utils/itn';
 import { calculateVolumetricWeight } from '@/lib/utils/volumetric';
 import { calculateParcelCost } from '@/lib/utils/pricing';
+import { requireStaff } from '@/lib/auth/guards';
+import { ROLES } from '@/lib/constants/roles';
 
-// GET /api/parcels?status=...&senderPhone=...&receiverPhone=...&dateFrom=...&dateTo=...&page=1
+// GET /api/parcels — staff only. Drivers see only their own + unassigned.
+// Admins/cashiers/warehouse see everything.
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
+  const currentUserId = guard.user.userId;
+  const currentRole = guard.user.role;
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
@@ -35,6 +38,20 @@ export async function GET(request: NextRequest) {
   if (tripId) where.tripId = tripId;
   if (courierId) where.assignedCourierId = courierId;
   if (unassigned === '1') where.assignedCourierId = null;
+
+  // Driver scoping: drivers see only parcels assigned to them OR unassigned
+  // (unless they explicitly pass ?courierId=other — which we reject below).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const driverScope: any[] = [];
+  if (currentRole === ROLES.DRIVER_COURIER) {
+    if (courierId && courierId !== currentUserId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    driverScope.push(
+      { assignedCourierId: currentUserId },
+      { assignedCourierId: null },
+    );
+  }
 
   if (senderPhone) {
     where.sender = { phone: { contains: senderPhone } };
@@ -64,6 +81,19 @@ export async function GET(request: NextRequest) {
     ];
   }
 
+  // Combine driver scope with any existing where.OR via AND
+  if (driverScope.length > 0) {
+    if (where.OR) {
+      where.AND = [
+        { OR: where.OR },
+        { OR: driverScope },
+      ];
+      delete where.OR;
+    } else {
+      where.OR = driverScope;
+    }
+  }
+
   const [parcels, total] = await Promise.all([
     prisma.parcel.findMany({
       where,
@@ -90,9 +120,9 @@ export async function GET(request: NextRequest) {
 
 // POST /api/parcels — create new parcel
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
+  const user = { id: guard.user.userId };
 
   const body = await request.json();
   const {

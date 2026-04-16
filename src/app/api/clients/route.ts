@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { normalizePhone } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
+import { requireStaff } from '@/lib/auth/guards';
 
-// GET /api/clients?q=search&page=1&limit=20
+// GET /api/clients?q=search&page=1&limit=20 — staff only
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
 
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q')?.trim() || '';
@@ -102,11 +101,11 @@ export async function GET(request: NextRequest) {
   });
 }
 
-// POST /api/clients — create new client
+// POST /api/clients — create new client (staff only)
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
+  const user = { id: guard.user.userId };
 
   const body = await request.json();
   const { phone, firstName, lastName, middleName, clientType, organizationName, country, notes, address } = body;

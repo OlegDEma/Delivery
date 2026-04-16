@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { requireRole } from '@/lib/auth/guards';
+import { FINANCE_ROLES } from '@/lib/constants/roles';
 
-// POST /api/parcels/bulk-paid — mark multiple parcels as paid/unpaid
+// POST /api/parcels/bulk-paid — mark multiple parcels as paid/unpaid (finance roles)
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireRole(FINANCE_ROLES);
+  if (!guard.ok) return guard.response;
 
   const body = await request.json();
   const { parcelIds, isPaid } = body;

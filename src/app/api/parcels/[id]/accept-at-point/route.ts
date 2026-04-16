@@ -36,6 +36,15 @@ export async function POST(
     );
   }
 
+  // Can accept only from statuses where parcel is still on the EU side
+  const acceptableFromStatuses = ['draft', 'at_collection_point', 'accepted_for_transport_to_ua'];
+  if (!acceptableFromStatuses.includes(parcel.status)) {
+    return NextResponse.json(
+      { error: `Не можна прийняти посилку на пункті — поточний статус: «${parcel.status}». Посилка вже в дорозі або доставлена.` },
+      { status: 400 }
+    );
+  }
+
   const collectionPointId = body.collectionPointId || parcel.collectionPointId;
   if (!collectionPointId) {
     return NextResponse.json(

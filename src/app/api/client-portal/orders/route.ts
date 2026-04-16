@@ -74,15 +74,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Додайте хоча б одне місце' }, { status: 400 });
   }
 
-  // Find or create sender
-  let sender = await prisma.client.findUnique({ where: { phone: senderPhone || profile.phone } });
+  // SECURITY: Sender must always be the authenticated client themselves.
+  // Ignore any senderPhone in the body to prevent spoofing someone else's identity.
+  let sender = await prisma.client.findUnique({
+    where: { phone: profile.phone },
+  });
   if (!sender) {
+    // First order for this user — create Client record linked to their profile phone
+    const profileNameParts = (profile.fullName || '').split(' ');
     sender = await prisma.client.create({
       data: {
-        phone: senderPhone || profile.phone,
-        phoneNormalized: normalizePhone(senderPhone || profile.phone),
-        firstName: capitalize(senderFirstName || profile.fullName.split(' ')[1] || ''),
-        lastName: capitalize(senderLastName || profile.fullName.split(' ')[0] || ''),
+        phone: profile.phone,
+        phoneNormalized: normalizePhone(profile.phone),
+        firstName: capitalize(senderFirstName || profileNameParts[1] || profileNameParts[0] || ''),
+        lastName: capitalize(senderLastName || profileNameParts[0] || ''),
         country: senderCountry || null,
       },
     });

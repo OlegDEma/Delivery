@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { requireRole, requireStaff } from '@/lib/auth/guards';
+import { LOGISTICS_ROLES } from '@/lib/constants/roles';
 
-// GET /api/trips/[id]
+// GET /api/trips/[id] — staff only
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
 
   const { id } = await params;
 
@@ -38,14 +38,14 @@ export async function GET(
   return NextResponse.json(trip);
 }
 
-// PATCH /api/trips/[id]
+// PATCH /api/trips/[id] — logistics roles only
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireRole(LOGISTICS_ROLES);
+  if (!guard.ok) return guard.response;
+  const user = { id: guard.user.userId };
 
   const { id } = await params;
   const body = await request.json();
@@ -62,13 +62,20 @@ export async function PATCH(
         const newParcelStatus = trip.direction === 'eu_to_ua' ? 'in_transit_to_ua' : 'in_transit_to_eu';
         const parcels = await prisma.parcel.findMany({
           where: { tripId: id, status: { notIn: [newParcelStatus, 'delivered_ua', 'delivered_eu', 'not_received', 'refused', 'returned'] } },
-          select: { id: true },
+          select: { id: true, collectedAt: true, collectionMethod: true, direction: true },
         });
         for (const p of parcels) {
+          // For EU→UA parcels that never went through a pickup point (e.g.
+          // direct_to_driver / courier_pickup / external_shipping), stamp
+          // collectedAt now so receipt time is always recorded.
+          const shouldStampCollected =
+            p.direction === 'eu_to_ua' && !p.collectedAt && !!p.collectionMethod;
+
           await prisma.parcel.update({
             where: { id: p.id },
             data: {
               status: newParcelStatus as import('@/generated/prisma/client').ParcelStatus,
+              ...(shouldStampCollected ? { collectedAt: new Date(), collectedById: user.id } : {}),
               statusHistory: {
                 create: {
                   status: newParcelStatus as import('@/generated/prisma/client').ParcelStatus,

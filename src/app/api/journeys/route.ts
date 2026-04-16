@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import type { Country, TripStatus } from '@/generated/prisma/client';
+import { requireRole, requireStaff } from '@/lib/auth/guards';
+import { LOGISTICS_ROLES } from '@/lib/constants/roles';
 
-// GET /api/journeys
+// GET /api/journeys — staff only
 export async function GET() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
 
   const journeys = await prisma.journey.findMany({
     include: {
@@ -28,11 +28,11 @@ export async function GET() {
   return NextResponse.json(journeys);
 }
 
-// POST /api/journeys — create journey + auto-create 2 trips
+// POST /api/journeys — create journey + auto-create 2 trips (logistics roles)
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireRole(LOGISTICS_ROLES);
+  if (!guard.ok) return guard.response;
+  const user = { id: guard.user.userId };
 
   const body = await request.json();
   const {
@@ -95,11 +95,10 @@ export async function POST(request: NextRequest) {
   }, { status: 201 });
 }
 
-// PATCH /api/journeys?id=xxx
+// PATCH /api/journeys?id=xxx — logistics roles only
 export async function PATCH(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireRole(LOGISTICS_ROLES);
+  if (!guard.ok) return guard.response;
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');

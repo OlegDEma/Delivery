@@ -99,6 +99,21 @@ export async function updateSession(request: NextRequest) {
     const role = await getUserRole(supabase, user.id);
     const isApi = pathname.startsWith('/api/');
 
+    // Account deactivated (role returns null when is_active=false) — sign out
+    if (role === null) {
+      await supabase.auth.signOut();
+      if (isApi) {
+        return NextResponse.json(
+          { error: 'Обліковий запис деактивовано' },
+          { status: 401 }
+        );
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('deactivated', '1');
+      return NextResponse.redirect(url);
+    }
+
     // Client trying to access staff area → bounce to /my-orders (or 403 for API)
     if (role === 'client') {
       const isStaffOnly = STAFF_ONLY_PREFIXES.some(p => pathname.startsWith(p)) || pathname === '/';

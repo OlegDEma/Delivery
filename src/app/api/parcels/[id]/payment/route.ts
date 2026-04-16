@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import type { PaymentMethod, CashPaymentType } from '@/generated/prisma/client';
+import { requireRole, requireStaff } from '@/lib/auth/guards';
+import { FINANCE_ROLES } from '@/lib/constants/roles';
 
-// POST /api/parcels/[id]/payment — accept payment (creates cash register entry)
+// POST /api/parcels/[id]/payment — accept payment (FINANCE_ROLES)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireRole(FINANCE_ROLES);
+  if (!guard.ok) return guard.response;
+  const userId = guard.user.userId;
 
   const { id } = await params;
   const body = await request.json();
@@ -38,7 +39,7 @@ export async function POST(
       paymentMethod: method,
       paymentType: 'income' as CashPaymentType,
       description,
-      receivedById: user.id,
+      receivedById: userId,
     },
   });
 
@@ -55,14 +56,13 @@ export async function POST(
   return NextResponse.json({ success: true, cashEntry });
 }
 
-// DELETE /api/parcels/[id]/payment — cancel payment (revert + delete cash entries for this parcel)
+// DELETE /api/parcels/[id]/payment — cancel payment (FINANCE_ROLES)
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireRole(FINANCE_ROLES);
+  if (!guard.ok) return guard.response;
 
   const { id } = await params;
 
@@ -85,14 +85,13 @@ export async function DELETE(
   return NextResponse.json({ success: true });
 }
 
-// GET /api/parcels/[id]/payment — payment history for this parcel
+// GET /api/parcels/[id]/payment — payment history (any staff)
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
 
   const { id } = await params;
 

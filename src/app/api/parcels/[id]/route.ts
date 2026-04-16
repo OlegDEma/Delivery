@@ -3,15 +3,16 @@ import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import type { ParcelStatus } from '@/generated/prisma/client';
 import { calculateParcelCost } from '@/lib/utils/pricing';
+import { requireRole, requireStaff } from '@/lib/auth/guards';
+import { ADMIN_ROLES } from '@/lib/constants/roles';
 
 // GET /api/parcels/[id]
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
 
   const { id } = await params;
 
@@ -57,14 +58,14 @@ export async function GET(
   return NextResponse.json(parcel);
 }
 
-// PATCH /api/parcels/[id] — update status or fields
+// PATCH /api/parcels/[id] — update status or fields (staff only)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
+  const user = { id: guard.user.userId };
 
   const { id } = await params;
   const body = await request.json();
@@ -269,14 +270,13 @@ export async function PATCH(
   return NextResponse.json(updated);
 }
 
-// DELETE /api/parcels/[id] — soft delete
+// DELETE /api/parcels/[id] — soft delete (admin only)
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireRole(ADMIN_ROLES);
+  if (!guard.ok) return guard.response;
 
   const { id } = await params;
 

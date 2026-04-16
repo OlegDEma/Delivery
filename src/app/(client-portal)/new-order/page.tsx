@@ -25,13 +25,6 @@ function volWeight(p: PlaceData): number {
   return l > 0 && w > 0 && h > 0 ? Number(((l * w * h) / 4000).toFixed(2)) : 0;
 }
 
-interface CollectionPoint {
-  id: string;
-  country: string;
-  city: string;
-  address: string;
-}
-
 interface PricingConfig {
   id: string;
   country: string;
@@ -52,7 +45,6 @@ export default function NewOrderPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [collectionPoints, setCollectionPoints] = useState<CollectionPoint[]>([]);
   const [successNumber, setSuccessNumber] = useState<string | null>(null);
   const [pricingConfigs, setPricingConfigs] = useState<PricingConfig[]>([]);
   const [collectionDayWarning, setCollectionDayWarning] = useState('');
@@ -92,7 +84,6 @@ export default function NewOrderPage() {
   const [collectionAddress, setCollectionAddress] = useState('');
 
   useEffect(() => {
-    fetch('/api/collection-points').then(r => r.ok ? r.json() : []).then(setCollectionPoints);
     fetch('/api/pricing').then(r => r.ok ? r.json() : []).then(setPricingConfigs);
   }, []);
 

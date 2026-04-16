@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { requireRole, requireStaff } from '@/lib/auth/guards';
+import { LOGISTICS_ROLES } from '@/lib/constants/roles';
 
-// GET /api/trips
+// GET /api/trips — staff can view
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
@@ -31,17 +31,17 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(trips);
 }
 
-// POST /api/trips
+// POST /api/trips — admins and drivers (logistics roles)
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireRole(LOGISTICS_ROLES);
+  if (!guard.ok) return guard.response;
+  const userId = guard.user.userId;
 
   const body = await request.json();
   const { direction, country, departureDate, arrivalDate, assignedCourierId, secondCourierId, notes } = body;
 
   if (!direction || !country || !departureDate) {
-    return NextResponse.json({ error: 'Напрямок, країна та дата обов\'язкові' }, { status: 400 });
+    return NextResponse.json({ error: 'Напрямок, країна та дата обовʼязкові' }, { status: 400 });
   }
 
   const trip = await prisma.trip.create({
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       assignedCourierId: assignedCourierId || null,
       secondCourierId: secondCourierId || null,
       notes: notes || null,
-      createdById: user.id,
+      createdById: userId,
     },
     include: {
       assignedCourier: { select: { fullName: true } },

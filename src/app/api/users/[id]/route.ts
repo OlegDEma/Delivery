@@ -78,6 +78,13 @@ export async function PATCH(
           { status: 400 }
         );
       }
+      // Audit log entry — sign that email was changed by admin
+      await prisma.profile.update({
+        where: { id: user.id },
+        data: {},
+      }).catch(() => {/* noop */});
+      // eslint-disable-next-line no-console
+      console.info(`[AUDIT] Admin ${profile.email} changed email of user ${id}: ${target.email} → ${newEmail}`);
     }
   }
 

@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { normalizePhone } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
+import { requireRole, requireStaff } from '@/lib/auth/guards';
+import { ADMIN_ROLES } from '@/lib/constants/roles';
 
 // GET /api/clients/[id]
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
 
   const { id } = await params;
 
@@ -61,14 +61,13 @@ export async function GET(
   });
 }
 
-// PATCH /api/clients/[id]
+// PATCH /api/clients/[id] — staff only
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
 
   const { id } = await params;
   const body = await request.json();
@@ -139,14 +138,13 @@ export async function PATCH(
   return NextResponse.json({ error: 'Невідома дія' }, { status: 400 });
 }
 
-// DELETE /api/clients/[id] — soft delete
+// DELETE /api/clients/[id] — soft delete (admin only)
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireRole(ADMIN_ROLES);
+  if (!guard.ok) return guard.response;
 
   const { id } = await params;
 
