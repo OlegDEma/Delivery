@@ -37,6 +37,64 @@ export default function AdminUsersPage() {
   const [newRole, setNewRole] = useState<Role>('driver_courier');
   const [resetInfo, setResetInfo] = useState<{ userName: string; password: string } | null>(null);
 
+  // Edit user dialog
+  const [editUser, setEditUser] = useState<UserProfile | null>(null);
+  const [editFullName, setEditFullName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  function openEdit(u: UserProfile) {
+    setEditUser(u);
+    setEditFullName(u.fullName);
+    setEditEmail(u.email);
+    setEditPhone(u.phone || '');
+    setEditError('');
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editUser) return;
+    if (!editFullName.trim()) {
+      setEditError('ПІБ не може бути пустим');
+      return;
+    }
+    if (!editEmail.trim()) {
+      setEditError('Email не може бути пустим');
+      return;
+    }
+    setEditSaving(true);
+    setEditError('');
+
+    const payload: { fullName?: string; email?: string; phone?: string | null } = {};
+    if (editFullName.trim() !== editUser.fullName) payload.fullName = editFullName.trim();
+    if (editEmail.trim().toLowerCase() !== editUser.email.toLowerCase()) payload.email = editEmail.trim().toLowerCase();
+    if ((editPhone.trim() || null) !== (editUser.phone || null)) payload.phone = editPhone.trim() || null;
+
+    if (Object.keys(payload).length === 0) {
+      setEditUser(null);
+      setEditSaving(false);
+      return;
+    }
+
+    const res = await fetch(`/api/users/${editUser.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      toast.success('Дані збережено');
+      setEditUser(null);
+      fetchUsers();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setEditError(data.error || 'Помилка');
+    }
+    setEditSaving(false);
+  }
+
   async function handleResetPassword(userId: string, userName: string) {
     if (!confirm(`Скинути пароль для ${userName}? Буде згенеровано новий пароль.`)) return;
     const res = await fetch(`/api/users/${userId}/reset-password`, { method: 'POST' });
@@ -305,6 +363,15 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEdit(u)}
+                          className="text-xs"
+                          title="Редагувати ПІБ, email, телефон"
+                        >
+                          ✏️
+                        </Button>
                         {currentUser?.id !== u.id && (
                           <Button
                             variant="ghost"
@@ -384,11 +451,21 @@ export default function AdminUsersPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleToggleActive(u.id, u.isActive)}
+                    onClick={() => openEdit(u)}
                     className="text-xs h-8"
                   >
-                    {u.isActive ? 'Заблокувати' : 'Розблокувати'}
+                    ✏️ Редагувати
                   </Button>
+                  {currentUser?.id !== u.id && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleToggleActive(u.id, u.isActive)}
+                      className="text-xs h-8"
+                    >
+                      {u.isActive ? 'Заблокувати' : 'Розблокувати'}
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -417,6 +494,66 @@ export default function AdminUsersPage() {
           )}
         </div>
       )}
+
+      {/* Edit user dialog */}
+      <Dialog open={!!editUser} onOpenChange={(o) => !o && setEditUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Редагувати користувача</DialogTitle>
+          </DialogHeader>
+          {editUser && (
+            <form onSubmit={handleSaveEdit} className="space-y-3">
+              <div className="text-xs text-gray-500">
+                Поточна роль: <b>{ROLE_LABELS[editUser.role]}</b>. Змінити роль можна у таблиці.
+              </div>
+              <div className="space-y-2">
+                <Label>ПІБ *</Label>
+                <Input
+                  value={editFullName}
+                  onChange={(e) => setEditFullName(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-amber-700">
+                  ⚠️ При зміні email користувач має використовувати новий email для входу.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Телефон</Label>
+                <Input
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  placeholder="+380..."
+                />
+              </div>
+              {editError && <p className="text-sm text-red-600">{editError}</p>}
+              <div className="flex gap-2 pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditUser(null)}
+                  disabled={editSaving}
+                  className="flex-1"
+                >
+                  Скасувати
+                </Button>
+                <Button type="submit" disabled={editSaving} className="flex-1">
+                  {editSaving ? 'Збереження...' : 'Зберегти'}
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

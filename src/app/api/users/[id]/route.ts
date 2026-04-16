@@ -44,12 +44,57 @@ export async function PATCH(
     }
   }
 
+  // Email change needs to happen in Supabase Auth (source of truth for login)
+  // AND in profile (mirror). Do Auth first — if it fails, profile stays consistent.
+  if (body.email !== undefined && body.email !== null) {
+    const newEmail = String(body.email).trim().toLowerCase();
+    if (!newEmail) {
+      return NextResponse.json({ error: 'Email не може бути пустим' }, { status: 400 });
+    }
+    // Basic email regex
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      return NextResponse.json({ error: 'Невалідний email' }, { status: 400 });
+    }
+    // Check uniqueness against other profiles
+    const existing = await prisma.profile.findFirst({
+      where: { email: newEmail, NOT: { id } },
+      select: { id: true },
+    });
+    if (existing) {
+      return NextResponse.json({ error: 'Цей email уже використовується іншим користувачем' }, { status: 400 });
+    }
+
+    // Update in Supabase Auth only if changed
+    const target = await prisma.profile.findUnique({ where: { id }, select: { email: true } });
+    if (target && target.email !== newEmail) {
+      const serviceClient = await createServiceClient();
+      const { error: authErr } = await serviceClient.auth.admin.updateUserById(id, {
+        email: newEmail,
+        email_confirm: true,
+      });
+      if (authErr) {
+        return NextResponse.json(
+          { error: `Помилка оновлення email в Auth: ${authErr.message}` },
+          { status: 400 }
+        );
+      }
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = {};
   if (body.role !== undefined) data.role = body.role;
   if (body.isActive !== undefined) data.isActive = body.isActive;
-  if (body.fullName !== undefined) data.fullName = body.fullName;
-  if (body.phone !== undefined) data.phone = body.phone || null;
+  if (body.fullName !== undefined) data.fullName = String(body.fullName).trim();
+  if (body.phone !== undefined) data.phone = body.phone ? String(body.phone).trim() : null;
+  if (body.email !== undefined && body.email !== null) {
+    data.email = String(body.email).trim().toLowerCase();
+  }
+
+  // Basic validation of fullName
+  if (data.fullName !== undefined && data.fullName === '') {
+    return NextResponse.json({ error: 'ПІБ не може бути пустим' }, { status: 400 });
+  }
 
   const updated = await prisma.profile.update({
     where: { id },
