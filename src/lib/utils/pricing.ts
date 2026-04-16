@@ -9,6 +9,8 @@ interface PricingConfig {
   packagingEnabled: boolean;
   packagingPrices: Record<string, number> | null;
   addressDeliveryPrice: number;
+  /** Optional — if set, insurance fee cannot be below this value. */
+  minInsuranceFee?: number;
 }
 
 interface ParcelData {
@@ -28,8 +30,22 @@ export interface CostBreakdown {
   billableWeight: number;
 }
 
+/** Minimum insurance fee in EUR when insurance actually applies. */
+export const DEFAULT_MIN_INSURANCE_FEE = 0.5;
+
+/** Rounds a money amount to 2 decimals with banker's rounding safety. */
+export function roundMoney(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  // Use multiply-round-divide. Avoids floating-point display artifacts like 10.005 → 10.00.
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
 /**
- * Calculate total parcel cost based on pricing config
+ * Calculate total parcel cost based on pricing config.
+ *
+ * Rounding policy: intermediate weights are kept at full precision; money
+ * amounts are rounded at the final step only. Small components (insurance
+ * below the minimum fee) are bumped up to the minimum.
  */
 export function calculateParcelCost(
   config: PricingConfig,
@@ -41,25 +57,27 @@ export function calculateParcelCost(
     parcel.volumetricWeight,
     config.weightType
   );
-  const deliveryCost = Number((billableWeight * config.pricePerKg).toFixed(2));
+  const deliveryCost = roundMoney(billableWeight * config.pricePerKg);
 
-  // 2. Insurance cost
+  // 2. Insurance cost — applies only above threshold, with a minimum fee.
   let insuranceCost = 0;
   if (config.insuranceEnabled && parcel.declaredValue > config.insuranceThreshold) {
-    insuranceCost = Number((parcel.declaredValue * config.insuranceRate).toFixed(2));
+    const raw = parcel.declaredValue * config.insuranceRate;
+    const minFee = config.minInsuranceFee ?? DEFAULT_MIN_INSURANCE_FEE;
+    insuranceCost = roundMoney(Math.max(raw, minFee));
   }
 
-  // 3. Packaging cost
+  // 3. Packaging cost — based on actual weight tiers
   let packagingCost = 0;
   if (config.packagingEnabled && parcel.needsPackaging && config.packagingPrices) {
-    packagingCost = getPackagingPrice(config.packagingPrices, parcel.actualWeight);
+    packagingCost = roundMoney(getPackagingPrice(config.packagingPrices, parcel.actualWeight));
   }
 
   // 4. Address delivery cost
-  const addressDeliveryCost = parcel.isAddressDelivery ? config.addressDeliveryPrice : 0;
+  const addressDeliveryCost = parcel.isAddressDelivery ? roundMoney(config.addressDeliveryPrice) : 0;
 
   // Total
-  const totalCost = Number((deliveryCost + insuranceCost + packagingCost + addressDeliveryCost).toFixed(2));
+  const totalCost = roundMoney(deliveryCost + insuranceCost + packagingCost + addressDeliveryCost);
 
   return {
     deliveryCost,
@@ -72,7 +90,7 @@ export function calculateParcelCost(
 }
 
 /**
- * Get packaging price based on weight tiers
+ * Get packaging price based on weight tiers.
  * packagingPrices format: { "10": 1, "20": 2, "30": 3, "30+": 5 }
  */
 function getPackagingPrice(prices: Record<string, number>, weight: number): number {

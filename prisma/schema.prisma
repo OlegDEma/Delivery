@@ -387,6 +387,11 @@ model Parcel {
   @@index([sequentialNumber])
   @@index([tripId, shortNumber])
   @@index([collectionPointId])
+  // Composite indexes for hot queries
+  @@index([deletedAt, createdAt(sort: Desc)])
+  @@index([direction, status])
+  @@index([tripId, status])
+  @@index([isPaid, direction])
   @@map("parcels")
 }
 
@@ -433,6 +438,7 @@ model ParcelStatusHistory {
 
   @@index([parcelId])
   @@index([changedAt])
+  @@index([parcelId, changedAt(sort: Desc)])
   @@map("parcel_status_history")
 }
 
@@ -600,6 +606,24 @@ enum ClaimStatus {
   in_progress
   resolved
   rejected
+}
+
+/// Immutable record of sensitive operations: deletions, role changes, email
+/// changes, manual cost overrides, etc. Written by logger.audit() callers.
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event      String   // e.g. "parcel.deleted", "user.role_changed"
+  actorId    String?  @map("actor_id") @db.Uuid
+  subjectId  String?  @map("subject_id") @db.Uuid   // the affected entity (parcel, client, user)
+  subjectType String? @map("subject_type")          // "parcel" | "client" | "user" | ...
+  payload    Json?                                    // event-specific metadata
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([event])
+  @@index([actorId])
+  @@index([subjectId])
+  @@index([createdAt])
+  @@map("audit_log")
 }
 
 model Claim {

@@ -25,6 +25,13 @@ interface CostBreakdown {
   weightType: string;
 }
 
+// Hoisted constant — label map is pure data, no reason to recreate every render.
+const WEIGHT_TYPE_LABELS: Record<string, string> = {
+  actual: 'max(факт., об\'ємна)',
+  volumetric: 'об\'ємна',
+  average: 'середня',
+};
+
 export function CostCalculator(props: CostCalculatorProps) {
   const [cost, setCost] = useState<CostBreakdown | null>(null);
   const [error, setError] = useState('');
@@ -52,11 +59,16 @@ export function CostCalculator(props: CostCalculatorProps) {
       return;
     }
 
+    // AbortController pairs with the debounce timer so in-flight requests are
+    // cancelled when the user keeps typing or the component unmounts.
+    const controller = new AbortController();
+
     const timer = setTimeout(async () => {
       try {
         const res = await fetch('/api/parcels/calculate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             direction: props.direction,
             country,
@@ -74,12 +86,17 @@ export function CostCalculator(props: CostCalculatorProps) {
           setCost(null);
           setError(`Тариф для ${country} ${props.direction === 'eu_to_ua' ? '→' : '←'} UA не знайдено. Створіть його у «Адміністрування → Тарифи».`);
         }
-      } catch {
+      } catch (err) {
+        // Ignore aborts — they're expected when inputs keep changing.
+        if ((err as { name?: string })?.name === 'AbortError') return;
         setCost(null);
       }
     }, 500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [country, props.direction, props.actualWeight, props.volumetricWeight, props.declaredValue, props.needsPackaging, props.isAddressDelivery]);
 
   if (!cost && !error) return null;
@@ -93,12 +110,6 @@ export function CostCalculator(props: CostCalculatorProps) {
   }
 
   if (!cost) return null;
-
-  const WEIGHT_TYPE_LABELS: Record<string, string> = {
-    actual: 'max(факт., об\'ємна)',
-    volumetric: 'об\'ємна',
-    average: 'середня',
-  };
 
   return (
     <div className="bg-blue-50 rounded-lg p-3 text-sm space-y-1">

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { requireStaff } from '@/lib/auth/guards';
 import ExcelJS from 'exceljs';
+import type { Prisma, ParcelStatus } from '@/generated/prisma/client';
 
 // GET /api/parcels/export?status=...&dateFrom=...&dateTo=...&tripId=...
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
@@ -15,14 +15,13 @@ export async function GET(request: NextRequest) {
   const dateTo = searchParams.get('dateTo');
   const tripId = searchParams.get('tripId');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = {};
-  if (status) where.status = status;
+  const where: Prisma.ParcelWhereInput = { deletedAt: null };
+  if (status) where.status = status as ParcelStatus;
   if (tripId) where.tripId = tripId;
   if (dateFrom || dateTo) {
     where.createdAt = {};
-    if (dateFrom) where.createdAt.gte = new Date(dateFrom);
-    if (dateTo) where.createdAt.lte = new Date(dateTo + 'T23:59:59Z');
+    if (dateFrom) where.createdAt.gte = new Date(dateFrom + 'T00:00:00+02:00');
+    if (dateTo) where.createdAt.lte = new Date(dateTo + 'T23:59:59.999+03:00');
   }
 
   const parcels = await prisma.parcel.findMany({

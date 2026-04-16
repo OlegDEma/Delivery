@@ -67,6 +67,7 @@ export const ModelName = {
   NpSyncLog: 'NpSyncLog',
   YearlySequence: 'YearlySequence',
   DescriptionSuggestion: 'DescriptionSuggestion',
+  AuditLog: 'AuditLog',
   Claim: 'Claim'
 } as const
 
@@ -412,6 +413,19 @@ export const DescriptionSuggestionScalarFieldEnum = {
 } as const
 
 export type DescriptionSuggestionScalarFieldEnum = (typeof DescriptionSuggestionScalarFieldEnum)[keyof typeof DescriptionSuggestionScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  event: 'event',
+  actorId: 'actorId',
+  subjectId: 'subjectId',
+  subjectType: 'subjectType',
+  payload: 'payload',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const ClaimScalarFieldEnum = {

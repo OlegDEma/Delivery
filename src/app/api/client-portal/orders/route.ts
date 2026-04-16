@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
-import { normalizePhone } from '@/lib/utils/phone';
+import { canonicalPhone, normalizePhone } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
-import { generateITN, generateInternalNumber, generatePlaceITN } from '@/lib/utils/itn';
-import { calculateVolumetricWeight } from '@/lib/utils/volumetric';
+import { parseBody, clientOrderSchema } from '@/lib/validators';
+import { createParcel } from '@/lib/services/parcel-creation';
+import { logger } from '@/lib/logger';
+import type { Country } from '@/generated/prisma/enums';
 
 // GET /api/client-portal/orders — get client's orders
 export async function GET() {
@@ -51,176 +53,142 @@ export async function POST(request: NextRequest) {
   if (!profile?.phone) {
     return NextResponse.json({ error: 'Профіль не знайдено' }, { status: 400 });
   }
-
-  const body = await request.json();
-  const {
-    direction, shipmentType, description, declaredValue,
-    payer, paymentMethod, paymentInUkraine,
-    // Sender (the client themselves or someone else)
-    senderPhone, senderFirstName, senderLastName, senderCity, senderStreet, senderCountry,
-    // Receiver
-    receiverPhone, receiverFirstName, receiverLastName, receiverCity, receiverStreet,
-    receiverCountry, receiverNpWarehouse, receiverDeliveryMethod,
-    // Places
-    places,
-    // Collection
-    collectionMethod, collectionPointId, collectionDate, collectionAddress,
-  } = body;
-
-  if (!receiverPhone || !receiverFirstName || !receiverLastName) {
-    return NextResponse.json({ error: 'Дані отримувача обов\'язкові' }, { status: 400 });
+  if (!profile.fullName || !profile.fullName.trim()) {
+    return NextResponse.json(
+      { error: 'Заповніть ПІБ у профілі, перш ніж створювати замовлення' },
+      { status: 400 }
+    );
   }
-  if (!places || places.length === 0) {
-    return NextResponse.json({ error: 'Додайте хоча б одне місце' }, { status: 400 });
-  }
+
+  const parsed = await parseBody(request, clientOrderSchema);
+  if (parsed instanceof NextResponse) return parsed;
+  const body = parsed;
 
   // SECURITY: Sender must always be the authenticated client themselves.
-  // Ignore any senderPhone in the body to prevent spoofing someone else's identity.
+  // Ignore any senderPhone in the body to prevent spoofing.
   let sender = await prisma.client.findUnique({
     where: { phone: profile.phone },
   });
   if (!sender) {
-    // First order for this user — create Client record linked to their profile phone
-    const profileNameParts = (profile.fullName || '').split(' ');
+    const profileNameParts = profile.fullName.split(/\s+/).filter(Boolean);
     sender = await prisma.client.create({
       data: {
         phone: profile.phone,
         phoneNormalized: normalizePhone(profile.phone),
-        firstName: capitalize(senderFirstName || profileNameParts[1] || profileNameParts[0] || ''),
-        lastName: capitalize(senderLastName || profileNameParts[0] || ''),
-        country: senderCountry || null,
+        firstName: capitalize(body.senderFirstName || profileNameParts[1] || profileNameParts[0] || 'Клієнт'),
+        lastName: capitalize(body.senderLastName || profileNameParts[0] || 'Клієнт'),
+        country: (body.senderCountry ?? null) as Country | null,
       },
     });
   }
 
-  // Add sender address if provided
+  // Sender address: dedupe per client by (country, city, street).
   let senderAddressId: string | null = null;
-  if (senderCity) {
-    const addr = await prisma.clientAddress.create({
-      data: {
+  if (body.senderCity) {
+    const senderCountry = (body.senderCountry ?? 'UA') as Country;
+    const existingSenderAddr = await prisma.clientAddress.findFirst({
+      where: {
         clientId: sender.id,
-        country: senderCountry || 'UA',
-        city: senderCity,
-        street: senderStreet || null,
+        country: senderCountry,
+        city: body.senderCity,
+        street: body.senderStreet || null,
       },
     });
-    senderAddressId = addr.id;
+    if (existingSenderAddr) {
+      senderAddressId = existingSenderAddr.id;
+    } else {
+      const addr = await prisma.clientAddress.create({
+        data: {
+          clientId: sender.id,
+          country: senderCountry,
+          city: body.senderCity,
+          street: body.senderStreet || null,
+        },
+      });
+      senderAddressId = addr.id;
+    }
   }
 
-  // Find or create receiver
-  let receiver = await prisma.client.findUnique({ where: { phone: receiverPhone } });
+  // Find or create receiver — normalize the phone first so "+38 050…" and
+  // "+380 50…" resolve to the same client.
+  const canonicalReceiverPhone = canonicalPhone(body.receiverPhone);
+  if (!canonicalReceiverPhone) {
+    return NextResponse.json({ error: 'Невалідний номер телефону отримувача' }, { status: 400 });
+  }
+  let receiver = await prisma.client.findUnique({ where: { phone: canonicalReceiverPhone } });
   if (!receiver) {
     receiver = await prisma.client.create({
       data: {
-        phone: receiverPhone,
-        phoneNormalized: normalizePhone(receiverPhone),
-        firstName: capitalize(receiverFirstName),
-        lastName: capitalize(receiverLastName),
-        country: receiverCountry || null,
+        phone: canonicalReceiverPhone,
+        phoneNormalized: normalizePhone(canonicalReceiverPhone),
+        firstName: capitalize(body.receiverFirstName),
+        lastName: capitalize(body.receiverLastName),
+        country: (body.receiverCountry ?? null) as Country | null,
       },
     });
   }
 
-  // Add receiver address
+  // Receiver address: same dedupe strategy.
   let receiverAddressId: string | null = null;
-  if (receiverCity) {
-    const addr = await prisma.clientAddress.create({
-      data: {
+  if (body.receiverCity) {
+    const receiverCountry = (body.receiverCountry ?? 'UA') as Country;
+    const existingReceiverAddr = await prisma.clientAddress.findFirst({
+      where: {
         clientId: receiver.id,
-        country: receiverCountry || 'UA',
-        city: receiverCity,
-        street: receiverStreet || null,
-        npWarehouseNum: receiverNpWarehouse || null,
-        deliveryMethod: receiverDeliveryMethod || 'address',
+        country: receiverCountry,
+        city: body.receiverCity,
+        street: body.receiverStreet || null,
+        npWarehouseNum: body.receiverNpWarehouse || null,
       },
     });
-    receiverAddressId = addr.id;
+    if (existingReceiverAddr) {
+      receiverAddressId = existingReceiverAddr.id;
+    } else {
+      const addr = await prisma.clientAddress.create({
+        data: {
+          clientId: receiver.id,
+          country: receiverCountry,
+          city: body.receiverCity,
+          street: body.receiverStreet || null,
+          npWarehouseNum: body.receiverNpWarehouse || null,
+          deliveryMethod: body.receiverDeliveryMethod || 'address',
+        },
+      });
+      receiverAddressId = addr.id;
+    }
   }
 
-  // Generate numbers
-  const currentYear = new Date().getFullYear();
-  const sequence = await prisma.yearlySequence.update({
-    where: { year: currentYear },
-    data: { lastNumber: { increment: 1 } },
-  });
-  const seqNum = sequence.lastNumber;
-  const itn = generateITN(currentYear, seqNum);
-  const now = new Date();
-  const totalPlaces = places.length;
-
-  let totalWeight = 0;
-  let totalVolWeight = 0;
-  const placesData = places.map((p: { weight?: number; length?: number; width?: number; height?: number }, i: number) => {
-    const w = Number(p.weight) || 0;
-    const volW = p.length && p.width && p.height
-      ? calculateVolumetricWeight(Number(p.length), Number(p.width), Number(p.height))
-      : 0;
-    totalWeight += w;
-    totalVolWeight += volW;
-    return {
-      placeNumber: i + 1,
-      weight: w,
-      length: p.length ? Number(p.length) : null,
-      width: p.width ? Number(p.width) : null,
-      height: p.height ? Number(p.height) : null,
-      volumetricWeight: volW,
-      itnPlace: generatePlaceITN(itn, i + 1, totalPlaces),
-      barcodeData: generatePlaceITN(itn, i + 1, totalPlaces),
-    };
-  });
-
-  const internalNumber = generateInternalNumber(seqNum, receiverCity || 'Невідомо', 1, totalPlaces, now);
-
-  // Validate collection method
-  const validMethods = ['pickup_point', 'courier_pickup', 'external_shipping', 'direct_to_driver'];
-  const resolvedCollectionMethod = collectionMethod && validMethods.includes(collectionMethod)
-    ? collectionMethod
-    : null;
-
-  // Collection point is only meaningful with pickup_point method
-  const resolvedCollectionPointId =
-    resolvedCollectionMethod === 'pickup_point' && collectionPointId
-      ? collectionPointId
-      : null;
-
-  // Collection address is only meaningful with courier_pickup method
-  const resolvedCollectionAddress =
-    resolvedCollectionMethod === 'courier_pickup' && collectionAddress
-      ? String(collectionAddress)
-      : null;
-
-  const parcel = await prisma.parcel.create({
-    data: {
-      itn,
-      internalNumber,
-      sequentialNumber: seqNum,
-      direction: direction || 'eu_to_ua',
+  try {
+    const created = await createParcel({
       senderId: sender.id,
       senderAddressId,
       receiverId: receiver.id,
       receiverAddressId,
-      shipmentType: shipmentType || 'parcels_cargo',
-      description: description || null,
-      declaredValue: declaredValue ? Number(declaredValue) : null,
-      totalWeight,
-      totalVolumetricWeight: totalVolWeight,
-      totalPlacesCount: totalPlaces,
-      payer: payer || 'sender',
-      paymentMethod: paymentMethod || 'cash',
-      paymentInUkraine: paymentInUkraine || false,
-      collectionMethod: resolvedCollectionMethod,
-      collectionPointId: resolvedCollectionPointId,
-      collectionDate: collectionDate ? new Date(collectionDate) : null,
-      collectionAddress: resolvedCollectionAddress,
-      status: 'draft',
-      createdSource: 'client_web',
+      tripId: null,
+      direction: body.direction ?? 'eu_to_ua',
+      shipmentType: body.shipmentType,
+      description: body.description ?? null,
+      declaredValue: body.declaredValue ?? null,
+      payer: body.payer,
+      paymentMethod: body.paymentMethod,
+      paymentInUkraine: body.paymentInUkraine,
+      places: body.places,
       createdById: user.id,
-      places: { create: placesData },
-      statusHistory: {
-        create: { status: 'draft', changedById: user.id, notes: 'Створено клієнтом на сайті' },
-      },
-    },
-  });
+      createdSource: 'client_web',
+      status: 'draft',
+      statusNote: 'Створено клієнтом на сайті',
+      collectionMethod: body.collectionMethod ?? null,
+      collectionPointId: body.collectionPointId ?? null,
+      collectionDate: body.collectionDate ? new Date(body.collectionDate) : null,
+      collectionAddress: body.collectionAddress ?? null,
+    });
 
-  return NextResponse.json(parcel, { status: 201 });
+    return NextResponse.json(created, { status: 201 });
+  } catch (err) {
+    logger.error('client_portal.order.create_failed', err, { userId: user.id });
+    return NextResponse.json(
+      { error: 'Не вдалося створити замовлення. Спробуйте ще раз.' },
+      { status: 500 }
+    );
+  }
 }

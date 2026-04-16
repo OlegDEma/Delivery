@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { ADMIN_ROLES } from '@/lib/constants/roles';
 import type { Weekday } from '@/generated/prisma/enums';
+import type { Prisma } from '@/generated/prisma/client';
 
 // GET /api/collection-points/[id] — point details with parcels waiting
 export async function GET(
@@ -44,8 +45,7 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = {};
+  const data: Prisma.CollectionPointUpdateInput = {};
   if (body.name !== undefined) data.name = body.name || null;
   if (body.country !== undefined) data.country = body.country;
   if (body.city !== undefined) data.city = body.city;

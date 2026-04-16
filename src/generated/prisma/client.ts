@@ -122,6 +122,12 @@ export type YearlySequence = Prisma.YearlySequenceModel
  */
 export type DescriptionSuggestion = Prisma.DescriptionSuggestionModel
 /**
+ * Model AuditLog
+ * Immutable record of sensitive operations: deletions, role changes, email
+ * changes, manual cost overrides, etc. Written by logger.audit() callers.
+ */
+export type AuditLog = Prisma.AuditLogModel
+/**
  * Model Claim
  * 
  */

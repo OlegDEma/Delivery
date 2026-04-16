@@ -1,48 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/auth/guards';
 import { calculateParcelCost } from '@/lib/utils/pricing';
-import { getBillableWeight } from '@/lib/utils/volumetric';
+import { parseBody, calculateCostSchema, parsePackagingPrices } from '@/lib/validators';
+import { logger } from '@/lib/logger';
 
 // POST /api/parcels/calculate — calculate parcel cost based on pricing config
+// Any authenticated user can call this (including clients — they see the estimate).
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const guard = await requireAuth();
+  if (!guard.ok) return guard.response;
 
-  const body = await request.json();
-  const { direction, country, actualWeight, volumetricWeight, declaredValue, needsPackaging, isAddressDelivery } = body;
-
-  if (!direction || !country) {
-    return NextResponse.json({ error: 'Напрямок та країна обов\'язкові' }, { status: 400 });
-  }
+  const parsed = await parseBody(request, calculateCostSchema);
+  if (parsed instanceof NextResponse) return parsed;
+  const body = parsed;
 
   // Find active pricing config
   const config = await prisma.pricingConfig.findFirst({
-    where: { country, direction, isActive: true },
+    where: { country: body.country, direction: body.direction, isActive: true },
+    orderBy: { createdAt: 'desc' },
   });
 
   if (!config) {
-    return NextResponse.json({ error: 'Тариф не знайдено для цього напрямку' }, { status: 404 });
+    logger.info('pricing.not_found', { country: body.country, direction: body.direction });
+    return NextResponse.json(
+      { error: `Тариф для ${body.country} у напрямку ${body.direction} не налаштовано` },
+      { status: 404 }
+    );
   }
 
   const result = calculateParcelCost(
     {
       pricePerKg: Number(config.pricePerKg),
-      weightType: config.weightType as 'actual' | 'volumetric' | 'average',
+      weightType: config.weightType,
       insuranceThreshold: Number(config.insuranceThreshold),
       insuranceRate: Number(config.insuranceRate),
       insuranceEnabled: config.insuranceEnabled,
       packagingEnabled: config.packagingEnabled,
-      packagingPrices: config.packagingPrices as Record<string, number> | null,
+      packagingPrices: parsePackagingPrices(config.packagingPrices),
       addressDeliveryPrice: Number(config.addressDeliveryPrice),
     },
     {
-      actualWeight: actualWeight || 0,
-      volumetricWeight: volumetricWeight || 0,
-      declaredValue: declaredValue || 0,
-      needsPackaging: needsPackaging || false,
-      isAddressDelivery: isAddressDelivery || false,
+      actualWeight: body.actualWeight ?? 0,
+      volumetricWeight: body.volumetricWeight ?? 0,
+      declaredValue: body.declaredValue ?? 0,
+      needsPackaging: body.needsPackaging ?? false,
+      isAddressDelivery: body.isAddressDelivery ?? false,
     }
   );
 

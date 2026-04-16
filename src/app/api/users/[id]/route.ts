@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
+import { writeAuditLog } from '@/lib/audit';
 
 // PATCH /api/users/[id] — update user role or deactivate
 export async function PATCH(
@@ -78,20 +80,29 @@ export async function PATCH(
           { status: 400 }
         );
       }
-      // Audit log entry — sign that email was changed by admin
-      await prisma.profile.update({
-        where: { id: user.id },
-        data: {},
-      }).catch(() => {/* noop */});
-      // eslint-disable-next-line no-console
-      console.info(`[AUDIT] Admin ${profile.email} changed email of user ${id}: ${target.email} → ${newEmail}`);
+      logger.audit('user.email_changed', {
+        actorEmail: profile.email, targetUserId: id,
+        from: target.email, to: newEmail,
+      });
+      await writeAuditLog({
+        event: 'user.email_changed',
+        actorId: user.id,
+        subjectId: id,
+        subjectType: 'user',
+        payload: { from: target.email, to: newEmail },
+      });
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = {};
+  const data: {
+    role?: typeof body.role;
+    isActive?: boolean;
+    fullName?: string;
+    phone?: string | null;
+    email?: string;
+  } = {};
   if (body.role !== undefined) data.role = body.role;
-  if (body.isActive !== undefined) data.isActive = body.isActive;
+  if (body.isActive !== undefined) data.isActive = !!body.isActive;
   if (body.fullName !== undefined) data.fullName = String(body.fullName).trim();
   if (body.phone !== undefined) data.phone = body.phone ? String(body.phone).trim() : null;
   if (body.email !== undefined && body.email !== null) {
@@ -103,11 +114,39 @@ export async function PATCH(
     return NextResponse.json({ error: 'ПІБ не може бути пустим' }, { status: 400 });
   }
 
+  // Capture old role for audit.
+  const previous = await prisma.profile.findUnique({
+    where: { id }, select: { role: true, isActive: true },
+  });
+
   const updated = await prisma.profile.update({
     where: { id },
     data,
     select: { id: true, email: true, fullName: true, phone: true, role: true, isActive: true },
   });
+
+  if (data.role !== undefined && previous && previous.role !== data.role) {
+    logger.audit('user.role_changed', {
+      actorEmail: profile.email, targetUserId: id,
+      from: previous.role, to: data.role,
+    });
+    await writeAuditLog({
+      event: 'user.role_changed',
+      actorId: user.id,
+      subjectId: id,
+      subjectType: 'user',
+      payload: { from: previous.role, to: data.role },
+    });
+  }
+  if (data.isActive !== undefined && previous && previous.isActive !== data.isActive) {
+    await writeAuditLog({
+      event: data.isActive ? 'user.activated' : 'user.deactivated',
+      actorId: user.id,
+      subjectId: id,
+      subjectType: 'user',
+      payload: {},
+    });
+  }
 
   return NextResponse.json(updated);
 }
@@ -133,12 +172,28 @@ export async function DELETE(
     return NextResponse.json({ error: 'Не можна видалити свій акаунт' }, { status: 400 });
   }
 
+  // Snapshot for audit before destroying.
+  const target = await prisma.profile.findUnique({
+    where: { id }, select: { email: true, role: true },
+  });
+
   // Delete from Supabase Auth
   const serviceClient = await createServiceClient();
   await serviceClient.auth.admin.deleteUser(id);
 
   // Delete profile
   await prisma.profile.delete({ where: { id } });
+
+  logger.audit('user.deleted', {
+    actorEmail: profile.email, targetUserId: id, targetEmail: target?.email,
+  });
+  await writeAuditLog({
+    event: 'user.deleted',
+    actorId: user.id,
+    subjectId: id,
+    subjectType: 'user',
+    payload: target ? { email: target.email, role: target.role } : {},
+  });
 
   return NextResponse.json({ success: true });
 }

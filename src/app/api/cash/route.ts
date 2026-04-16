@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth/guards';
 import { FINANCE_ROLES } from '@/lib/constants/roles';
+import type { Prisma } from '@/generated/prisma/client';
+import { z } from 'zod';
+import { parseBody } from '@/lib/validators';
+import { paymentMethodSchema, positiveMoneySchema, uuidSchema } from '@/lib/validators/common';
+import { logger } from '@/lib/logger';
+
+// POST body schema — kept local since it's only used here.
+const cashEntrySchema = z.object({
+  parcelId: uuidSchema.optional().nullable(),
+  amount: positiveMoneySchema,
+  currency: z.enum(['EUR', 'UAH']),
+  paymentMethod: paymentMethodSchema,
+  paymentType: z.enum(['income', 'expense', 'refund']).optional(),
+  description: z.string().trim().max(500).optional().nullable(),
+});
 
 // GET /api/cash?dateFrom=...&dateTo=...&receivedBy=...
 export async function GET(request: NextRequest) {
@@ -13,13 +28,12 @@ export async function GET(request: NextRequest) {
   const dateTo = searchParams.get('dateTo');
   const receivedBy = searchParams.get('receivedBy');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = {};
+  const where: Prisma.CashRegisterWhereInput = {};
   if (receivedBy) where.receivedById = receivedBy;
   if (dateFrom || dateTo) {
     where.createdAt = {};
-    if (dateFrom) where.createdAt.gte = new Date(dateFrom);
-    if (dateTo) where.createdAt.lte = new Date(dateTo + 'T23:59:59Z');
+    if (dateFrom) where.createdAt.gte = new Date(dateFrom + 'T00:00:00+02:00');
+    if (dateTo) where.createdAt.lte = new Date(dateTo + 'T23:59:59.999+03:00');
   }
 
   const [entries, totals] = await Promise.all([
@@ -48,35 +62,42 @@ export async function POST(request: NextRequest) {
   if (!guard.ok) return guard.response;
   const userId = guard.user.userId;
 
-  const body = await request.json();
-  const { parcelId, amount, currency, paymentMethod, paymentType, description } = body;
+  const parsed = await parseBody(request, cashEntrySchema);
+  if (parsed instanceof NextResponse) return parsed;
+  const body = parsed;
 
-  if (!amount || !currency || !paymentMethod) {
-    return NextResponse.json({ error: 'Сума, валюта та спосіб оплати обов\'язкові' }, { status: 400 });
-  }
+  // Do everything in a single transaction so a cash entry and the paid-flag
+  // on the parcel never diverge.
+  const entry = await prisma.$transaction(async (tx) => {
+    const created = await tx.cashRegister.create({
+      data: {
+        parcelId: body.parcelId || null,
+        amount: body.amount,
+        currency: body.currency,
+        paymentMethod: body.paymentMethod,
+        paymentType: body.paymentType || 'income',
+        description: body.description || null,
+        receivedById: userId,
+      },
+      include: {
+        parcel: { select: { internalNumber: true } },
+      },
+    });
 
-  const entry = await prisma.cashRegister.create({
-    data: {
-      parcelId: parcelId || null,
-      amount: Number(amount),
-      currency,
-      paymentMethod,
-      paymentType: paymentType || 'income',
-      description: description || null,
-      receivedById: userId,
-    },
-    include: {
-      parcel: { select: { internalNumber: true } },
-    },
+    if (body.parcelId && (body.paymentType || 'income') === 'income') {
+      await tx.parcel.update({
+        where: { id: body.parcelId },
+        data: { isPaid: true, paidAt: new Date() },
+      });
+    }
+
+    return created;
   });
 
-  // If linked to parcel, mark as paid
-  if (parcelId) {
-    await prisma.parcel.update({
-      where: { id: parcelId },
-      data: { isPaid: true, paidAt: new Date() },
-    });
-  }
+  logger.audit('cash.entry_created', {
+    entryId: entry.id, amount: body.amount, currency: body.currency,
+    type: body.paymentType || 'income', userId,
+  });
 
   return NextResponse.json(entry, { status: 201 });
 }

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
-import type { ParcelStatus } from '@/generated/prisma/client';
+import type { ParcelStatus } from '@/generated/prisma/enums';
+import type { Prisma } from '@/generated/prisma/client';
 import { calculateParcelCost } from '@/lib/utils/pricing';
+import { calculateVolumetricWeight, roundWeight } from '@/lib/utils/volumetric';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { ADMIN_ROLES } from '@/lib/constants/roles';
+import { parseBody, updateParcelSchema, parsePackagingPrices } from '@/lib/validators';
+import { logger } from '@/lib/logger';
+import { writeAuditLog } from '@/lib/audit';
 
 // GET /api/parcels/[id]
 export async function GET(
@@ -65,25 +69,29 @@ export async function PATCH(
 ) {
   const guard = await requireStaff();
   if (!guard.ok) return guard.response;
-  const user = { id: guard.user.userId };
+  const userId = guard.user.userId;
 
   const { id } = await params;
-  const body = await request.json();
+  const parsed = await parseBody(request, updateParcelSchema);
+  if (parsed instanceof NextResponse) return parsed;
+  const body = parsed;
 
-  const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null } });
+  const parcel = await prisma.parcel.findFirst({
+    where: { id, deletedAt: null },
+    include: { places: { select: { id: true } } },
+  });
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }
 
-  // Status change
+  // Status-only change path (doesn't touch places, can be simple update).
   if (body.status) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const statusUpdateData: any = {
+    const statusUpdateData: Prisma.ParcelUpdateInput = {
       status: body.status as ParcelStatus,
       statusHistory: {
         create: {
           status: body.status as ParcelStatus,
-          changedById: user.id,
+          changedById: userId,
           notes: body.statusNote || null,
           location: body.location || null,
         },
@@ -91,24 +99,23 @@ export async function PATCH(
     };
 
     // Auto-link to nearest trip when status becomes "Прийнято до перевезення"
-    const acceptedStatuses = ['accepted_for_transport_to_ua', 'accepted_for_transport_to_eu'];
+    const acceptedStatuses: ParcelStatus[] = ['accepted_for_transport_to_ua', 'accepted_for_transport_to_eu'];
     if (acceptedStatuses.includes(body.status) && !parcel.tripId) {
       const direction = body.status === 'accepted_for_transport_to_ua' ? 'eu_to_ua' : 'ua_to_eu';
 
-      // Find receiver address to determine country (for outbound trips from EU)
-      const receiverAddr = parcel.receiverAddressId
-        ? await prisma.clientAddress.findUnique({ where: { id: parcel.receiverAddressId } })
-        : null;
-      const senderAddr = parcel.senderAddressId
-        ? await prisma.clientAddress.findUnique({ where: { id: parcel.senderAddressId } })
-        : null;
+      const [receiverAddr, senderAddr] = await Promise.all([
+        parcel.receiverAddressId
+          ? prisma.clientAddress.findUnique({ where: { id: parcel.receiverAddressId } })
+          : Promise.resolve(null),
+        parcel.senderAddressId
+          ? prisma.clientAddress.findUnique({ where: { id: parcel.senderAddressId } })
+          : Promise.resolve(null),
+      ]);
 
-      // For EU→UA: country is sender's country; For UA→EU: country is receiver's country
       const targetCountry = direction === 'eu_to_ua'
         ? senderAddr?.country
         : receiverAddr?.country;
 
-      // Find nearest planned trip with matching direction (and country if known)
       const nearestTrip = await prisma.trip.findFirst({
         where: {
           direction,
@@ -120,10 +127,17 @@ export async function PATCH(
       });
 
       if (nearestTrip) {
-        statusUpdateData.tripId = nearestTrip.id;
-        statusUpdateData.statusHistory.create.notes =
-          (body.statusNote ? body.statusNote + '. ' : '') +
-          `Автоматично прив'язано до рейсу ${nearestTrip.country} ${new Date(nearestTrip.departureDate).toLocaleDateString('uk-UA')}`;
+        statusUpdateData.trip = { connect: { id: nearestTrip.id } };
+        const noteSuffix = `Автоматично прив'язано до рейсу ${nearestTrip.country} ${new Date(nearestTrip.departureDate).toLocaleDateString('uk-UA')}`;
+        const sh = statusUpdateData.statusHistory as Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput | undefined;
+        if (sh && 'create' in sh && sh.create && !Array.isArray(sh.create)) {
+          const create = sh.create as { notes?: string | null };
+          create.notes = (body.statusNote ? body.statusNote + '. ' : '') + noteSuffix;
+        }
+      } else {
+        logger.warn('parcel.auto_link.no_trip', {
+          parcelId: id, direction, targetCountry,
+        });
       }
     }
 
@@ -134,102 +148,110 @@ export async function PATCH(
     return NextResponse.json(updated);
   }
 
-  // General field updates
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateData: any = {};
+  // General field updates (non-status path). Build once, execute in one tx if places present.
+  const updateData: Prisma.ParcelUpdateInput = {};
   if (body.npTtn !== undefined) updateData.npTtn = body.npTtn;
-  if (body.tripId !== undefined) updateData.tripId = body.tripId;
-  if (body.assignedCourierId !== undefined) updateData.assignedCourierId = body.assignedCourierId;
+  if (body.tripId !== undefined) {
+    updateData.trip = body.tripId ? { connect: { id: body.tripId } } : { disconnect: true };
+  }
+  if (body.assignedCourierId !== undefined) {
+    updateData.assignedCourier = body.assignedCourierId
+      ? { connect: { id: body.assignedCourierId } }
+      : { disconnect: true };
+  }
   if (body.isPaid !== undefined) {
     updateData.isPaid = body.isPaid;
     if (body.isPaid) updateData.paidAt = new Date();
   }
-  if (body.estimatedDeliveryStart !== undefined) updateData.estimatedDeliveryStart = body.estimatedDeliveryStart;
-  if (body.estimatedDeliveryEnd !== undefined) updateData.estimatedDeliveryEnd = body.estimatedDeliveryEnd;
+  if (body.estimatedDeliveryStart !== undefined) {
+    updateData.estimatedDeliveryStart = body.estimatedDeliveryStart ? new Date(body.estimatedDeliveryStart) : null;
+  }
+  if (body.estimatedDeliveryEnd !== undefined) {
+    updateData.estimatedDeliveryEnd = body.estimatedDeliveryEnd ? new Date(body.estimatedDeliveryEnd) : null;
+  }
   if (body.shortNumber !== undefined) updateData.shortNumber = body.shortNumber;
-  // Editable fields
   if (body.description !== undefined) updateData.description = body.description;
-  if (body.declaredValue !== undefined) updateData.declaredValue = Number(body.declaredValue);
+  if (body.declaredValue !== undefined) updateData.declaredValue = body.declaredValue ? Number(body.declaredValue) : null;
   if (body.needsPackaging !== undefined) updateData.needsPackaging = body.needsPackaging;
   if (body.payer !== undefined) updateData.payer = body.payer;
   if (body.paymentMethod !== undefined) updateData.paymentMethod = body.paymentMethod;
   if (body.paymentInUkraine !== undefined) updateData.paymentInUkraine = body.paymentInUkraine;
   if (body.shipmentType !== undefined) updateData.shipmentType = body.shipmentType;
-  // Collection fields
-  if (body.collectionMethod !== undefined) {
-    updateData.collectionMethod = body.collectionMethod || null;
-  }
+  if (body.collectionMethod !== undefined) updateData.collectionMethod = body.collectionMethod || null;
   if (body.collectionPointId !== undefined) {
-    updateData.collectionPointId = body.collectionPointId || null;
+    updateData.collectionPoint = body.collectionPointId
+      ? { connect: { id: body.collectionPointId } }
+      : { disconnect: true };
   }
   if (body.collectionDate !== undefined) {
     updateData.collectionDate = body.collectionDate ? new Date(body.collectionDate) : null;
   }
-  if (body.collectionAddress !== undefined) {
-    updateData.collectionAddress = body.collectionAddress || null;
-  }
-  // Route task fields
+  if (body.collectionAddress !== undefined) updateData.collectionAddress = body.collectionAddress || null;
   if (body.routeTaskStatus !== undefined) updateData.routeTaskStatus = body.routeTaskStatus || null;
   if (body.routeTaskFailReason !== undefined) updateData.routeTaskFailReason = body.routeTaskFailReason || null;
   if (body.routeTaskReschedDate !== undefined) {
     updateData.routeTaskReschedDate = body.routeTaskReschedDate ? new Date(body.routeTaskReschedDate) : null;
   }
 
-  // Places array update — replaces dimensions/weight per place
-  // Body format: { places: [{ id?, placeNumber, weight, length?, width?, height? }] }
+  // Places update — replaces dimensions/weight per place; delete missing ones;
+  // all mutations happen in a single transaction so the parcel aggregate
+  // weights and cost stay consistent with place records.
   if (Array.isArray(body.places)) {
+    const incomingIds = new Set(
+      body.places.map(p => p.id).filter((x): x is string => typeof x === 'string')
+    );
+    const existingIds = parcel.places.map(p => p.id);
+    const placesToDelete = existingIds.filter(eid => !incomingIds.has(eid));
+
     let totalWeight = 0;
     let totalVolWeight = 0;
 
-    for (const p of body.places) {
-      const w = Number(p.weight) || 0;
-      const l = p.length != null ? Number(p.length) : null;
-      const wd = p.width != null ? Number(p.width) : null;
-      const h = p.height != null ? Number(p.height) : null;
-      const volW = l && wd && h ? Number(((l * wd * h) / 4000).toFixed(2)) : 0;
-      totalWeight += w;
-      totalVolWeight += volW;
-
-      if (p.id) {
-        await prisma.parcelPlace.update({
-          where: { id: p.id },
+    // Pre-compute normalized blueprints so we don't repeat Number() calls.
+    const placeUpdates = body.places
+      .filter(p => p.id) // only existing places can be updated in-place; new places would need create
+      .map(p => {
+        const w = Number(p.weight) || 0;
+        const l = p.length != null ? Number(p.length) : null;
+        const wd = p.width != null ? Number(p.width) : null;
+        const h = p.height != null ? Number(p.height) : null;
+        const volW = l && wd && h ? calculateVolumetricWeight(l, wd, h) : 0;
+        totalWeight += w;
+        totalVolWeight += volW;
+        return {
+          id: p.id!,
           data: {
-            weight: w,
+            weight: roundWeight(w),
             length: l,
             width: wd,
             height: h,
-            volumetricWeight: volW || null,
+            volumetricWeight: volW > 0 ? roundWeight(volW) : null,
             ...(p.needsPackaging !== undefined ? { needsPackaging: p.needsPackaging } : {}),
           },
-        });
-      }
-    }
+        };
+      });
 
-    updateData.totalWeight = totalWeight;
-    updateData.totalVolumetricWeight = totalVolWeight;
+    updateData.totalWeight = roundWeight(totalWeight);
+    updateData.totalVolumetricWeight = roundWeight(totalVolWeight);
 
-    // Recalculate delivery cost using active pricing config
+    // Recalculate costs before transaction. Priority: trip → collectionPoint → senderAddr → receiverAddr.
     try {
-      // Country for pricing lookup. Priority:
-      //  - EU→UA: trip.country (EU side) → collectionPoint.country → senderAddr.country
-      //  - UA→EU: trip.country (EU side) → receiverAddr.country
-      // The sender's own registered address may be UA (Ukrainian living in NL),
-      // so we prefer actual logistics data (trip / collection point).
-      const trip = parcel.tripId
-        ? await prisma.trip.findUnique({ where: { id: parcel.tripId }, select: { country: true } })
-        : null;
-      const collectionPoint = parcel.collectionPointId
-        ? await prisma.collectionPoint.findUnique({
-            where: { id: parcel.collectionPointId },
-            select: { country: true },
-          })
-        : null;
-      const senderAddr = parcel.senderAddressId
-        ? await prisma.clientAddress.findUnique({ where: { id: parcel.senderAddressId } })
-        : null;
-      const receiverAddr = parcel.receiverAddressId
-        ? await prisma.clientAddress.findUnique({ where: { id: parcel.receiverAddressId } })
-        : null;
+      const [trip, collectionPoint, senderAddr, receiverAddr] = await Promise.all([
+        parcel.tripId
+          ? prisma.trip.findUnique({ where: { id: parcel.tripId }, select: { country: true } })
+          : Promise.resolve(null),
+        parcel.collectionPointId
+          ? prisma.collectionPoint.findUnique({
+              where: { id: parcel.collectionPointId },
+              select: { country: true },
+            })
+          : Promise.resolve(null),
+        parcel.senderAddressId
+          ? prisma.clientAddress.findUnique({ where: { id: parcel.senderAddressId } })
+          : Promise.resolve(null),
+        parcel.receiverAddressId
+          ? prisma.clientAddress.findUnique({ where: { id: parcel.receiverAddressId } })
+          : Promise.resolve(null),
+      ]);
 
       const tripCountryIfEu = trip?.country && trip.country !== 'UA' ? trip.country : null;
       const country = parcel.direction === 'eu_to_ua'
@@ -252,7 +274,7 @@ export async function PATCH(
               insuranceRate: Number(pricing.insuranceRate),
               insuranceEnabled: pricing.insuranceEnabled,
               packagingEnabled: pricing.packagingEnabled,
-              packagingPrices: (pricing.packagingPrices as Record<string, number> | null) ?? null,
+              packagingPrices: parsePackagingPrices(pricing.packagingPrices),
               addressDeliveryPrice: Number(pricing.addressDeliveryPrice),
             },
             {
@@ -271,16 +293,32 @@ export async function PATCH(
         }
       }
     } catch (e) {
-      // Silently skip if pricing can't be calculated — user can set manually
-      console.error('Cost recalc failed:', e);
+      logger.error('parcel.cost_recalc_failed', e, { parcelId: id });
+      // Leave cost fields as-is; user can set manually.
     }
+
+    // Run everything in one transaction.
+    await prisma.$transaction(async (tx) => {
+      for (const p of placeUpdates) {
+        await tx.parcelPlace.update({ where: { id: p.id }, data: p.data });
+      }
+      if (placesToDelete.length > 0) {
+        await tx.parcelPlace.deleteMany({
+          where: { id: { in: placesToDelete }, parcelId: id },
+        });
+      }
+      await tx.parcel.update({ where: { id }, data: updateData });
+    });
+
+    const full = await prisma.parcel.findUnique({ where: { id } });
+    return NextResponse.json(full);
   }
 
+  // No places — single update.
   const updated = await prisma.parcel.update({
     where: { id },
     data: updateData,
   });
-
   return NextResponse.json(updated);
 }
 
@@ -291,6 +329,7 @@ export async function DELETE(
 ) {
   const guard = await requireRole(ADMIN_ROLES);
   if (!guard.ok) return guard.response;
+  const userId = guard.user.userId;
 
   const { id } = await params;
 
@@ -302,6 +341,17 @@ export async function DELETE(
   await prisma.parcel.update({
     where: { id },
     data: { deletedAt: new Date() },
+  });
+
+  logger.audit('parcel.deleted', {
+    parcelId: id, itn: parcel.itn, userId,
+  });
+  await writeAuditLog({
+    event: 'parcel.deleted',
+    actorId: userId,
+    subjectId: id,
+    subjectType: 'parcel',
+    payload: { itn: parcel.itn, internalNumber: parcel.internalNumber },
   });
 
   return NextResponse.json({ success: true });

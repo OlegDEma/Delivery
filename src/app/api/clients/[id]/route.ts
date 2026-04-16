@@ -4,6 +4,8 @@ import { normalizePhone } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { ADMIN_ROLES } from '@/lib/constants/roles';
+import { logger } from '@/lib/logger';
+import { writeAuditLog } from '@/lib/audit';
 
 // GET /api/clients/[id]
 export async function GET(
@@ -75,8 +77,15 @@ export async function PATCH(
   // Update client fields
   if (body.action === 'update') {
     const { phone, firstName, lastName, middleName, country, notes } = body;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = {};
+    const data: {
+      phone?: string;
+      phoneNormalized?: string;
+      firstName?: string;
+      lastName?: string;
+      middleName?: string | null;
+      country?: string | null;
+      notes?: string | null;
+    } = {};
     if (phone !== undefined) { data.phone = phone; data.phoneNormalized = normalizePhone(phone); }
     if (firstName !== undefined) data.firstName = capitalize(firstName);
     if (lastName !== undefined) data.lastName = capitalize(lastName);
@@ -84,7 +93,10 @@ export async function PATCH(
     if (country !== undefined) data.country = country || null;
     if (notes !== undefined) data.notes = notes || null;
 
-    const updated = await prisma.client.update({ where: { id }, data });
+    const updated = await prisma.client.update({
+      where: { id },
+      data: data as import('@/generated/prisma/client').Prisma.ClientUpdateInput,
+    });
     return NextResponse.json(updated);
   }
 
@@ -145,6 +157,7 @@ export async function DELETE(
 ) {
   const guard = await requireRole(ADMIN_ROLES);
   if (!guard.ok) return guard.response;
+  const userId = guard.user.userId;
 
   const { id } = await params;
 
@@ -156,6 +169,15 @@ export async function DELETE(
   await prisma.client.update({
     where: { id },
     data: { deletedAt: new Date() },
+  });
+
+  logger.audit('client.deleted', { clientId: id, phone: client.phone, userId });
+  await writeAuditLog({
+    event: 'client.deleted',
+    actorId: userId,
+    subjectId: id,
+    subjectType: 'client',
+    payload: { phone: client.phone, lastName: client.lastName, firstName: client.firstName },
   });
 
   return NextResponse.json({ success: true });

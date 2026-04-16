@@ -400,6 +400,7 @@ export const ModelName = {
   NpSyncLog: 'NpSyncLog',
   YearlySequence: 'YearlySequence',
   DescriptionSuggestion: 'DescriptionSuggestion',
+  AuditLog: 'AuditLog',
   Claim: 'Claim'
 } as const
 
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "descriptionSuggestion" | "claim"
+    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "descriptionSuggestion" | "auditLog" | "claim"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1604,6 +1605,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AuditLog: {
+      payload: Prisma.$AuditLogPayload<ExtArgs>
+      fields: Prisma.AuditLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuditLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuditLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        findFirst: {
+          args: Prisma.AuditLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuditLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        findMany: {
+          args: Prisma.AuditLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        create: {
+          args: Prisma.AuditLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        createMany: {
+          args: Prisma.AuditLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuditLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        delete: {
+          args: Prisma.AuditLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        update: {
+          args: Prisma.AuditLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuditLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuditLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuditLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuditLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        aggregate: {
+          args: Prisma.AuditLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuditLog>
+        }
+        groupBy: {
+          args: Prisma.AuditLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuditLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditLogCountAggregateOutputType> | number
+        }
+      }
+    }
     Claim: {
       payload: Prisma.$ClaimPayload<ExtArgs>
       fields: Prisma.ClaimFieldRefs
@@ -2043,6 +2118,19 @@ export const DescriptionSuggestionScalarFieldEnum = {
 } as const
 
 export type DescriptionSuggestionScalarFieldEnum = (typeof DescriptionSuggestionScalarFieldEnum)[keyof typeof DescriptionSuggestionScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  event: 'event',
+  actorId: 'actorId',
+  subjectId: 'subjectId',
+  subjectType: 'subjectType',
+  payload: 'payload',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const ClaimScalarFieldEnum = {
@@ -2575,6 +2663,7 @@ export type GlobalOmitConfig = {
   npSyncLog?: Prisma.NpSyncLogOmit
   yearlySequence?: Prisma.YearlySequenceOmit
   descriptionSuggestion?: Prisma.DescriptionSuggestionOmit
+  auditLog?: Prisma.AuditLogOmit
   claim?: Prisma.ClaimOmit
 }
 
