@@ -83,6 +83,7 @@ export type Payer = (typeof Payer)[keyof typeof Payer]
 
 export const ParcelStatus = {
   draft: 'draft',
+  at_collection_point: 'at_collection_point',
   accepted_for_transport_to_ua: 'accepted_for_transport_to_ua',
   in_transit_to_ua: 'in_transit_to_ua',
   at_lviv_warehouse: 'at_lviv_warehouse',
@@ -117,6 +118,29 @@ export const RouteTaskType = {
 } as const
 
 export type RouteTaskType = (typeof RouteTaskType)[keyof typeof RouteTaskType]
+
+
+export const Weekday = {
+  mon: 'mon',
+  tue: 'tue',
+  wed: 'wed',
+  thu: 'thu',
+  fri: 'fri',
+  sat: 'sat',
+  sun: 'sun'
+} as const
+
+export type Weekday = (typeof Weekday)[keyof typeof Weekday]
+
+
+export const CollectionMethod = {
+  pickup_point: 'pickup_point',
+  courier_pickup: 'courier_pickup',
+  external_shipping: 'external_shipping',
+  direct_to_driver: 'direct_to_driver'
+} as const
+
+export type CollectionMethod = (typeof CollectionMethod)[keyof typeof CollectionMethod]
 
 
 export const RouteTaskStatus = {

@@ -30,9 +30,12 @@ interface TripParcel {
   totalPlacesCount: number;
   needsPackaging: boolean;
   declaredValue: number | null;
+  collectionMethod: string | null;
+  collectionAddress: string | null;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { city: string; street: string | null; building: string | null; npWarehouseNum: string | null } | null;
+  collectionPoint: { id: string; name: string | null; city: string; address: string } | null;
 }
 
 interface TripDetail {
@@ -191,6 +194,121 @@ export default function TripDetailPage() {
           <div className="text-xs text-gray-500">кг</div>
         </div>
       </div>
+
+      {/* Pickup plan (EU→UA) — group parcels by pickup point + courier pickups */}
+      {trip.direction === 'eu_to_ua' && trip.parcels.length > 0 && (() => {
+        const byPoint = new Map<string, { name: string; city: string; address: string; pointId: string; items: typeof trip.parcels }>();
+        const courierPickups: typeof trip.parcels = [];
+        const external: typeof trip.parcels = [];
+        const direct: typeof trip.parcels = [];
+
+        for (const p of trip.parcels) {
+          if (p.collectionMethod === 'pickup_point' && p.collectionPoint) {
+            const key = p.collectionPoint.id;
+            const existing = byPoint.get(key);
+            if (existing) existing.items.push(p);
+            else byPoint.set(key, {
+              pointId: p.collectionPoint.id,
+              name: p.collectionPoint.name || `${p.collectionPoint.city}, ${p.collectionPoint.address}`,
+              city: p.collectionPoint.city,
+              address: p.collectionPoint.address,
+              items: [p],
+            });
+          } else if (p.collectionMethod === 'courier_pickup') {
+            courierPickups.push(p);
+          } else if (p.collectionMethod === 'external_shipping') {
+            external.push(p);
+          } else if (p.collectionMethod === 'direct_to_driver') {
+            direct.push(p);
+          }
+        }
+
+        if (byPoint.size === 0 && courierPickups.length === 0 && external.length === 0 && direct.length === 0) {
+          return null;
+        }
+
+        return (
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-base">📍 План забору в Європі</CardTitle>
+            </CardHeader>
+            <CardContent className="px-0 pb-0 divide-y">
+              {Array.from(byPoint.values()).map(g => (
+                <div key={g.pointId} className="px-4 py-3">
+                  <div className="flex items-start justify-between mb-1">
+                    <Link href={`/collection-points/${g.pointId}`} className="hover:underline">
+                      <div className="font-medium text-sm">🏢 {g.name}</div>
+                      {g.name !== `${g.city}, ${g.address}` && (
+                        <div className="text-xs text-gray-500">{g.city}, {g.address}</div>
+                      )}
+                    </Link>
+                    <Badge variant="secondary" className="text-xs shrink-0">{g.items.length} пос.</Badge>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {g.items.map(p => (
+                      <Link key={p.id} href={`/parcels/${p.id}`} className="inline-block mr-2 hover:underline">
+                        {p.internalNumber}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {courierPickups.length > 0 && (
+                <div className="px-4 py-3">
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="font-medium text-sm">🚐 Виклики курʼєра</div>
+                    <Badge variant="secondary" className="text-xs shrink-0">{courierPickups.length} пос.</Badge>
+                  </div>
+                  <div className="space-y-1">
+                    {courierPickups.map(p => (
+                      <Link key={p.id} href={`/parcels/${p.id}`} className="block text-xs hover:bg-gray-50 rounded px-1">
+                        <span className="font-mono">{p.internalNumber}</span>
+                        <span className="text-gray-500"> — {p.sender.lastName} {p.sender.firstName}</span>
+                        {p.collectionAddress && (
+                          <span className="text-gray-400"> · {p.collectionAddress}</span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {external.length > 0 && (
+                <div className="px-4 py-3">
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="font-medium text-sm">📦 Очікуємо локальної пошти</div>
+                    <Badge variant="secondary" className="text-xs shrink-0">{external.length} пос.</Badge>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {external.map(p => (
+                      <Link key={p.id} href={`/parcels/${p.id}`} className="inline-block mr-2 hover:underline">
+                        {p.internalNumber}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {direct.length > 0 && (
+                <div className="px-4 py-3">
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="font-medium text-sm">🤝 Передати водію напряму</div>
+                    <Badge variant="secondary" className="text-xs shrink-0">{direct.length} пос.</Badge>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {direct.map(p => (
+                      <Link key={p.id} href={`/parcels/${p.id}`} className="inline-block mr-2 hover:underline">
+                        {p.internalNumber}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Parcels list */}
       <Card>

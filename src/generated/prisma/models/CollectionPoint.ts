@@ -20,18 +20,37 @@ export type CollectionPointModel = runtime.Types.Result.DefaultSelection<Prisma.
 
 export type AggregateCollectionPoint = {
   _count: CollectionPointCountAggregateOutputType | null
+  _avg: CollectionPointAvgAggregateOutputType | null
+  _sum: CollectionPointSumAggregateOutputType | null
   _min: CollectionPointMinAggregateOutputType | null
   _max: CollectionPointMaxAggregateOutputType | null
 }
 
+export type CollectionPointAvgAggregateOutputType = {
+  latitude: runtime.Decimal | null
+  longitude: runtime.Decimal | null
+  maxCapacity: number | null
+}
+
+export type CollectionPointSumAggregateOutputType = {
+  latitude: runtime.Decimal | null
+  longitude: runtime.Decimal | null
+  maxCapacity: number | null
+}
+
 export type CollectionPointMinAggregateOutputType = {
   id: string | null
+  name: string | null
   country: $Enums.Country | null
   city: string | null
   address: string | null
   postalCode: string | null
   contactPhone: string | null
   workingHours: string | null
+  latitude: runtime.Decimal | null
+  longitude: runtime.Decimal | null
+  notes: string | null
+  maxCapacity: number | null
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -39,12 +58,17 @@ export type CollectionPointMinAggregateOutputType = {
 
 export type CollectionPointMaxAggregateOutputType = {
   id: string | null
+  name: string | null
   country: $Enums.Country | null
   city: string | null
   address: string | null
   postalCode: string | null
   contactPhone: string | null
   workingHours: string | null
+  latitude: runtime.Decimal | null
+  longitude: runtime.Decimal | null
+  notes: string | null
+  maxCapacity: number | null
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -52,12 +76,18 @@ export type CollectionPointMaxAggregateOutputType = {
 
 export type CollectionPointCountAggregateOutputType = {
   id: number
+  name: number
   country: number
   city: number
   address: number
   postalCode: number
   contactPhone: number
   workingHours: number
+  workingDays: number
+  latitude: number
+  longitude: number
+  notes: number
+  maxCapacity: number
   isActive: number
   createdAt: number
   updatedAt: number
@@ -65,14 +95,31 @@ export type CollectionPointCountAggregateOutputType = {
 }
 
 
+export type CollectionPointAvgAggregateInputType = {
+  latitude?: true
+  longitude?: true
+  maxCapacity?: true
+}
+
+export type CollectionPointSumAggregateInputType = {
+  latitude?: true
+  longitude?: true
+  maxCapacity?: true
+}
+
 export type CollectionPointMinAggregateInputType = {
   id?: true
+  name?: true
   country?: true
   city?: true
   address?: true
   postalCode?: true
   contactPhone?: true
   workingHours?: true
+  latitude?: true
+  longitude?: true
+  notes?: true
+  maxCapacity?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -80,12 +127,17 @@ export type CollectionPointMinAggregateInputType = {
 
 export type CollectionPointMaxAggregateInputType = {
   id?: true
+  name?: true
   country?: true
   city?: true
   address?: true
   postalCode?: true
   contactPhone?: true
   workingHours?: true
+  latitude?: true
+  longitude?: true
+  notes?: true
+  maxCapacity?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -93,12 +145,18 @@ export type CollectionPointMaxAggregateInputType = {
 
 export type CollectionPointCountAggregateInputType = {
   id?: true
+  name?: true
   country?: true
   city?: true
   address?: true
   postalCode?: true
   contactPhone?: true
   workingHours?: true
+  workingDays?: true
+  latitude?: true
+  longitude?: true
+  notes?: true
+  maxCapacity?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -143,6 +201,18 @@ export type CollectionPointAggregateArgs<ExtArgs extends runtime.Types.Extension
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: CollectionPointAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: CollectionPointSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: CollectionPointMinAggregateInputType
@@ -173,22 +243,32 @@ export type CollectionPointGroupByArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   _count?: CollectionPointCountAggregateInputType | true
+  _avg?: CollectionPointAvgAggregateInputType
+  _sum?: CollectionPointSumAggregateInputType
   _min?: CollectionPointMinAggregateInputType
   _max?: CollectionPointMaxAggregateInputType
 }
 
 export type CollectionPointGroupByOutputType = {
   id: string
+  name: string | null
   country: $Enums.Country
   city: string
   address: string
   postalCode: string | null
   contactPhone: string | null
   workingHours: string | null
+  workingDays: $Enums.Weekday[]
+  latitude: runtime.Decimal | null
+  longitude: runtime.Decimal | null
+  notes: string | null
+  maxCapacity: number | null
   isActive: boolean
   createdAt: Date
   updatedAt: Date
   _count: CollectionPointCountAggregateOutputType | null
+  _avg: CollectionPointAvgAggregateOutputType | null
+  _sum: CollectionPointSumAggregateOutputType | null
   _min: CollectionPointMinAggregateOutputType | null
   _max: CollectionPointMaxAggregateOutputType | null
 }
@@ -213,28 +293,42 @@ export type CollectionPointWhereInput = {
   OR?: Prisma.CollectionPointWhereInput[]
   NOT?: Prisma.CollectionPointWhereInput | Prisma.CollectionPointWhereInput[]
   id?: Prisma.UuidFilter<"CollectionPoint"> | string
+  name?: Prisma.StringNullableFilter<"CollectionPoint"> | string | null
   country?: Prisma.EnumCountryFilter<"CollectionPoint"> | $Enums.Country
   city?: Prisma.StringFilter<"CollectionPoint"> | string
   address?: Prisma.StringFilter<"CollectionPoint"> | string
   postalCode?: Prisma.StringNullableFilter<"CollectionPoint"> | string | null
   contactPhone?: Prisma.StringNullableFilter<"CollectionPoint"> | string | null
   workingHours?: Prisma.StringNullableFilter<"CollectionPoint"> | string | null
+  workingDays?: Prisma.EnumWeekdayNullableListFilter<"CollectionPoint">
+  latitude?: Prisma.DecimalNullableFilter<"CollectionPoint"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.DecimalNullableFilter<"CollectionPoint"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.StringNullableFilter<"CollectionPoint"> | string | null
+  maxCapacity?: Prisma.IntNullableFilter<"CollectionPoint"> | number | null
   isActive?: Prisma.BoolFilter<"CollectionPoint"> | boolean
   createdAt?: Prisma.DateTimeFilter<"CollectionPoint"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CollectionPoint"> | Date | string
+  parcels?: Prisma.ParcelListRelationFilter
 }
 
 export type CollectionPointOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrder
   city?: Prisma.SortOrder
   address?: Prisma.SortOrder
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   contactPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   workingHours?: Prisma.SortOrderInput | Prisma.SortOrder
+  workingDays?: Prisma.SortOrder
+  latitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxCapacity?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  parcels?: Prisma.ParcelOrderByRelationAggregateInput
 }
 
 export type CollectionPointWhereUniqueInput = Prisma.AtLeast<{
@@ -242,31 +336,46 @@ export type CollectionPointWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.CollectionPointWhereInput | Prisma.CollectionPointWhereInput[]
   OR?: Prisma.CollectionPointWhereInput[]
   NOT?: Prisma.CollectionPointWhereInput | Prisma.CollectionPointWhereInput[]
+  name?: Prisma.StringNullableFilter<"CollectionPoint"> | string | null
   country?: Prisma.EnumCountryFilter<"CollectionPoint"> | $Enums.Country
   city?: Prisma.StringFilter<"CollectionPoint"> | string
   address?: Prisma.StringFilter<"CollectionPoint"> | string
   postalCode?: Prisma.StringNullableFilter<"CollectionPoint"> | string | null
   contactPhone?: Prisma.StringNullableFilter<"CollectionPoint"> | string | null
   workingHours?: Prisma.StringNullableFilter<"CollectionPoint"> | string | null
+  workingDays?: Prisma.EnumWeekdayNullableListFilter<"CollectionPoint">
+  latitude?: Prisma.DecimalNullableFilter<"CollectionPoint"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.DecimalNullableFilter<"CollectionPoint"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.StringNullableFilter<"CollectionPoint"> | string | null
+  maxCapacity?: Prisma.IntNullableFilter<"CollectionPoint"> | number | null
   isActive?: Prisma.BoolFilter<"CollectionPoint"> | boolean
   createdAt?: Prisma.DateTimeFilter<"CollectionPoint"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CollectionPoint"> | Date | string
+  parcels?: Prisma.ParcelListRelationFilter
 }, "id">
 
 export type CollectionPointOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrder
   city?: Prisma.SortOrder
   address?: Prisma.SortOrder
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   contactPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   workingHours?: Prisma.SortOrderInput | Prisma.SortOrder
+  workingDays?: Prisma.SortOrder
+  latitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxCapacity?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CollectionPointCountOrderByAggregateInput
+  _avg?: Prisma.CollectionPointAvgOrderByAggregateInput
   _max?: Prisma.CollectionPointMaxOrderByAggregateInput
   _min?: Prisma.CollectionPointMinOrderByAggregateInput
+  _sum?: Prisma.CollectionPointSumOrderByAggregateInput
 }
 
 export type CollectionPointScalarWhereWithAggregatesInput = {
@@ -274,12 +383,18 @@ export type CollectionPointScalarWhereWithAggregatesInput = {
   OR?: Prisma.CollectionPointScalarWhereWithAggregatesInput[]
   NOT?: Prisma.CollectionPointScalarWhereWithAggregatesInput | Prisma.CollectionPointScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"CollectionPoint"> | string
+  name?: Prisma.StringNullableWithAggregatesFilter<"CollectionPoint"> | string | null
   country?: Prisma.EnumCountryWithAggregatesFilter<"CollectionPoint"> | $Enums.Country
   city?: Prisma.StringWithAggregatesFilter<"CollectionPoint"> | string
   address?: Prisma.StringWithAggregatesFilter<"CollectionPoint"> | string
   postalCode?: Prisma.StringNullableWithAggregatesFilter<"CollectionPoint"> | string | null
   contactPhone?: Prisma.StringNullableWithAggregatesFilter<"CollectionPoint"> | string | null
   workingHours?: Prisma.StringNullableWithAggregatesFilter<"CollectionPoint"> | string | null
+  workingDays?: Prisma.EnumWeekdayNullableListFilter<"CollectionPoint">
+  latitude?: Prisma.DecimalNullableWithAggregatesFilter<"CollectionPoint"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.DecimalNullableWithAggregatesFilter<"CollectionPoint"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.StringNullableWithAggregatesFilter<"CollectionPoint"> | string | null
+  maxCapacity?: Prisma.IntNullableWithAggregatesFilter<"CollectionPoint"> | number | null
   isActive?: Prisma.BoolWithAggregatesFilter<"CollectionPoint"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"CollectionPoint"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"CollectionPoint"> | Date | string
@@ -287,64 +402,98 @@ export type CollectionPointScalarWhereWithAggregatesInput = {
 
 export type CollectionPointCreateInput = {
   id?: string
+  name?: string | null
   country: $Enums.Country
   city: string
   address: string
   postalCode?: string | null
   contactPhone?: string | null
   workingHours?: string | null
+  workingDays?: Prisma.CollectionPointCreateworkingDaysInput | $Enums.Weekday[]
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: string | null
+  maxCapacity?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  parcels?: Prisma.ParcelCreateNestedManyWithoutCollectionPointInput
 }
 
 export type CollectionPointUncheckedCreateInput = {
   id?: string
+  name?: string | null
   country: $Enums.Country
   city: string
   address: string
   postalCode?: string | null
   contactPhone?: string | null
   workingHours?: string | null
+  workingDays?: Prisma.CollectionPointCreateworkingDaysInput | $Enums.Weekday[]
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: string | null
+  maxCapacity?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectionPointInput
 }
 
 export type CollectionPointUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   city?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingDays?: Prisma.CollectionPointUpdateworkingDaysInput | $Enums.Weekday[]
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxCapacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  parcels?: Prisma.ParcelUpdateManyWithoutCollectionPointNestedInput
 }
 
 export type CollectionPointUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   city?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingDays?: Prisma.CollectionPointUpdateworkingDaysInput | $Enums.Weekday[]
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxCapacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  parcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectionPointNestedInput
 }
 
 export type CollectionPointCreateManyInput = {
   id?: string
+  name?: string | null
   country: $Enums.Country
   city: string
   address: string
   postalCode?: string | null
   contactPhone?: string | null
   workingHours?: string | null
+  workingDays?: Prisma.CollectionPointCreateworkingDaysInput | $Enums.Weekday[]
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: string | null
+  maxCapacity?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -352,12 +501,18 @@ export type CollectionPointCreateManyInput = {
 
 export type CollectionPointUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   city?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingDays?: Prisma.CollectionPointUpdateworkingDaysInput | $Enums.Weekday[]
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxCapacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -365,38 +520,74 @@ export type CollectionPointUpdateManyMutationInput = {
 
 export type CollectionPointUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   city?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingDays?: Prisma.CollectionPointUpdateworkingDaysInput | $Enums.Weekday[]
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxCapacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type CollectionPointNullableScalarRelationFilter = {
+  is?: Prisma.CollectionPointWhereInput | null
+  isNot?: Prisma.CollectionPointWhereInput | null
+}
+
+export type EnumWeekdayNullableListFilter<$PrismaModel = never> = {
+  equals?: $Enums.Weekday[] | Prisma.ListEnumWeekdayFieldRefInput<$PrismaModel> | null
+  has?: $Enums.Weekday | Prisma.EnumWeekdayFieldRefInput<$PrismaModel> | null
+  hasEvery?: $Enums.Weekday[] | Prisma.ListEnumWeekdayFieldRefInput<$PrismaModel>
+  hasSome?: $Enums.Weekday[] | Prisma.ListEnumWeekdayFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
+}
+
 export type CollectionPointCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   country?: Prisma.SortOrder
   city?: Prisma.SortOrder
   address?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
   contactPhone?: Prisma.SortOrder
   workingHours?: Prisma.SortOrder
+  workingDays?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  maxCapacity?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
+export type CollectionPointAvgOrderByAggregateInput = {
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
+  maxCapacity?: Prisma.SortOrder
+}
+
 export type CollectionPointMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   country?: Prisma.SortOrder
   city?: Prisma.SortOrder
   address?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
   contactPhone?: Prisma.SortOrder
   workingHours?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  maxCapacity?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -404,40 +595,211 @@ export type CollectionPointMaxOrderByAggregateInput = {
 
 export type CollectionPointMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   country?: Prisma.SortOrder
   city?: Prisma.SortOrder
   address?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
   contactPhone?: Prisma.SortOrder
   workingHours?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  maxCapacity?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
+export type CollectionPointSumOrderByAggregateInput = {
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
+  maxCapacity?: Prisma.SortOrder
+}
+
+export type CollectionPointCreateNestedOneWithoutParcelsInput = {
+  create?: Prisma.XOR<Prisma.CollectionPointCreateWithoutParcelsInput, Prisma.CollectionPointUncheckedCreateWithoutParcelsInput>
+  connectOrCreate?: Prisma.CollectionPointCreateOrConnectWithoutParcelsInput
+  connect?: Prisma.CollectionPointWhereUniqueInput
+}
+
+export type CollectionPointUpdateOneWithoutParcelsNestedInput = {
+  create?: Prisma.XOR<Prisma.CollectionPointCreateWithoutParcelsInput, Prisma.CollectionPointUncheckedCreateWithoutParcelsInput>
+  connectOrCreate?: Prisma.CollectionPointCreateOrConnectWithoutParcelsInput
+  upsert?: Prisma.CollectionPointUpsertWithoutParcelsInput
+  disconnect?: Prisma.CollectionPointWhereInput | boolean
+  delete?: Prisma.CollectionPointWhereInput | boolean
+  connect?: Prisma.CollectionPointWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CollectionPointUpdateToOneWithWhereWithoutParcelsInput, Prisma.CollectionPointUpdateWithoutParcelsInput>, Prisma.CollectionPointUncheckedUpdateWithoutParcelsInput>
+}
+
+export type CollectionPointCreateworkingDaysInput = {
+  set: $Enums.Weekday[]
+}
+
+export type CollectionPointUpdateworkingDaysInput = {
+  set?: $Enums.Weekday[]
+  push?: $Enums.Weekday | $Enums.Weekday[]
+}
+
+export type CollectionPointCreateWithoutParcelsInput = {
+  id?: string
+  name?: string | null
+  country: $Enums.Country
+  city: string
+  address: string
+  postalCode?: string | null
+  contactPhone?: string | null
+  workingHours?: string | null
+  workingDays?: Prisma.CollectionPointCreateworkingDaysInput | $Enums.Weekday[]
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: string | null
+  maxCapacity?: number | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type CollectionPointUncheckedCreateWithoutParcelsInput = {
+  id?: string
+  name?: string | null
+  country: $Enums.Country
+  city: string
+  address: string
+  postalCode?: string | null
+  contactPhone?: string | null
+  workingHours?: string | null
+  workingDays?: Prisma.CollectionPointCreateworkingDaysInput | $Enums.Weekday[]
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: string | null
+  maxCapacity?: number | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type CollectionPointCreateOrConnectWithoutParcelsInput = {
+  where: Prisma.CollectionPointWhereUniqueInput
+  create: Prisma.XOR<Prisma.CollectionPointCreateWithoutParcelsInput, Prisma.CollectionPointUncheckedCreateWithoutParcelsInput>
+}
+
+export type CollectionPointUpsertWithoutParcelsInput = {
+  update: Prisma.XOR<Prisma.CollectionPointUpdateWithoutParcelsInput, Prisma.CollectionPointUncheckedUpdateWithoutParcelsInput>
+  create: Prisma.XOR<Prisma.CollectionPointCreateWithoutParcelsInput, Prisma.CollectionPointUncheckedCreateWithoutParcelsInput>
+  where?: Prisma.CollectionPointWhereInput
+}
+
+export type CollectionPointUpdateToOneWithWhereWithoutParcelsInput = {
+  where?: Prisma.CollectionPointWhereInput
+  data: Prisma.XOR<Prisma.CollectionPointUpdateWithoutParcelsInput, Prisma.CollectionPointUncheckedUpdateWithoutParcelsInput>
+}
+
+export type CollectionPointUpdateWithoutParcelsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingDays?: Prisma.CollectionPointUpdateworkingDaysInput | $Enums.Weekday[]
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxCapacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CollectionPointUncheckedUpdateWithoutParcelsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingDays?: Prisma.CollectionPointUpdateworkingDaysInput | $Enums.Weekday[]
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxCapacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type CollectionPointCountOutputType
+ */
+
+export type CollectionPointCountOutputType = {
+  parcels: number
+}
+
+export type CollectionPointCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  parcels?: boolean | CollectionPointCountOutputTypeCountParcelsArgs
+}
+
+/**
+ * CollectionPointCountOutputType without action
+ */
+export type CollectionPointCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CollectionPointCountOutputType
+   */
+  select?: Prisma.CollectionPointCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CollectionPointCountOutputType without action
+ */
+export type CollectionPointCountOutputTypeCountParcelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ParcelWhereInput
+}
 
 
 export type CollectionPointSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  name?: boolean
   country?: boolean
   city?: boolean
   address?: boolean
   postalCode?: boolean
   contactPhone?: boolean
   workingHours?: boolean
+  workingDays?: boolean
+  latitude?: boolean
+  longitude?: boolean
+  notes?: boolean
+  maxCapacity?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  parcels?: boolean | Prisma.CollectionPoint$parcelsArgs<ExtArgs>
+  _count?: boolean | Prisma.CollectionPointCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["collectionPoint"]>
 
 export type CollectionPointSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  name?: boolean
   country?: boolean
   city?: boolean
   address?: boolean
   postalCode?: boolean
   contactPhone?: boolean
   workingHours?: boolean
+  workingDays?: boolean
+  latitude?: boolean
+  longitude?: boolean
+  notes?: boolean
+  maxCapacity?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -445,12 +807,18 @@ export type CollectionPointSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
 
 export type CollectionPointSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  name?: boolean
   country?: boolean
   city?: boolean
   address?: boolean
   postalCode?: boolean
   contactPhone?: boolean
   workingHours?: boolean
+  workingDays?: boolean
+  latitude?: boolean
+  longitude?: boolean
+  notes?: boolean
+  maxCapacity?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -458,30 +826,50 @@ export type CollectionPointSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
 
 export type CollectionPointSelectScalar = {
   id?: boolean
+  name?: boolean
   country?: boolean
   city?: boolean
   address?: boolean
   postalCode?: boolean
   contactPhone?: boolean
   workingHours?: boolean
+  workingDays?: boolean
+  latitude?: boolean
+  longitude?: boolean
+  notes?: boolean
+  maxCapacity?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CollectionPointOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "city" | "address" | "postalCode" | "contactPhone" | "workingHours" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["collectionPoint"]>
+export type CollectionPointOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "country" | "city" | "address" | "postalCode" | "contactPhone" | "workingHours" | "workingDays" | "latitude" | "longitude" | "notes" | "maxCapacity" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["collectionPoint"]>
+export type CollectionPointInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  parcels?: boolean | Prisma.CollectionPoint$parcelsArgs<ExtArgs>
+  _count?: boolean | Prisma.CollectionPointCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type CollectionPointIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type CollectionPointIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $CollectionPointPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CollectionPoint"
-  objects: {}
+  objects: {
+    parcels: Prisma.$ParcelPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    name: string | null
     country: $Enums.Country
     city: string
     address: string
     postalCode: string | null
     contactPhone: string | null
     workingHours: string | null
+    workingDays: $Enums.Weekday[]
+    latitude: runtime.Decimal | null
+    longitude: runtime.Decimal | null
+    notes: string | null
+    maxCapacity: number | null
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -879,6 +1267,7 @@ readonly fields: CollectionPointFieldRefs;
  */
 export interface Prisma__CollectionPointClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  parcels<T extends Prisma.CollectionPoint$parcelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CollectionPoint$parcelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -909,12 +1298,18 @@ export interface Prisma__CollectionPointClient<T, Null = never, ExtArgs extends 
  */
 export interface CollectionPointFieldRefs {
   readonly id: Prisma.FieldRef<"CollectionPoint", 'String'>
+  readonly name: Prisma.FieldRef<"CollectionPoint", 'String'>
   readonly country: Prisma.FieldRef<"CollectionPoint", 'Country'>
   readonly city: Prisma.FieldRef<"CollectionPoint", 'String'>
   readonly address: Prisma.FieldRef<"CollectionPoint", 'String'>
   readonly postalCode: Prisma.FieldRef<"CollectionPoint", 'String'>
   readonly contactPhone: Prisma.FieldRef<"CollectionPoint", 'String'>
   readonly workingHours: Prisma.FieldRef<"CollectionPoint", 'String'>
+  readonly workingDays: Prisma.FieldRef<"CollectionPoint", 'Weekday[]'>
+  readonly latitude: Prisma.FieldRef<"CollectionPoint", 'Decimal'>
+  readonly longitude: Prisma.FieldRef<"CollectionPoint", 'Decimal'>
+  readonly notes: Prisma.FieldRef<"CollectionPoint", 'String'>
+  readonly maxCapacity: Prisma.FieldRef<"CollectionPoint", 'Int'>
   readonly isActive: Prisma.FieldRef<"CollectionPoint", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"CollectionPoint", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"CollectionPoint", 'DateTime'>
@@ -935,6 +1330,10 @@ export type CollectionPointFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.CollectionPointOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
+  /**
    * Filter, which CollectionPoint to fetch.
    */
   where: Prisma.CollectionPointWhereUniqueInput
@@ -953,6 +1352,10 @@ export type CollectionPointFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.CollectionPointOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
+  /**
    * Filter, which CollectionPoint to fetch.
    */
   where: Prisma.CollectionPointWhereUniqueInput
@@ -970,6 +1373,10 @@ export type CollectionPointFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the CollectionPoint
    */
   omit?: Prisma.CollectionPointOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
   /**
    * Filter, which CollectionPoint to fetch.
    */
@@ -1019,6 +1426,10 @@ export type CollectionPointFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.CollectionPointOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
+  /**
    * Filter, which CollectionPoint to fetch.
    */
   where?: Prisma.CollectionPointWhereInput
@@ -1066,6 +1477,10 @@ export type CollectionPointFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the CollectionPoint
    */
   omit?: Prisma.CollectionPointOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
   /**
    * Filter, which CollectionPoints to fetch.
    */
@@ -1115,6 +1530,10 @@ export type CollectionPointCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.CollectionPointOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
+  /**
    * The data needed to create a CollectionPoint.
    */
   data: Prisma.XOR<Prisma.CollectionPointCreateInput, Prisma.CollectionPointUncheckedCreateInput>
@@ -1162,6 +1581,10 @@ export type CollectionPointUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the CollectionPoint
    */
   omit?: Prisma.CollectionPointOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
   /**
    * The data needed to update a CollectionPoint.
    */
@@ -1229,6 +1652,10 @@ export type CollectionPointUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.CollectionPointOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
+  /**
    * The filter to search for the CollectionPoint to update in case it exists.
    */
   where: Prisma.CollectionPointWhereUniqueInput
@@ -1255,6 +1682,10 @@ export type CollectionPointDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.CollectionPointOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
+  /**
    * Filter which CollectionPoint to delete.
    */
   where: Prisma.CollectionPointWhereUniqueInput
@@ -1275,6 +1706,30 @@ export type CollectionPointDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
+ * CollectionPoint.parcels
+ */
+export type CollectionPoint$parcelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Parcel
+   */
+  select?: Prisma.ParcelSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Parcel
+   */
+  omit?: Prisma.ParcelOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ParcelInclude<ExtArgs> | null
+  where?: Prisma.ParcelWhereInput
+  orderBy?: Prisma.ParcelOrderByWithRelationInput | Prisma.ParcelOrderByWithRelationInput[]
+  cursor?: Prisma.ParcelWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ParcelScalarFieldEnum | Prisma.ParcelScalarFieldEnum[]
+}
+
+/**
  * CollectionPoint without action
  */
 export type CollectionPointDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1286,4 +1741,8 @@ export type CollectionPointDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the CollectionPoint
    */
   omit?: Prisma.CollectionPointOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
 }

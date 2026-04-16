@@ -217,6 +217,7 @@ export type ProfileWhereInput = {
   createdClients?: Prisma.ClientListRelationFilter
   assignedParcels?: Prisma.ParcelListRelationFilter
   createdParcels?: Prisma.ParcelListRelationFilter
+  collectedParcels?: Prisma.ParcelListRelationFilter
   assignedTrips?: Prisma.TripListRelationFilter
   secondCourierTrips?: Prisma.TripListRelationFilter
   createdTrips?: Prisma.TripListRelationFilter
@@ -246,6 +247,7 @@ export type ProfileOrderByWithRelationInput = {
   createdClients?: Prisma.ClientOrderByRelationAggregateInput
   assignedParcels?: Prisma.ParcelOrderByRelationAggregateInput
   createdParcels?: Prisma.ParcelOrderByRelationAggregateInput
+  collectedParcels?: Prisma.ParcelOrderByRelationAggregateInput
   assignedTrips?: Prisma.TripOrderByRelationAggregateInput
   secondCourierTrips?: Prisma.TripOrderByRelationAggregateInput
   createdTrips?: Prisma.TripOrderByRelationAggregateInput
@@ -278,6 +280,7 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   createdClients?: Prisma.ClientListRelationFilter
   assignedParcels?: Prisma.ParcelListRelationFilter
   createdParcels?: Prisma.ParcelListRelationFilter
+  collectedParcels?: Prisma.ParcelListRelationFilter
   assignedTrips?: Prisma.TripListRelationFilter
   secondCourierTrips?: Prisma.TripListRelationFilter
   createdTrips?: Prisma.TripListRelationFilter
@@ -337,6 +340,7 @@ export type ProfileCreateInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -366,6 +370,7 @@ export type ProfileUncheckedCreateInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -395,6 +400,7 @@ export type ProfileUpdateInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -424,6 +430,7 @@ export type ProfileUncheckedUpdateInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -654,6 +661,12 @@ export type ProfileUpdateOneWithoutCreatedTripsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutCreatedTripsInput, Prisma.ProfileUpdateWithoutCreatedTripsInput>, Prisma.ProfileUncheckedUpdateWithoutCreatedTripsInput>
 }
 
+export type ProfileCreateNestedOneWithoutCollectedParcelsInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutCollectedParcelsInput, Prisma.ProfileUncheckedCreateWithoutCollectedParcelsInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutCollectedParcelsInput
+  connect?: Prisma.ProfileWhereUniqueInput
+}
+
 export type ProfileCreateNestedOneWithoutCreatedParcelsInput = {
   create?: Prisma.XOR<Prisma.ProfileCreateWithoutCreatedParcelsInput, Prisma.ProfileUncheckedCreateWithoutCreatedParcelsInput>
   connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutCreatedParcelsInput
@@ -664,6 +677,16 @@ export type ProfileCreateNestedOneWithoutAssignedParcelsInput = {
   create?: Prisma.XOR<Prisma.ProfileCreateWithoutAssignedParcelsInput, Prisma.ProfileUncheckedCreateWithoutAssignedParcelsInput>
   connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutAssignedParcelsInput
   connect?: Prisma.ProfileWhereUniqueInput
+}
+
+export type ProfileUpdateOneWithoutCollectedParcelsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutCollectedParcelsInput, Prisma.ProfileUncheckedCreateWithoutCollectedParcelsInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutCollectedParcelsInput
+  upsert?: Prisma.ProfileUpsertWithoutCollectedParcelsInput
+  disconnect?: Prisma.ProfileWhereInput | boolean
+  delete?: Prisma.ProfileWhereInput | boolean
+  connect?: Prisma.ProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutCollectedParcelsInput, Prisma.ProfileUpdateWithoutCollectedParcelsInput>, Prisma.ProfileUncheckedUpdateWithoutCollectedParcelsInput>
 }
 
 export type ProfileUpdateOneWithoutCreatedParcelsNestedInput = {
@@ -824,6 +847,7 @@ export type ProfileCreateWithoutCreatedClientsInput = {
   updatedAt?: Date | string
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -852,6 +876,7 @@ export type ProfileUncheckedCreateWithoutCreatedClientsInput = {
   updatedAt?: Date | string
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -896,6 +921,7 @@ export type ProfileUpdateWithoutCreatedClientsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -924,6 +950,7 @@ export type ProfileUncheckedUpdateWithoutCreatedClientsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -953,6 +980,7 @@ export type ProfileCreateWithoutAssignedJourneysInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -981,6 +1009,7 @@ export type ProfileUncheckedCreateWithoutAssignedJourneysInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1014,6 +1043,7 @@ export type ProfileCreateWithoutSecondCourierJourneysInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -1042,6 +1072,7 @@ export type ProfileUncheckedCreateWithoutSecondCourierJourneysInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1075,6 +1106,7 @@ export type ProfileCreateWithoutCreatedJourneysInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -1103,6 +1135,7 @@ export type ProfileUncheckedCreateWithoutCreatedJourneysInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1147,6 +1180,7 @@ export type ProfileUpdateWithoutAssignedJourneysInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -1175,6 +1209,7 @@ export type ProfileUncheckedUpdateWithoutAssignedJourneysInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1214,6 +1249,7 @@ export type ProfileUpdateWithoutSecondCourierJourneysInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -1242,6 +1278,7 @@ export type ProfileUncheckedUpdateWithoutSecondCourierJourneysInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1281,6 +1318,7 @@ export type ProfileUpdateWithoutCreatedJourneysInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -1309,6 +1347,7 @@ export type ProfileUncheckedUpdateWithoutCreatedJourneysInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1337,6 +1376,7 @@ export type ProfileCreateWithoutAssignedTripsInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
   assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
@@ -1365,6 +1405,7 @@ export type ProfileUncheckedCreateWithoutAssignedTripsInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
   assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
@@ -1398,6 +1439,7 @@ export type ProfileCreateWithoutSecondCourierTripsInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
   assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
@@ -1426,6 +1468,7 @@ export type ProfileUncheckedCreateWithoutSecondCourierTripsInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
   assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
@@ -1459,6 +1502,7 @@ export type ProfileCreateWithoutCreatedTripsInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
@@ -1487,6 +1531,7 @@ export type ProfileUncheckedCreateWithoutCreatedTripsInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
@@ -1531,6 +1576,7 @@ export type ProfileUpdateWithoutAssignedTripsInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
   assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
@@ -1559,6 +1605,7 @@ export type ProfileUncheckedUpdateWithoutAssignedTripsInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
@@ -1598,6 +1645,7 @@ export type ProfileUpdateWithoutSecondCourierTripsInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
   assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
@@ -1626,6 +1674,7 @@ export type ProfileUncheckedUpdateWithoutSecondCourierTripsInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
@@ -1665,6 +1714,7 @@ export type ProfileUpdateWithoutCreatedTripsInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
@@ -1693,6 +1743,7 @@ export type ProfileUncheckedUpdateWithoutCreatedTripsInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
@@ -1708,6 +1759,69 @@ export type ProfileUncheckedUpdateWithoutCreatedTripsInput = {
   createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
+export type ProfileCreateWithoutCollectedParcelsInput = {
+  id: string
+  email: string
+  fullName: string
+  phone?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
+  assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
+  createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
+  secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
+  createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
+  assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
+  cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
+  cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
+  statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
+  scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
+  warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
+  pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
+}
+
+export type ProfileUncheckedCreateWithoutCollectedParcelsInput = {
+  id: string
+  email: string
+  fullName: string
+  phone?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
+  createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
+  cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
+  cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
+  statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
+  pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type ProfileCreateOrConnectWithoutCollectedParcelsInput = {
+  where: Prisma.ProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutCollectedParcelsInput, Prisma.ProfileUncheckedCreateWithoutCollectedParcelsInput>
+}
+
 export type ProfileCreateWithoutCreatedParcelsInput = {
   id: string
   email: string
@@ -1720,6 +1834,7 @@ export type ProfileCreateWithoutCreatedParcelsInput = {
   updatedAt?: Date | string
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -1748,6 +1863,7 @@ export type ProfileUncheckedCreateWithoutCreatedParcelsInput = {
   updatedAt?: Date | string
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1781,6 +1897,7 @@ export type ProfileCreateWithoutAssignedParcelsInput = {
   updatedAt?: Date | string
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -1809,6 +1926,7 @@ export type ProfileUncheckedCreateWithoutAssignedParcelsInput = {
   updatedAt?: Date | string
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1828,6 +1946,75 @@ export type ProfileUncheckedCreateWithoutAssignedParcelsInput = {
 export type ProfileCreateOrConnectWithoutAssignedParcelsInput = {
   where: Prisma.ProfileWhereUniqueInput
   create: Prisma.XOR<Prisma.ProfileCreateWithoutAssignedParcelsInput, Prisma.ProfileUncheckedCreateWithoutAssignedParcelsInput>
+}
+
+export type ProfileUpsertWithoutCollectedParcelsInput = {
+  update: Prisma.XOR<Prisma.ProfileUpdateWithoutCollectedParcelsInput, Prisma.ProfileUncheckedUpdateWithoutCollectedParcelsInput>
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutCollectedParcelsInput, Prisma.ProfileUncheckedCreateWithoutCollectedParcelsInput>
+  where?: Prisma.ProfileWhereInput
+}
+
+export type ProfileUpdateToOneWithWhereWithoutCollectedParcelsInput = {
+  where?: Prisma.ProfileWhereInput
+  data: Prisma.XOR<Prisma.ProfileUpdateWithoutCollectedParcelsInput, Prisma.ProfileUncheckedUpdateWithoutCollectedParcelsInput>
+}
+
+export type ProfileUpdateWithoutCollectedParcelsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
+  assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
+  createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
+  createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
+  assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
+  cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
+  cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
+  statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
+  scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
+  pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
+}
+
+export type ProfileUncheckedUpdateWithoutCollectedParcelsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
+  cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
+  statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
+  pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type ProfileUpsertWithoutCreatedParcelsInput = {
@@ -1853,6 +2040,7 @@ export type ProfileUpdateWithoutCreatedParcelsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -1881,6 +2069,7 @@ export type ProfileUncheckedUpdateWithoutCreatedParcelsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1920,6 +2109,7 @@ export type ProfileUpdateWithoutAssignedParcelsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -1948,6 +2138,7 @@ export type ProfileUncheckedUpdateWithoutAssignedParcelsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1977,6 +2168,7 @@ export type ProfileCreateWithoutScannedPlacesInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -2005,6 +2197,7 @@ export type ProfileUncheckedCreateWithoutScannedPlacesInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2049,6 +2242,7 @@ export type ProfileUpdateWithoutScannedPlacesInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -2077,6 +2271,7 @@ export type ProfileUncheckedUpdateWithoutScannedPlacesInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2105,6 +2300,7 @@ export type ProfileCreateWithoutStatusChangesInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -2133,6 +2329,7 @@ export type ProfileUncheckedCreateWithoutStatusChangesInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2177,6 +2374,7 @@ export type ProfileUpdateWithoutStatusChangesInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -2205,6 +2403,7 @@ export type ProfileUncheckedUpdateWithoutStatusChangesInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2233,6 +2432,7 @@ export type ProfileCreateWithoutPricingUpdatesInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -2261,6 +2461,7 @@ export type ProfileUncheckedCreateWithoutPricingUpdatesInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2305,6 +2506,7 @@ export type ProfileUpdateWithoutPricingUpdatesInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -2333,6 +2535,7 @@ export type ProfileUncheckedUpdateWithoutPricingUpdatesInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2361,6 +2564,7 @@ export type ProfileCreateWithoutCashReceivedInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -2389,6 +2593,7 @@ export type ProfileUncheckedCreateWithoutCashReceivedInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2422,6 +2627,7 @@ export type ProfileCreateWithoutCashConfirmedInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -2450,6 +2656,7 @@ export type ProfileUncheckedCreateWithoutCashConfirmedInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2494,6 +2701,7 @@ export type ProfileUpdateWithoutCashReceivedInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -2522,6 +2730,7 @@ export type ProfileUncheckedUpdateWithoutCashReceivedInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2561,6 +2770,7 @@ export type ProfileUpdateWithoutCashConfirmedInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -2589,6 +2799,7 @@ export type ProfileUncheckedUpdateWithoutCashConfirmedInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2617,6 +2828,7 @@ export type ProfileCreateWithoutAssignedRouteTasksInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -2645,6 +2857,7 @@ export type ProfileUncheckedCreateWithoutAssignedRouteTasksInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2689,6 +2902,7 @@ export type ProfileUpdateWithoutAssignedRouteTasksInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -2717,6 +2931,7 @@ export type ProfileUncheckedUpdateWithoutAssignedRouteTasksInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2745,6 +2960,7 @@ export type ProfileCreateWithoutWarehouseActionsInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -2773,6 +2989,7 @@ export type ProfileUncheckedCreateWithoutWarehouseActionsInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2817,6 +3034,7 @@ export type ProfileUpdateWithoutWarehouseActionsInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -2845,6 +3063,7 @@ export type ProfileUncheckedUpdateWithoutWarehouseActionsInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2873,6 +3092,7 @@ export type ProfileCreateWithoutCreatedClaimsInput = {
   createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
@@ -2901,6 +3121,7 @@ export type ProfileUncheckedCreateWithoutCreatedClaimsInput = {
   createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
   assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  collectedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCollectedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
@@ -2945,6 +3166,7 @@ export type ProfileUpdateWithoutCreatedClaimsInput = {
   createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
@@ -2973,6 +3195,7 @@ export type ProfileUncheckedUpdateWithoutCreatedClaimsInput = {
   createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCollectedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -2997,6 +3220,7 @@ export type ProfileCountOutputType = {
   createdClients: number
   assignedParcels: number
   createdParcels: number
+  collectedParcels: number
   assignedTrips: number
   secondCourierTrips: number
   createdTrips: number
@@ -3017,6 +3241,7 @@ export type ProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   createdClients?: boolean | ProfileCountOutputTypeCountCreatedClientsArgs
   assignedParcels?: boolean | ProfileCountOutputTypeCountAssignedParcelsArgs
   createdParcels?: boolean | ProfileCountOutputTypeCountCreatedParcelsArgs
+  collectedParcels?: boolean | ProfileCountOutputTypeCountCollectedParcelsArgs
   assignedTrips?: boolean | ProfileCountOutputTypeCountAssignedTripsArgs
   secondCourierTrips?: boolean | ProfileCountOutputTypeCountSecondCourierTripsArgs
   createdTrips?: boolean | ProfileCountOutputTypeCountCreatedTripsArgs
@@ -3061,6 +3286,13 @@ export type ProfileCountOutputTypeCountAssignedParcelsArgs<ExtArgs extends runti
  * ProfileCountOutputType without action
  */
 export type ProfileCountOutputTypeCountCreatedParcelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ParcelWhereInput
+}
+
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountCollectedParcelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ParcelWhereInput
 }
 
@@ -3176,6 +3408,7 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdClients?: boolean | Prisma.Profile$createdClientsArgs<ExtArgs>
   assignedParcels?: boolean | Prisma.Profile$assignedParcelsArgs<ExtArgs>
   createdParcels?: boolean | Prisma.Profile$createdParcelsArgs<ExtArgs>
+  collectedParcels?: boolean | Prisma.Profile$collectedParcelsArgs<ExtArgs>
   assignedTrips?: boolean | Prisma.Profile$assignedTripsArgs<ExtArgs>
   secondCourierTrips?: boolean | Prisma.Profile$secondCourierTripsArgs<ExtArgs>
   createdTrips?: boolean | Prisma.Profile$createdTripsArgs<ExtArgs>
@@ -3234,6 +3467,7 @@ export type ProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdClients?: boolean | Prisma.Profile$createdClientsArgs<ExtArgs>
   assignedParcels?: boolean | Prisma.Profile$assignedParcelsArgs<ExtArgs>
   createdParcels?: boolean | Prisma.Profile$createdParcelsArgs<ExtArgs>
+  collectedParcels?: boolean | Prisma.Profile$collectedParcelsArgs<ExtArgs>
   assignedTrips?: boolean | Prisma.Profile$assignedTripsArgs<ExtArgs>
   secondCourierTrips?: boolean | Prisma.Profile$secondCourierTripsArgs<ExtArgs>
   createdTrips?: boolean | Prisma.Profile$createdTripsArgs<ExtArgs>
@@ -3259,6 +3493,7 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     createdClients: Prisma.$ClientPayload<ExtArgs>[]
     assignedParcels: Prisma.$ParcelPayload<ExtArgs>[]
     createdParcels: Prisma.$ParcelPayload<ExtArgs>[]
+    collectedParcels: Prisma.$ParcelPayload<ExtArgs>[]
     assignedTrips: Prisma.$TripPayload<ExtArgs>[]
     secondCourierTrips: Prisma.$TripPayload<ExtArgs>[]
     createdTrips: Prisma.$TripPayload<ExtArgs>[]
@@ -3681,6 +3916,7 @@ export interface Prisma__ProfileClient<T, Null = never, ExtArgs extends runtime.
   createdClients<T extends Prisma.Profile$createdClientsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$createdClientsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedParcels<T extends Prisma.Profile$assignedParcelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$assignedParcelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdParcels<T extends Prisma.Profile$createdParcelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$createdParcelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  collectedParcels<T extends Prisma.Profile$collectedParcelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$collectedParcelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedTrips<T extends Prisma.Profile$assignedTripsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$assignedTripsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   secondCourierTrips<T extends Prisma.Profile$secondCourierTripsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$secondCourierTripsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdTrips<T extends Prisma.Profile$createdTripsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$createdTripsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4177,6 +4413,30 @@ export type Profile$assignedParcelsArgs<ExtArgs extends runtime.Types.Extensions
  * Profile.createdParcels
  */
 export type Profile$createdParcelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Parcel
+   */
+  select?: Prisma.ParcelSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Parcel
+   */
+  omit?: Prisma.ParcelOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ParcelInclude<ExtArgs> | null
+  where?: Prisma.ParcelWhereInput
+  orderBy?: Prisma.ParcelOrderByWithRelationInput | Prisma.ParcelOrderByWithRelationInput[]
+  cursor?: Prisma.ParcelWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ParcelScalarFieldEnum | Prisma.ParcelScalarFieldEnum[]
+}
+
+/**
+ * Profile.collectedParcels
+ */
+export type Profile$collectedParcelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Parcel
    */

@@ -93,6 +93,12 @@ export type ParcelMinAggregateOutputType = {
   estimatedDeliveryEnd: Date | null
   isPaid: boolean | null
   paidAt: Date | null
+  collectionMethod: $Enums.CollectionMethod | null
+  collectionPointId: string | null
+  collectionDate: Date | null
+  collectionAddress: string | null
+  collectedAt: Date | null
+  collectedById: string | null
   routeTaskStatus: string | null
   routeTaskFailReason: string | null
   routeTaskReschedDate: Date | null
@@ -140,6 +146,12 @@ export type ParcelMaxAggregateOutputType = {
   estimatedDeliveryEnd: Date | null
   isPaid: boolean | null
   paidAt: Date | null
+  collectionMethod: $Enums.CollectionMethod | null
+  collectionPointId: string | null
+  collectionDate: Date | null
+  collectionAddress: string | null
+  collectedAt: Date | null
+  collectedById: string | null
   routeTaskStatus: string | null
   routeTaskFailReason: string | null
   routeTaskReschedDate: Date | null
@@ -188,6 +200,12 @@ export type ParcelCountAggregateOutputType = {
   isPaid: number
   paidAt: number
   photos: number
+  collectionMethod: number
+  collectionPointId: number
+  collectionDate: number
+  collectionAddress: number
+  collectedAt: number
+  collectedById: number
   routeTaskStatus: number
   routeTaskFailReason: number
   routeTaskReschedDate: number
@@ -265,6 +283,12 @@ export type ParcelMinAggregateInputType = {
   estimatedDeliveryEnd?: true
   isPaid?: true
   paidAt?: true
+  collectionMethod?: true
+  collectionPointId?: true
+  collectionDate?: true
+  collectionAddress?: true
+  collectedAt?: true
+  collectedById?: true
   routeTaskStatus?: true
   routeTaskFailReason?: true
   routeTaskReschedDate?: true
@@ -312,6 +336,12 @@ export type ParcelMaxAggregateInputType = {
   estimatedDeliveryEnd?: true
   isPaid?: true
   paidAt?: true
+  collectionMethod?: true
+  collectionPointId?: true
+  collectionDate?: true
+  collectionAddress?: true
+  collectedAt?: true
+  collectedById?: true
   routeTaskStatus?: true
   routeTaskFailReason?: true
   routeTaskReschedDate?: true
@@ -360,6 +390,12 @@ export type ParcelCountAggregateInputType = {
   isPaid?: true
   paidAt?: true
   photos?: true
+  collectionMethod?: true
+  collectionPointId?: true
+  collectionDate?: true
+  collectionAddress?: true
+  collectedAt?: true
+  collectedById?: true
   routeTaskStatus?: true
   routeTaskFailReason?: true
   routeTaskReschedDate?: true
@@ -495,6 +531,12 @@ export type ParcelGroupByOutputType = {
   isPaid: boolean
   paidAt: Date | null
   photos: string[]
+  collectionMethod: $Enums.CollectionMethod | null
+  collectionPointId: string | null
+  collectionDate: Date | null
+  collectionAddress: string | null
+  collectedAt: Date | null
+  collectedById: string | null
   routeTaskStatus: string | null
   routeTaskFailReason: string | null
   routeTaskReschedDate: Date | null
@@ -566,6 +608,12 @@ export type ParcelWhereInput = {
   isPaid?: Prisma.BoolFilter<"Parcel"> | boolean
   paidAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
   photos?: Prisma.StringNullableListFilter<"Parcel">
+  collectionMethod?: Prisma.EnumCollectionMethodNullableFilter<"Parcel"> | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
+  collectionDate?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
+  collectionAddress?: Prisma.StringNullableFilter<"Parcel"> | string | null
+  collectedAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
+  collectedById?: Prisma.UuidNullableFilter<"Parcel"> | string | null
   routeTaskStatus?: Prisma.StringNullableFilter<"Parcel"> | string | null
   routeTaskFailReason?: Prisma.StringNullableFilter<"Parcel"> | string | null
   routeTaskReschedDate?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
@@ -577,6 +625,8 @@ export type ParcelWhereInput = {
   receiver?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
   receiverAddress?: Prisma.XOR<Prisma.ClientAddressNullableScalarRelationFilter, Prisma.ClientAddressWhereInput> | null
   trip?: Prisma.XOR<Prisma.TripNullableScalarRelationFilter, Prisma.TripWhereInput> | null
+  collectionPoint?: Prisma.XOR<Prisma.CollectionPointNullableScalarRelationFilter, Prisma.CollectionPointWhereInput> | null
+  collectedBy?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   assignedCourier?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   places?: Prisma.ParcelPlaceListRelationFilter
@@ -628,6 +678,12 @@ export type ParcelOrderByWithRelationInput = {
   isPaid?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   photos?: Prisma.SortOrder
+  collectionMethod?: Prisma.SortOrderInput | Prisma.SortOrder
+  collectionPointId?: Prisma.SortOrderInput | Prisma.SortOrder
+  collectionDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  collectionAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  collectedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  collectedById?: Prisma.SortOrderInput | Prisma.SortOrder
   routeTaskStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   routeTaskFailReason?: Prisma.SortOrderInput | Prisma.SortOrder
   routeTaskReschedDate?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -639,6 +695,8 @@ export type ParcelOrderByWithRelationInput = {
   receiver?: Prisma.ClientOrderByWithRelationInput
   receiverAddress?: Prisma.ClientAddressOrderByWithRelationInput
   trip?: Prisma.TripOrderByWithRelationInput
+  collectionPoint?: Prisma.CollectionPointOrderByWithRelationInput
+  collectedBy?: Prisma.ProfileOrderByWithRelationInput
   createdBy?: Prisma.ProfileOrderByWithRelationInput
   assignedCourier?: Prisma.ProfileOrderByWithRelationInput
   places?: Prisma.ParcelPlaceOrderByRelationAggregateInput
@@ -693,6 +751,12 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
   isPaid?: Prisma.BoolFilter<"Parcel"> | boolean
   paidAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
   photos?: Prisma.StringNullableListFilter<"Parcel">
+  collectionMethod?: Prisma.EnumCollectionMethodNullableFilter<"Parcel"> | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
+  collectionDate?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
+  collectionAddress?: Prisma.StringNullableFilter<"Parcel"> | string | null
+  collectedAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
+  collectedById?: Prisma.UuidNullableFilter<"Parcel"> | string | null
   routeTaskStatus?: Prisma.StringNullableFilter<"Parcel"> | string | null
   routeTaskFailReason?: Prisma.StringNullableFilter<"Parcel"> | string | null
   routeTaskReschedDate?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
@@ -704,6 +768,8 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
   receiver?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
   receiverAddress?: Prisma.XOR<Prisma.ClientAddressNullableScalarRelationFilter, Prisma.ClientAddressWhereInput> | null
   trip?: Prisma.XOR<Prisma.TripNullableScalarRelationFilter, Prisma.TripWhereInput> | null
+  collectionPoint?: Prisma.XOR<Prisma.CollectionPointNullableScalarRelationFilter, Prisma.CollectionPointWhereInput> | null
+  collectedBy?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   assignedCourier?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   places?: Prisma.ParcelPlaceListRelationFilter
@@ -755,6 +821,12 @@ export type ParcelOrderByWithAggregationInput = {
   isPaid?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   photos?: Prisma.SortOrder
+  collectionMethod?: Prisma.SortOrderInput | Prisma.SortOrder
+  collectionPointId?: Prisma.SortOrderInput | Prisma.SortOrder
+  collectionDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  collectionAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  collectedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  collectedById?: Prisma.SortOrderInput | Prisma.SortOrder
   routeTaskStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   routeTaskFailReason?: Prisma.SortOrderInput | Prisma.SortOrder
   routeTaskReschedDate?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -811,6 +883,12 @@ export type ParcelScalarWhereWithAggregatesInput = {
   isPaid?: Prisma.BoolWithAggregatesFilter<"Parcel"> | boolean
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Parcel"> | Date | string | null
   photos?: Prisma.StringNullableListFilter<"Parcel">
+  collectionMethod?: Prisma.EnumCollectionMethodNullableWithAggregatesFilter<"Parcel"> | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.UuidNullableWithAggregatesFilter<"Parcel"> | string | null
+  collectionDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Parcel"> | Date | string | null
+  collectionAddress?: Prisma.StringNullableWithAggregatesFilter<"Parcel"> | string | null
+  collectedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Parcel"> | Date | string | null
+  collectedById?: Prisma.UuidNullableWithAggregatesFilter<"Parcel"> | string | null
   routeTaskStatus?: Prisma.StringNullableWithAggregatesFilter<"Parcel"> | string | null
   routeTaskFailReason?: Prisma.StringNullableWithAggregatesFilter<"Parcel"> | string | null
   routeTaskReschedDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Parcel"> | Date | string | null
@@ -852,6 +930,10 @@ export type ParcelCreateInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -863,6 +945,8 @@ export type ParcelCreateInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -914,6 +998,12 @@ export type ParcelUncheckedCreateInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -962,6 +1052,10 @@ export type ParcelUpdateInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -973,6 +1067,8 @@ export type ParcelUpdateInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -1024,6 +1120,12 @@ export type ParcelUncheckedUpdateInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1079,6 +1181,12 @@ export type ParcelCreateManyInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -1120,6 +1228,10 @@ export type ParcelUpdateManyMutationInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1168,6 +1280,12 @@ export type ParcelUncheckedUpdateManyInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1234,6 +1352,12 @@ export type ParcelCountOrderByAggregateInput = {
   isPaid?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   photos?: Prisma.SortOrder
+  collectionMethod?: Prisma.SortOrder
+  collectionPointId?: Prisma.SortOrder
+  collectionDate?: Prisma.SortOrder
+  collectionAddress?: Prisma.SortOrder
+  collectedAt?: Prisma.SortOrder
+  collectedById?: Prisma.SortOrder
   routeTaskStatus?: Prisma.SortOrder
   routeTaskFailReason?: Prisma.SortOrder
   routeTaskReschedDate?: Prisma.SortOrder
@@ -1295,6 +1419,12 @@ export type ParcelMaxOrderByAggregateInput = {
   estimatedDeliveryEnd?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
+  collectionMethod?: Prisma.SortOrder
+  collectionPointId?: Prisma.SortOrder
+  collectionDate?: Prisma.SortOrder
+  collectionAddress?: Prisma.SortOrder
+  collectedAt?: Prisma.SortOrder
+  collectedById?: Prisma.SortOrder
   routeTaskStatus?: Prisma.SortOrder
   routeTaskFailReason?: Prisma.SortOrder
   routeTaskReschedDate?: Prisma.SortOrder
@@ -1342,6 +1472,12 @@ export type ParcelMinOrderByAggregateInput = {
   estimatedDeliveryEnd?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
+  collectionMethod?: Prisma.SortOrder
+  collectionPointId?: Prisma.SortOrder
+  collectionDate?: Prisma.SortOrder
+  collectionAddress?: Prisma.SortOrder
+  collectedAt?: Prisma.SortOrder
+  collectedById?: Prisma.SortOrder
   routeTaskStatus?: Prisma.SortOrder
   routeTaskFailReason?: Prisma.SortOrder
   routeTaskReschedDate?: Prisma.SortOrder
@@ -1388,6 +1524,13 @@ export type ParcelCreateNestedManyWithoutCreatedByInput = {
   connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
 }
 
+export type ParcelCreateNestedManyWithoutCollectedByInput = {
+  create?: Prisma.XOR<Prisma.ParcelCreateWithoutCollectedByInput, Prisma.ParcelUncheckedCreateWithoutCollectedByInput> | Prisma.ParcelCreateWithoutCollectedByInput[] | Prisma.ParcelUncheckedCreateWithoutCollectedByInput[]
+  connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCollectedByInput | Prisma.ParcelCreateOrConnectWithoutCollectedByInput[]
+  createMany?: Prisma.ParcelCreateManyCollectedByInputEnvelope
+  connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+}
+
 export type ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput = {
   create?: Prisma.XOR<Prisma.ParcelCreateWithoutAssignedCourierInput, Prisma.ParcelUncheckedCreateWithoutAssignedCourierInput> | Prisma.ParcelCreateWithoutAssignedCourierInput[] | Prisma.ParcelUncheckedCreateWithoutAssignedCourierInput[]
   connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutAssignedCourierInput | Prisma.ParcelCreateOrConnectWithoutAssignedCourierInput[]
@@ -1399,6 +1542,13 @@ export type ParcelUncheckedCreateNestedManyWithoutCreatedByInput = {
   create?: Prisma.XOR<Prisma.ParcelCreateWithoutCreatedByInput, Prisma.ParcelUncheckedCreateWithoutCreatedByInput> | Prisma.ParcelCreateWithoutCreatedByInput[] | Prisma.ParcelUncheckedCreateWithoutCreatedByInput[]
   connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCreatedByInput | Prisma.ParcelCreateOrConnectWithoutCreatedByInput[]
   createMany?: Prisma.ParcelCreateManyCreatedByInputEnvelope
+  connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+}
+
+export type ParcelUncheckedCreateNestedManyWithoutCollectedByInput = {
+  create?: Prisma.XOR<Prisma.ParcelCreateWithoutCollectedByInput, Prisma.ParcelUncheckedCreateWithoutCollectedByInput> | Prisma.ParcelCreateWithoutCollectedByInput[] | Prisma.ParcelUncheckedCreateWithoutCollectedByInput[]
+  connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCollectedByInput | Prisma.ParcelCreateOrConnectWithoutCollectedByInput[]
+  createMany?: Prisma.ParcelCreateManyCollectedByInputEnvelope
   connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
 }
 
@@ -1430,6 +1580,20 @@ export type ParcelUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.ParcelScalarWhereInput | Prisma.ParcelScalarWhereInput[]
 }
 
+export type ParcelUpdateManyWithoutCollectedByNestedInput = {
+  create?: Prisma.XOR<Prisma.ParcelCreateWithoutCollectedByInput, Prisma.ParcelUncheckedCreateWithoutCollectedByInput> | Prisma.ParcelCreateWithoutCollectedByInput[] | Prisma.ParcelUncheckedCreateWithoutCollectedByInput[]
+  connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCollectedByInput | Prisma.ParcelCreateOrConnectWithoutCollectedByInput[]
+  upsert?: Prisma.ParcelUpsertWithWhereUniqueWithoutCollectedByInput | Prisma.ParcelUpsertWithWhereUniqueWithoutCollectedByInput[]
+  createMany?: Prisma.ParcelCreateManyCollectedByInputEnvelope
+  set?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  disconnect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  delete?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  update?: Prisma.ParcelUpdateWithWhereUniqueWithoutCollectedByInput | Prisma.ParcelUpdateWithWhereUniqueWithoutCollectedByInput[]
+  updateMany?: Prisma.ParcelUpdateManyWithWhereWithoutCollectedByInput | Prisma.ParcelUpdateManyWithWhereWithoutCollectedByInput[]
+  deleteMany?: Prisma.ParcelScalarWhereInput | Prisma.ParcelScalarWhereInput[]
+}
+
 export type ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput = {
   create?: Prisma.XOR<Prisma.ParcelCreateWithoutAssignedCourierInput, Prisma.ParcelUncheckedCreateWithoutAssignedCourierInput> | Prisma.ParcelCreateWithoutAssignedCourierInput[] | Prisma.ParcelUncheckedCreateWithoutAssignedCourierInput[]
   connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutAssignedCourierInput | Prisma.ParcelCreateOrConnectWithoutAssignedCourierInput[]
@@ -1455,6 +1619,20 @@ export type ParcelUncheckedUpdateManyWithoutCreatedByNestedInput = {
   connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
   update?: Prisma.ParcelUpdateWithWhereUniqueWithoutCreatedByInput | Prisma.ParcelUpdateWithWhereUniqueWithoutCreatedByInput[]
   updateMany?: Prisma.ParcelUpdateManyWithWhereWithoutCreatedByInput | Prisma.ParcelUpdateManyWithWhereWithoutCreatedByInput[]
+  deleteMany?: Prisma.ParcelScalarWhereInput | Prisma.ParcelScalarWhereInput[]
+}
+
+export type ParcelUncheckedUpdateManyWithoutCollectedByNestedInput = {
+  create?: Prisma.XOR<Prisma.ParcelCreateWithoutCollectedByInput, Prisma.ParcelUncheckedCreateWithoutCollectedByInput> | Prisma.ParcelCreateWithoutCollectedByInput[] | Prisma.ParcelUncheckedCreateWithoutCollectedByInput[]
+  connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCollectedByInput | Prisma.ParcelCreateOrConnectWithoutCollectedByInput[]
+  upsert?: Prisma.ParcelUpsertWithWhereUniqueWithoutCollectedByInput | Prisma.ParcelUpsertWithWhereUniqueWithoutCollectedByInput[]
+  createMany?: Prisma.ParcelCreateManyCollectedByInputEnvelope
+  set?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  disconnect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  delete?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  update?: Prisma.ParcelUpdateWithWhereUniqueWithoutCollectedByInput | Prisma.ParcelUpdateWithWhereUniqueWithoutCollectedByInput[]
+  updateMany?: Prisma.ParcelUpdateManyWithWhereWithoutCollectedByInput | Prisma.ParcelUpdateManyWithWhereWithoutCollectedByInput[]
   deleteMany?: Prisma.ParcelScalarWhereInput | Prisma.ParcelScalarWhereInput[]
 }
 
@@ -1705,6 +1883,10 @@ export type ParcelUpdatephotosInput = {
   push?: string | string[]
 }
 
+export type NullableEnumCollectionMethodFieldUpdateOperationsInput = {
+  set?: $Enums.CollectionMethod | null
+}
+
 export type ParcelCreateNestedOneWithoutPlacesInput = {
   create?: Prisma.XOR<Prisma.ParcelCreateWithoutPlacesInput, Prisma.ParcelUncheckedCreateWithoutPlacesInput>
   connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutPlacesInput
@@ -1731,6 +1913,48 @@ export type ParcelUpdateOneRequiredWithoutStatusHistoryNestedInput = {
   upsert?: Prisma.ParcelUpsertWithoutStatusHistoryInput
   connect?: Prisma.ParcelWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ParcelUpdateToOneWithWhereWithoutStatusHistoryInput, Prisma.ParcelUpdateWithoutStatusHistoryInput>, Prisma.ParcelUncheckedUpdateWithoutStatusHistoryInput>
+}
+
+export type ParcelCreateNestedManyWithoutCollectionPointInput = {
+  create?: Prisma.XOR<Prisma.ParcelCreateWithoutCollectionPointInput, Prisma.ParcelUncheckedCreateWithoutCollectionPointInput> | Prisma.ParcelCreateWithoutCollectionPointInput[] | Prisma.ParcelUncheckedCreateWithoutCollectionPointInput[]
+  connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCollectionPointInput | Prisma.ParcelCreateOrConnectWithoutCollectionPointInput[]
+  createMany?: Prisma.ParcelCreateManyCollectionPointInputEnvelope
+  connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+}
+
+export type ParcelUncheckedCreateNestedManyWithoutCollectionPointInput = {
+  create?: Prisma.XOR<Prisma.ParcelCreateWithoutCollectionPointInput, Prisma.ParcelUncheckedCreateWithoutCollectionPointInput> | Prisma.ParcelCreateWithoutCollectionPointInput[] | Prisma.ParcelUncheckedCreateWithoutCollectionPointInput[]
+  connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCollectionPointInput | Prisma.ParcelCreateOrConnectWithoutCollectionPointInput[]
+  createMany?: Prisma.ParcelCreateManyCollectionPointInputEnvelope
+  connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+}
+
+export type ParcelUpdateManyWithoutCollectionPointNestedInput = {
+  create?: Prisma.XOR<Prisma.ParcelCreateWithoutCollectionPointInput, Prisma.ParcelUncheckedCreateWithoutCollectionPointInput> | Prisma.ParcelCreateWithoutCollectionPointInput[] | Prisma.ParcelUncheckedCreateWithoutCollectionPointInput[]
+  connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCollectionPointInput | Prisma.ParcelCreateOrConnectWithoutCollectionPointInput[]
+  upsert?: Prisma.ParcelUpsertWithWhereUniqueWithoutCollectionPointInput | Prisma.ParcelUpsertWithWhereUniqueWithoutCollectionPointInput[]
+  createMany?: Prisma.ParcelCreateManyCollectionPointInputEnvelope
+  set?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  disconnect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  delete?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  update?: Prisma.ParcelUpdateWithWhereUniqueWithoutCollectionPointInput | Prisma.ParcelUpdateWithWhereUniqueWithoutCollectionPointInput[]
+  updateMany?: Prisma.ParcelUpdateManyWithWhereWithoutCollectionPointInput | Prisma.ParcelUpdateManyWithWhereWithoutCollectionPointInput[]
+  deleteMany?: Prisma.ParcelScalarWhereInput | Prisma.ParcelScalarWhereInput[]
+}
+
+export type ParcelUncheckedUpdateManyWithoutCollectionPointNestedInput = {
+  create?: Prisma.XOR<Prisma.ParcelCreateWithoutCollectionPointInput, Prisma.ParcelUncheckedCreateWithoutCollectionPointInput> | Prisma.ParcelCreateWithoutCollectionPointInput[] | Prisma.ParcelUncheckedCreateWithoutCollectionPointInput[]
+  connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCollectionPointInput | Prisma.ParcelCreateOrConnectWithoutCollectionPointInput[]
+  upsert?: Prisma.ParcelUpsertWithWhereUniqueWithoutCollectionPointInput | Prisma.ParcelUpsertWithWhereUniqueWithoutCollectionPointInput[]
+  createMany?: Prisma.ParcelCreateManyCollectionPointInputEnvelope
+  set?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  disconnect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  delete?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  connect?: Prisma.ParcelWhereUniqueInput | Prisma.ParcelWhereUniqueInput[]
+  update?: Prisma.ParcelUpdateWithWhereUniqueWithoutCollectionPointInput | Prisma.ParcelUpdateWithWhereUniqueWithoutCollectionPointInput[]
+  updateMany?: Prisma.ParcelUpdateManyWithWhereWithoutCollectionPointInput | Prisma.ParcelUpdateManyWithWhereWithoutCollectionPointInput[]
+  deleteMany?: Prisma.ParcelScalarWhereInput | Prisma.ParcelScalarWhereInput[]
 }
 
 export type ParcelCreateNestedOneWithoutCashEntriesInput = {
@@ -1842,6 +2066,10 @@ export type ParcelCreateWithoutAssignedCourierInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -1853,6 +2081,8 @@ export type ParcelCreateWithoutAssignedCourierInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
@@ -1902,6 +2132,12 @@ export type ParcelUncheckedCreateWithoutAssignedCourierInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -1960,6 +2196,10 @@ export type ParcelCreateWithoutCreatedByInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -1971,6 +2211,8 @@ export type ParcelCreateWithoutCreatedByInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
@@ -2020,6 +2262,12 @@ export type ParcelUncheckedCreateWithoutCreatedByInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2042,6 +2290,136 @@ export type ParcelCreateOrConnectWithoutCreatedByInput = {
 
 export type ParcelCreateManyCreatedByInputEnvelope = {
   data: Prisma.ParcelCreateManyCreatedByInput | Prisma.ParcelCreateManyCreatedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type ParcelCreateWithoutCollectedByInput = {
+  id?: string
+  itn: string
+  internalNumber: string
+  sequentialNumber: number
+  shortNumber?: number | null
+  direction: $Enums.Direction
+  shipmentType?: $Enums.ShipmentType
+  description?: string | null
+  declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: string
+  totalWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: number
+  payer?: $Enums.Payer
+  paymentMethod?: $Enums.PaymentMethod
+  paymentInUkraine?: boolean
+  needsPackaging?: boolean
+  deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: string
+  npTtn?: string | null
+  npTrackingStatus?: string | null
+  status?: $Enums.ParcelStatus
+  createdSource?: $Enums.CreatedSource
+  estimatedDeliveryStart?: Date | string | null
+  estimatedDeliveryEnd?: Date | string | null
+  isPaid?: boolean
+  paidAt?: Date | string | null
+  photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  routeTaskStatus?: string | null
+  routeTaskFailReason?: string | null
+  routeTaskReschedDate?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sender: Prisma.ClientCreateNestedOneWithoutSentParcelsInput
+  senderAddress?: Prisma.ClientAddressCreateNestedOneWithoutSenderParcelsInput
+  receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
+  receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
+  trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
+  assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
+  places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
+  statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
+  cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
+  routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
+  npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
+  claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
+}
+
+export type ParcelUncheckedCreateWithoutCollectedByInput = {
+  id?: string
+  itn: string
+  internalNumber: string
+  sequentialNumber: number
+  shortNumber?: number | null
+  direction: $Enums.Direction
+  senderId: string
+  senderAddressId?: string | null
+  receiverId: string
+  receiverAddressId?: string | null
+  tripId?: string | null
+  shipmentType?: $Enums.ShipmentType
+  description?: string | null
+  declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: string
+  totalWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: number
+  payer?: $Enums.Payer
+  paymentMethod?: $Enums.PaymentMethod
+  paymentInUkraine?: boolean
+  needsPackaging?: boolean
+  deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: string
+  npTtn?: string | null
+  npTrackingStatus?: string | null
+  status?: $Enums.ParcelStatus
+  createdSource?: $Enums.CreatedSource
+  createdById?: string | null
+  assignedCourierId?: string | null
+  estimatedDeliveryStart?: Date | string | null
+  estimatedDeliveryEnd?: Date | string | null
+  isPaid?: boolean
+  paidAt?: Date | string | null
+  photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  routeTaskStatus?: string | null
+  routeTaskFailReason?: string | null
+  routeTaskReschedDate?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  places?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutParcelInput
+  statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
+  cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
+  routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
+  npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
+  claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
+}
+
+export type ParcelCreateOrConnectWithoutCollectedByInput = {
+  where: Prisma.ParcelWhereUniqueInput
+  create: Prisma.XOR<Prisma.ParcelCreateWithoutCollectedByInput, Prisma.ParcelUncheckedCreateWithoutCollectedByInput>
+}
+
+export type ParcelCreateManyCollectedByInputEnvelope = {
+  data: Prisma.ParcelCreateManyCollectedByInput | Prisma.ParcelCreateManyCollectedByInput[]
   skipDuplicates?: boolean
 }
 
@@ -2104,6 +2482,12 @@ export type ParcelScalarWhereInput = {
   isPaid?: Prisma.BoolFilter<"Parcel"> | boolean
   paidAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
   photos?: Prisma.StringNullableListFilter<"Parcel">
+  collectionMethod?: Prisma.EnumCollectionMethodNullableFilter<"Parcel"> | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
+  collectionDate?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
+  collectionAddress?: Prisma.StringNullableFilter<"Parcel"> | string | null
+  collectedAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
+  collectedById?: Prisma.UuidNullableFilter<"Parcel"> | string | null
   routeTaskStatus?: Prisma.StringNullableFilter<"Parcel"> | string | null
   routeTaskFailReason?: Prisma.StringNullableFilter<"Parcel"> | string | null
   routeTaskReschedDate?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
@@ -2126,6 +2510,22 @@ export type ParcelUpdateWithWhereUniqueWithoutCreatedByInput = {
 export type ParcelUpdateManyWithWhereWithoutCreatedByInput = {
   where: Prisma.ParcelScalarWhereInput
   data: Prisma.XOR<Prisma.ParcelUpdateManyMutationInput, Prisma.ParcelUncheckedUpdateManyWithoutCreatedByInput>
+}
+
+export type ParcelUpsertWithWhereUniqueWithoutCollectedByInput = {
+  where: Prisma.ParcelWhereUniqueInput
+  update: Prisma.XOR<Prisma.ParcelUpdateWithoutCollectedByInput, Prisma.ParcelUncheckedUpdateWithoutCollectedByInput>
+  create: Prisma.XOR<Prisma.ParcelCreateWithoutCollectedByInput, Prisma.ParcelUncheckedCreateWithoutCollectedByInput>
+}
+
+export type ParcelUpdateWithWhereUniqueWithoutCollectedByInput = {
+  where: Prisma.ParcelWhereUniqueInput
+  data: Prisma.XOR<Prisma.ParcelUpdateWithoutCollectedByInput, Prisma.ParcelUncheckedUpdateWithoutCollectedByInput>
+}
+
+export type ParcelUpdateManyWithWhereWithoutCollectedByInput = {
+  where: Prisma.ParcelScalarWhereInput
+  data: Prisma.XOR<Prisma.ParcelUpdateManyMutationInput, Prisma.ParcelUncheckedUpdateManyWithoutCollectedByInput>
 }
 
 export type ParcelCreateWithoutSenderInput = {
@@ -2161,6 +2561,10 @@ export type ParcelCreateWithoutSenderInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2171,6 +2575,8 @@ export type ParcelCreateWithoutSenderInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -2221,6 +2627,12 @@ export type ParcelUncheckedCreateWithoutSenderInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2279,6 +2691,10 @@ export type ParcelCreateWithoutReceiverInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2289,6 +2705,8 @@ export type ParcelCreateWithoutReceiverInput = {
   senderAddress?: Prisma.ClientAddressCreateNestedOneWithoutSenderParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -2339,6 +2757,12 @@ export type ParcelUncheckedCreateWithoutReceiverInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2429,6 +2853,10 @@ export type ParcelCreateWithoutSenderAddressInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2439,6 +2867,8 @@ export type ParcelCreateWithoutSenderAddressInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -2489,6 +2919,12 @@ export type ParcelUncheckedCreateWithoutSenderAddressInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2547,6 +2983,10 @@ export type ParcelCreateWithoutReceiverAddressInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2557,6 +2997,8 @@ export type ParcelCreateWithoutReceiverAddressInput = {
   senderAddress?: Prisma.ClientAddressCreateNestedOneWithoutSenderParcelsInput
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -2607,6 +3049,12 @@ export type ParcelUncheckedCreateWithoutReceiverAddressInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2697,6 +3145,10 @@ export type ParcelCreateWithoutTripInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2707,6 +3159,8 @@ export type ParcelCreateWithoutTripInput = {
   senderAddress?: Prisma.ClientAddressCreateNestedOneWithoutSenderParcelsInput
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -2757,6 +3211,12 @@ export type ParcelUncheckedCreateWithoutTripInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2831,6 +3291,10 @@ export type ParcelCreateWithoutPlacesInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2842,6 +3306,8 @@ export type ParcelCreateWithoutPlacesInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
@@ -2892,6 +3358,12 @@ export type ParcelUncheckedCreateWithoutPlacesInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -2955,6 +3427,10 @@ export type ParcelUpdateWithoutPlacesInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2966,6 +3442,8 @@ export type ParcelUpdateWithoutPlacesInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
@@ -3016,6 +3494,12 @@ export type ParcelUncheckedUpdateWithoutPlacesInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3063,6 +3547,10 @@ export type ParcelCreateWithoutStatusHistoryInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -3074,6 +3562,8 @@ export type ParcelCreateWithoutStatusHistoryInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -3124,6 +3614,12 @@ export type ParcelUncheckedCreateWithoutStatusHistoryInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -3187,6 +3683,10 @@ export type ParcelUpdateWithoutStatusHistoryInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3198,6 +3698,8 @@ export type ParcelUpdateWithoutStatusHistoryInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -3248,6 +3750,12 @@ export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3260,6 +3768,152 @@ export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
+}
+
+export type ParcelCreateWithoutCollectionPointInput = {
+  id?: string
+  itn: string
+  internalNumber: string
+  sequentialNumber: number
+  shortNumber?: number | null
+  direction: $Enums.Direction
+  shipmentType?: $Enums.ShipmentType
+  description?: string | null
+  declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: string
+  totalWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: number
+  payer?: $Enums.Payer
+  paymentMethod?: $Enums.PaymentMethod
+  paymentInUkraine?: boolean
+  needsPackaging?: boolean
+  deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: string
+  npTtn?: string | null
+  npTrackingStatus?: string | null
+  status?: $Enums.ParcelStatus
+  createdSource?: $Enums.CreatedSource
+  estimatedDeliveryStart?: Date | string | null
+  estimatedDeliveryEnd?: Date | string | null
+  isPaid?: boolean
+  paidAt?: Date | string | null
+  photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  routeTaskStatus?: string | null
+  routeTaskFailReason?: string | null
+  routeTaskReschedDate?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sender: Prisma.ClientCreateNestedOneWithoutSentParcelsInput
+  senderAddress?: Prisma.ClientAddressCreateNestedOneWithoutSenderParcelsInput
+  receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
+  receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
+  trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
+  createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
+  assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
+  places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
+  statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
+  cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
+  routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
+  npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
+  claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
+}
+
+export type ParcelUncheckedCreateWithoutCollectionPointInput = {
+  id?: string
+  itn: string
+  internalNumber: string
+  sequentialNumber: number
+  shortNumber?: number | null
+  direction: $Enums.Direction
+  senderId: string
+  senderAddressId?: string | null
+  receiverId: string
+  receiverAddressId?: string | null
+  tripId?: string | null
+  shipmentType?: $Enums.ShipmentType
+  description?: string | null
+  declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: string
+  totalWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: number
+  payer?: $Enums.Payer
+  paymentMethod?: $Enums.PaymentMethod
+  paymentInUkraine?: boolean
+  needsPackaging?: boolean
+  deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: string
+  npTtn?: string | null
+  npTrackingStatus?: string | null
+  status?: $Enums.ParcelStatus
+  createdSource?: $Enums.CreatedSource
+  createdById?: string | null
+  assignedCourierId?: string | null
+  estimatedDeliveryStart?: Date | string | null
+  estimatedDeliveryEnd?: Date | string | null
+  isPaid?: boolean
+  paidAt?: Date | string | null
+  photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
+  routeTaskStatus?: string | null
+  routeTaskFailReason?: string | null
+  routeTaskReschedDate?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  places?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutParcelInput
+  statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
+  cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
+  routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
+  npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
+  claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
+}
+
+export type ParcelCreateOrConnectWithoutCollectionPointInput = {
+  where: Prisma.ParcelWhereUniqueInput
+  create: Prisma.XOR<Prisma.ParcelCreateWithoutCollectionPointInput, Prisma.ParcelUncheckedCreateWithoutCollectionPointInput>
+}
+
+export type ParcelCreateManyCollectionPointInputEnvelope = {
+  data: Prisma.ParcelCreateManyCollectionPointInput | Prisma.ParcelCreateManyCollectionPointInput[]
+  skipDuplicates?: boolean
+}
+
+export type ParcelUpsertWithWhereUniqueWithoutCollectionPointInput = {
+  where: Prisma.ParcelWhereUniqueInput
+  update: Prisma.XOR<Prisma.ParcelUpdateWithoutCollectionPointInput, Prisma.ParcelUncheckedUpdateWithoutCollectionPointInput>
+  create: Prisma.XOR<Prisma.ParcelCreateWithoutCollectionPointInput, Prisma.ParcelUncheckedCreateWithoutCollectionPointInput>
+}
+
+export type ParcelUpdateWithWhereUniqueWithoutCollectionPointInput = {
+  where: Prisma.ParcelWhereUniqueInput
+  data: Prisma.XOR<Prisma.ParcelUpdateWithoutCollectionPointInput, Prisma.ParcelUncheckedUpdateWithoutCollectionPointInput>
+}
+
+export type ParcelUpdateManyWithWhereWithoutCollectionPointInput = {
+  where: Prisma.ParcelScalarWhereInput
+  data: Prisma.XOR<Prisma.ParcelUpdateManyMutationInput, Prisma.ParcelUncheckedUpdateManyWithoutCollectionPointInput>
 }
 
 export type ParcelCreateWithoutCashEntriesInput = {
@@ -3295,6 +3949,10 @@ export type ParcelCreateWithoutCashEntriesInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -3306,6 +3964,8 @@ export type ParcelCreateWithoutCashEntriesInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -3356,6 +4016,12 @@ export type ParcelUncheckedCreateWithoutCashEntriesInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -3419,6 +4085,10 @@ export type ParcelUpdateWithoutCashEntriesInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3430,6 +4100,8 @@ export type ParcelUpdateWithoutCashEntriesInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -3480,6 +4152,12 @@ export type ParcelUncheckedUpdateWithoutCashEntriesInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3527,6 +4205,10 @@ export type ParcelCreateWithoutRouteTasksInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -3538,6 +4220,8 @@ export type ParcelCreateWithoutRouteTasksInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -3588,6 +4272,12 @@ export type ParcelUncheckedCreateWithoutRouteTasksInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -3651,6 +4341,10 @@ export type ParcelUpdateWithoutRouteTasksInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3662,6 +4356,8 @@ export type ParcelUpdateWithoutRouteTasksInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -3712,6 +4408,12 @@ export type ParcelUncheckedUpdateWithoutRouteTasksInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3759,6 +4461,10 @@ export type ParcelCreateWithoutWarehouseActionsInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -3770,6 +4476,8 @@ export type ParcelCreateWithoutWarehouseActionsInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -3820,6 +4528,12 @@ export type ParcelUncheckedCreateWithoutWarehouseActionsInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -3883,6 +4597,10 @@ export type ParcelUpdateWithoutWarehouseActionsInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3894,6 +4612,8 @@ export type ParcelUpdateWithoutWarehouseActionsInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -3944,6 +4664,12 @@ export type ParcelUncheckedUpdateWithoutWarehouseActionsInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3991,6 +4717,10 @@ export type ParcelCreateWithoutNpSyncLogsInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -4002,6 +4732,8 @@ export type ParcelCreateWithoutNpSyncLogsInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -4052,6 +4784,12 @@ export type ParcelUncheckedCreateWithoutNpSyncLogsInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -4115,6 +4853,10 @@ export type ParcelUpdateWithoutNpSyncLogsInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4126,6 +4868,8 @@ export type ParcelUpdateWithoutNpSyncLogsInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -4176,6 +4920,12 @@ export type ParcelUncheckedUpdateWithoutNpSyncLogsInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4223,6 +4973,10 @@ export type ParcelCreateWithoutClaimsInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -4234,6 +4988,8 @@ export type ParcelCreateWithoutClaimsInput = {
   receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
   receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
   trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
@@ -4284,6 +5040,12 @@ export type ParcelUncheckedCreateWithoutClaimsInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -4347,6 +5109,10 @@ export type ParcelUpdateWithoutClaimsInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4358,6 +5124,8 @@ export type ParcelUpdateWithoutClaimsInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -4408,6 +5176,12 @@ export type ParcelUncheckedUpdateWithoutClaimsInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4461,6 +5235,12 @@ export type ParcelCreateManyAssignedCourierInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -4508,6 +5288,65 @@ export type ParcelCreateManyCreatedByInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
+  routeTaskStatus?: string | null
+  routeTaskFailReason?: string | null
+  routeTaskReschedDate?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ParcelCreateManyCollectedByInput = {
+  id?: string
+  itn: string
+  internalNumber: string
+  sequentialNumber: number
+  shortNumber?: number | null
+  direction: $Enums.Direction
+  senderId: string
+  senderAddressId?: string | null
+  receiverId: string
+  receiverAddressId?: string | null
+  tripId?: string | null
+  shipmentType?: $Enums.ShipmentType
+  description?: string | null
+  declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: string
+  totalWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: number
+  payer?: $Enums.Payer
+  paymentMethod?: $Enums.PaymentMethod
+  paymentInUkraine?: boolean
+  needsPackaging?: boolean
+  deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: string
+  npTtn?: string | null
+  npTrackingStatus?: string | null
+  status?: $Enums.ParcelStatus
+  createdSource?: $Enums.CreatedSource
+  createdById?: string | null
+  assignedCourierId?: string | null
+  estimatedDeliveryStart?: Date | string | null
+  estimatedDeliveryEnd?: Date | string | null
+  isPaid?: boolean
+  paidAt?: Date | string | null
+  photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -4549,6 +5388,10 @@ export type ParcelUpdateWithoutAssignedCourierInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4560,6 +5403,8 @@ export type ParcelUpdateWithoutAssignedCourierInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
@@ -4609,6 +5454,12 @@ export type ParcelUncheckedUpdateWithoutAssignedCourierInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4663,6 +5514,12 @@ export type ParcelUncheckedUpdateManyWithoutAssignedCourierInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4704,6 +5561,10 @@ export type ParcelUpdateWithoutCreatedByInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4715,6 +5576,8 @@ export type ParcelUpdateWithoutCreatedByInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
@@ -4764,6 +5627,12 @@ export type ParcelUncheckedUpdateWithoutCreatedByInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4818,6 +5687,185 @@ export type ParcelUncheckedUpdateManyWithoutCreatedByInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ParcelUpdateWithoutCollectedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  itn?: Prisma.StringFieldUpdateOperationsInput | string
+  internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  totalWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  payer?: Prisma.EnumPayerFieldUpdateOperationsInput | $Enums.Payer
+  paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
+  createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
+  estimatedDeliveryStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sender?: Prisma.ClientUpdateOneRequiredWithoutSentParcelsNestedInput
+  senderAddress?: Prisma.ClientAddressUpdateOneWithoutSenderParcelsNestedInput
+  receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
+  receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
+  trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
+  assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
+  places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
+  statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
+  cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
+  routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
+  npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
+  claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
+}
+
+export type ParcelUncheckedUpdateWithoutCollectedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  itn?: Prisma.StringFieldUpdateOperationsInput | string
+  internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverId?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  totalWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  payer?: Prisma.EnumPayerFieldUpdateOperationsInput | $Enums.Payer
+  paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
+  createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedDeliveryStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  places?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutParcelNestedInput
+  statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
+  cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
+  routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
+  npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
+  claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
+}
+
+export type ParcelUncheckedUpdateManyWithoutCollectedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  itn?: Prisma.StringFieldUpdateOperationsInput | string
+  internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverId?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  totalWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  payer?: Prisma.EnumPayerFieldUpdateOperationsInput | $Enums.Payer
+  paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
+  createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedDeliveryStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4865,6 +5913,12 @@ export type ParcelCreateManySenderInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -4912,6 +5966,12 @@ export type ParcelCreateManyReceiverInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -4953,6 +6013,10 @@ export type ParcelUpdateWithoutSenderInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4963,6 +6027,8 @@ export type ParcelUpdateWithoutSenderInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -5013,6 +6079,12 @@ export type ParcelUncheckedUpdateWithoutSenderInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5067,6 +6139,12 @@ export type ParcelUncheckedUpdateManyWithoutSenderInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5108,6 +6186,10 @@ export type ParcelUpdateWithoutReceiverInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5118,6 +6200,8 @@ export type ParcelUpdateWithoutReceiverInput = {
   senderAddress?: Prisma.ClientAddressUpdateOneWithoutSenderParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -5168,6 +6252,12 @@ export type ParcelUncheckedUpdateWithoutReceiverInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5222,6 +6312,12 @@ export type ParcelUncheckedUpdateManyWithoutReceiverInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5269,6 +6365,12 @@ export type ParcelCreateManySenderAddressInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -5316,6 +6418,12 @@ export type ParcelCreateManyReceiverAddressInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -5357,6 +6465,10 @@ export type ParcelUpdateWithoutSenderAddressInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5367,6 +6479,8 @@ export type ParcelUpdateWithoutSenderAddressInput = {
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -5417,6 +6531,12 @@ export type ParcelUncheckedUpdateWithoutSenderAddressInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5471,6 +6591,12 @@ export type ParcelUncheckedUpdateManyWithoutSenderAddressInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5512,6 +6638,10 @@ export type ParcelUpdateWithoutReceiverAddressInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5522,6 +6652,8 @@ export type ParcelUpdateWithoutReceiverAddressInput = {
   senderAddress?: Prisma.ClientAddressUpdateOneWithoutSenderParcelsNestedInput
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -5572,6 +6704,12 @@ export type ParcelUncheckedUpdateWithoutReceiverAddressInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5626,6 +6764,12 @@ export type ParcelUncheckedUpdateManyWithoutReceiverAddressInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5673,6 +6817,12 @@ export type ParcelCreateManyTripInput = {
   isPaid?: boolean
   paidAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
   routeTaskStatus?: string | null
   routeTaskFailReason?: string | null
   routeTaskReschedDate?: Date | string | null
@@ -5714,6 +6864,10 @@ export type ParcelUpdateWithoutTripInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5724,6 +6878,8 @@ export type ParcelUpdateWithoutTripInput = {
   senderAddress?: Prisma.ClientAddressUpdateOneWithoutSenderParcelsNestedInput
   receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
   receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
@@ -5774,6 +6930,12 @@ export type ParcelUncheckedUpdateWithoutTripInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5828,6 +6990,238 @@ export type ParcelUncheckedUpdateManyWithoutTripInput = {
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ParcelCreateManyCollectionPointInput = {
+  id?: string
+  itn: string
+  internalNumber: string
+  sequentialNumber: number
+  shortNumber?: number | null
+  direction: $Enums.Direction
+  senderId: string
+  senderAddressId?: string | null
+  receiverId: string
+  receiverAddressId?: string | null
+  tripId?: string | null
+  shipmentType?: $Enums.ShipmentType
+  description?: string | null
+  declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: string
+  totalWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: number
+  payer?: $Enums.Payer
+  paymentMethod?: $Enums.PaymentMethod
+  paymentInUkraine?: boolean
+  needsPackaging?: boolean
+  deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: string
+  npTtn?: string | null
+  npTrackingStatus?: string | null
+  status?: $Enums.ParcelStatus
+  createdSource?: $Enums.CreatedSource
+  createdById?: string | null
+  assignedCourierId?: string | null
+  estimatedDeliveryStart?: Date | string | null
+  estimatedDeliveryEnd?: Date | string | null
+  isPaid?: boolean
+  paidAt?: Date | string | null
+  photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
+  routeTaskStatus?: string | null
+  routeTaskFailReason?: string | null
+  routeTaskReschedDate?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ParcelUpdateWithoutCollectionPointInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  itn?: Prisma.StringFieldUpdateOperationsInput | string
+  internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  totalWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  payer?: Prisma.EnumPayerFieldUpdateOperationsInput | $Enums.Payer
+  paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
+  createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
+  estimatedDeliveryStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sender?: Prisma.ClientUpdateOneRequiredWithoutSentParcelsNestedInput
+  senderAddress?: Prisma.ClientAddressUpdateOneWithoutSenderParcelsNestedInput
+  receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
+  receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
+  trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
+  createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
+  assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
+  places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
+  statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
+  cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
+  routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
+  npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
+  claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
+}
+
+export type ParcelUncheckedUpdateWithoutCollectionPointInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  itn?: Prisma.StringFieldUpdateOperationsInput | string
+  internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverId?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  totalWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  payer?: Prisma.EnumPayerFieldUpdateOperationsInput | $Enums.Payer
+  paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
+  createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedDeliveryStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  places?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutParcelNestedInput
+  statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
+  cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
+  routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
+  npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
+  claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
+}
+
+export type ParcelUncheckedUpdateManyWithoutCollectionPointInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  itn?: Prisma.StringFieldUpdateOperationsInput | string
+  internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverId?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  totalWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  payer?: Prisma.EnumPayerFieldUpdateOperationsInput | $Enums.Payer
+  paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
+  createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedDeliveryStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5961,6 +7355,12 @@ export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   isPaid?: boolean
   paidAt?: boolean
   photos?: boolean
+  collectionMethod?: boolean
+  collectionPointId?: boolean
+  collectionDate?: boolean
+  collectionAddress?: boolean
+  collectedAt?: boolean
+  collectedById?: boolean
   routeTaskStatus?: boolean
   routeTaskFailReason?: boolean
   routeTaskReschedDate?: boolean
@@ -5972,6 +7372,8 @@ export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   receiver?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   receiverAddress?: boolean | Prisma.Parcel$receiverAddressArgs<ExtArgs>
   trip?: boolean | Prisma.Parcel$tripArgs<ExtArgs>
+  collectionPoint?: boolean | Prisma.Parcel$collectionPointArgs<ExtArgs>
+  collectedBy?: boolean | Prisma.Parcel$collectedByArgs<ExtArgs>
   createdBy?: boolean | Prisma.Parcel$createdByArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.Parcel$assignedCourierArgs<ExtArgs>
   places?: boolean | Prisma.Parcel$placesArgs<ExtArgs>
@@ -6024,6 +7426,12 @@ export type ParcelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   isPaid?: boolean
   paidAt?: boolean
   photos?: boolean
+  collectionMethod?: boolean
+  collectionPointId?: boolean
+  collectionDate?: boolean
+  collectionAddress?: boolean
+  collectedAt?: boolean
+  collectedById?: boolean
   routeTaskStatus?: boolean
   routeTaskFailReason?: boolean
   routeTaskReschedDate?: boolean
@@ -6035,6 +7443,8 @@ export type ParcelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   receiver?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   receiverAddress?: boolean | Prisma.Parcel$receiverAddressArgs<ExtArgs>
   trip?: boolean | Prisma.Parcel$tripArgs<ExtArgs>
+  collectionPoint?: boolean | Prisma.Parcel$collectionPointArgs<ExtArgs>
+  collectedBy?: boolean | Prisma.Parcel$collectedByArgs<ExtArgs>
   createdBy?: boolean | Prisma.Parcel$createdByArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.Parcel$assignedCourierArgs<ExtArgs>
 }, ExtArgs["result"]["parcel"]>
@@ -6079,6 +7489,12 @@ export type ParcelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   isPaid?: boolean
   paidAt?: boolean
   photos?: boolean
+  collectionMethod?: boolean
+  collectionPointId?: boolean
+  collectionDate?: boolean
+  collectionAddress?: boolean
+  collectedAt?: boolean
+  collectedById?: boolean
   routeTaskStatus?: boolean
   routeTaskFailReason?: boolean
   routeTaskReschedDate?: boolean
@@ -6090,6 +7506,8 @@ export type ParcelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   receiver?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   receiverAddress?: boolean | Prisma.Parcel$receiverAddressArgs<ExtArgs>
   trip?: boolean | Prisma.Parcel$tripArgs<ExtArgs>
+  collectionPoint?: boolean | Prisma.Parcel$collectionPointArgs<ExtArgs>
+  collectedBy?: boolean | Prisma.Parcel$collectedByArgs<ExtArgs>
   createdBy?: boolean | Prisma.Parcel$createdByArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.Parcel$assignedCourierArgs<ExtArgs>
 }, ExtArgs["result"]["parcel"]>
@@ -6134,6 +7552,12 @@ export type ParcelSelectScalar = {
   isPaid?: boolean
   paidAt?: boolean
   photos?: boolean
+  collectionMethod?: boolean
+  collectionPointId?: boolean
+  collectionDate?: boolean
+  collectionAddress?: boolean
+  collectedAt?: boolean
+  collectedById?: boolean
   routeTaskStatus?: boolean
   routeTaskFailReason?: boolean
   routeTaskReschedDate?: boolean
@@ -6142,13 +7566,15 @@ export type ParcelSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "deliveryCost" | "packagingCost" | "insuranceCost" | "addressDeliveryCost" | "totalCost" | "costCurrency" | "npTtn" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "photos" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
+export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "deliveryCost" | "packagingCost" | "insuranceCost" | "addressDeliveryCost" | "totalCost" | "costCurrency" | "npTtn" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
 export type ParcelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sender?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   senderAddress?: boolean | Prisma.Parcel$senderAddressArgs<ExtArgs>
   receiver?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   receiverAddress?: boolean | Prisma.Parcel$receiverAddressArgs<ExtArgs>
   trip?: boolean | Prisma.Parcel$tripArgs<ExtArgs>
+  collectionPoint?: boolean | Prisma.Parcel$collectionPointArgs<ExtArgs>
+  collectedBy?: boolean | Prisma.Parcel$collectedByArgs<ExtArgs>
   createdBy?: boolean | Prisma.Parcel$createdByArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.Parcel$assignedCourierArgs<ExtArgs>
   places?: boolean | Prisma.Parcel$placesArgs<ExtArgs>
@@ -6166,6 +7592,8 @@ export type ParcelIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   receiver?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   receiverAddress?: boolean | Prisma.Parcel$receiverAddressArgs<ExtArgs>
   trip?: boolean | Prisma.Parcel$tripArgs<ExtArgs>
+  collectionPoint?: boolean | Prisma.Parcel$collectionPointArgs<ExtArgs>
+  collectedBy?: boolean | Prisma.Parcel$collectedByArgs<ExtArgs>
   createdBy?: boolean | Prisma.Parcel$createdByArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.Parcel$assignedCourierArgs<ExtArgs>
 }
@@ -6175,6 +7603,8 @@ export type ParcelIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   receiver?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   receiverAddress?: boolean | Prisma.Parcel$receiverAddressArgs<ExtArgs>
   trip?: boolean | Prisma.Parcel$tripArgs<ExtArgs>
+  collectionPoint?: boolean | Prisma.Parcel$collectionPointArgs<ExtArgs>
+  collectedBy?: boolean | Prisma.Parcel$collectedByArgs<ExtArgs>
   createdBy?: boolean | Prisma.Parcel$createdByArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.Parcel$assignedCourierArgs<ExtArgs>
 }
@@ -6187,6 +7617,8 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     receiver: Prisma.$ClientPayload<ExtArgs>
     receiverAddress: Prisma.$ClientAddressPayload<ExtArgs> | null
     trip: Prisma.$TripPayload<ExtArgs> | null
+    collectionPoint: Prisma.$CollectionPointPayload<ExtArgs> | null
+    collectedBy: Prisma.$ProfilePayload<ExtArgs> | null
     createdBy: Prisma.$ProfilePayload<ExtArgs> | null
     assignedCourier: Prisma.$ProfilePayload<ExtArgs> | null
     places: Prisma.$ParcelPlacePayload<ExtArgs>[]
@@ -6237,6 +7669,12 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     isPaid: boolean
     paidAt: Date | null
     photos: string[]
+    collectionMethod: $Enums.CollectionMethod | null
+    collectionPointId: string | null
+    collectionDate: Date | null
+    collectionAddress: string | null
+    collectedAt: Date | null
+    collectedById: string | null
     routeTaskStatus: string | null
     routeTaskFailReason: string | null
     routeTaskReschedDate: Date | null
@@ -6642,6 +8080,8 @@ export interface Prisma__ParcelClient<T, Null = never, ExtArgs extends runtime.T
   receiver<T extends Prisma.ClientDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClientDefaultArgs<ExtArgs>>): Prisma.Prisma__ClientClient<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   receiverAddress<T extends Prisma.Parcel$receiverAddressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$receiverAddressArgs<ExtArgs>>): Prisma.Prisma__ClientAddressClient<runtime.Types.Result.GetResult<Prisma.$ClientAddressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   trip<T extends Prisma.Parcel$tripArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$tripArgs<ExtArgs>>): Prisma.Prisma__TripClient<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  collectionPoint<T extends Prisma.Parcel$collectionPointArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$collectionPointArgs<ExtArgs>>): Prisma.Prisma__CollectionPointClient<runtime.Types.Result.GetResult<Prisma.$CollectionPointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  collectedBy<T extends Prisma.Parcel$collectedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$collectedByArgs<ExtArgs>>): Prisma.Prisma__ProfileClient<runtime.Types.Result.GetResult<Prisma.$ProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.Parcel$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$createdByArgs<ExtArgs>>): Prisma.Prisma__ProfileClient<runtime.Types.Result.GetResult<Prisma.$ProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   assignedCourier<T extends Prisma.Parcel$assignedCourierArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$assignedCourierArgs<ExtArgs>>): Prisma.Prisma__ProfileClient<runtime.Types.Result.GetResult<Prisma.$ProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   places<T extends Prisma.Parcel$placesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$placesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelPlacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -6719,6 +8159,12 @@ export interface ParcelFieldRefs {
   readonly isPaid: Prisma.FieldRef<"Parcel", 'Boolean'>
   readonly paidAt: Prisma.FieldRef<"Parcel", 'DateTime'>
   readonly photos: Prisma.FieldRef<"Parcel", 'String[]'>
+  readonly collectionMethod: Prisma.FieldRef<"Parcel", 'CollectionMethod'>
+  readonly collectionPointId: Prisma.FieldRef<"Parcel", 'String'>
+  readonly collectionDate: Prisma.FieldRef<"Parcel", 'DateTime'>
+  readonly collectionAddress: Prisma.FieldRef<"Parcel", 'String'>
+  readonly collectedAt: Prisma.FieldRef<"Parcel", 'DateTime'>
+  readonly collectedById: Prisma.FieldRef<"Parcel", 'String'>
   readonly routeTaskStatus: Prisma.FieldRef<"Parcel", 'String'>
   readonly routeTaskFailReason: Prisma.FieldRef<"Parcel", 'String'>
   readonly routeTaskReschedDate: Prisma.FieldRef<"Parcel", 'DateTime'>
@@ -7180,6 +8626,44 @@ export type Parcel$tripArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   include?: Prisma.TripInclude<ExtArgs> | null
   where?: Prisma.TripWhereInput
+}
+
+/**
+ * Parcel.collectionPoint
+ */
+export type Parcel$collectionPointArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CollectionPoint
+   */
+  select?: Prisma.CollectionPointSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CollectionPoint
+   */
+  omit?: Prisma.CollectionPointOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionPointInclude<ExtArgs> | null
+  where?: Prisma.CollectionPointWhereInput
+}
+
+/**
+ * Parcel.collectedBy
+ */
+export type Parcel$collectedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Profile
+   */
+  select?: Prisma.ProfileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Profile
+   */
+  omit?: Prisma.ProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProfileInclude<ExtArgs> | null
+  where?: Prisma.ProfileWhereInput
 }
 
 /**

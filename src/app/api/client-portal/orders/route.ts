@@ -166,6 +166,24 @@ export async function POST(request: NextRequest) {
 
   const internalNumber = generateInternalNumber(seqNum, receiverCity || 'Невідомо', 1, totalPlaces, now);
 
+  // Validate collection method
+  const validMethods = ['pickup_point', 'courier_pickup', 'external_shipping', 'direct_to_driver'];
+  const resolvedCollectionMethod = collectionMethod && validMethods.includes(collectionMethod)
+    ? collectionMethod
+    : null;
+
+  // Collection point is only meaningful with pickup_point method
+  const resolvedCollectionPointId =
+    resolvedCollectionMethod === 'pickup_point' && collectionPointId
+      ? collectionPointId
+      : null;
+
+  // Collection address is only meaningful with courier_pickup method
+  const resolvedCollectionAddress =
+    resolvedCollectionMethod === 'courier_pickup' && collectionAddress
+      ? String(collectionAddress)
+      : null;
+
   const parcel = await prisma.parcel.create({
     data: {
       itn,
@@ -185,6 +203,10 @@ export async function POST(request: NextRequest) {
       payer: payer || 'sender',
       paymentMethod: paymentMethod || 'cash',
       paymentInUkraine: paymentInUkraine || false,
+      collectionMethod: resolvedCollectionMethod,
+      collectionPointId: resolvedCollectionPointId,
+      collectionDate: collectionDate ? new Date(collectionDate) : null,
+      collectionAddress: resolvedCollectionAddress,
       status: 'draft',
       createdSource: 'client_web',
       createdById: user.id,

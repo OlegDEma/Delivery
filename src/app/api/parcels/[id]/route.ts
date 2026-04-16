@@ -34,6 +34,19 @@ export async function GET(
       trip: { select: { id: true, departureDate: true, country: true, direction: true } },
       assignedCourier: { select: { id: true, fullName: true } },
       createdBy: { select: { fullName: true } },
+      collectionPoint: {
+        select: {
+          id: true,
+          name: true,
+          country: true,
+          city: true,
+          address: true,
+          contactPhone: true,
+          workingHours: true,
+          workingDays: true,
+        },
+      },
+      collectedBy: { select: { id: true, fullName: true } },
     },
   });
 
@@ -141,6 +154,19 @@ export async function PATCH(
   if (body.paymentMethod !== undefined) updateData.paymentMethod = body.paymentMethod;
   if (body.paymentInUkraine !== undefined) updateData.paymentInUkraine = body.paymentInUkraine;
   if (body.shipmentType !== undefined) updateData.shipmentType = body.shipmentType;
+  // Collection fields
+  if (body.collectionMethod !== undefined) {
+    updateData.collectionMethod = body.collectionMethod || null;
+  }
+  if (body.collectionPointId !== undefined) {
+    updateData.collectionPointId = body.collectionPointId || null;
+  }
+  if (body.collectionDate !== undefined) {
+    updateData.collectionDate = body.collectionDate ? new Date(body.collectionDate) : null;
+  }
+  if (body.collectionAddress !== undefined) {
+    updateData.collectionAddress = body.collectionAddress || null;
+  }
   // Route task fields
   if (body.routeTaskStatus !== undefined) updateData.routeTaskStatus = body.routeTaskStatus || null;
   if (body.routeTaskFailReason !== undefined) updateData.routeTaskFailReason = body.routeTaskFailReason || null;

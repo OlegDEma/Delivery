@@ -421,6 +421,13 @@ export type EnumCreatedSourceFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumCreatedSourceFilter<$PrismaModel> | $Enums.CreatedSource
 }
 
+export type EnumCollectionMethodNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionMethod | Prisma.EnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  in?: $Enums.CollectionMethod[] | Prisma.ListEnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.CollectionMethod[] | Prisma.ListEnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumCollectionMethodNullableFilter<$PrismaModel> | $Enums.CollectionMethod | null
+}
+
 export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
   in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
@@ -485,6 +492,16 @@ export type EnumCreatedSourceWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumCreatedSourceFilter<$PrismaModel>
   _max?: Prisma.NestedEnumCreatedSourceFilter<$PrismaModel>
+}
+
+export type EnumCollectionMethodNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionMethod | Prisma.EnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  in?: $Enums.CollectionMethod[] | Prisma.ListEnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.CollectionMethod[] | Prisma.ListEnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumCollectionMethodNullableWithAggregatesFilter<$PrismaModel> | $Enums.CollectionMethod | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCollectionMethodNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCollectionMethodNullableFilter<$PrismaModel>
 }
 
 export type DecimalFilter<$PrismaModel = never> = {
@@ -1085,6 +1102,13 @@ export type NestedEnumCreatedSourceFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumCreatedSourceFilter<$PrismaModel> | $Enums.CreatedSource
 }
 
+export type NestedEnumCollectionMethodNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionMethod | Prisma.EnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  in?: $Enums.CollectionMethod[] | Prisma.ListEnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.CollectionMethod[] | Prisma.ListEnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumCollectionMethodNullableFilter<$PrismaModel> | $Enums.CollectionMethod | null
+}
+
 export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
   in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
@@ -1160,6 +1184,16 @@ export type NestedEnumCreatedSourceWithAggregatesFilter<$PrismaModel = never> = 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumCreatedSourceFilter<$PrismaModel>
   _max?: Prisma.NestedEnumCreatedSourceFilter<$PrismaModel>
+}
+
+export type NestedEnumCollectionMethodNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionMethod | Prisma.EnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  in?: $Enums.CollectionMethod[] | Prisma.ListEnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.CollectionMethod[] | Prisma.ListEnumCollectionMethodFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumCollectionMethodNullableWithAggregatesFilter<$PrismaModel> | $Enums.CollectionMethod | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCollectionMethodNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCollectionMethodNullableFilter<$PrismaModel>
 }
 
 export type NestedDecimalFilter<$PrismaModel = never> = {

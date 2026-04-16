@@ -24,6 +24,9 @@ export async function GET(
           sender: { select: { firstName: true, lastName: true, phone: true } },
           receiver: { select: { firstName: true, lastName: true, phone: true } },
           receiverAddress: { select: { city: true, street: true, building: true, npWarehouseNum: true } },
+          collectionPoint: {
+            select: { id: true, name: true, city: true, address: true },
+          },
         },
         orderBy: { shortNumber: 'asc' },
       },

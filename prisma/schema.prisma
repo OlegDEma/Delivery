@@ -61,6 +61,7 @@ enum Payer {
 
 enum ParcelStatus {
   draft
+  at_collection_point
   accepted_for_transport_to_ua
   in_transit_to_ua
   at_lviv_warehouse
@@ -86,6 +87,24 @@ enum RouteTaskType {
   pickup
   delivery
   passenger
+}
+
+enum Weekday {
+  mon
+  tue
+  wed
+  thu
+  fri
+  sat
+  sun
+}
+
+/// How the client hands the parcel to the company (EU→UA side)
+enum CollectionMethod {
+  pickup_point        // Client brings parcel to our collection point
+  courier_pickup      // We send a courier to pick up from client's address
+  external_shipping   // Client ships to our warehouse via PostNL/DPD/etc
+  direct_to_driver    // Client hands directly to the driver on trip day
 }
 
 enum RouteTaskStatus {
@@ -141,6 +160,7 @@ model Profile {
   createdClients       Client[]              @relation("ClientCreatedBy")
   assignedParcels      Parcel[]              @relation("ParcelAssignedCourier")
   createdParcels       Parcel[]              @relation("ParcelCreatedBy")
+  collectedParcels     Parcel[]              @relation("ParcelCollectedBy")
   assignedTrips        Trip[]                @relation("TripAssignedCourier")
   secondCourierTrips   Trip[]                @relation("TripSecondCourier")
   createdTrips         Trip[]                @relation("TripCreatedBy")
@@ -322,6 +342,13 @@ model Parcel {
   isPaid                Boolean       @default(false) @map("is_paid")
   paidAt                DateTime?     @map("paid_at") @db.Timestamptz
   photos                String[]      @default([])
+  // Collection (how the company receives the parcel from sender, EU→UA side)
+  collectionMethod      CollectionMethod? @map("collection_method")
+  collectionPointId     String?       @map("collection_point_id") @db.Uuid
+  collectionDate        DateTime?     @map("collection_date") @db.Date       // planned date
+  collectionAddress     String?       @map("collection_address")               // for courier_pickup
+  collectedAt           DateTime?     @map("collected_at") @db.Timestamptz    // actual timestamp
+  collectedById         String?       @map("collected_by") @db.Uuid
   // Route task status (for daily route sheet)
   routeTaskStatus       String?       @map("route_task_status") // pending/address_confirmed/in_navigator/completed/not_completed/rescheduled
   routeTaskFailReason   String?       @map("route_task_fail_reason")
@@ -337,6 +364,8 @@ model Parcel {
   receiver          Client              @relation("ParcelReceiver", fields: [receiverId], references: [id])
   receiverAddress   ClientAddress?      @relation("ParcelReceiverAddress", fields: [receiverAddressId], references: [id])
   trip              Trip?               @relation(fields: [tripId], references: [id])
+  collectionPoint   CollectionPoint?    @relation("ParcelCollectionPoint", fields: [collectionPointId], references: [id])
+  collectedBy       Profile?            @relation("ParcelCollectedBy", fields: [collectedById], references: [id])
   createdBy         Profile?            @relation("ParcelCreatedBy", fields: [createdById], references: [id])
   assignedCourier   Profile?            @relation("ParcelAssignedCourier", fields: [assignedCourierId], references: [id])
   places            ParcelPlace[]
@@ -357,6 +386,7 @@ model Parcel {
   @@index([createdAt])
   @@index([sequentialNumber])
   @@index([tripId, shortNumber])
+  @@index([collectionPointId])
   @@map("parcels")
 }
 
@@ -431,17 +461,27 @@ model PricingConfig {
 }
 
 model CollectionPoint {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  country      Country
-  city         String
-  address      String
-  postalCode   String?  @map("postal_code")
-  contactPhone String?  @map("contact_phone")
-  workingHours String?  @map("working_hours")
-  isActive     Boolean  @default(true) @map("is_active")
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String?   // Optional display name, e.g. "Amsterdam Centraal"
+  country       Country
+  city          String
+  address       String
+  postalCode    String?   @map("postal_code")
+  contactPhone  String?   @map("contact_phone")
+  workingHours  String?   @map("working_hours")        // Human readable, e.g. "10:00-19:00"
+  workingDays   Weekday[] @default([]) @map("working_days")
+  latitude      Decimal?  @db.Decimal(10, 7)
+  longitude     Decimal?  @db.Decimal(10, 7)
+  notes         String?                                 // Instructions for clients
+  maxCapacity   Int?      @map("max_capacity")          // Optional cap per trip, null = unlimited
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
+  parcels       Parcel[]  @relation("ParcelCollectionPoint")
+
+  @@index([country])
+  @@index([isActive])
   @@map("collection_points")
 }
 

@@ -1,5 +1,6 @@
 export const PARCEL_STATUSES = {
   DRAFT: 'draft',
+  AT_COLLECTION_POINT: 'at_collection_point',
   ACCEPTED_FOR_TRANSPORT_TO_UA: 'accepted_for_transport_to_ua',
   IN_TRANSIT_TO_UA: 'in_transit_to_ua',
   AT_LVIV_WAREHOUSE: 'at_lviv_warehouse',
@@ -18,6 +19,7 @@ export type ParcelStatusType = (typeof PARCEL_STATUSES)[keyof typeof PARCEL_STAT
 
 export const STATUS_LABELS: Record<ParcelStatusType, string> = {
   draft: 'Створена',
+  at_collection_point: 'На пункті збору',
   accepted_for_transport_to_ua: 'Прийнято до перевезення в Україну',
   in_transit_to_ua: 'В дорозі до України',
   at_lviv_warehouse: 'На складі у Львові',
@@ -34,6 +36,7 @@ export const STATUS_LABELS: Record<ParcelStatusType, string> = {
 
 export const STATUS_COLORS: Record<ParcelStatusType, string> = {
   draft: 'bg-gray-100 text-gray-800',
+  at_collection_point: 'bg-cyan-100 text-cyan-800',
   accepted_for_transport_to_ua: 'bg-blue-100 text-blue-800',
   in_transit_to_ua: 'bg-indigo-100 text-indigo-800',
   at_lviv_warehouse: 'bg-purple-100 text-purple-800',
@@ -51,6 +54,7 @@ export const STATUS_COLORS: Record<ParcelStatusType, string> = {
 // Valid status transitions
 export const STATUS_FLOW_EU_TO_UA: ParcelStatusType[] = [
   'draft',
+  'at_collection_point',
   'accepted_for_transport_to_ua',
   'in_transit_to_ua',
   'at_lviv_warehouse',

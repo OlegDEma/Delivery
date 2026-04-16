@@ -101,6 +101,8 @@ export async function POST(request: NextRequest) {
     direction, shipmentType, description, declaredValue,
     payer, paymentMethod, paymentInUkraine, needsPackaging,
     places, tripId,
+    // Collection (how we receive the parcel from sender — EU→UA only)
+    collectionMethod, collectionPointId, collectionDate, collectionAddress,
   } = body;
 
   if (!senderId || !receiverId || !direction) {
@@ -286,6 +288,17 @@ export async function POST(request: NextRequest) {
       insuranceCost: insuranceCost || null,
       addressDeliveryCost: addressDeliveryCost || null,
       totalCost: totalCost || null,
+      // Collection (only valid for eu_to_ua)
+      collectionMethod: direction === 'eu_to_ua' && collectionMethod ? collectionMethod : null,
+      collectionPointId:
+        direction === 'eu_to_ua' && collectionMethod === 'pickup_point' && collectionPointId
+          ? collectionPointId
+          : null,
+      collectionDate: collectionDate ? new Date(collectionDate) : null,
+      collectionAddress:
+        direction === 'eu_to_ua' && collectionMethod === 'courier_pickup' && collectionAddress
+          ? String(collectionAddress)
+          : null,
       status: initialStatus as import('@/generated/prisma/client').ParcelStatus,
       createdSource: 'worker',
       createdById: user.id,

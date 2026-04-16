@@ -21,6 +21,7 @@ import { ShareButton } from '@/components/shared/share-button';
 import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
 import { ParcelPaymentCard } from '@/components/parcels/parcel-payment-card';
 import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
+import { ParcelCollectionCard } from '@/components/parcels/parcel-collection-card';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { toast } from 'sonner';
 
@@ -75,6 +76,17 @@ interface ParcelDetail {
   trip: { id: string; departureDate: string; country: string; direction: string } | null;
   assignedCourier: { id: string; fullName: string } | null;
   createdBy: { fullName: string } | null;
+  // Collection
+  collectionMethod: string | null;
+  collectionPointId: string | null;
+  collectionDate: string | null;
+  collectionAddress: string | null;
+  collectedAt: string | null;
+  collectionPoint: {
+    id: string; name: string | null; country: string; city: string; address: string;
+    contactPhone: string | null; workingHours: string | null; workingDays: string[];
+  } | null;
+  collectedBy: { id: string; fullName: string } | null;
 }
 
 export default function ParcelDetailPage() {
@@ -372,6 +384,11 @@ export default function ParcelDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Collection method (EU→UA only) */}
+      {parcel.direction === 'eu_to_ua' && (
+        <ParcelCollectionCard parcel={parcel} onUpdate={fetchParcel} />
+      )}
 
       {/* Assign trip & courier */}
       <Card>

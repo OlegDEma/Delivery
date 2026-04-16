@@ -1861,6 +1861,12 @@ export const ParcelScalarFieldEnum = {
   isPaid: 'isPaid',
   paidAt: 'paidAt',
   photos: 'photos',
+  collectionMethod: 'collectionMethod',
+  collectionPointId: 'collectionPointId',
+  collectionDate: 'collectionDate',
+  collectionAddress: 'collectionAddress',
+  collectedAt: 'collectedAt',
+  collectedById: 'collectedById',
   routeTaskStatus: 'routeTaskStatus',
   routeTaskFailReason: 'routeTaskFailReason',
   routeTaskReschedDate: 'routeTaskReschedDate',
@@ -1932,12 +1938,18 @@ export type PricingConfigScalarFieldEnum = (typeof PricingConfigScalarFieldEnum)
 
 export const CollectionPointScalarFieldEnum = {
   id: 'id',
+  name: 'name',
   country: 'country',
   city: 'city',
   address: 'address',
   postalCode: 'postalCode',
   contactPhone: 'contactPhone',
   workingHours: 'workingHours',
+  workingDays: 'workingDays',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  notes: 'notes',
+  maxCapacity: 'maxCapacity',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -2314,6 +2326,20 @@ export type ListEnumCreatedSourceFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'CollectionMethod'
+ */
+export type EnumCollectionMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CollectionMethod'>
+    
+
+
+/**
+ * Reference to a field of type 'CollectionMethod[]'
+ */
+export type ListEnumCollectionMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CollectionMethod[]'>
+    
+
+
+/**
  * Reference to a field of type 'WeightType'
  */
 export type EnumWeightTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WeightType'>
@@ -2338,6 +2364,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'Weekday[]'
+ */
+export type ListEnumWeekdayFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Weekday[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Weekday'
+ */
+export type EnumWeekdayFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Weekday'>
     
 
 

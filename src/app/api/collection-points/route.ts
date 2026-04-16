@@ -1,32 +1,67 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { requireRole } from '@/lib/auth/guards';
+import { ADMIN_ROLES } from '@/lib/constants/roles';
+import type { Weekday } from '@/generated/prisma/enums';
 
-// GET /api/collection-points — public (used by client portal too)
-export async function GET() {
+// GET /api/collection-points — lists all active points (public — client portal uses it)
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const country = searchParams.get('country');
+
   const points = await prisma.collectionPoint.findMany({
-    where: { isActive: true },
+    where: {
+      isActive: true,
+      ...(country ? { country: country as 'UA' | 'NL' | 'AT' | 'DE' } : {}),
+    },
     orderBy: [{ country: 'asc' }, { city: 'asc' }],
   });
   return NextResponse.json(points);
 }
 
-// POST /api/collection-points
+// POST /api/collection-points — create new (admin only)
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const profile = await prisma.profile.findUnique({ where: { id: user.id } });
-  if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const guard = await requireRole(ADMIN_ROLES);
+  if (!guard.ok) return guard.response;
 
   const body = await request.json();
-  const { country, city, address, postalCode, contactPhone, workingHours } = body;
+  const {
+    name,
+    country,
+    city,
+    address,
+    postalCode,
+    contactPhone,
+    workingHours,
+    workingDays,
+    latitude,
+    longitude,
+    notes,
+    maxCapacity,
+  } = body;
+
+  if (!country || !city || !address) {
+    return NextResponse.json(
+      { error: 'Країна, місто та адреса обовʼязкові' },
+      { status: 400 }
+    );
+  }
 
   const point = await prisma.collectionPoint.create({
-    data: { country, city, address, postalCode, contactPhone, workingHours },
+    data: {
+      name: name || null,
+      country,
+      city,
+      address,
+      postalCode: postalCode || null,
+      contactPhone: contactPhone || null,
+      workingHours: workingHours || null,
+      workingDays: (workingDays || []) as Weekday[],
+      latitude: latitude != null && latitude !== '' ? Number(latitude) : null,
+      longitude: longitude != null && longitude !== '' ? Number(longitude) : null,
+      notes: notes || null,
+      maxCapacity: maxCapacity ? Number(maxCapacity) : null,
+    },
   });
 
   return NextResponse.json(point, { status: 201 });

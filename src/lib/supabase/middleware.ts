@@ -19,6 +19,7 @@ const STAFF_ONLY_PREFIXES = [
   '/search',
   '/scan',
   '/admin',
+  '/collection-points',
   // API routes — block clients from calling staff APIs directly
   '/api/parcels',
   '/api/clients',

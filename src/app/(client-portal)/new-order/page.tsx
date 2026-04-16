@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { CollectionBlock } from '@/components/parcels/collection-block';
 
 interface PlaceData {
   weight: string;
@@ -84,8 +85,8 @@ export default function NewOrderPage() {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [paymentInUkraine, setPaymentInUkraine] = useState(false);
 
-  // Collection
-  const [collectionMethod, setCollectionMethod] = useState('collection_point');
+  // Collection (pickup_point | courier_pickup | external_shipping | direct_to_driver)
+  const [collectionMethod, setCollectionMethod] = useState<string>('pickup_point');
   const [collectionPointId, setCollectionPointId] = useState('');
   const [collectionDate, setCollectionDate] = useState('');
   const [collectionAddress, setCollectionAddress] = useState('');
@@ -253,46 +254,32 @@ export default function NewOrderPage() {
         {direction === 'eu_to_ua' && (
           <Card>
             <CardHeader className="py-3 px-4">
-              <CardTitle className="text-base">Спосіб передачі посилки</CardTitle>
+              <CardTitle className="text-base">Як ви передасте нам посилку?</CardTitle>
             </CardHeader>
-            <CardContent className="px-4 pb-4 pt-0 space-y-2">
-              <Select value={collectionMethod} onValueChange={(v) => setCollectionMethod(v ?? 'collection_point')}>
-                <SelectTrigger><SelectValue>{COLLECTION_METHOD_LABELS[collectionMethod]}</SelectValue></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="collection_point">Пункт збору</SelectItem>
-                  <SelectItem value="courier_pickup">Виклик кур&apos;єра</SelectItem>
-                </SelectContent>
-              </Select>
-              {collectionMethod === 'collection_point' && collectionPoints.length > 0 && (
-                <div>
-                  <Label>Пункт збору</Label>
-                  <Select value={collectionPointId} onValueChange={(v) => setCollectionPointId(v ?? '')}>
-                    <SelectTrigger><SelectValue placeholder="Виберіть пункт" /></SelectTrigger>
-                    <SelectContent>
-                      {collectionPoints.filter(cp => cp.country === senderCountry).map(cp => (
-                        <SelectItem key={cp.id} value={cp.id}>{cp.city}, {cp.address}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              {collectionMethod === 'courier_pickup' && (
-                <>
-                  <div>
-                    <Label>Бажана дата</Label>
-                    <Input type="date" value={collectionDate} onChange={(e) => handleCollectionDateChange(e.target.value)} />
-                    {collectionDayWarning && (
-                      <p className="text-xs text-amber-600 mt-1">{collectionDayWarning}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label>Адреса забору</Label>
-                    <Input value={collectionAddress} onChange={(e) => setCollectionAddress(e.target.value)} placeholder="Повна адреса з поштовим кодом" />
-                    <p className="text-xs text-gray-400 mt-1">
-                      Просимо перевірити, чи біля вказаної адреси буде можливість припаркувати мікроавтобус.
-                    </p>
-                  </div>
-                </>
+            <CardContent className="px-4 pb-4 pt-0">
+              <CollectionBlock
+                senderCountry={senderCountry}
+                value={{
+                  method: (collectionMethod as 'pickup_point' | 'courier_pickup' | 'external_shipping' | 'direct_to_driver' | '') || '',
+                  pointId: collectionPointId,
+                  date: collectionDate,
+                  address: collectionAddress,
+                }}
+                onChange={(next) => {
+                  setCollectionMethod(next.method);
+                  setCollectionPointId(next.pointId);
+                  setCollectionDate(next.date);
+                  setCollectionAddress(next.address);
+                  if (next.method === 'courier_pickup' && next.date) {
+                    validateCollectionDate(next.date);
+                  } else {
+                    setCollectionDayWarning('');
+                  }
+                }}
+                clientFacing
+              />
+              {collectionDayWarning && (
+                <p className="text-xs text-amber-600 mt-2">{collectionDayWarning}</p>
               )}
             </CardContent>
           </Card>

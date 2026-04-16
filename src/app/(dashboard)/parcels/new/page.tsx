@@ -17,6 +17,7 @@ import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { cn } from '@/lib/utils';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
+import { CollectionBlock, type CollectionState } from '@/components/parcels/collection-block';
 
 interface SelectedClient {
   id: string;
@@ -151,6 +152,14 @@ export default function NewParcelPage() {
   const [trips, setTrips] = useState<TripOption[]>([]);
   const [selectedTripId, setSelectedTripId] = useState('');
 
+  // Collection (EU→UA only): how we receive the parcel
+  const [collection, setCollection] = useState<CollectionState>({
+    method: '',
+    pointId: '',
+    date: '',
+    address: '',
+  });
+
   useEffect(() => {
     fetch('/api/trips').then(r => r.ok ? r.json() : []).then(setTrips);
   }, []);
@@ -280,6 +289,11 @@ export default function NewParcelPage() {
         paymentInUkraine,
         needsPackaging,
         tripId: selectedTripId || undefined,
+        // Collection (EU→UA only — server ignores otherwise)
+        collectionMethod: direction === 'eu_to_ua' && collection.method ? collection.method : undefined,
+        collectionPointId: collection.method === 'pickup_point' ? collection.pointId || undefined : undefined,
+        collectionDate: collection.date || undefined,
+        collectionAddress: collection.method === 'courier_pickup' ? collection.address || undefined : undefined,
         places: useGeneralParams
           ? Array.from({ length: Number(generalPlaces) || 1 }, (_, i) => ({
               weight: (Number(generalWeight) || 0) / (Number(generalPlaces) || 1),
@@ -664,6 +678,22 @@ export default function NewParcelPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Collection method — EU→UA only */}
+        {direction === 'eu_to_ua' && (
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-base">Спосіб прийому посилки</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 pt-0">
+              <CollectionBlock
+                senderCountry={sender?.country || sender?.addresses[0]?.country || null}
+                value={collection}
+                onChange={setCollection}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Trip selection */}
         <Card>

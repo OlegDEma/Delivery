@@ -58,6 +58,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Рейси', href: '/trips', icon: Truck, roles: ['super_admin', 'admin', 'driver_courier'] },
       { label: 'Календар', href: '/calendar', icon: Calendar, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
       { label: 'Маршрути', href: '/routes', icon: Map, roles: ['super_admin', 'admin', 'driver_courier'] },
+      { label: 'Пункти збору', href: '/collection-points', icon: MapPin, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
       { label: 'Склад', href: '/warehouse', icon: Warehouse, roles: ['super_admin', 'admin', 'warehouse_worker'] },
     ],
   },
