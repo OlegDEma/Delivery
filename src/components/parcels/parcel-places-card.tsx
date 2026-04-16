@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatWeight } from '@/lib/utils/format';
+import { CostCalculator } from '@/components/parcels/cost-calculator';
 
 interface Place {
   id: string;
@@ -26,6 +27,13 @@ interface ParcelPlacesCardProps {
   parcelId: string;
   places: Place[];
   totalWeight: number | null;
+  /** For live cost calculation */
+  direction?: string;
+  senderCountry?: string | null;
+  receiverCountry?: string | null;
+  receiverDeliveryMethod?: string | null;
+  declaredValue?: number | null;
+  needsPackaging?: boolean;
   onUpdate: () => void;
 }
 
@@ -49,7 +57,18 @@ function volWeight(l: string, w: string, h: string): number {
   return 0;
 }
 
-export function ParcelPlacesCard({ parcelId, places, totalWeight, onUpdate }: ParcelPlacesCardProps) {
+export function ParcelPlacesCard({
+  parcelId,
+  places,
+  totalWeight,
+  direction,
+  senderCountry,
+  receiverCountry,
+  receiverDeliveryMethod,
+  declaredValue,
+  needsPackaging,
+  onUpdate,
+}: ParcelPlacesCardProps) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [drafts, setDrafts] = useState<PlaceDraft[]>([]);
@@ -105,10 +124,20 @@ export function ParcelPlacesCard({ parcelId, places, totalWeight, onUpdate }: Pa
     }
   }
 
-  // Sum for preview
+  // Totals for live preview in edit mode
   const totalDraftWeight = editing
     ? drafts.reduce((s, d) => s + (Number(d.weight) || 0), 0)
-    : null;
+    : 0;
+  const totalDraftVolWeight = editing
+    ? drafts.reduce((s, d) => s + volWeight(d.length, d.width, d.height), 0)
+    : 0;
+
+  // Weight/vol weight to feed into CostCalculator
+  const calcActualWeight = editing ? totalDraftWeight : Number(totalWeight) || 0;
+  const calcVolWeight = editing
+    ? totalDraftVolWeight
+    : places.reduce((s, p) => s + (Number(p.volumetricWeight) || 0), 0);
+  const canCalculate = !!direction && !!(senderCountry || receiverCountry);
 
   return (
     <Card>
@@ -201,8 +230,20 @@ export function ParcelPlacesCard({ parcelId, places, totalWeight, onUpdate }: Pa
             ))}
             <div className="pt-2 border-t flex justify-between text-sm font-medium">
               <span>Загальна вага (нова)</span>
-              <span>{(totalDraftWeight ?? 0).toFixed(2)} кг</span>
+              <span>{totalDraftWeight.toFixed(2)} кг</span>
             </div>
+            {canCalculate && totalDraftWeight > 0 && (
+              <CostCalculator
+                direction={direction!}
+                senderCountry={senderCountry || null}
+                receiverCountry={receiverCountry || null}
+                actualWeight={totalDraftWeight}
+                volumetricWeight={totalDraftVolWeight}
+                declaredValue={Number(declaredValue) || 0}
+                needsPackaging={!!needsPackaging}
+                isAddressDelivery={receiverDeliveryMethod === 'address'}
+              />
+            )}
           </div>
         ) : (
           <>
@@ -236,6 +277,20 @@ export function ParcelPlacesCard({ parcelId, places, totalWeight, onUpdate }: Pa
               <span>Загальна вага</span>
               <span>{totalWeight ? formatWeight(Number(totalWeight)) : '—'}</span>
             </div>
+            {canCalculate && calcActualWeight > 0 && (
+              <div className="mt-2">
+                <CostCalculator
+                  direction={direction!}
+                  senderCountry={senderCountry || null}
+                  receiverCountry={receiverCountry || null}
+                  actualWeight={calcActualWeight}
+                  volumetricWeight={calcVolWeight}
+                  declaredValue={Number(declaredValue) || 0}
+                  needsPackaging={!!needsPackaging}
+                  isAddressDelivery={receiverDeliveryMethod === 'address'}
+                />
+              </div>
+            )}
           </>
         )}
       </CardContent>

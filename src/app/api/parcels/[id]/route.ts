@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import type { ParcelStatus } from '@/generated/prisma/client';
+import { calculateParcelCost } from '@/lib/utils/pricing';
 
 // GET /api/parcels/[id]
 export async function GET(
@@ -179,6 +180,59 @@ export async function PATCH(
 
     updateData.totalWeight = totalWeight;
     updateData.totalVolumetricWeight = totalVolWeight;
+
+    // Recalculate delivery cost using active pricing config
+    try {
+      // Country: for EU→UA it's the sender's, for UA→EU it's the receiver's
+      const senderAddr = parcel.senderAddressId
+        ? await prisma.clientAddress.findUnique({ where: { id: parcel.senderAddressId } })
+        : null;
+      const receiverAddr = parcel.receiverAddressId
+        ? await prisma.clientAddress.findUnique({ where: { id: parcel.receiverAddressId } })
+        : null;
+
+      const country = parcel.direction === 'eu_to_ua'
+        ? senderAddr?.country
+        : receiverAddr?.country;
+
+      if (country && country !== 'UA') {
+        const pricing = await prisma.pricingConfig.findFirst({
+          where: { direction: parcel.direction, country, isActive: true },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        if (pricing) {
+          const isAddressDelivery = receiverAddr?.deliveryMethod === 'address';
+          const breakdown = calculateParcelCost(
+            {
+              pricePerKg: Number(pricing.pricePerKg),
+              weightType: pricing.weightType,
+              insuranceThreshold: Number(pricing.insuranceThreshold),
+              insuranceRate: Number(pricing.insuranceRate),
+              insuranceEnabled: pricing.insuranceEnabled,
+              packagingEnabled: pricing.packagingEnabled,
+              packagingPrices: (pricing.packagingPrices as Record<string, number> | null) ?? null,
+              addressDeliveryPrice: Number(pricing.addressDeliveryPrice),
+            },
+            {
+              actualWeight: totalWeight,
+              volumetricWeight: totalVolWeight,
+              declaredValue: Number(parcel.declaredValue) || 0,
+              needsPackaging: parcel.needsPackaging,
+              isAddressDelivery,
+            }
+          );
+          updateData.deliveryCost = breakdown.deliveryCost;
+          updateData.insuranceCost = breakdown.insuranceCost;
+          updateData.packagingCost = breakdown.packagingCost;
+          updateData.addressDeliveryCost = breakdown.addressDeliveryCost;
+          updateData.totalCost = breakdown.totalCost;
+        }
+      }
+    } catch (e) {
+      // Silently skip if pricing can't be calculated — user can set manually
+      console.error('Cost recalc failed:', e);
+    }
   }
 
   const updated = await prisma.parcel.update({

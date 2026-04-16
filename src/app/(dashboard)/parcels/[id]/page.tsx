@@ -54,7 +54,7 @@ interface ParcelDetail {
     firstName: string; lastName: string; phone: string;
     addresses: { city: string; street: string | null; country: string }[];
   };
-  senderAddress: { city: string; street: string | null; building: string | null; landmark: string | null } | null;
+  senderAddress: { city: string; street: string | null; building: string | null; landmark: string | null; country: string | null } | null;
   receiver: {
     firstName: string; lastName: string; phone: string;
     addresses: { city: string; street: string | null; country: string }[];
@@ -306,6 +306,12 @@ export default function ParcelDetailPage() {
         parcelId={parcel.id}
         places={parcel.places}
         totalWeight={parcel.totalWeight}
+        direction={parcel.direction}
+        senderCountry={parcel.senderAddress?.country || parcel.sender.addresses[0]?.country || null}
+        receiverCountry={parcel.receiverAddress?.country || null}
+        receiverDeliveryMethod={parcel.receiverAddress?.deliveryMethod || null}
+        declaredValue={parcel.declaredValue}
+        needsPackaging={parcel.needsPackaging}
         onUpdate={fetchParcel}
       />
 
