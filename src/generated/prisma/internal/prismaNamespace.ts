@@ -387,6 +387,7 @@ export const ModelName = {
   Profile: 'Profile',
   Client: 'Client',
   ClientAddress: 'ClientAddress',
+  Journey: 'Journey',
   Trip: 'Trip',
   Parcel: 'Parcel',
   ParcelPlace: 'ParcelPlace',
@@ -415,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "client" | "clientAddress" | "trip" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "descriptionSuggestion" | "claim"
+    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "descriptionSuggestion" | "claim"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -638,6 +639,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ClientAddressCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ClientAddressCountAggregateOutputType> | number
+        }
+      }
+    }
+    Journey: {
+      payload: Prisma.$JourneyPayload<ExtArgs>
+      fields: Prisma.JourneyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.JourneyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.JourneyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload>
+        }
+        findFirst: {
+          args: Prisma.JourneyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.JourneyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload>
+        }
+        findMany: {
+          args: Prisma.JourneyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload>[]
+        }
+        create: {
+          args: Prisma.JourneyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload>
+        }
+        createMany: {
+          args: Prisma.JourneyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.JourneyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload>[]
+        }
+        delete: {
+          args: Prisma.JourneyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload>
+        }
+        update: {
+          args: Prisma.JourneyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload>
+        }
+        deleteMany: {
+          args: Prisma.JourneyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.JourneyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.JourneyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload>[]
+        }
+        upsert: {
+          args: Prisma.JourneyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyPayload>
+        }
+        aggregate: {
+          args: Prisma.JourneyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateJourney>
+        }
+        groupBy: {
+          args: Prisma.JourneyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JourneyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.JourneyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JourneyCountAggregateOutputType> | number
         }
       }
     }
@@ -1700,6 +1775,26 @@ export const ClientAddressScalarFieldEnum = {
 export type ClientAddressScalarFieldEnum = (typeof ClientAddressScalarFieldEnum)[keyof typeof ClientAddressScalarFieldEnum]
 
 
+export const JourneyScalarFieldEnum = {
+  id: 'id',
+  country: 'country',
+  departureDate: 'departureDate',
+  euArrivalDate: 'euArrivalDate',
+  euReturnDate: 'euReturnDate',
+  endDate: 'endDate',
+  status: 'status',
+  assignedCourierId: 'assignedCourierId',
+  secondCourierId: 'secondCourierId',
+  vehicleInfo: 'vehicleInfo',
+  notes: 'notes',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JourneyScalarFieldEnum = (typeof JourneyScalarFieldEnum)[keyof typeof JourneyScalarFieldEnum]
+
+
 export const TripScalarFieldEnum = {
   id: 'id',
   direction: 'direction',
@@ -1707,6 +1802,7 @@ export const TripScalarFieldEnum = {
   departureDate: 'departureDate',
   arrivalDate: 'arrivalDate',
   status: 'status',
+  journeyId: 'journeyId',
   assignedCourierId: 'assignedCourierId',
   secondCourierId: 'secondCourierId',
   vehicleInfo: 'vehicleInfo',
@@ -2106,20 +2202,6 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'Direction'
- */
-export type EnumDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Direction'>
-    
-
-
-/**
- * Reference to a field of type 'Direction[]'
- */
-export type ListEnumDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Direction[]'>
-    
-
-
-/**
  * Reference to a field of type 'TripStatus'
  */
 export type EnumTripStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TripStatus'>
@@ -2130,6 +2212,20 @@ export type EnumTripStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'TripStatus[]'
  */
 export type ListEnumTripStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TripStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Direction'
+ */
+export type EnumDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Direction'>
+    
+
+
+/**
+ * Reference to a field of type 'Direction[]'
+ */
+export type ListEnumDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Direction[]'>
     
 
 
@@ -2426,6 +2522,7 @@ export type GlobalOmitConfig = {
   profile?: Prisma.ProfileOmit
   client?: Prisma.ClientOmit
   clientAddress?: Prisma.ClientAddressOmit
+  journey?: Prisma.JourneyOmit
   trip?: Prisma.TripOmit
   parcel?: Prisma.ParcelOmit
   parcelPlace?: Prisma.ParcelPlaceOmit

@@ -143,6 +143,9 @@ model Profile {
   assignedTrips        Trip[]                @relation("TripAssignedCourier")
   secondCourierTrips   Trip[]                @relation("TripSecondCourier")
   createdTrips         Trip[]                @relation("TripCreatedBy")
+  assignedJourneys     Journey[]             @relation("JourneyAssignedCourier")
+  secondCourierJourneys Journey[]            @relation("JourneySecondCourier")
+  createdJourneys      Journey[]             @relation("JourneyCreatedBy")
   assignedRouteTasks   RouteTask[]           @relation("RouteTaskAssignedCourier")
   cashReceived         CashRegister[]        @relation("CashReceivedBy")
   cashConfirmed        CashRegister[]        @relation("CashConfirmedBy")
@@ -216,6 +219,32 @@ model ClientAddress {
   @@map("client_addresses")
 }
 
+model Journey {
+  id                 String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  country            Country
+  departureDate      DateTime   @map("departure_date") @db.Date   // Дата виїзду з України (UA→EU)
+  euArrivalDate      DateTime?  @map("eu_arrival_date") @db.Date  // Дата приїзду в країну
+  euReturnDate       DateTime?  @map("eu_return_date") @db.Date   // Дата виїзду з країни (EU→UA)
+  endDate            DateTime?  @map("end_date") @db.Date         // Дата приїзду в UA
+  status             TripStatus @default(planned)
+  assignedCourierId  String?    @map("assigned_courier_id") @db.Uuid
+  secondCourierId    String?    @map("second_courier_id") @db.Uuid
+  vehicleInfo        String?    @map("vehicle_info")
+  notes              String?
+  createdById        String?    @map("created_by") @db.Uuid
+  createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  assignedCourier Profile? @relation("JourneyAssignedCourier", fields: [assignedCourierId], references: [id])
+  secondCourier   Profile? @relation("JourneySecondCourier", fields: [secondCourierId], references: [id])
+  createdBy       Profile? @relation("JourneyCreatedBy", fields: [createdById], references: [id])
+  trips           Trip[]
+
+  @@index([departureDate])
+  @@index([status])
+  @@map("journeys")
+}
+
 model Trip {
   id                       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   direction                Direction
@@ -223,6 +252,7 @@ model Trip {
   departureDate            DateTime   @map("departure_date") @db.Date
   arrivalDate              DateTime?  @map("arrival_date") @db.Date
   status                   TripStatus @default(planned)
+  journeyId                String?    @map("journey_id") @db.Uuid
   assignedCourierId        String?    @map("assigned_courier_id") @db.Uuid
   secondCourierId          String?    @map("second_courier_id") @db.Uuid
   vehicleInfo              String?    @map("vehicle_info")
@@ -241,6 +271,7 @@ model Trip {
   assignedCourier  Profile?    @relation("TripAssignedCourier", fields: [assignedCourierId], references: [id])
   secondCourier    Profile?    @relation("TripSecondCourier", fields: [secondCourierId], references: [id])
   createdBy        Profile?    @relation("TripCreatedBy", fields: [createdById], references: [id])
+  journey          Journey?    @relation(fields: [journeyId], references: [id])
   parcels          Parcel[]
   routeTasks       RouteTask[]
 

@@ -220,6 +220,9 @@ export type ProfileWhereInput = {
   assignedTrips?: Prisma.TripListRelationFilter
   secondCourierTrips?: Prisma.TripListRelationFilter
   createdTrips?: Prisma.TripListRelationFilter
+  assignedJourneys?: Prisma.JourneyListRelationFilter
+  secondCourierJourneys?: Prisma.JourneyListRelationFilter
+  createdJourneys?: Prisma.JourneyListRelationFilter
   assignedRouteTasks?: Prisma.RouteTaskListRelationFilter
   cashReceived?: Prisma.CashRegisterListRelationFilter
   cashConfirmed?: Prisma.CashRegisterListRelationFilter
@@ -246,6 +249,9 @@ export type ProfileOrderByWithRelationInput = {
   assignedTrips?: Prisma.TripOrderByRelationAggregateInput
   secondCourierTrips?: Prisma.TripOrderByRelationAggregateInput
   createdTrips?: Prisma.TripOrderByRelationAggregateInput
+  assignedJourneys?: Prisma.JourneyOrderByRelationAggregateInput
+  secondCourierJourneys?: Prisma.JourneyOrderByRelationAggregateInput
+  createdJourneys?: Prisma.JourneyOrderByRelationAggregateInput
   assignedRouteTasks?: Prisma.RouteTaskOrderByRelationAggregateInput
   cashReceived?: Prisma.CashRegisterOrderByRelationAggregateInput
   cashConfirmed?: Prisma.CashRegisterOrderByRelationAggregateInput
@@ -275,6 +281,9 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   assignedTrips?: Prisma.TripListRelationFilter
   secondCourierTrips?: Prisma.TripListRelationFilter
   createdTrips?: Prisma.TripListRelationFilter
+  assignedJourneys?: Prisma.JourneyListRelationFilter
+  secondCourierJourneys?: Prisma.JourneyListRelationFilter
+  createdJourneys?: Prisma.JourneyListRelationFilter
   assignedRouteTasks?: Prisma.RouteTaskListRelationFilter
   cashReceived?: Prisma.CashRegisterListRelationFilter
   cashConfirmed?: Prisma.CashRegisterListRelationFilter
@@ -331,6 +340,9 @@ export type ProfileCreateInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -357,6 +369,9 @@ export type ProfileUncheckedCreateInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -383,6 +398,9 @@ export type ProfileUpdateInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -409,6 +427,9 @@ export type ProfileUncheckedUpdateInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -535,6 +556,54 @@ export type ProfileUpdateOneWithoutCreatedClientsNestedInput = {
   delete?: Prisma.ProfileWhereInput | boolean
   connect?: Prisma.ProfileWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutCreatedClientsInput, Prisma.ProfileUpdateWithoutCreatedClientsInput>, Prisma.ProfileUncheckedUpdateWithoutCreatedClientsInput>
+}
+
+export type ProfileCreateNestedOneWithoutAssignedJourneysInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutAssignedJourneysInput, Prisma.ProfileUncheckedCreateWithoutAssignedJourneysInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutAssignedJourneysInput
+  connect?: Prisma.ProfileWhereUniqueInput
+}
+
+export type ProfileCreateNestedOneWithoutSecondCourierJourneysInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutSecondCourierJourneysInput, Prisma.ProfileUncheckedCreateWithoutSecondCourierJourneysInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutSecondCourierJourneysInput
+  connect?: Prisma.ProfileWhereUniqueInput
+}
+
+export type ProfileCreateNestedOneWithoutCreatedJourneysInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutCreatedJourneysInput, Prisma.ProfileUncheckedCreateWithoutCreatedJourneysInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutCreatedJourneysInput
+  connect?: Prisma.ProfileWhereUniqueInput
+}
+
+export type ProfileUpdateOneWithoutAssignedJourneysNestedInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutAssignedJourneysInput, Prisma.ProfileUncheckedCreateWithoutAssignedJourneysInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutAssignedJourneysInput
+  upsert?: Prisma.ProfileUpsertWithoutAssignedJourneysInput
+  disconnect?: Prisma.ProfileWhereInput | boolean
+  delete?: Prisma.ProfileWhereInput | boolean
+  connect?: Prisma.ProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutAssignedJourneysInput, Prisma.ProfileUpdateWithoutAssignedJourneysInput>, Prisma.ProfileUncheckedUpdateWithoutAssignedJourneysInput>
+}
+
+export type ProfileUpdateOneWithoutSecondCourierJourneysNestedInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutSecondCourierJourneysInput, Prisma.ProfileUncheckedCreateWithoutSecondCourierJourneysInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutSecondCourierJourneysInput
+  upsert?: Prisma.ProfileUpsertWithoutSecondCourierJourneysInput
+  disconnect?: Prisma.ProfileWhereInput | boolean
+  delete?: Prisma.ProfileWhereInput | boolean
+  connect?: Prisma.ProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutSecondCourierJourneysInput, Prisma.ProfileUpdateWithoutSecondCourierJourneysInput>, Prisma.ProfileUncheckedUpdateWithoutSecondCourierJourneysInput>
+}
+
+export type ProfileUpdateOneWithoutCreatedJourneysNestedInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutCreatedJourneysInput, Prisma.ProfileUncheckedCreateWithoutCreatedJourneysInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutCreatedJourneysInput
+  upsert?: Prisma.ProfileUpsertWithoutCreatedJourneysInput
+  disconnect?: Prisma.ProfileWhereInput | boolean
+  delete?: Prisma.ProfileWhereInput | boolean
+  connect?: Prisma.ProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutCreatedJourneysInput, Prisma.ProfileUpdateWithoutCreatedJourneysInput>, Prisma.ProfileUncheckedUpdateWithoutCreatedJourneysInput>
 }
 
 export type ProfileCreateNestedOneWithoutAssignedTripsInput = {
@@ -758,6 +827,9 @@ export type ProfileCreateWithoutCreatedClientsInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -783,6 +855,9 @@ export type ProfileUncheckedCreateWithoutCreatedClientsInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -824,6 +899,9 @@ export type ProfileUpdateWithoutCreatedClientsInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -849,6 +927,393 @@ export type ProfileUncheckedUpdateWithoutCreatedClientsInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
+  cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
+  statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
+  pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type ProfileCreateWithoutAssignedJourneysInput = {
+  id: string
+  email: string
+  fullName: string
+  phone?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
+  assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
+  createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
+  secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
+  createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
+  assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
+  cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
+  cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
+  statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
+  scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
+  warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
+  pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
+}
+
+export type ProfileUncheckedCreateWithoutAssignedJourneysInput = {
+  id: string
+  email: string
+  fullName: string
+  phone?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
+  createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
+  cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
+  cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
+  statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
+  pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type ProfileCreateOrConnectWithoutAssignedJourneysInput = {
+  where: Prisma.ProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutAssignedJourneysInput, Prisma.ProfileUncheckedCreateWithoutAssignedJourneysInput>
+}
+
+export type ProfileCreateWithoutSecondCourierJourneysInput = {
+  id: string
+  email: string
+  fullName: string
+  phone?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
+  assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
+  createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
+  secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
+  createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
+  assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
+  cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
+  cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
+  statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
+  scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
+  warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
+  pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
+}
+
+export type ProfileUncheckedCreateWithoutSecondCourierJourneysInput = {
+  id: string
+  email: string
+  fullName: string
+  phone?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
+  createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
+  cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
+  cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
+  statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
+  pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type ProfileCreateOrConnectWithoutSecondCourierJourneysInput = {
+  where: Prisma.ProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutSecondCourierJourneysInput, Prisma.ProfileUncheckedCreateWithoutSecondCourierJourneysInput>
+}
+
+export type ProfileCreateWithoutCreatedJourneysInput = {
+  id: string
+  email: string
+  fullName: string
+  phone?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdClients?: Prisma.ClientCreateNestedManyWithoutCreatedByInput
+  assignedParcels?: Prisma.ParcelCreateNestedManyWithoutAssignedCourierInput
+  createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
+  assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
+  secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
+  createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
+  cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
+  cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
+  statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
+  scannedPlaces?: Prisma.ParcelPlaceCreateNestedManyWithoutScannedByInput
+  warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutScannedByInput
+  pricingUpdates?: Prisma.PricingConfigCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimCreateNestedManyWithoutCreatedByInput
+}
+
+export type ProfileUncheckedCreateWithoutCreatedJourneysInput = {
+  id: string
+  email: string
+  fullName: string
+  phone?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdClients?: Prisma.ClientUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutAssignedCourierInput
+  createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
+  cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
+  cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
+  statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  scannedPlaces?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutScannedByInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutScannedByInput
+  pricingUpdates?: Prisma.PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+  createdClaims?: Prisma.ClaimUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type ProfileCreateOrConnectWithoutCreatedJourneysInput = {
+  where: Prisma.ProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutCreatedJourneysInput, Prisma.ProfileUncheckedCreateWithoutCreatedJourneysInput>
+}
+
+export type ProfileUpsertWithoutAssignedJourneysInput = {
+  update: Prisma.XOR<Prisma.ProfileUpdateWithoutAssignedJourneysInput, Prisma.ProfileUncheckedUpdateWithoutAssignedJourneysInput>
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutAssignedJourneysInput, Prisma.ProfileUncheckedCreateWithoutAssignedJourneysInput>
+  where?: Prisma.ProfileWhereInput
+}
+
+export type ProfileUpdateToOneWithWhereWithoutAssignedJourneysInput = {
+  where?: Prisma.ProfileWhereInput
+  data: Prisma.XOR<Prisma.ProfileUpdateWithoutAssignedJourneysInput, Prisma.ProfileUncheckedUpdateWithoutAssignedJourneysInput>
+}
+
+export type ProfileUpdateWithoutAssignedJourneysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
+  assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
+  createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
+  createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
+  assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
+  cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
+  cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
+  statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
+  scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
+  pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
+}
+
+export type ProfileUncheckedUpdateWithoutAssignedJourneysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
+  cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
+  statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
+  pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type ProfileUpsertWithoutSecondCourierJourneysInput = {
+  update: Prisma.XOR<Prisma.ProfileUpdateWithoutSecondCourierJourneysInput, Prisma.ProfileUncheckedUpdateWithoutSecondCourierJourneysInput>
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutSecondCourierJourneysInput, Prisma.ProfileUncheckedCreateWithoutSecondCourierJourneysInput>
+  where?: Prisma.ProfileWhereInput
+}
+
+export type ProfileUpdateToOneWithWhereWithoutSecondCourierJourneysInput = {
+  where?: Prisma.ProfileWhereInput
+  data: Prisma.XOR<Prisma.ProfileUpdateWithoutSecondCourierJourneysInput, Prisma.ProfileUncheckedUpdateWithoutSecondCourierJourneysInput>
+}
+
+export type ProfileUpdateWithoutSecondCourierJourneysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
+  assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
+  createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
+  createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
+  assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
+  cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
+  cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
+  statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
+  scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
+  pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
+}
+
+export type ProfileUncheckedUpdateWithoutSecondCourierJourneysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
+  cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
+  statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  scannedPlaces?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutScannedByNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutScannedByNestedInput
+  pricingUpdates?: Prisma.PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type ProfileUpsertWithoutCreatedJourneysInput = {
+  update: Prisma.XOR<Prisma.ProfileUpdateWithoutCreatedJourneysInput, Prisma.ProfileUncheckedUpdateWithoutCreatedJourneysInput>
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutCreatedJourneysInput, Prisma.ProfileUncheckedCreateWithoutCreatedJourneysInput>
+  where?: Prisma.ProfileWhereInput
+}
+
+export type ProfileUpdateToOneWithWhereWithoutCreatedJourneysInput = {
+  where?: Prisma.ProfileWhereInput
+  data: Prisma.XOR<Prisma.ProfileUpdateWithoutCreatedJourneysInput, Prisma.ProfileUncheckedUpdateWithoutCreatedJourneysInput>
+}
+
+export type ProfileUpdateWithoutCreatedJourneysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdClients?: Prisma.ClientUpdateManyWithoutCreatedByNestedInput
+  assignedParcels?: Prisma.ParcelUpdateManyWithoutAssignedCourierNestedInput
+  createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
+  assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
+  createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
+  cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
+  cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
+  statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
+  scannedPlaces?: Prisma.ParcelPlaceUpdateManyWithoutScannedByNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutScannedByNestedInput
+  pricingUpdates?: Prisma.PricingConfigUpdateManyWithoutUpdatedByNestedInput
+  createdClaims?: Prisma.ClaimUpdateManyWithoutCreatedByNestedInput
+}
+
+export type ProfileUncheckedUpdateWithoutCreatedJourneysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdClients?: Prisma.ClientUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedParcels?: Prisma.ParcelUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -874,6 +1339,9 @@ export type ProfileCreateWithoutAssignedTripsInput = {
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -899,6 +1367,9 @@ export type ProfileUncheckedCreateWithoutAssignedTripsInput = {
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -929,6 +1400,9 @@ export type ProfileCreateWithoutSecondCourierTripsInput = {
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -954,6 +1428,9 @@ export type ProfileUncheckedCreateWithoutSecondCourierTripsInput = {
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -984,6 +1461,9 @@ export type ProfileCreateWithoutCreatedTripsInput = {
   createdParcels?: Prisma.ParcelCreateNestedManyWithoutCreatedByInput
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -1009,6 +1489,9 @@ export type ProfileUncheckedCreateWithoutCreatedTripsInput = {
   createdParcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -1050,6 +1533,9 @@ export type ProfileUpdateWithoutAssignedTripsInput = {
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -1075,6 +1561,9 @@ export type ProfileUncheckedUpdateWithoutAssignedTripsInput = {
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -1111,6 +1600,9 @@ export type ProfileUpdateWithoutSecondCourierTripsInput = {
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -1136,6 +1628,9 @@ export type ProfileUncheckedUpdateWithoutSecondCourierTripsInput = {
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -1172,6 +1667,9 @@ export type ProfileUpdateWithoutCreatedTripsInput = {
   createdParcels?: Prisma.ParcelUpdateManyWithoutCreatedByNestedInput
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -1197,6 +1695,9 @@ export type ProfileUncheckedUpdateWithoutCreatedTripsInput = {
   createdParcels?: Prisma.ParcelUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -1222,6 +1723,9 @@ export type ProfileCreateWithoutCreatedParcelsInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -1247,6 +1751,9 @@ export type ProfileUncheckedCreateWithoutCreatedParcelsInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -1277,6 +1784,9 @@ export type ProfileCreateWithoutAssignedParcelsInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -1302,6 +1812,9 @@ export type ProfileUncheckedCreateWithoutAssignedParcelsInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -1343,6 +1856,9 @@ export type ProfileUpdateWithoutCreatedParcelsInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -1368,6 +1884,9 @@ export type ProfileUncheckedUpdateWithoutCreatedParcelsInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -1404,6 +1923,9 @@ export type ProfileUpdateWithoutAssignedParcelsInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -1429,6 +1951,9 @@ export type ProfileUncheckedUpdateWithoutAssignedParcelsInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -1455,6 +1980,9 @@ export type ProfileCreateWithoutScannedPlacesInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -1480,6 +2008,9 @@ export type ProfileUncheckedCreateWithoutScannedPlacesInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -1521,6 +2052,9 @@ export type ProfileUpdateWithoutScannedPlacesInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -1546,6 +2080,9 @@ export type ProfileUncheckedUpdateWithoutScannedPlacesInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -1571,6 +2108,9 @@ export type ProfileCreateWithoutStatusChangesInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -1596,6 +2136,9 @@ export type ProfileUncheckedCreateWithoutStatusChangesInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -1637,6 +2180,9 @@ export type ProfileUpdateWithoutStatusChangesInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -1662,6 +2208,9 @@ export type ProfileUncheckedUpdateWithoutStatusChangesInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -1687,6 +2236,9 @@ export type ProfileCreateWithoutPricingUpdatesInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -1712,6 +2264,9 @@ export type ProfileUncheckedCreateWithoutPricingUpdatesInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -1753,6 +2308,9 @@ export type ProfileUpdateWithoutPricingUpdatesInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -1778,6 +2336,9 @@ export type ProfileUncheckedUpdateWithoutPricingUpdatesInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -1803,6 +2364,9 @@ export type ProfileCreateWithoutCashReceivedInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
   statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
@@ -1828,6 +2392,9 @@ export type ProfileUncheckedCreateWithoutCashReceivedInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
@@ -1858,6 +2425,9 @@ export type ProfileCreateWithoutCashConfirmedInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
@@ -1883,6 +2453,9 @@ export type ProfileUncheckedCreateWithoutCashConfirmedInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
@@ -1924,6 +2497,9 @@ export type ProfileUpdateWithoutCashReceivedInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
   statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
@@ -1949,6 +2525,9 @@ export type ProfileUncheckedUpdateWithoutCashReceivedInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
@@ -1985,6 +2564,9 @@ export type ProfileUpdateWithoutCashConfirmedInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
@@ -2010,6 +2592,9 @@ export type ProfileUncheckedUpdateWithoutCashConfirmedInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
@@ -2035,6 +2620,9 @@ export type ProfileCreateWithoutAssignedRouteTasksInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
   statusChanges?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutChangedByInput
@@ -2060,6 +2648,9 @@ export type ProfileUncheckedCreateWithoutAssignedRouteTasksInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
@@ -2101,6 +2692,9 @@ export type ProfileUpdateWithoutAssignedRouteTasksInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
   statusChanges?: Prisma.ParcelStatusHistoryUpdateManyWithoutChangedByNestedInput
@@ -2126,6 +2720,9 @@ export type ProfileUncheckedUpdateWithoutAssignedRouteTasksInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
   statusChanges?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
@@ -2151,6 +2748,9 @@ export type ProfileCreateWithoutWarehouseActionsInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -2176,6 +2776,9 @@ export type ProfileUncheckedCreateWithoutWarehouseActionsInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -2217,6 +2820,9 @@ export type ProfileUpdateWithoutWarehouseActionsInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -2242,6 +2848,9 @@ export type ProfileUncheckedUpdateWithoutWarehouseActionsInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -2267,6 +2876,9 @@ export type ProfileCreateWithoutCreatedClaimsInput = {
   assignedTrips?: Prisma.TripCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterCreateNestedManyWithoutConfirmedByInput
@@ -2292,6 +2904,9 @@ export type ProfileUncheckedCreateWithoutCreatedClaimsInput = {
   assignedTrips?: Prisma.TripUncheckedCreateNestedManyWithoutAssignedCourierInput
   secondCourierTrips?: Prisma.TripUncheckedCreateNestedManyWithoutSecondCourierInput
   createdTrips?: Prisma.TripUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutAssignedCourierInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutSecondCourierInput
+  createdJourneys?: Prisma.JourneyUncheckedCreateNestedManyWithoutCreatedByInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutAssignedCourierInput
   cashReceived?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutReceivedByInput
   cashConfirmed?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutConfirmedByInput
@@ -2333,6 +2948,9 @@ export type ProfileUpdateWithoutCreatedClaimsInput = {
   assignedTrips?: Prisma.TripUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUpdateManyWithoutConfirmedByNestedInput
@@ -2358,6 +2976,9 @@ export type ProfileUncheckedUpdateWithoutCreatedClaimsInput = {
   assignedTrips?: Prisma.TripUncheckedUpdateManyWithoutAssignedCourierNestedInput
   secondCourierTrips?: Prisma.TripUncheckedUpdateManyWithoutSecondCourierNestedInput
   createdTrips?: Prisma.TripUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutAssignedCourierNestedInput
+  secondCourierJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutSecondCourierNestedInput
+  createdJourneys?: Prisma.JourneyUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedRouteTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutAssignedCourierNestedInput
   cashReceived?: Prisma.CashRegisterUncheckedUpdateManyWithoutReceivedByNestedInput
   cashConfirmed?: Prisma.CashRegisterUncheckedUpdateManyWithoutConfirmedByNestedInput
@@ -2379,6 +3000,9 @@ export type ProfileCountOutputType = {
   assignedTrips: number
   secondCourierTrips: number
   createdTrips: number
+  assignedJourneys: number
+  secondCourierJourneys: number
+  createdJourneys: number
   assignedRouteTasks: number
   cashReceived: number
   cashConfirmed: number
@@ -2396,6 +3020,9 @@ export type ProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   assignedTrips?: boolean | ProfileCountOutputTypeCountAssignedTripsArgs
   secondCourierTrips?: boolean | ProfileCountOutputTypeCountSecondCourierTripsArgs
   createdTrips?: boolean | ProfileCountOutputTypeCountCreatedTripsArgs
+  assignedJourneys?: boolean | ProfileCountOutputTypeCountAssignedJourneysArgs
+  secondCourierJourneys?: boolean | ProfileCountOutputTypeCountSecondCourierJourneysArgs
+  createdJourneys?: boolean | ProfileCountOutputTypeCountCreatedJourneysArgs
   assignedRouteTasks?: boolean | ProfileCountOutputTypeCountAssignedRouteTasksArgs
   cashReceived?: boolean | ProfileCountOutputTypeCountCashReceivedArgs
   cashConfirmed?: boolean | ProfileCountOutputTypeCountCashConfirmedArgs
@@ -2456,6 +3083,27 @@ export type ProfileCountOutputTypeCountSecondCourierTripsArgs<ExtArgs extends ru
  */
 export type ProfileCountOutputTypeCountCreatedTripsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.TripWhereInput
+}
+
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountAssignedJourneysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JourneyWhereInput
+}
+
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountSecondCourierJourneysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JourneyWhereInput
+}
+
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountCreatedJourneysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JourneyWhereInput
 }
 
 /**
@@ -2531,6 +3179,9 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   assignedTrips?: boolean | Prisma.Profile$assignedTripsArgs<ExtArgs>
   secondCourierTrips?: boolean | Prisma.Profile$secondCourierTripsArgs<ExtArgs>
   createdTrips?: boolean | Prisma.Profile$createdTripsArgs<ExtArgs>
+  assignedJourneys?: boolean | Prisma.Profile$assignedJourneysArgs<ExtArgs>
+  secondCourierJourneys?: boolean | Prisma.Profile$secondCourierJourneysArgs<ExtArgs>
+  createdJourneys?: boolean | Prisma.Profile$createdJourneysArgs<ExtArgs>
   assignedRouteTasks?: boolean | Prisma.Profile$assignedRouteTasksArgs<ExtArgs>
   cashReceived?: boolean | Prisma.Profile$cashReceivedArgs<ExtArgs>
   cashConfirmed?: boolean | Prisma.Profile$cashConfirmedArgs<ExtArgs>
@@ -2586,6 +3237,9 @@ export type ProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   assignedTrips?: boolean | Prisma.Profile$assignedTripsArgs<ExtArgs>
   secondCourierTrips?: boolean | Prisma.Profile$secondCourierTripsArgs<ExtArgs>
   createdTrips?: boolean | Prisma.Profile$createdTripsArgs<ExtArgs>
+  assignedJourneys?: boolean | Prisma.Profile$assignedJourneysArgs<ExtArgs>
+  secondCourierJourneys?: boolean | Prisma.Profile$secondCourierJourneysArgs<ExtArgs>
+  createdJourneys?: boolean | Prisma.Profile$createdJourneysArgs<ExtArgs>
   assignedRouteTasks?: boolean | Prisma.Profile$assignedRouteTasksArgs<ExtArgs>
   cashReceived?: boolean | Prisma.Profile$cashReceivedArgs<ExtArgs>
   cashConfirmed?: boolean | Prisma.Profile$cashConfirmedArgs<ExtArgs>
@@ -2608,6 +3262,9 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     assignedTrips: Prisma.$TripPayload<ExtArgs>[]
     secondCourierTrips: Prisma.$TripPayload<ExtArgs>[]
     createdTrips: Prisma.$TripPayload<ExtArgs>[]
+    assignedJourneys: Prisma.$JourneyPayload<ExtArgs>[]
+    secondCourierJourneys: Prisma.$JourneyPayload<ExtArgs>[]
+    createdJourneys: Prisma.$JourneyPayload<ExtArgs>[]
     assignedRouteTasks: Prisma.$RouteTaskPayload<ExtArgs>[]
     cashReceived: Prisma.$CashRegisterPayload<ExtArgs>[]
     cashConfirmed: Prisma.$CashRegisterPayload<ExtArgs>[]
@@ -3027,6 +3684,9 @@ export interface Prisma__ProfileClient<T, Null = never, ExtArgs extends runtime.
   assignedTrips<T extends Prisma.Profile$assignedTripsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$assignedTripsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   secondCourierTrips<T extends Prisma.Profile$secondCourierTripsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$secondCourierTripsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdTrips<T extends Prisma.Profile$createdTripsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$createdTripsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignedJourneys<T extends Prisma.Profile$assignedJourneysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$assignedJourneysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JourneyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  secondCourierJourneys<T extends Prisma.Profile$secondCourierJourneysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$secondCourierJourneysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JourneyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdJourneys<T extends Prisma.Profile$createdJourneysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$createdJourneysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JourneyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedRouteTasks<T extends Prisma.Profile$assignedRouteTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$assignedRouteTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RouteTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cashReceived<T extends Prisma.Profile$cashReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$cashReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CashRegisterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cashConfirmed<T extends Prisma.Profile$cashConfirmedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$cashConfirmedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CashRegisterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3607,6 +4267,78 @@ export type Profile$createdTripsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.TripScalarFieldEnum | Prisma.TripScalarFieldEnum[]
+}
+
+/**
+ * Profile.assignedJourneys
+ */
+export type Profile$assignedJourneysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Journey
+   */
+  select?: Prisma.JourneySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Journey
+   */
+  omit?: Prisma.JourneyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JourneyInclude<ExtArgs> | null
+  where?: Prisma.JourneyWhereInput
+  orderBy?: Prisma.JourneyOrderByWithRelationInput | Prisma.JourneyOrderByWithRelationInput[]
+  cursor?: Prisma.JourneyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JourneyScalarFieldEnum | Prisma.JourneyScalarFieldEnum[]
+}
+
+/**
+ * Profile.secondCourierJourneys
+ */
+export type Profile$secondCourierJourneysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Journey
+   */
+  select?: Prisma.JourneySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Journey
+   */
+  omit?: Prisma.JourneyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JourneyInclude<ExtArgs> | null
+  where?: Prisma.JourneyWhereInput
+  orderBy?: Prisma.JourneyOrderByWithRelationInput | Prisma.JourneyOrderByWithRelationInput[]
+  cursor?: Prisma.JourneyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JourneyScalarFieldEnum | Prisma.JourneyScalarFieldEnum[]
+}
+
+/**
+ * Profile.createdJourneys
+ */
+export type Profile$createdJourneysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Journey
+   */
+  select?: Prisma.JourneySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Journey
+   */
+  omit?: Prisma.JourneyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JourneyInclude<ExtArgs> | null
+  where?: Prisma.JourneyWhereInput
+  orderBy?: Prisma.JourneyOrderByWithRelationInput | Prisma.JourneyOrderByWithRelationInput[]
+  cursor?: Prisma.JourneyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JourneyScalarFieldEnum | Prisma.JourneyScalarFieldEnum[]
 }
 
 /**

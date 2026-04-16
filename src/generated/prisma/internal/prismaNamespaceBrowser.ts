@@ -54,6 +54,7 @@ export const ModelName = {
   Profile: 'Profile',
   Client: 'Client',
   ClientAddress: 'ClientAddress',
+  Journey: 'Journey',
   Trip: 'Trip',
   Parcel: 'Parcel',
   ParcelPlace: 'ParcelPlace',
@@ -143,6 +144,26 @@ export const ClientAddressScalarFieldEnum = {
 export type ClientAddressScalarFieldEnum = (typeof ClientAddressScalarFieldEnum)[keyof typeof ClientAddressScalarFieldEnum]
 
 
+export const JourneyScalarFieldEnum = {
+  id: 'id',
+  country: 'country',
+  departureDate: 'departureDate',
+  euArrivalDate: 'euArrivalDate',
+  euReturnDate: 'euReturnDate',
+  endDate: 'endDate',
+  status: 'status',
+  assignedCourierId: 'assignedCourierId',
+  secondCourierId: 'secondCourierId',
+  vehicleInfo: 'vehicleInfo',
+  notes: 'notes',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JourneyScalarFieldEnum = (typeof JourneyScalarFieldEnum)[keyof typeof JourneyScalarFieldEnum]
+
+
 export const TripScalarFieldEnum = {
   id: 'id',
   direction: 'direction',
@@ -150,6 +171,7 @@ export const TripScalarFieldEnum = {
   departureDate: 'departureDate',
   arrivalDate: 'arrivalDate',
   status: 'status',
+  journeyId: 'journeyId',
   assignedCourierId: 'assignedCourierId',
   secondCourierId: 'secondCourierId',
   vehicleInfo: 'vehicleInfo',

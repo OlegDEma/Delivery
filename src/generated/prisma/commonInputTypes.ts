@@ -314,18 +314,28 @@ export type IntWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntFilter<$PrismaModel>
 }
 
-export type EnumDirectionFilter<$PrismaModel = never> = {
-  equals?: $Enums.Direction | Prisma.EnumDirectionFieldRefInput<$PrismaModel>
-  in?: $Enums.Direction[] | Prisma.ListEnumDirectionFieldRefInput<$PrismaModel>
-  notIn?: $Enums.Direction[] | Prisma.ListEnumDirectionFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumDirectionFilter<$PrismaModel> | $Enums.Direction
-}
-
 export type EnumTripStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.TripStatus | Prisma.EnumTripStatusFieldRefInput<$PrismaModel>
   in?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumTripStatusFilter<$PrismaModel> | $Enums.TripStatus
+}
+
+export type EnumTripStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TripStatus | Prisma.EnumTripStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTripStatusWithAggregatesFilter<$PrismaModel> | $Enums.TripStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTripStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTripStatusFilter<$PrismaModel>
+}
+
+export type EnumDirectionFilter<$PrismaModel = never> = {
+  equals?: $Enums.Direction | Prisma.EnumDirectionFieldRefInput<$PrismaModel>
+  in?: $Enums.Direction[] | Prisma.ListEnumDirectionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.Direction[] | Prisma.ListEnumDirectionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDirectionFilter<$PrismaModel> | $Enums.Direction
 }
 
 export type DecimalNullableFilter<$PrismaModel = never> = {
@@ -347,16 +357,6 @@ export type EnumDirectionWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDirectionFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDirectionFilter<$PrismaModel>
-}
-
-export type EnumTripStatusWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.TripStatus | Prisma.EnumTripStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumTripStatusWithAggregatesFilter<$PrismaModel> | $Enums.TripStatus
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumTripStatusFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumTripStatusFilter<$PrismaModel>
 }
 
 export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -989,18 +989,28 @@ export type NestedFloatFilter<$PrismaModel = never> = {
   not?: Prisma.NestedFloatFilter<$PrismaModel> | number
 }
 
-export type NestedEnumDirectionFilter<$PrismaModel = never> = {
-  equals?: $Enums.Direction | Prisma.EnumDirectionFieldRefInput<$PrismaModel>
-  in?: $Enums.Direction[] | Prisma.ListEnumDirectionFieldRefInput<$PrismaModel>
-  notIn?: $Enums.Direction[] | Prisma.ListEnumDirectionFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumDirectionFilter<$PrismaModel> | $Enums.Direction
-}
-
 export type NestedEnumTripStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.TripStatus | Prisma.EnumTripStatusFieldRefInput<$PrismaModel>
   in?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumTripStatusFilter<$PrismaModel> | $Enums.TripStatus
+}
+
+export type NestedEnumTripStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TripStatus | Prisma.EnumTripStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTripStatusWithAggregatesFilter<$PrismaModel> | $Enums.TripStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTripStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTripStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumDirectionFilter<$PrismaModel = never> = {
+  equals?: $Enums.Direction | Prisma.EnumDirectionFieldRefInput<$PrismaModel>
+  in?: $Enums.Direction[] | Prisma.ListEnumDirectionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.Direction[] | Prisma.ListEnumDirectionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDirectionFilter<$PrismaModel> | $Enums.Direction
 }
 
 export type NestedDecimalNullableFilter<$PrismaModel = never> = {
@@ -1022,16 +1032,6 @@ export type NestedEnumDirectionWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDirectionFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDirectionFilter<$PrismaModel>
-}
-
-export type NestedEnumTripStatusWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.TripStatus | Prisma.EnumTripStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.TripStatus[] | Prisma.ListEnumTripStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumTripStatusWithAggregatesFilter<$PrismaModel> | $Enums.TripStatus
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumTripStatusFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumTripStatusFilter<$PrismaModel>
 }
 
 export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {

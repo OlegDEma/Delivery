@@ -11,6 +11,7 @@
 export type * from './models/Profile'
 export type * from './models/Client'
 export type * from './models/ClientAddress'
+export type * from './models/Journey'
 export type * from './models/Trip'
 export type * from './models/Parcel'
 export type * from './models/ParcelPlace'

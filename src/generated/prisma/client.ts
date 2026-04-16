@@ -57,6 +57,11 @@ export type Client = Prisma.ClientModel
  */
 export type ClientAddress = Prisma.ClientAddressModel
 /**
+ * Model Journey
+ * 
+ */
+export type Journey = Prisma.JourneyModel
+/**
  * Model Trip
  * 
  */

@@ -35,6 +35,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: 'Логістика',
     items: [
+      { label: 'Поїздки', href: '/journeys' },
       { label: 'Рейси', href: '/trips' },
       { label: 'Календар', href: '/calendar' },
       { label: 'Маршрути', href: '/routes', roles: ['super_admin', 'admin', 'driver_courier'] },
