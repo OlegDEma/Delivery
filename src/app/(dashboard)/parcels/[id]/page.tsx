@@ -73,6 +73,10 @@ interface ParcelDetail {
     status: string; changedAt: string; notes: string | null;
     changedBy: { fullName: string } | null;
   }[];
+  auditLog?: {
+    id: string; event: string; actor: string | null;
+    payload: unknown; createdAt: string;
+  }[];
   trip: { id: string; departureDate: string; country: string; direction: string } | null;
   assignedCourier: { id: string; fullName: string } | null;
   createdBy: { fullName: string } | null;
@@ -612,6 +616,33 @@ export default function ParcelDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Audit Journal — other operations (deletions, cost overrides, etc.) */}
+      {parcel.auditLog && parcel.auditLog.length > 0 && (
+        <Card>
+          <CardHeader className="py-2 px-3">
+            <CardTitle className="text-sm">Журнал операцій</CardTitle>
+          </CardHeader>
+          <CardContent className="px-3 pb-3 pt-0">
+            <div className="divide-y">
+              {parcel.auditLog.map((a) => (
+                <div key={a.id} className="py-2 text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-gray-900">{a.event}</span>
+                    <span className="text-gray-400">{formatDateTime(a.createdAt)}</span>
+                  </div>
+                  <div className="text-gray-500">{a.actor || 'Система'}</div>
+                  {a.payload != null && typeof a.payload === 'object' && (
+                    <div className="text-gray-400 font-mono break-all line-clamp-2 mt-0.5">
+                      {JSON.stringify(a.payload)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

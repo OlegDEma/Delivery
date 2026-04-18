@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
-import { formatDate } from '@/lib/utils/format';
+import { formatDate, formatCurrency, formatDateTime } from '@/lib/utils/format';
 
 interface Address {
   id: string;
@@ -36,6 +36,27 @@ interface ParcelRef {
   createdAt: string;
 }
 
+interface ClientStats {
+  totalParcels: number;
+  totalSent: number;
+  totalReceived: number;
+  totalPaid: number;
+  currentDebt: number;
+  unpaidCount: number;
+  byDirection: { eu_to_ua: number; ua_to_eu: number };
+}
+
+interface CashEntry {
+  id: string;
+  amount: number;
+  currency: string;
+  paymentMethod: string;
+  paymentType: string;
+  createdAt: string;
+  parcel: { id: string; internalNumber: string } | null;
+  receivedBy: string | null;
+}
+
 interface ClientDetail {
   id: string;
   phone: string;
@@ -48,7 +69,22 @@ interface ClientDetail {
   addresses: Address[];
   sentParcels: ParcelRef[];
   receivedParcels: ParcelRef[];
+  stats: ClientStats;
+  cashEntries: CashEntry[];
 }
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  cash: 'Готівка',
+  card: 'Картка',
+  transfer: 'Переказ',
+  online: 'Онлайн',
+};
+
+const PAYMENT_TYPE_LABELS: Record<string, string> = {
+  income: 'Надходження',
+  expense: 'Витрата',
+  refund: 'Повернення',
+};
 
 export default function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -169,30 +205,63 @@ export default function ClientDetailPage() {
         </Button>
       </div>
 
-      {/* Stats */}
-      {(client as unknown as { stats?: { totalParcels: number; totalSent: number; totalReceived: number; totalSpent: number; unpaidCount: number } }).stats && (() => {
-        const stats = (client as unknown as { stats: { totalParcels: number; totalSent: number; totalReceived: number; totalSpent: number; unpaidCount: number } }).stats;
-        return (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <div className="bg-white rounded-lg border p-3 text-center">
-              <div className="text-2xl font-bold">{stats.totalParcels}</div>
-              <div className="text-xs text-gray-500">Всього посилок</div>
-            </div>
-            <div className="bg-white rounded-lg border p-3 text-center">
-              <div className="text-2xl font-bold text-green-600">{stats.totalSent}</div>
-              <div className="text-xs text-gray-500">Відправлено</div>
-            </div>
-            <div className="bg-white rounded-lg border p-3 text-center">
-              <div className="text-2xl font-bold text-blue-600">{stats.totalReceived}</div>
-              <div className="text-xs text-gray-500">Отримано</div>
-            </div>
-            <div className="bg-white rounded-lg border p-3 text-center">
-              <div className={`text-2xl font-bold ${stats.unpaidCount > 0 ? 'text-red-600' : 'text-gray-400'}`}>{stats.unpaidCount}</div>
-              <div className="text-xs text-gray-500">Не оплачено</div>
+      {/* Parcel count stats */}
+      {client.stats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="bg-white rounded-lg border p-3 text-center">
+            <div className="text-2xl font-bold">{client.stats.totalParcels}</div>
+            <div className="text-xs text-gray-500">Всього посилок</div>
+            <div className="text-[10px] text-gray-400 mt-0.5">
+              EU→UA: {client.stats.byDirection.eu_to_ua} / UA→EU: {client.stats.byDirection.ua_to_eu}
             </div>
           </div>
-        );
-      })()}
+          <div className="bg-white rounded-lg border p-3 text-center">
+            <div className="text-2xl font-bold text-green-600">{client.stats.totalSent}</div>
+            <div className="text-xs text-gray-500">Відправлено</div>
+          </div>
+          <div className="bg-white rounded-lg border p-3 text-center">
+            <div className="text-2xl font-bold text-blue-600">{client.stats.totalReceived}</div>
+            <div className="text-xs text-gray-500">Отримано</div>
+          </div>
+          <div className="bg-white rounded-lg border p-3 text-center">
+            <div className={`text-2xl font-bold ${client.stats.unpaidCount > 0 ? 'text-red-600' : 'text-gray-400'}`}>{client.stats.unpaidCount}</div>
+            <div className="text-xs text-gray-500">Не оплачено</div>
+          </div>
+        </div>
+      )}
+
+      {/* Financial summary — ledger-style. Shows lifetime-paid vs current debt
+          as side-by-side cards; the debt card goes red when non-zero. */}
+      {client.stats && (
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="text-xs text-green-700 font-medium">Загалом оплачено</div>
+            <div className="text-2xl font-bold text-green-800 mt-1">
+              {formatCurrency(client.stats.totalPaid, 'EUR')}
+            </div>
+            <div className="text-[10px] text-green-600 mt-0.5">за весь час співпраці</div>
+          </div>
+          <div className={`rounded-lg p-3 border ${
+            client.stats.currentDebt > 0
+              ? 'bg-red-50 border-red-200'
+              : 'bg-gray-50 border-gray-200'
+          }`}>
+            <div className={`text-xs font-medium ${
+              client.stats.currentDebt > 0 ? 'text-red-700' : 'text-gray-500'
+            }`}>Поточний борг</div>
+            <div className={`text-2xl font-bold mt-1 ${
+              client.stats.currentDebt > 0 ? 'text-red-800' : 'text-gray-400'
+            }`}>
+              {formatCurrency(client.stats.currentDebt, 'EUR')}
+            </div>
+            <div className="text-[10px] text-gray-500 mt-0.5">
+              {client.stats.unpaidCount > 0
+                ? `${client.stats.unpaidCount} неоплачен${client.stats.unpaidCount === 1 ? 'а посилка' : client.stats.unpaidCount < 5 ? 'і посилки' : 'их посилок'}`
+                : 'немає неоплачених'}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Notes */}
       {client.notes && (
@@ -227,6 +296,52 @@ export default function ClientDetailPage() {
             <Button onClick={handleSave} disabled={saving} size="sm">
               {saving ? 'Збереження...' : 'Зберегти'}
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Payment history — recent cash-register entries tied to this client's
+          parcels (either sent or received). Keeps a visible audit-trail of who
+          took the money and when, so any "ти це не оплатив" dispute has
+          one-click evidence. */}
+      {client.cashEntries && client.cashEntries.length > 0 && (
+        <Card>
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-base">Останні платежі</CardTitle>
+          </CardHeader>
+          <CardContent className="px-0 pb-0">
+            <div className="divide-y">
+              {client.cashEntries.map((c) => (
+                <div key={c.id} className="px-4 py-2 flex items-center justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-semibold ${
+                        c.paymentType === 'expense' ? 'text-red-600' : 'text-green-700'
+                      }`}>
+                        {c.paymentType === 'expense' ? '−' : '+'}{formatCurrency(c.amount, c.currency)}
+                      </span>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {PAYMENT_METHOD_LABELS[c.paymentMethod] ?? c.paymentMethod}
+                      </Badge>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {PAYMENT_TYPE_LABELS[c.paymentType] ?? c.paymentType}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      {c.parcel ? (
+                        <Link href={`/parcels/${c.parcel.id}`} className="font-mono text-blue-600 hover:underline">
+                          {c.parcel.internalNumber}
+                        </Link>
+                      ) : (
+                        <span>Без посилки</span>
+                      )}
+                      {c.receivedBy && <span> • прийняв {c.receivedBy}</span>}
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-400 shrink-0">{formatDateTime(c.createdAt)}</div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}

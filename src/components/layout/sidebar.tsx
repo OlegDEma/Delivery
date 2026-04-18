@@ -8,7 +8,7 @@ import {
   Route, Calendar, Map, Warehouse,
   Wallet, AlertCircle, BarChart3, FileText,
   PackageOpen, ClipboardList, AlertTriangle,
-  UserCog, Tags, MapPin, Upload,
+  UserCog, Tags, MapPin, Upload, ScrollText,
   Search, LogOut, ChevronDown,
   type LucideIcon,
 } from 'lucide-react';
@@ -82,6 +82,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Тарифи', href: '/admin/pricing', icon: Tags },
       { label: 'Пункти збору', href: '/admin/collection-points', icon: MapPin },
       { label: 'Імпорт даних', href: '/admin/import', icon: Upload, roles: ['super_admin'] },
+      { label: 'Журнал подій', href: '/audit', icon: ScrollText, roles: ['super_admin', 'admin'] },
     ],
   },
 ];

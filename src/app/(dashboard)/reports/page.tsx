@@ -4,7 +4,11 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { formatCurrency } from '@/lib/utils/format';
 
 interface WarehouseParcel {
   id: string;
@@ -50,6 +54,53 @@ interface TripReport {
   statusBreakdown: Record<string, number>;
 }
 
+interface FinancialReport {
+  range: { from: string; to: string };
+  totals: {
+    parcelsTotal: number;
+    parcelsPaid: number;
+    parcelsUnpaid: number;
+    revenue: number;
+    pending: number;
+    totalBilled: number;
+  };
+  byDirection: Array<{ direction: string; count: number; revenue: number; totalWeight: number }>;
+  byCountry: Array<{ country: string; count: number; revenue: number }>;
+  cashByMethod: Array<{ currency: string; paymentMethod: string; amount: number; count: number }>;
+  cashByType: Array<{ currency: string; paymentType: string; amount: number; count: number }>;
+  dailySeries: Array<{ day: string; count: number; revenue: number }>;
+}
+
+const DIRECTION_LABELS: Record<string, string> = {
+  eu_to_ua: 'ЄС → Україна',
+  ua_to_eu: 'Україна → ЄС',
+};
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  cash: 'Готівка',
+  card: 'Картка',
+  bank_transfer: 'Переказ',
+  crypto: 'Крипто',
+};
+
+const PAYMENT_TYPE_LABELS: Record<string, string> = {
+  income: 'Дохід',
+  expense: 'Витрата',
+  refund: 'Повернення',
+};
+
+function todayYmd(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function firstOfMonthYmd(): string {
+  return todayYmd().slice(0, 8) + '01';
+}
+
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState('warehouse');
 
@@ -65,11 +116,33 @@ export default function ReportsPage() {
   const [tripReports, setTripReports] = useState<TripReport[]>([]);
   const [tripLoading, setTripLoading] = useState(false);
 
+  // Finance tab
+  const [finFrom, setFinFrom] = useState(firstOfMonthYmd());
+  const [finTo, setFinTo] = useState(todayYmd());
+  const [finReport, setFinReport] = useState<FinancialReport | null>(null);
+  const [finLoading, setFinLoading] = useState(false);
+
   useEffect(() => {
     if (activeTab === 'warehouse') fetchWarehouse();
     else if (activeTab === 'courier') fetchCouriers();
     else if (activeTab === 'trip') fetchTrips();
+    else if (activeTab === 'finance' && !finReport) fetchFinance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
+
+  async function fetchFinance() {
+    setFinLoading(true);
+    const res = await fetch(`/api/reports/financial?from=${finFrom}&to=${finTo}`);
+    if (res.ok) {
+      const data = await res.json();
+      setFinReport(data);
+    }
+    setFinLoading(false);
+  }
+
+  function exportFinanceExcel() {
+    window.location.href = `/api/reports/financial?from=${finFrom}&to=${finTo}&format=xlsx`;
+  }
 
   async function fetchWarehouse() {
     setWarehouseLoading(true);
@@ -143,6 +216,7 @@ export default function ReportsPage() {
           <TabsTrigger value="warehouse">По складу</TabsTrigger>
           <TabsTrigger value="courier">По кур&apos;єру</TabsTrigger>
           <TabsTrigger value="trip">По рейсу</TabsTrigger>
+          <TabsTrigger value="finance">Фінанси</TabsTrigger>
         </TabsList>
 
         {/* Warehouse tab */}
@@ -275,6 +349,197 @@ export default function ReportsPage() {
               {tripReports.length === 0 && (
                 <div className="text-center py-8 text-gray-500">Немає рейсів</div>
               )}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Finance tab */}
+        <TabsContent value="finance">
+          <Card className="mb-4">
+            <CardContent className="p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto_auto] gap-3 items-end">
+                <div>
+                  <Label htmlFor="fin-from" className="text-xs">Від</Label>
+                  <Input id="fin-from" type="date" value={finFrom} onChange={(e) => setFinFrom(e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="fin-to" className="text-xs">До</Label>
+                  <Input id="fin-to" type="date" value={finTo} onChange={(e) => setFinTo(e.target.value)} />
+                </div>
+                <Button onClick={fetchFinance} disabled={finLoading}>
+                  {finLoading ? 'Завантаження...' : 'Оновити'}
+                </Button>
+                <Button variant="outline" onClick={exportFinanceExcel} disabled={!finReport}>
+                  Експорт Excel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {finLoading && !finReport ? (
+            <div className="text-center py-12 text-gray-500">Завантаження...</div>
+          ) : !finReport ? (
+            <div className="text-center py-12 text-gray-500">Оберіть період і натисніть «Оновити»</div>
+          ) : (
+            <div className="space-y-4">
+              {/* Totals */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold">{finReport.totals.parcelsTotal}</div>
+                    <div className="text-xs text-gray-500">Всього посилок</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold">{finReport.totals.parcelsPaid}</div>
+                    <div className="text-xs text-gray-500">Оплачено</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold">{finReport.totals.parcelsUnpaid}</div>
+                    <div className="text-xs text-gray-500">Не оплачено</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold text-green-600">{formatCurrency(finReport.totals.revenue)}</div>
+                    <div className="text-xs text-gray-500">Надходження</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className={`text-2xl font-bold ${finReport.totals.pending > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                      {formatCurrency(finReport.totals.pending)}
+                    </div>
+                    <div className="text-xs text-gray-500">В очікуванні</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold">{formatCurrency(finReport.totals.totalBilled)}</div>
+                    <div className="text-xs text-gray-500">Виставлено всього</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* By direction */}
+              <Card>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base">По напрямках</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0">
+                  {finReport.byDirection.length === 0 ? (
+                    <div className="text-sm text-gray-500">Немає даних</div>
+                  ) : (
+                    <div className="divide-y">
+                      {finReport.byDirection.map((d) => (
+                        <div key={d.direction} className="py-2 flex items-center justify-between text-sm">
+                          <span>{DIRECTION_LABELS[d.direction] || d.direction}</span>
+                          <span className="text-gray-600">
+                            {d.count} шт · {d.totalWeight.toFixed(1)} кг · <span className="font-medium text-gray-900">{formatCurrency(d.revenue)}</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* By country */}
+              <Card>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base">По країнах</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0">
+                  {finReport.byCountry.length === 0 ? (
+                    <div className="text-sm text-gray-500">Немає даних</div>
+                  ) : (
+                    <div className="divide-y">
+                      {finReport.byCountry.map((c) => (
+                        <div key={c.country} className="py-2 flex items-center justify-between text-sm">
+                          <span>{c.country}</span>
+                          <span className="text-gray-600">
+                            {c.count} шт · <span className="font-medium text-gray-900">{formatCurrency(c.revenue)}</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Cash by method */}
+              <Card>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base">Каса — за методом оплати</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0">
+                  {finReport.cashByMethod.length === 0 ? (
+                    <div className="text-sm text-gray-500">Немає даних</div>
+                  ) : (
+                    <div className="divide-y">
+                      {finReport.cashByMethod.map((c, i) => (
+                        <div key={i} className="py-2 flex items-center justify-between text-sm">
+                          <span>
+                            {PAYMENT_METHOD_LABELS[c.paymentMethod] || c.paymentMethod}
+                            <span className="text-xs text-gray-400 ml-1">({c.count})</span>
+                          </span>
+                          <span className="font-medium">{formatCurrency(c.amount, c.currency)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Cash by type */}
+              <Card>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base">Каса — за типом</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0">
+                  {finReport.cashByType.length === 0 ? (
+                    <div className="text-sm text-gray-500">Немає даних</div>
+                  ) : (
+                    <div className="divide-y">
+                      {finReport.cashByType.map((c, i) => (
+                        <div key={i} className="py-2 flex items-center justify-between text-sm">
+                          <span>
+                            {PAYMENT_TYPE_LABELS[c.paymentType] || c.paymentType}
+                            <span className="text-xs text-gray-400 ml-1">({c.count})</span>
+                          </span>
+                          <span className="font-medium">{formatCurrency(c.amount, c.currency)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Daily series */}
+              <Card>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base">По днях</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0">
+                  {finReport.dailySeries.length === 0 ? (
+                    <div className="text-sm text-gray-500">Немає даних</div>
+                  ) : (
+                    <div className="divide-y max-h-96 overflow-y-auto">
+                      {finReport.dailySeries.map((d) => (
+                        <div key={d.day} className="py-2 flex items-center justify-between text-sm">
+                          <span className="font-mono text-xs text-gray-600">{d.day}</span>
+                          <span className="text-gray-600">
+                            {d.count} шт · <span className="font-medium text-gray-900">{formatCurrency(d.revenue)}</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           )}
         </TabsContent>

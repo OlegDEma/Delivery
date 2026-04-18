@@ -59,7 +59,37 @@ export async function GET(
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }
 
-  return NextResponse.json(parcel);
+  // Pull audit-log rows that target this parcel. These capture operations
+  // that aren't reflected in statusHistory (e.g. manual cost overrides,
+  // deletions, un-deletions, PII edits) and round out the "journal" view.
+  const auditEntries = await prisma.auditLog.findMany({
+    where: { subjectType: 'parcel', subjectId: id },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+  });
+
+  // Resolve actor names in one round-trip instead of joining per-row.
+  const actorIds = Array.from(
+    new Set(auditEntries.map((a) => a.actorId).filter((x): x is string => !!x))
+  );
+  const actors = actorIds.length
+    ? await prisma.profile.findMany({
+        where: { id: { in: actorIds } },
+        select: { id: true, fullName: true },
+      })
+    : [];
+  const actorMap = new Map(actors.map((a) => [a.id, a.fullName]));
+
+  return NextResponse.json({
+    ...parcel,
+    auditLog: auditEntries.map((a) => ({
+      id: a.id,
+      event: a.event,
+      actor: a.actorId ? actorMap.get(a.actorId) ?? null : null,
+      payload: a.payload,
+      createdAt: a.createdAt,
+    })),
+  });
 }
 
 // PATCH /api/parcels/[id] — update status or fields (staff only)

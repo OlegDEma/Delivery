@@ -21,6 +21,23 @@ interface ParcelItem {
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { city: string } | null;
   createdAt: string;
+  // Present only when the aging endpoint is used (at_lviv_warehouse / at_eu_warehouse).
+  warehouseSince?: string;
+  daysAtWarehouse?: number;
+}
+
+interface AgingSummary {
+  total: number;
+  over7: number;
+  over14: number;
+  over30: number;
+}
+
+function agingTone(days: number): string {
+  if (days >= 30) return 'bg-red-100 text-red-700 border-red-300';
+  if (days >= 14) return 'bg-orange-100 text-orange-700 border-orange-300';
+  if (days >= 7) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+  return 'bg-gray-100 text-gray-600 border-gray-200';
 }
 
 export default function WarehousePage() {
@@ -31,16 +48,31 @@ export default function WarehousePage() {
   const [targetStatus, setTargetStatus] = useState('at_lviv_warehouse');
   const [updating, setUpdating] = useState(false);
   const [result, setResult] = useState('');
+  const [minDays, setMinDays] = useState<number>(0);
+  const [agingSummary, setAgingSummary] = useState<AgingSummary | null>(null);
+
+  const isWarehouseView = statusFilter === 'at_lviv_warehouse' || statusFilter === 'at_eu_warehouse';
 
   const fetchParcels = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/parcels?status=${statusFilter}&limit=100`);
-    if (res.ok) {
-      const data = await res.json();
-      setParcels(data.parcels);
+    if (isWarehouseView) {
+      // Use aging endpoint — gives us warehouseSince + daysAtWarehouse per parcel.
+      const res = await fetch(`/api/warehouse/aging?status=${statusFilter}&minDays=${minDays}&limit=200`);
+      if (res.ok) {
+        const data = await res.json();
+        setParcels(data.parcels);
+        setAgingSummary(data.summary);
+      }
+    } else {
+      setAgingSummary(null);
+      const res = await fetch(`/api/parcels?status=${statusFilter}&limit=100`);
+      if (res.ok) {
+        const data = await res.json();
+        setParcels(data.parcels);
+      }
     }
     setLoading(false);
-  }, [statusFilter]);
+  }, [statusFilter, minDays, isWarehouseView]);
 
   useEffect(() => { fetchParcels(); }, [fetchParcels]);
 
@@ -109,11 +141,49 @@ export default function WarehousePage() {
               <SelectItem value="at_lviv_warehouse">На складі Львів</SelectItem>
               <SelectItem value="in_transit_to_eu">В дорозі до EU (прийом з НП)</SelectItem>
               <SelectItem value="accepted_for_transport_to_ua">Прийнято до перевезення (→UA)</SelectItem>
+              <SelectItem value="at_eu_warehouse">На складі у Європі</SelectItem>
               <SelectItem value="accepted_for_transport_to_eu">Прийнято до перевезення (→EU)</SelectItem>
             </SelectContent>
           </Select>
         </div>
+        {isWarehouseView && (
+          <div className="md:w-56">
+            <Select value={String(minDays)} onValueChange={(v) => setMinDays(Number(v))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Всі посилки</SelectItem>
+                <SelectItem value="7">≥ 7 днів на складі</SelectItem>
+                <SelectItem value="14">≥ 14 днів на складі</SelectItem>
+                <SelectItem value="30">≥ 30 днів на складі</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
+
+      {/* Aging summary — shown only in warehouse view */}
+      {isWarehouseView && agingSummary && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+          <div className="bg-white border rounded-lg p-3">
+            <div className="text-xl font-bold">{agingSummary.total}</div>
+            <div className="text-xs text-gray-500">На складі</div>
+          </div>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <div className="text-xl font-bold text-yellow-700">{agingSummary.over7}</div>
+            <div className="text-xs text-yellow-800">≥ 7 днів</div>
+          </div>
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+            <div className="text-xl font-bold text-orange-700">{agingSummary.over14}</div>
+            <div className="text-xs text-orange-800">≥ 14 днів</div>
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="text-xl font-bold text-red-700">{agingSummary.over30}</div>
+            <div className="text-xs text-red-800">≥ 30 днів</div>
+          </div>
+        </div>
+      )}
 
       {/* Bulk action bar */}
       {selectedIds.size > 0 && (
@@ -192,6 +262,11 @@ export default function WarehousePage() {
                   <div>{p.totalWeight ? `${Number(p.totalWeight).toFixed(1)} кг` : '—'}</div>
                   <div className="text-xs text-gray-400">{p.totalPlacesCount} м.</div>
                   <div className="text-xs text-gray-400">{formatDate(p.createdAt)}</div>
+                  {typeof p.daysAtWarehouse === 'number' && (
+                    <div className={`text-xs mt-1 px-1.5 py-0.5 rounded border inline-block ${agingTone(p.daysAtWarehouse)}`}>
+                      {p.daysAtWarehouse === 0 ? 'сьогодні' : `${p.daysAtWarehouse} дн.`}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

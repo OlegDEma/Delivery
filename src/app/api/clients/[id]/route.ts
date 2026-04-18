@@ -38,16 +38,75 @@ export async function GET(
 
   if (!client) return NextResponse.json({ error: 'Клієнта не знайдено' }, { status: 404 });
 
-  // Calculate stats
-  const [totalSent, totalReceived, totalSpent, unpaidCount] = await Promise.all([
+  // The client is a "party" of a parcel either as sender or receiver, and pays
+  // for it only when they are the `payer`. So the "owes" calculation is the
+  // subset where this client is the responsible payer.
+  const asPayerWhere = {
+    deletedAt: null,
+    OR: [
+      { senderId: id, payer: 'sender' as const },
+      { receiverId: id, payer: 'receiver' as const },
+    ],
+  };
+
+  const [
+    totalSent,
+    totalReceived,
+    totalPaidAgg,
+    currentDebtAgg,
+    unpaidCount,
+    byDirectionEuUa,
+    byDirectionUaEu,
+    cashEntries,
+  ] = await Promise.all([
     prisma.parcel.count({ where: { deletedAt: null, senderId: id } }),
     prisma.parcel.count({ where: { deletedAt: null, receiverId: id } }),
+    // Lifetime paid — how much this client has already paid across all their parcels.
     prisma.parcel.aggregate({
-      where: { deletedAt: null, OR: [{ senderId: id }, { receiverId: id }], isPaid: true },
+      where: { ...asPayerWhere, isPaid: true },
+      _sum: { totalCost: true },
+    }),
+    // Current debt — unpaid parcels where this client is the payer, excluding drafts/returned.
+    prisma.parcel.aggregate({
+      where: {
+        ...asPayerWhere,
+        isPaid: false,
+        totalCost: { gt: 0 },
+        status: { notIn: ['draft', 'returned'] },
+      },
       _sum: { totalCost: true },
     }),
     prisma.parcel.count({
-      where: { deletedAt: null, OR: [{ senderId: id, payer: 'sender' }, { receiverId: id, payer: 'receiver' }], isPaid: false, totalCost: { gt: 0 } },
+      where: {
+        ...asPayerWhere,
+        isPaid: false,
+        totalCost: { gt: 0 },
+        status: { notIn: ['draft', 'returned'] },
+      },
+    }),
+    prisma.parcel.count({
+      where: { deletedAt: null, direction: 'eu_to_ua', OR: [{ senderId: id }, { receiverId: id }] },
+    }),
+    prisma.parcel.count({
+      where: { deletedAt: null, direction: 'ua_to_eu', OR: [{ senderId: id }, { receiverId: id }] },
+    }),
+    // Last 10 cash register entries linked to this client's parcels.
+    prisma.cashRegister.findMany({
+      where: {
+        parcel: { OR: [{ senderId: id }, { receiverId: id }], deletedAt: null },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      select: {
+        id: true,
+        amount: true,
+        currency: true,
+        paymentMethod: true,
+        paymentType: true,
+        createdAt: true,
+        parcel: { select: { id: true, internalNumber: true } },
+        receivedBy: { select: { fullName: true } },
+      },
     }),
   ]);
 
@@ -57,9 +116,24 @@ export async function GET(
       totalSent,
       totalReceived,
       totalParcels: totalSent + totalReceived,
-      totalSpent: Number(totalSpent._sum.totalCost) || 0,
+      totalPaid: Number(totalPaidAgg._sum.totalCost) || 0,
+      currentDebt: Number(currentDebtAgg._sum.totalCost) || 0,
       unpaidCount,
+      byDirection: {
+        eu_to_ua: byDirectionEuUa,
+        ua_to_eu: byDirectionUaEu,
+      },
     },
+    cashEntries: cashEntries.map((c) => ({
+      id: c.id,
+      amount: Number(c.amount),
+      currency: c.currency,
+      paymentMethod: c.paymentMethod,
+      paymentType: c.paymentType,
+      createdAt: c.createdAt,
+      parcel: c.parcel,
+      receivedBy: c.receivedBy?.fullName ?? null,
+    })),
   });
 }
 
