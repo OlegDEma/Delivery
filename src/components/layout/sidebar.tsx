@@ -7,7 +7,7 @@ import {
   Home, ScanLine, Package, Truck, Users,
   Route, Calendar, Map, Warehouse,
   Wallet, AlertCircle, BarChart3, FileText,
-  UserCog, Tags, MapPin, ScrollText,
+  UserCog, Tags, MapPin,
   Users2, ListChecks,
   Search, LogOut, ChevronDown,
   type LucideIcon,
@@ -83,7 +83,6 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Користувачі', href: '/admin/users', icon: UserCog, roles: ['super_admin'] },
       { label: 'Тарифи', href: '/admin/pricing', icon: Tags },
       { label: 'Статуси', href: '/admin/statuses', icon: ListChecks, roles: ['super_admin', 'admin'] },
-      { label: 'Журнал подій', href: '/audit', icon: ScrollText, roles: ['super_admin', 'admin'] },
     ],
   },
 ];
