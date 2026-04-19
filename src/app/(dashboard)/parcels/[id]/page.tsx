@@ -356,41 +356,39 @@ export default function ParcelDetailPage() {
         </Card>
       )}
 
-      {/* Sender & Receiver */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <Card>
-          <CardHeader className="py-2 px-3">
-            <CardTitle className="text-sm text-green-600">Відправник</CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 pb-3 pt-0">
-            <div className="font-medium text-sm">{parcel.sender.lastName} {parcel.sender.firstName}</div>
-            <div className="text-sm"><PhoneLink phone={parcel.sender.phone} /></div>
+      {/* Відправник / Отримувач — компактно, без карток (ТЗ: максимально
+          стиснути інфо-блоки). Label-color відрізняє сторони. */}
+      <div className="text-sm space-y-1.5 py-2 border-y">
+        <div className="flex items-baseline gap-2">
+          <span className="text-green-600 font-medium shrink-0 w-16">Від:</span>
+          <div className="min-w-0 flex-1">
+            <span className="font-medium">{parcel.sender.lastName} {parcel.sender.firstName}</span>
+            <span className="text-gray-400 mx-1">·</span>
+            <PhoneLink phone={parcel.sender.phone} />
             {parcel.senderAddress && (
-              <div className="text-xs text-gray-400 mt-1">
+              <span className="text-xs text-gray-500 ml-2">
                 <AddressLink address={`${parcel.senderAddress.city}${parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}${parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}`} />
                 {parcel.senderAddress.landmark ? ` (${parcel.senderAddress.landmark})` : ''}
-              </div>
+              </span>
             )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="py-2 px-3">
-            <CardTitle className="text-sm text-blue-600">Отримувач</CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 pb-3 pt-0">
-            <div className="font-medium text-sm">{parcel.receiver.lastName} {parcel.receiver.firstName}</div>
-            <div className="text-sm"><PhoneLink phone={parcel.receiver.phone} /></div>
+          </div>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span className="text-blue-600 font-medium shrink-0 w-16">Кому:</span>
+          <div className="min-w-0 flex-1">
+            <span className="font-medium">{parcel.receiver.lastName} {parcel.receiver.firstName}</span>
+            <span className="text-gray-400 mx-1">·</span>
+            <PhoneLink phone={parcel.receiver.phone} />
             {parcel.receiverAddress && (
-              <div className="text-xs text-gray-400 mt-1">
+              <span className="text-xs text-gray-500 ml-2">
                 <AddressLink address={`${COUNTRY_LABELS[parcel.receiverAddress.country as CountryCode] || parcel.receiverAddress.country}, ${parcel.receiverAddress.city}${parcel.receiverAddress.street ? `, ${parcel.receiverAddress.street}` : ''}${parcel.receiverAddress.building ? ` ${parcel.receiverAddress.building}` : ''}`} />
                 {parcel.receiverAddress.apartment ? `, кв. ${parcel.receiverAddress.apartment}` : ''}
                 {parcel.receiverAddress.npWarehouseNum ? ` | НП №${parcel.receiverAddress.npWarehouseNum}` : ''}
                 {parcel.receiverAddress.landmark ? ` (${parcel.receiverAddress.landmark})` : ''}
-              </div>
+              </span>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Places (editable) */}

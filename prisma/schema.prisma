@@ -175,6 +175,7 @@ model Profile {
   warehouseActions     WarehouseInventory[]
   pricingUpdates       PricingConfig[]       @relation("PricingUpdatedBy")
   createdClaims        Claim[]               @relation("ClaimCreatedBy")
+  createdPassengers    Passenger[]           @relation("PassengerCreatedBy")
 
   @@index([role])
   @@index([phone])
@@ -284,6 +285,9 @@ model Trip {
   shortNumberCounterLinz   Int        @default(0) @map("short_number_counter_linz")
   shortNumberCounterGeo    Int        @default(0) @map("short_number_counter_geo")
   shortNumberCounterEuUa   Int        @default(0) @map("short_number_counter_eu_ua")
+  // Пасажирська місткість рейсу — використовується для розрахунку
+  // вільних місць на сторінці /passengers.
+  passengerCapacity        Int        @default(0) @map("passenger_capacity")
   createdById              String?    @map("created_by") @db.Uuid
   createdAt                DateTime   @default(now()) @map("created_at") @db.Timestamptz
   updatedAt                DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
@@ -295,11 +299,43 @@ model Trip {
   journey          Journey?    @relation(fields: [journeyId], references: [id])
   parcels          Parcel[]
   routeTasks       RouteTask[]
+  passengers       Passenger[]
 
   @@index([departureDate])
   @@index([assignedCourierId])
   @@index([status])
   @@map("trips")
+}
+
+/// Пасажир на рейсі (перевезення людей, не посилок). Зберігаємо кого везли,
+/// звідки-куди, скільки коштує, чи оплачено. Не плутати з Client — пасажир
+/// може бути випадковим і не входити в основну базу клієнтів.
+model Passenger {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tripId          String   @map("trip_id") @db.Uuid
+  firstName       String   @map("first_name")
+  lastName        String   @map("last_name")
+  phone           String
+  phoneNormalized String   @map("phone_normalized")
+  /// Номер місця (1..passengerCapacity). NULL = не призначено.
+  seatNumber      Int?     @map("seat_number")
+  pickupAddress   String?  @map("pickup_address")
+  dropoffAddress  String?  @map("dropoff_address")
+  price           Decimal? @db.Decimal(10, 2)
+  currency        String   @default("EUR")
+  isPaid          Boolean  @default(false) @map("is_paid")
+  notes           String?
+  createdById     String?  @map("created_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
+
+  trip      Trip     @relation(fields: [tripId], references: [id])
+  createdBy Profile? @relation("PassengerCreatedBy", fields: [createdById], references: [id])
+
+  @@index([tripId])
+  @@index([phoneNormalized])
+  @@map("passengers")
 }
 
 model Parcel {

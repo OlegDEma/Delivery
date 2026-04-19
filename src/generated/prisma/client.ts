@@ -67,6 +67,13 @@ export type Journey = Prisma.JourneyModel
  */
 export type Trip = Prisma.TripModel
 /**
+ * Model Passenger
+ * Пасажир на рейсі (перевезення людей, не посилок). Зберігаємо кого везли,
+ * звідки-куди, скільки коштує, чи оплачено. Не плутати з Client — пасажир
+ * може бути випадковим і не входити в основну базу клієнтів.
+ */
+export type Passenger = Prisma.PassengerModel
+/**
  * Model Parcel
  * 
  */

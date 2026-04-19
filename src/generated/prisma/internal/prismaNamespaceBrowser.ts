@@ -56,6 +56,7 @@ export const ModelName = {
   ClientAddress: 'ClientAddress',
   Journey: 'Journey',
   Trip: 'Trip',
+  Passenger: 'Passenger',
   Parcel: 'Parcel',
   ParcelPlace: 'ParcelPlace',
   ParcelStatusHistory: 'ParcelStatusHistory',
@@ -183,12 +184,36 @@ export const TripScalarFieldEnum = {
   shortNumberCounterLinz: 'shortNumberCounterLinz',
   shortNumberCounterGeo: 'shortNumberCounterGeo',
   shortNumberCounterEuUa: 'shortNumberCounterEuUa',
+  passengerCapacity: 'passengerCapacity',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type TripScalarFieldEnum = (typeof TripScalarFieldEnum)[keyof typeof TripScalarFieldEnum]
+
+
+export const PassengerScalarFieldEnum = {
+  id: 'id',
+  tripId: 'tripId',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  phone: 'phone',
+  phoneNormalized: 'phoneNormalized',
+  seatNumber: 'seatNumber',
+  pickupAddress: 'pickupAddress',
+  dropoffAddress: 'dropoffAddress',
+  price: 'price',
+  currency: 'currency',
+  isPaid: 'isPaid',
+  notes: 'notes',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PassengerScalarFieldEnum = (typeof PassengerScalarFieldEnum)[keyof typeof PassengerScalarFieldEnum]
 
 
 export const ParcelScalarFieldEnum = {

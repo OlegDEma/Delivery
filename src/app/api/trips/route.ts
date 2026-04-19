@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   const userId = guard.user.userId;
 
   const body = await request.json();
-  const { direction, country, departureDate, arrivalDate, assignedCourierId, secondCourierId, notes } = body;
+  const { direction, country, departureDate, arrivalDate, assignedCourierId, secondCourierId, notes, passengerCapacity } = body;
 
   if (!direction || !country || !departureDate) {
     return NextResponse.json({ error: 'Напрямок, країна та дата обовʼязкові' }, { status: 400 });
@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
       assignedCourierId: assignedCourierId || null,
       secondCourierId: secondCourierId || null,
       notes: notes || null,
+      passengerCapacity: typeof passengerCapacity === 'number' && passengerCapacity >= 0 ? passengerCapacity : 0,
       createdById: userId,
     },
     include: {

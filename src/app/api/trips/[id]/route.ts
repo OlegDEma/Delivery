@@ -119,6 +119,10 @@ export async function PATCH(
   if (body.secondCourierId !== undefined) data.secondCourierId = body.secondCourierId || null;
   if (body.arrivalDate !== undefined) data.arrivalDate = body.arrivalDate ? new Date(body.arrivalDate) : null;
   if (body.notes !== undefined) data.notes = body.notes || null;
+  if (body.passengerCapacity !== undefined) {
+    const n = Number(body.passengerCapacity);
+    data.passengerCapacity = Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+  }
 
   // Assign parcel to trip
   if (body.addParcelId) {

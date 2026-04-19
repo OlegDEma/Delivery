@@ -1850,14 +1850,6 @@ export type ParcelCreatephotosInput = {
   set: string[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type EnumShipmentTypeFieldUpdateOperationsInput = {
   set?: $Enums.ShipmentType
 }

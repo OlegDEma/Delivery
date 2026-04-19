@@ -45,6 +45,7 @@ export default function TripsPage() {
   const [country, setCountry] = useState('NL');
   const [departureDate, setDepartureDate] = useState('');
   const [notes, setNotes] = useState('');
+  const [passengerCapacity, setPassengerCapacity] = useState('');
 
   async function fetchTrips() {
     setLoading(true);
@@ -63,13 +64,18 @@ export default function TripsPage() {
     const res = await fetch('/api/trips', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ direction, country, departureDate, notes: notes || undefined }),
+      body: JSON.stringify({
+        direction, country, departureDate,
+        notes: notes || undefined,
+        passengerCapacity: passengerCapacity ? Number(passengerCapacity) : 0,
+      }),
     });
 
     if (res.ok) {
       setDialogOpen(false);
       setDepartureDate('');
       setNotes('');
+      setPassengerCapacity('');
       fetchTrips();
     } else {
       const data = await res.json();
@@ -116,6 +122,15 @@ export default function TripsPage() {
               <div>
                 <Label>Дата відправлення</Label>
                 <Input type="date" value={departureDate} onChange={(e) => setDepartureDate(e.target.value)} required />
+              </div>
+              <div>
+                <Label>Місткість пасажирів</Label>
+                <Input
+                  type="number" min={0} max={99}
+                  value={passengerCapacity}
+                  onChange={(e) => setPassengerCapacity(e.target.value)}
+                  placeholder="0 — не возимо пасажирів"
+                />
               </div>
               <div>
                 <Label>Примітки</Label>
