@@ -7,8 +7,8 @@ import {
   Home, ScanLine, Package, Truck, Users,
   Route, Calendar, Map, Warehouse,
   Wallet, AlertCircle, BarChart3, FileText,
-  PackageOpen, ClipboardList, AlertTriangle,
   UserCog, Tags, MapPin, Upload, ScrollText,
+  Users2, ListChecks,
   Search, LogOut, ChevronDown,
   type LucideIcon,
 } from 'lucide-react';
@@ -32,6 +32,10 @@ interface NavGroup {
   collapsible?: boolean;
 }
 
+// Структура меню узгоджена за документом «Загальна схема програми»:
+// 5 груп — Головна / Замовлення / Логістика / Фінанси / Адміністрування.
+// «Претензії», «Доступні», «Замовлення клієнтів», «Пункти збору» в Admin
+// прибрані з меню (функціонал лишається доступним по URL/через фільтри).
 const NAV_GROUPS: NavGroup[] = [
   {
     items: [
@@ -44,10 +48,9 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Посилки', href: '/parcels', icon: Package, roles: ['super_admin', 'admin', 'cashier', 'warehouse_worker'] },
       { label: 'Мої посилки', href: '/my-parcels', icon: Truck, roles: ['driver_courier'] },
-      { label: 'Доступні', href: '/parcels/available', icon: PackageOpen, roles: ['super_admin', 'admin', 'driver_courier'] },
-      { label: 'Замовлення клієнтів', href: '/parcels/pending-orders', icon: ClipboardList, roles: ['super_admin', 'admin', 'driver_courier'] },
-      { label: 'Претензії', href: '/claims', icon: AlertTriangle, roles: ['super_admin', 'admin', 'driver_courier'] },
+      { label: 'Пасажири', href: '/passengers', icon: Users2, roles: ['super_admin', 'admin', 'driver_courier'] },
       { label: 'Клієнти', href: '/clients', icon: Users, roles: ['super_admin', 'admin', 'cashier'] },
+      { label: 'Імпорт даних', href: '/admin/import', icon: Upload, roles: ['super_admin', 'admin'] },
     ],
   },
   {
@@ -56,9 +59,9 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Поїздки', href: '/journeys', icon: Route, roles: ['super_admin', 'admin', 'driver_courier'] },
       { label: 'Рейси', href: '/trips', icon: Truck, roles: ['super_admin', 'admin', 'driver_courier'] },
-      { label: 'Календар', href: '/calendar', icon: Calendar, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
       { label: 'Маршрути', href: '/routes', icon: Map, roles: ['super_admin', 'admin', 'driver_courier'] },
       { label: 'Пункти збору', href: '/collection-points', icon: MapPin, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
+      { label: 'Календар', href: '/calendar', icon: Calendar, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
       { label: 'Склад', href: '/warehouse', icon: Warehouse, roles: ['super_admin', 'admin', 'warehouse_worker'] },
     ],
   },
@@ -80,12 +83,12 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Користувачі', href: '/admin/users', icon: UserCog, roles: ['super_admin'] },
       { label: 'Тарифи', href: '/admin/pricing', icon: Tags },
-      { label: 'Пункти збору', href: '/admin/collection-points', icon: MapPin },
-      { label: 'Імпорт даних', href: '/admin/import', icon: Upload, roles: ['super_admin'] },
+      { label: 'Статуси', href: '/admin/statuses', icon: ListChecks, roles: ['super_admin', 'admin'] },
       { label: 'Журнал подій', href: '/audit', icon: ScrollText, roles: ['super_admin', 'admin'] },
     ],
   },
 ];
+
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?';

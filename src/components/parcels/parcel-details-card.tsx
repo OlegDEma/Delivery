@@ -26,9 +26,11 @@ interface ParcelDetailsCardProps {
     estimatedDeliveryEnd: string | null;
   };
   onUpdate: () => void;
+  /** Блокує редагування деталей — після accepted_for_transport_* */
+  readOnly?: boolean;
 }
 
-export function ParcelDetailsCard({ parcel, onUpdate }: ParcelDetailsCardProps) {
+export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: ParcelDetailsCardProps) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -84,9 +86,11 @@ export function ParcelDetailsCard({ parcel, onUpdate }: ParcelDetailsCardProps) 
       <CardHeader className="py-2 px-3 flex flex-row items-center justify-between">
         <CardTitle className="text-sm">Деталі</CardTitle>
         {!editing ? (
-          <Button variant="ghost" size="sm" onClick={startEdit} className="text-xs h-7">
-            ✏️ Редагувати
-          </Button>
+          !readOnly && (
+            <Button variant="ghost" size="sm" onClick={startEdit} className="text-xs h-7">
+              ✏️ Редагувати
+            </Button>
+          )
         ) : (
           <div className="flex gap-1">
             <Button variant="ghost" size="sm" onClick={() => setEditing(false)} className="text-xs h-7" disabled={saving}>

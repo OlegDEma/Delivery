@@ -34,6 +34,8 @@ interface ParcelPlacesCardProps {
   receiverDeliveryMethod?: string | null;
   declaredValue?: number | null;
   needsPackaging?: boolean;
+  /** Блокує редагування ваги/розмірів — після accepted_for_transport_* */
+  readOnly?: boolean;
   onUpdate: () => void;
 }
 
@@ -67,6 +69,7 @@ export function ParcelPlacesCard({
   receiverDeliveryMethod,
   declaredValue,
   needsPackaging,
+  readOnly = false,
   onUpdate,
 }: ParcelPlacesCardProps) {
   const [editing, setEditing] = useState(false);
@@ -144,9 +147,11 @@ export function ParcelPlacesCard({
       <CardHeader className="py-2 px-3 flex flex-row items-center justify-between">
         <CardTitle className="text-sm">Місця ({places.length})</CardTitle>
         {!editing ? (
-          <Button variant="ghost" size="sm" onClick={startEdit} className="text-xs h-7">
-            ✏️ Редагувати
-          </Button>
+          !readOnly && (
+            <Button variant="ghost" size="sm" onClick={startEdit} className="text-xs h-7">
+              ✏️ Редагувати
+            </Button>
+          )
         ) : (
           <div className="flex gap-1">
             <Button variant="ghost" size="sm" onClick={() => setEditing(false)} className="text-xs h-7" disabled={saving}>

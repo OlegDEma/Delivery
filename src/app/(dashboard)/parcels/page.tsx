@@ -13,6 +13,8 @@ import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/const
 import { formatDate } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
+import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ParcelListItem {
   id: string;
@@ -30,13 +32,9 @@ interface ParcelListItem {
   receiverAddress: { city: string; street: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
 }
 
-const SORT_OPTIONS: { value: string; label: string; sortBy: string; sortOrder: 'asc' | 'desc' }[] = [
-  { value: 'createdAt-desc', label: 'Дата створення ↓', sortBy: 'createdAt', sortOrder: 'desc' },
-  { value: 'createdAt-asc', label: 'Дата створення ↑', sortBy: 'createdAt', sortOrder: 'asc' },
-  { value: 'totalWeight-desc', label: 'Вага ↓', sortBy: 'totalWeight', sortOrder: 'desc' },
-  { value: 'totalWeight-asc', label: 'Вага ↑', sortBy: 'totalWeight', sortOrder: 'asc' },
-  { value: 'internalNumber-desc', label: 'Внутрішній № ↓', sortBy: 'internalNumber', sortOrder: 'desc' },
-];
+// Спец-значення для фільтра по кур'єру: «всі» / «без кур'єра».
+const COURIER_ALL = '__all__';
+const COURIER_UNASSIGNED = '__unassigned__';
 
 // Virtual filter values (combine both directions) — supported in /api/parcels.
 const VIRTUAL_STATUS_LABELS: Record<string, string> = {
@@ -85,12 +83,23 @@ function ParcelsContent() {
   const [dateFrom, setDateFrom] = useState(initialDateFrom);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
-  const [sortValue, setSortValue] = useState('createdAt-desc');
+  // За ТЗ клієнта: замість фільтра «дата/вага/номер» — фільтр «по кур'єру,
+  // який приймав посилку». Дефолт — «Без кур'єра» (прибрати розгорнутий
+  // загальний список, показувати ще не прив'язані).
+  const [courierFilter, setCourierFilter] = useState<string>(COURIER_UNASSIGNED);
+  const [couriers, setCouriers] = useState<{ id: string; fullName: string }[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkStatus, setBulkStatus] = useState<string>('');
   const [bulkWorking, setBulkWorking] = useState(false);
 
-  const sortOption = SORT_OPTIONS.find(o => o.value === sortValue) || SORT_OPTIONS[0];
+  // Load available couriers for the filter dropdown (once).
+  useEffect(() => {
+    fetch('/api/users').then((r) => r.ok ? r.json() : []).then(
+      (users: { id: string; fullName: string; role: string }[]) => {
+        setCouriers(users.filter((u) => u.role === 'driver_courier'));
+      }
+    );
+  }, []);
 
   const fetchParcels = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
@@ -98,10 +107,15 @@ function ParcelsContent() {
     if (search) params.set('q', search);
     if (statusFilter !== 'all') params.set('status', statusFilter);
     if (dateFrom) { params.set('dateFrom', dateFrom); params.set('dateTo', dateFrom); }
+    if (courierFilter === COURIER_UNASSIGNED) {
+      params.set('unassigned', '1');
+    } else if (courierFilter !== COURIER_ALL) {
+      params.set('courierId', courierFilter);
+    }
     params.set('page', String(page));
     params.set('limit', '20');
-    params.set('sortBy', sortOption.sortBy);
-    params.set('sortOrder', sortOption.sortOrder);
+    params.set('sortBy', 'createdAt');
+    params.set('sortOrder', 'desc');
 
     try {
       const res = await fetch(`/api/parcels?${params}`, { signal });
@@ -115,7 +129,7 @@ function ParcelsContent() {
       if (e instanceof DOMException && e.name === 'AbortError') return;
     }
     setLoading(false);
-  }, [search, statusFilter, dateFrom, page, sortOption.sortBy, sortOption.sortOrder]);
+  }, [search, statusFilter, dateFrom, courierFilter, page]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -228,55 +242,93 @@ function ParcelsContent() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-2 mb-4">
-        <Input
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          placeholder="Пошук: ІТН, прізвище, телефон..."
-          className="text-base md:max-w-xs"
-        />
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v ?? 'all'); setPage(1); }}>
-          <SelectTrigger className="md:w-56">
-            <SelectValue>{
-              statusFilter === 'all'
-                ? 'Всі статуси'
-                : VIRTUAL_STATUS_LABELS[statusFilter]
-                  || STATUS_LABELS[statusFilter as ParcelStatusType]
-                  || statusFilter
-            }</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Всі статуси</SelectItem>
-            <SelectItem value="draft">Створена</SelectItem>
-            <SelectItem value="in_transit">В дорозі (обидва напрямки)</SelectItem>
-            <SelectItem value="in_transit_to_ua">В дорозі (→ UA)</SelectItem>
-            <SelectItem value="in_transit_to_eu">В дорозі (→ EU)</SelectItem>
-            <SelectItem value="at_warehouse">На складі (Львів + ЄС)</SelectItem>
-            <SelectItem value="at_lviv_warehouse">На складі у Львові</SelectItem>
-            <SelectItem value="at_eu_warehouse">На складі в ЄС</SelectItem>
-            <SelectItem value="at_nova_poshta">На Новій пошті</SelectItem>
-            <SelectItem value="delivered_ua">Доставлено (UA)</SelectItem>
-            <SelectItem value="delivered_eu">Доставлено (EU)</SelectItem>
-            <SelectItem value="not_received">Не отримано</SelectItem>
-          </SelectContent>
-        </Select>
-        <Input
-          type="date"
-          value={dateFrom}
-          onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
-          className="md:w-40"
-        />
-        <Select value={sortValue} onValueChange={(v) => { setSortValue(v ?? 'createdAt-desc'); setPage(1); }}>
-          <SelectTrigger className="md:w-48">
-            <SelectValue>{sortOption.label}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map(o => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {(() => {
+        // Активні фільтри — візуально виділяємо блакитною рамкою, щоб було видно
+        // «що зараз включено», як вимагає клієнт.
+        const isStatusActive = statusFilter !== 'all';
+        const isDateActive = !!dateFrom;
+        const isCourierActive = courierFilter !== COURIER_UNASSIGNED; // дефолт — unassigned
+        const activeCls = 'ring-2 ring-blue-200 border-blue-400';
+        return (
+          <div className="flex flex-col md:flex-row gap-2 mb-4">
+            <Input
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Пошук: ІТН, прізвище, телефон..."
+              className={cn('text-base md:max-w-xs', search && activeCls)}
+            />
+            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v ?? 'all'); setPage(1); }}>
+              <SelectTrigger className={cn('md:w-56', isStatusActive && activeCls)}>
+                <SelectValue>{
+                  statusFilter === 'all'
+                    ? 'Всі статуси'
+                    : VIRTUAL_STATUS_LABELS[statusFilter]
+                      || STATUS_LABELS[statusFilter as ParcelStatusType]
+                      || statusFilter
+                }</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Всі статуси</SelectItem>
+                <SelectItem value="draft">Створена</SelectItem>
+                <SelectItem value="in_transit">В дорозі (обидва напрямки)</SelectItem>
+                <SelectItem value="in_transit_to_ua">В дорозі (→ UA)</SelectItem>
+                <SelectItem value="in_transit_to_eu">В дорозі (→ EU)</SelectItem>
+                <SelectItem value="at_warehouse">На складі (Львів + ЄС)</SelectItem>
+                <SelectItem value="at_lviv_warehouse">На складі у Львові</SelectItem>
+                <SelectItem value="at_eu_warehouse">На складі в ЄС</SelectItem>
+                <SelectItem value="at_nova_poshta">На Новій пошті</SelectItem>
+                <SelectItem value="delivered_ua">Доставлено (UA)</SelectItem>
+                <SelectItem value="delivered_eu">Доставлено (EU)</SelectItem>
+                <SelectItem value="not_received">Не отримано</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Фільтр дати з inline-кнопкою «Очистити» (ТЗ: на мобілі теж). */}
+            <div className={cn(
+              'relative md:w-44 flex items-center border rounded-md bg-white',
+              isDateActive && activeCls
+            )}>
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+                className="border-0 focus-visible:ring-0 pr-8"
+              />
+              {dateFrom && (
+                <button
+                  type="button"
+                  onClick={() => { setDateFrom(''); setPage(1); }}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 inline-flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded"
+                  aria-label="Очистити фільтр дати"
+                  title="Очистити"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Фільтр по кур'єру, який приймав посилку. Дефолт — «Без кур'єра». */}
+            <Select value={courierFilter} onValueChange={(v) => { setCourierFilter(v ?? COURIER_UNASSIGNED); setPage(1); }}>
+              <SelectTrigger className={cn('md:w-56', isCourierActive && activeCls)}>
+                <SelectValue>{
+                  courierFilter === COURIER_UNASSIGNED
+                    ? 'Без кур\'єра'
+                    : courierFilter === COURIER_ALL
+                      ? 'Всі посилки'
+                      : couriers.find((c) => c.id === courierFilter)?.fullName || 'Кур\'єр'
+                }</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={COURIER_UNASSIGNED}>Без кур&apos;єра</SelectItem>
+                <SelectItem value={COURIER_ALL}>Всі посилки</SelectItem>
+                {couriers.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        );
+      })()}
 
       {/* Bulk action bar */}
       {selectedIds.size > 0 && (

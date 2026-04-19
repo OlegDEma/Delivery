@@ -9,19 +9,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { STATUS_LABELS, STATUS_COLORS, STATUS_FLOW_EU_TO_UA, STATUS_FLOW_UA_TO_EU, type ParcelStatusType } from '@/lib/constants/statuses';
+import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { STATUS_TRANSITIONS } from '@/lib/parcels/status-transitions';
+import { useAuth } from '@/lib/hooks/use-auth';
+import { Camera, StickyNote, Lock, Pencil } from 'lucide-react';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDateTime } from '@/lib/utils/format';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { CopyButton } from '@/components/shared/copy-button';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
-import { Textarea } from '@/components/ui/textarea';
 import { ShareButton } from '@/components/shared/share-button';
 import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
 import { ParcelPaymentCard } from '@/components/parcels/parcel-payment-card';
 import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
-import { ParcelCollectionCard } from '@/components/parcels/parcel-collection-card';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { toast } from 'sonner';
 
@@ -95,10 +96,14 @@ interface ParcelDetail {
 
 export default function ParcelDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { role } = useAuth();
+  const isSuperAdmin = role === 'super_admin';
   const [parcel, setParcel] = useState<ParcelDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [newStatus, setNewStatus] = useState('');
   const [npTtn, setNpTtn] = useState('');
+  const [editTtn, setEditTtn] = useState(false);
+  const [editTrip, setEditTrip] = useState(false);
   const [saving, setSaving] = useState(false);
   const [trips, setTrips] = useState<TripOption[]>([]);
   const [couriers, setCouriers] = useState<{ id: string; fullName: string }[]>([]);
@@ -190,9 +195,18 @@ export default function ParcelDetailPage() {
   if (loading) return <div className="text-center py-12 text-gray-500">Завантаження...</div>;
   if (!parcel) return <div className="text-center py-12 text-red-500">Посилку не знайдено</div>;
 
-  const statusFlow = parcel.direction === 'eu_to_ua' ? STATUS_FLOW_EU_TO_UA : STATUS_FLOW_UA_TO_EU;
-  const currentIdx = statusFlow.indexOf(parcel.status);
-  const nextStatuses = currentIdx >= 0 ? statusFlow.slice(currentIdx + 1) : [];
+  // Допустимі наступні статуси з матриці переходів.
+  const nextStatuses = STATUS_TRANSITIONS[parcel.status] ?? [];
+
+  // Після статусу "Прийнято до перевезення" редагування блоків «Місця»
+  // (вага/розміри) та «Деталі» заборонене всім, окрім Суперадміна.
+  // Базою для "locked" — всі статуси після прийому включно.
+  const LOCKED_STATUSES: ParcelStatusType[] = [
+    'accepted_for_transport_to_ua', 'in_transit_to_ua', 'at_lviv_warehouse', 'at_nova_poshta', 'delivered_ua',
+    'accepted_for_transport_to_eu', 'in_transit_to_eu', 'at_eu_warehouse', 'delivered_eu',
+  ];
+  const isAccepted = LOCKED_STATUSES.includes(parcel.status);
+  const isEditLocked = isAccepted && !isSuperAdmin;
 
   const isClientOrderPending =
     parcel.status === 'draft' &&
@@ -230,46 +244,108 @@ export default function ParcelDetailPage() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header — ІТН та ТТН поряд у самому верху (за ТЗ). */}
       <div>
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3 mb-1 flex-wrap">
           <h1 className="text-xl font-bold font-mono">{parcel.internalNumber}</h1>
           <Badge className={STATUS_COLORS[parcel.status]}>
             {STATUS_LABELS[parcel.status]}
           </Badge>
         </div>
-        <div className="text-xs text-gray-400">
-          ІТН: {parcel.itn} <CopyButton text={parcel.itn} />{parcel.npTtn && <> | ТТН: {parcel.npTtn} <CopyButton text={parcel.npTtn} /></>} | Створено: {formatDateTime(parcel.createdAt)}
-          {parcel.createdBy && ` | ${parcel.createdBy.fullName}`}
+        <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
+          <span>ІТН: <span className="font-mono">{parcel.itn}</span></span>
+          <CopyButton text={parcel.itn} />
+          <span className="text-gray-300">|</span>
+          {parcel.npTtn ? (
+            <>
+              <span>ТТН: <span className="font-mono">{parcel.npTtn}</span></span>
+              <CopyButton text={parcel.npTtn} />
+              <button
+                type="button"
+                onClick={() => setEditTtn((v) => !v)}
+                className="text-blue-600 hover:underline inline-flex items-center gap-0.5"
+                aria-label="Редагувати ТТН"
+              >
+                <Pencil className="w-3 h-3" />
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditTtn((v) => !v)}
+              className="text-blue-600 hover:underline"
+            >
+              + ТТН
+            </button>
+          )}
+          <span className="text-gray-300">|</span>
+          <span>{formatDateTime(parcel.createdAt)}</span>
+          {parcel.createdBy && <span className="text-gray-400">· {parcel.createdBy.fullName}</span>}
         </div>
-        <div className="flex gap-2 mt-2">
+
+        {/* Inline TTN editor */}
+        {editTtn && (
+          <div className="mt-2 flex gap-2 items-center">
+            <Input
+              value={npTtn}
+              onChange={(e) => setNpTtn(e.target.value)}
+              placeholder="20000000000000"
+              className="font-mono max-w-xs"
+            />
+            <Button size="sm" onClick={async () => { await handleSaveNpTtn(); setEditTtn(false); }} disabled={saving}>
+              Зберегти
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => { setNpTtn(parcel.npTtn || ''); setEditTtn(false); }}>
+              Скасувати
+            </Button>
+          </div>
+        )}
+
+        <div className="flex gap-2 mt-2 flex-wrap">
           <Link href={`/parcels/${parcel.id}/print`}>
             <Button variant="outline" size="sm">Друк етикетки</Button>
           </Link>
           <Link href={`/parcels/new?repeat=${parcel.id}`}>
             <Button variant="outline" size="sm">Повторити</Button>
           </Link>
-          <ShareButton parcelNumber={parcel.internalNumber} />
+          <ShareButton
+            parcelNumber={parcel.internalNumber}
+            receiverName={`${parcel.receiver.lastName} ${parcel.receiver.firstName}`}
+            receiverPhone={parcel.receiver.phone}
+          />
         </div>
       </div>
 
-      {/* Status change */}
+      {/* Банер блокування редагування */}
+      {isAccepted && (
+        <div className={`rounded-lg border px-3 py-2 flex items-start gap-2 text-sm ${
+          isSuperAdmin ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-gray-50 border-gray-200 text-gray-700'
+        }`}>
+          <Lock className="w-4 h-4 mt-0.5 shrink-0" />
+          <div>
+            {isSuperAdmin ? (
+              <>Посилка прийнята до перевезення. Редагування місць і деталей доступне тільки вам як Суперадміну.</>
+            ) : (
+              <>Посилка прийнята до перевезення. Редагування ваги, розмірів і деталей заборонено — зверніться до Суперадміна.</>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Змінити статус — список обмежено правилами переходу (status-transitions.ts). */}
       {nextStatuses.length > 0 && (
         <Card>
           <CardContent className="p-3 flex gap-2 items-end">
             <div className="flex-1">
               <Label className="text-xs">Змінити статус</Label>
               <Select value={newStatus} onValueChange={(v) => setNewStatus(v ?? '')}>
-                <SelectTrigger><SelectValue>{newStatus ? (STATUS_LABELS[newStatus as ParcelStatusType] || newStatus) : 'Виберіть статус'}</SelectValue></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue>{newStatus ? (STATUS_LABELS[newStatus as ParcelStatusType] || newStatus) : 'Виберіть статус'}</SelectValue>
+                </SelectTrigger>
                 <SelectContent>
-                  {nextStatuses.map(s => (
+                  {nextStatuses.map((s) => (
                     <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
                   ))}
-                  {parcel.direction === 'ua_to_eu' && (
-                    <SelectItem value="not_received">Не отримано</SelectItem>
-                  )}
-                  <SelectItem value="refused">Відмова від отримання</SelectItem>
-                  <SelectItem value="returned">Повернено</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -339,10 +415,11 @@ export default function ParcelDetailPage() {
         declaredValue={parcel.declaredValue}
         needsPackaging={parcel.needsPackaging}
         onUpdate={fetchParcel}
+        readOnly={isEditLocked}
       />
 
-      {/* Details (editable) */}
-      <ParcelDetailsCard parcel={parcel} onUpdate={fetchParcel} />
+      {/* Details — після accepted редагування заборонено всім крім super_admin */}
+      <ParcelDetailsCard parcel={parcel} onUpdate={fetchParcel} readOnly={isEditLocked} />
 
       {/* Payment card */}
       <ParcelPaymentCard parcel={parcel} onUpdate={fetchParcel} />
@@ -399,192 +476,124 @@ export default function ParcelDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Collection method (EU→UA only) */}
-      {parcel.direction === 'eu_to_ua' && (
-        <ParcelCollectionCard parcel={parcel} onUpdate={fetchParcel} />
-      )}
-
-      {/* Assign trip & courier */}
+      {/* Рейс — показуємо лише дату фактичного рейсу + кур'єра. Редагування
+          під кнопкою олівця (щоб не захаращувати картку) */}
       <Card>
-        <CardHeader className="py-2 px-3">
-          <CardTitle className="text-sm">
-            Рейс {parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3 pt-0 space-y-3">
-          <TripSelector
-            trips={trips}
-            direction={parcel.direction}
-            selectedTripId={parcel.trip?.id || ''}
-            onChange={(tripId) => handleAssignTrip(tripId)}
-            compact
-          />
-          <div>
-            <Label className="text-xs">Кур&apos;єр</Label>
-            <Select
-              value={parcel.assignedCourier?.id || '_none'}
-              onValueChange={(v) => handleAssignCourier(v === '_none' ? '' : (v ?? ''))}
+        <CardContent className="p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-sm">
+              <span className="text-gray-500">Рейс:</span>{' '}
+              {parcel.trip ? (
+                <span className="font-medium">
+                  {new Date(parcel.trip.departureDate).toLocaleDateString('uk-UA')}
+                  <span className="text-gray-400 ml-1">({parcel.trip.country})</span>
+                </span>
+              ) : (
+                <span className="text-gray-400">Не прив&apos;язано</span>
+              )}
+              <span className="text-gray-300 mx-2">|</span>
+              <span className="text-gray-500">Кур&apos;єр:</span>{' '}
+              <span className="font-medium">
+                {parcel.assignedCourier?.fullName || <span className="text-gray-400">Не призначено</span>}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setEditTrip((v) => !v)}
+              className="text-blue-600 hover:underline text-xs inline-flex items-center gap-1"
             >
-              <SelectTrigger>
-                <SelectValue>
-                  {parcel.assignedCourier ? parcel.assignedCourier.fullName : 'Не призначено'}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="_none">Не призначено</SelectItem>
-                {couriers.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Pencil className="w-3 h-3" /> Редагувати
+            </button>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* NP Integration */}
-      <Card>
-        <CardHeader className="py-2 px-3">
-          <CardTitle className="text-sm">Нова Пошта</CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3 pt-0 space-y-3">
-          {/* Manual TTN input */}
-          <div className="flex gap-2 items-end">
-            <div className="flex-1">
-              <Label className="text-xs">ТТН Нової Пошти</Label>
-              <Input
-                value={npTtn}
-                onChange={(e) => setNpTtn(e.target.value)}
-                placeholder="20000000000000"
-                className="font-mono"
+          {editTrip && (
+            <div className="mt-3 space-y-2 border-t pt-3">
+              <TripSelector
+                trips={trips}
+                direction={parcel.direction}
+                selectedTripId={parcel.trip?.id || ''}
+                onChange={(tripId) => handleAssignTrip(tripId)}
+                compact
               />
-            </div>
-            <Button size="sm" onClick={handleSaveNpTtn} disabled={saving}>
-              Зберегти
-            </Button>
-          </div>
-
-          {/* Auto-create TTN */}
-          {!parcel.npTtn && (
-            <div className="border-t pt-2">
-              <Label className="text-xs text-gray-500 mb-1 block">Або створити ТТН автоматично через API НП</Label>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={async () => {
-                  setSaving(true);
-                  const res = await fetch('/api/nova-poshta/ttn', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ parcelId: parcel.id }),
-                  });
-                  const data = await res.json();
-                  if (res.ok) {
-                    setNpTtn(data.ttn);
-                    fetchParcel();
-                  } else {
-                    alert(data.error || 'Помилка створення ТТН');
-                  }
-                  setSaving(false);
-                }}
-                disabled={saving}
-              >
-                Створити ТТН на НП
-              </Button>
-            </div>
-          )}
-
-          {/* Track status */}
-          {parcel.npTtn && (
-            <div className="border-t pt-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs text-gray-500">Статус на НП:</div>
-                  <div className="text-sm font-medium">{parcel.npTrackingStatus || 'Невідомо'}</div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={async () => {
-                    const res = await fetch(`/api/nova-poshta/tracking?ttn=${parcel.npTtn}`);
-                    if (res.ok) {
-                      fetchParcel();
-                    }
-                  }}
+              <div>
+                <Label className="text-xs">Кур&apos;єр</Label>
+                <Select
+                  value={parcel.assignedCourier?.id || '_none'}
+                  onValueChange={(v) => handleAssignCourier(v === '_none' ? '' : (v ?? ''))}
                 >
-                  Оновити
-                </Button>
+                  <SelectTrigger>
+                    <SelectValue>
+                      {parcel.assignedCourier ? parcel.assignedCourier.fullName : 'Не призначено'}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">Не призначено</SelectItem>
+                    {couriers.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Photos */}
-      <Card>
-        <CardHeader className="py-2 px-3">
-          <CardTitle className="text-sm">Фото посилки</CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3 pt-0">
-          {(parcel as unknown as { photos?: string[] }).photos && (parcel as unknown as { photos: string[] }).photos.length > 0 && (
-            <div className="flex gap-2 flex-wrap mb-2">
-              {(parcel as unknown as { photos: string[] }).photos.map((url, i) => (
-                <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                  <img src={url} alt={`Фото ${i + 1}`} className="w-20 h-20 object-cover rounded-lg border hover:opacity-80" />
-                </a>
-              ))}
-            </div>
-          )}
-          <label className="flex items-center gap-2 cursor-pointer text-sm text-blue-600 hover:text-blue-800">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            Додати фото
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const formData = new FormData();
-                formData.append('file', file);
-                await fetch(`/api/parcels/${id}/photos`, { method: 'POST', body: formData });
-                fetchParcel();
-              }}
-            />
-          </label>
-        </CardContent>
-      </Card>
-
-      {/* Notes */}
-      <Card>
-        <CardHeader className="py-2 px-3">
-          <CardTitle className="text-sm">Нотатки</CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3 pt-0">
-          <Textarea
-            placeholder="Додати нотатку..."
-            defaultValue=""
-            id="parcel-note"
-            rows={2}
+      {/* Фото і нотатки — компактні кнопки-дії (замість повноцінних карток). */}
+      <div className="flex gap-2 flex-wrap">
+        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md bg-white cursor-pointer hover:bg-gray-50 transition-colors">
+          <Camera className="w-4 h-4 text-gray-500" />
+          Додати фото
+          {(parcel as unknown as { photos?: string[] }).photos?.length ? (
+            <span className="ml-1 text-xs bg-blue-100 text-blue-700 px-1.5 rounded-full">
+              {(parcel as unknown as { photos: string[] }).photos.length}
+            </span>
+          ) : null}
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const formData = new FormData();
+              formData.append('file', file);
+              await fetch(`/api/parcels/${id}/photos`, { method: 'POST', body: formData });
+              fetchParcel();
+            }}
           />
-          <Button size="sm" className="mt-2" onClick={async () => {
-            const note = (document.getElementById('parcel-note') as HTMLTextAreaElement).value;
-            if (!note.trim()) return;
-            await fetch(`/api/parcels/${id}`, {
+        </label>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            const note = window.prompt('Додати нотатку до посилки:');
+            if (!note || !note.trim()) return;
+            fetch(`/api/parcels/${id}`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ status: parcel.status, statusNote: note }),
-            });
-            (document.getElementById('parcel-note') as HTMLTextAreaElement).value = '';
-            fetchParcel();
-          }}>
-            Додати нотатку
-          </Button>
-        </CardContent>
-      </Card>
+            }).then(fetchParcel);
+          }}
+        >
+          <StickyNote className="w-4 h-4 mr-1" /> Додати нотатку
+        </Button>
+      </div>
+
+      {/* Галерея фото (якщо є) — під кнопкою */}
+      {(parcel as unknown as { photos?: string[] }).photos?.length ? (
+        <div className="flex gap-2 flex-wrap">
+          {(parcel as unknown as { photos: string[] }).photos.map((url, i) => (
+            <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+              <img
+                src={url}
+                alt={`Фото ${i + 1}`}
+                className="w-16 h-16 object-cover rounded-lg border hover:opacity-80"
+              />
+            </a>
+          ))}
+        </div>
+      ) : null}
 
       {/* Status Timeline */}
       <Card>
