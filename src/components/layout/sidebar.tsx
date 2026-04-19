@@ -7,7 +7,7 @@ import {
   Home, ScanLine, Package, Truck, Users,
   Route, Calendar, Map, Warehouse,
   Wallet, AlertCircle, BarChart3, FileText,
-  UserCog, Tags, MapPin, Upload, ScrollText,
+  UserCog, Tags, MapPin, ScrollText,
   Users2, ListChecks,
   Search, LogOut, ChevronDown,
   type LucideIcon,
@@ -50,7 +50,6 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Мої посилки', href: '/my-parcels', icon: Truck, roles: ['driver_courier'] },
       { label: 'Пасажири', href: '/passengers', icon: Users2, roles: ['super_admin', 'admin', 'driver_courier'] },
       { label: 'Клієнти', href: '/clients', icon: Users, roles: ['super_admin', 'admin', 'cashier'] },
-      { label: 'Імпорт даних', href: '/admin/import', icon: Upload, roles: ['super_admin', 'admin'] },
     ],
   },
   {

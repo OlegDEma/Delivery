@@ -69,8 +69,12 @@ export default function ClientsPage() {
           <h1 className="text-2xl font-bold">Клієнти</h1>
           <p className="text-sm text-gray-500">{total} всього</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger render={<Button>+ Додати</Button>} />
+        <div className="flex gap-2">
+          <Link href="/admin/import">
+            <Button variant="outline">Імпорт даних</Button>
+          </Link>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger render={<Button>+ Додати</Button>} />
           <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Новий клієнт</DialogTitle>
@@ -82,7 +86,8 @@ export default function ClientsPage() {
               }}
             />
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <div className="mb-4">
