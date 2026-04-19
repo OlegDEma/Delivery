@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatWeight, formatCurrency } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 
 interface ParcelItem {
   id: string;
@@ -22,16 +24,32 @@ interface ParcelItem {
   totalCost: number | null;
   isPaid: boolean;
   createdAt: string;
+  createdSource: string | null;
+  createdById: string | null;
   sender: { phone: string; firstName: string; lastName: string };
   receiver: { phone: string; firstName: string; lastName: string };
   receiverAddress: { city: string; street: string | null; npWarehouseNum: string | null } | null;
 }
+
+// 3 відра за ТЗ «Логіка Кур'єр»:
+// - mine       — кур'єр оформив з нуля (createdById === user.id)
+// - clientOrders — клієнтські (веб/telegram), прив'язані до його поїздки
+// - toDeliver  — ті, які він має віддати (ua_to_eu на його поїздці або
+//                у фазі доставки в UA: at_lviv_warehouse / at_nova_poshta)
+type Bucket = 'all' | 'mine' | 'clientOrders' | 'toDeliver';
+
+const DELIVERY_PHASE: ParcelStatusType[] = [
+  'at_lviv_warehouse', 'at_nova_poshta', 'at_eu_warehouse',
+  'delivered_ua', 'delivered_eu',
+];
 
 export default function MyParcelsPage() {
   const { user } = useAuth();
   const [parcels, setParcels] = useState<ParcelItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  const [bucket, setBucket] = useState<Bucket>('all');
 
   // Filters
   const [search, setSearch] = useState('');
@@ -69,10 +87,37 @@ export default function MyParcelsPage() {
     return () => clearTimeout(timer);
   }, [fetchParcels]);
 
-  // Totals
-  const totalWeight = parcels.reduce((s, p) => s + (Number(p.totalWeight) || 0), 0);
-  const totalMoney = parcels.reduce((s, p) => s + (Number(p.totalCost) || 0), 0);
-  const paidMoney = parcels.filter(p => p.isPaid).reduce((s, p) => s + (Number(p.totalCost) || 0), 0);
+  // Bucket filtering — клієнт-сайдом, щоб не переробляти /api/parcels.
+  // API вже віддає лише посилки, прив'язані до цього кур'єра (`courierId`),
+  // тож нам залишається розсортувати їх на 3 відра.
+  const visibleParcels = parcels.filter((p) => {
+    if (bucket === 'all') return true;
+    if (bucket === 'mine') return p.createdById === user?.id;
+    if (bucket === 'clientOrders') {
+      return p.createdSource === 'client_web' || p.createdSource === 'client_telegram';
+    }
+    if (bucket === 'toDeliver') {
+      return p.direction === 'ua_to_eu' || DELIVERY_PHASE.includes(p.status);
+    }
+    return true;
+  });
+
+  // Counters — для бейджів на табах.
+  const counts = {
+    all: parcels.length,
+    mine: parcels.filter((p) => p.createdById === user?.id).length,
+    clientOrders: parcels.filter((p) =>
+      p.createdSource === 'client_web' || p.createdSource === 'client_telegram'
+    ).length,
+    toDeliver: parcels.filter((p) =>
+      p.direction === 'ua_to_eu' || DELIVERY_PHASE.includes(p.status)
+    ).length,
+  };
+
+  // Totals — по видимим в активному відрі.
+  const totalWeight = visibleParcels.reduce((s, p) => s + (Number(p.totalWeight) || 0), 0);
+  const totalMoney = visibleParcels.reduce((s, p) => s + (Number(p.totalCost) || 0), 0);
+  const paidMoney = visibleParcels.filter(p => p.isPaid).reduce((s, p) => s + (Number(p.totalCost) || 0), 0);
   const unpaidMoney = totalMoney - paidMoney;
 
   const STATUS_FILTER_LABELS: Record<string, string> = {
@@ -87,7 +132,7 @@ export default function MyParcelsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <div>
           <h1 className="text-2xl font-bold">Мої посилки</h1>
           <p className="text-sm text-gray-500">{total} всього</p>
@@ -99,6 +144,24 @@ export default function MyParcelsPage() {
           <Link href="/parcels/new"><Button>+ Створити</Button></Link>
         </div>
       </div>
+
+      {/* 3 відра за ТЗ «Логіка Кур'єр»: з нуля мною / клієнтські / на віддачу */}
+      <Tabs value={bucket} onValueChange={(v) => setBucket((v as Bucket) ?? 'all')}>
+        <TabsList className="mb-4 flex-wrap h-auto">
+          <TabsTrigger value="all">
+            Всі <span className={cn('ml-1.5 text-xs', bucket === 'all' ? 'opacity-70' : 'text-gray-400')}>{counts.all}</span>
+          </TabsTrigger>
+          <TabsTrigger value="mine">
+            Оформив сам <span className={cn('ml-1.5 text-xs', bucket === 'mine' ? 'opacity-70' : 'text-gray-400')}>{counts.mine}</span>
+          </TabsTrigger>
+          <TabsTrigger value="clientOrders">
+            До прийому <span className={cn('ml-1.5 text-xs', bucket === 'clientOrders' ? 'opacity-70' : 'text-gray-400')}>{counts.clientOrders}</span>
+          </TabsTrigger>
+          <TabsTrigger value="toDeliver">
+            На видачу <span className={cn('ml-1.5 text-xs', bucket === 'toDeliver' ? 'opacity-70' : 'text-gray-400')}>{counts.toDeliver}</span>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
@@ -159,7 +222,7 @@ export default function MyParcelsPage() {
         <ListSkeleton />
       ) : (
         <div className="bg-white rounded-lg border divide-y">
-          {parcels.map((p) => (
+          {visibleParcels.map((p) => (
             <Link key={p.id} href={`/parcels/${p.id}`} className="block p-3 hover:bg-gray-50">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -186,7 +249,14 @@ export default function MyParcelsPage() {
               </div>
             </Link>
           ))}
-          {parcels.length === 0 && <div className="text-center py-8 text-gray-500">Немає закріплених посилок</div>}
+          {visibleParcels.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              {bucket === 'mine' && 'Ще немає посилок, які ви оформили самі'}
+              {bucket === 'clientOrders' && 'На ваших поїздках немає клієнтських замовлень'}
+              {bucket === 'toDeliver' && 'Немає посилок на видачу'}
+              {bucket === 'all' && 'Немає закріплених посилок'}
+            </div>
+          )}
         </div>
       )}
     </div>
