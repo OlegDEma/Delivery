@@ -283,7 +283,7 @@ export default function NewParcelPage() {
         direction,
         shipmentType,
         description: description || undefined,
-        declaredValue: declaredValue || undefined,
+        declaredValue: declaredValue ? Number(declaredValue) : undefined,
         payer,
         paymentMethod,
         paymentInUkraine,
