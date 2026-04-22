@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { statusLabel } from '@/lib/parcels/status-label';
 import { formatDate } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
@@ -30,6 +31,7 @@ interface ParcelListItem {
   sender: { phone: string; firstName: string; lastName: string };
   receiver: { phone: string; firstName: string; lastName: string };
   receiverAddress: { city: string; street: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
+  trip?: { id: string; country: string | null } | null;
 }
 
 // Спец-значення для фільтра по кур'єру: «всі» / «без кур'єра».
@@ -382,7 +384,7 @@ function ParcelsContent() {
                         <div className="flex items-center gap-2 mb-0.5">
                           <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
                           <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
-                            {STATUS_LABELS[p.status]}
+                            {statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction })}
                           </Badge>
                           {p.isPaid && <Badge className="text-xs bg-green-100 text-green-800">Оплачено</Badge>}
                         </div>

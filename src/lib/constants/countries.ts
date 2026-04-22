@@ -14,6 +14,14 @@ export const COUNTRY_LABELS: Record<CountryCode, string> = {
   DE: 'Німеччина',
 };
 
+/** Родовий відмінок (до кого/чого?) — для підстановки в «В дорозі до …». */
+export const COUNTRY_LABELS_GENITIVE: Record<CountryCode, string> = {
+  UA: 'України',
+  NL: 'Нідерландів',
+  AT: 'Австрії',
+  DE: 'Німеччини',
+};
+
 export const COUNTRY_PHONE_CODES: Record<CountryCode, string> = {
   UA: '+380',
   NL: '+31',

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { statusLabel } from '@/lib/parcels/status-label';
 import { formatDate, formatWeight, formatCurrency } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,6 +30,7 @@ interface ParcelItem {
   sender: { phone: string; firstName: string; lastName: string };
   receiver: { phone: string; firstName: string; lastName: string };
   receiverAddress: { city: string; street: string | null; npWarehouseNum: string | null } | null;
+  trip?: { id: string; country: string | null } | null;
 }
 
 // 3 відра за ТЗ «Логіка Кур'єр». API вже фільтрує лише прив'язані до
@@ -218,7 +220,7 @@ export default function MyParcelsPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
-                    <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{STATUS_LABELS[p.status]}</Badge>
+                    <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction })}</Badge>
                     {!p.isPaid && p.totalCost && <Badge variant="destructive" className="text-xs">Не оплачено</Badge>}
                   </div>
                   <div className="text-sm">

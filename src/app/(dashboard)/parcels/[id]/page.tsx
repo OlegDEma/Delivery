@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { STATUS_TRANSITIONS, isTerminal } from '@/lib/parcels/status-transitions';
+import { statusLabel } from '@/lib/parcels/status-label';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { Camera, StickyNote, Lock, Pencil } from 'lucide-react';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
@@ -250,7 +251,7 @@ export default function ParcelDetailPage() {
         <div className="flex items-center gap-3 mb-1 flex-wrap">
           <h1 className="text-xl font-bold font-mono">{parcel.internalNumber}</h1>
           <Badge className={STATUS_COLORS[parcel.status]}>
-            {STATUS_LABELS[parcel.status]}
+            {statusLabel(parcel.status, { tripCountry: parcel.trip?.country, direction: parcel.direction })}
           </Badge>
         </div>
         <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
@@ -367,11 +368,11 @@ export default function ParcelDetailPage() {
               <Label className="text-xs">Змінити статус</Label>
               <Select value={newStatus} onValueChange={(v) => setNewStatus(v ?? '')}>
                 <SelectTrigger>
-                  <SelectValue>{newStatus ? (STATUS_LABELS[newStatus as ParcelStatusType] || newStatus) : 'Виберіть статус'}</SelectValue>
+                  <SelectValue>{newStatus ? statusLabel(newStatus, { tripCountry: parcel.trip?.country, direction: parcel.direction }) : 'Виберіть статус'}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {nextStatuses.map((s) => (
-                    <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+                    <SelectItem key={s} value={s}>{statusLabel(s, { tripCountry: parcel.trip?.country, direction: parcel.direction })}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -588,7 +589,7 @@ export default function ParcelDetailPage() {
                 </div>
                 <div className="pb-3">
                   <div className="text-sm font-medium">
-                    {STATUS_LABELS[h.status as ParcelStatusType] || h.status}
+                    {statusLabel(h.status, { tripCountry: parcel.trip?.country, direction: parcel.direction })}
                   </div>
                   <div className="text-xs text-gray-400">
                     {formatDateTime(h.changedAt)}

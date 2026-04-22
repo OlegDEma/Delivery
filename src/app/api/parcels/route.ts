@@ -117,6 +117,8 @@ export async function GET(request: NextRequest) {
           orderBy: { placeNumber: 'asc' },
           select: { id: true, placeNumber: true, weight: true, volumetricWeight: true, itnPlace: true },
         },
+        // Для динамічного лейблу статусу («В дорозі до …»).
+        trip: { select: { id: true, country: true, departureDate: true } },
       },
       orderBy: { [sortBy]: sortOrderParam },
       skip: (page - 1) * limit,
