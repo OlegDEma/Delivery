@@ -78,6 +78,7 @@ interface ParcelDetail {
     id: string; event: string; actor: string | null;
     payload: unknown; createdAt: string;
   }[];
+  photos?: string[];
   trip: { id: string; departureDate: string; country: string; direction: string } | null;
   assignedCourier: { id: string; fullName: string } | null;
   createdBy: { fullName: string } | null;
@@ -518,9 +519,9 @@ export default function ParcelDetailPage() {
         <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md bg-white cursor-pointer hover:bg-gray-50 transition-colors">
           <Camera className="w-4 h-4 text-gray-500" />
           Додати фото
-          {(parcel as unknown as { photos?: string[] }).photos?.length ? (
+          {parcel.photos?.length ? (
             <span className="ml-1 text-xs bg-blue-100 text-blue-700 px-1.5 rounded-full">
-              {(parcel as unknown as { photos: string[] }).photos.length}
+              {parcel.photos!.length}
             </span>
           ) : null}
           <input
@@ -556,9 +557,9 @@ export default function ParcelDetailPage() {
       </div>
 
       {/* Галерея фото (якщо є) — під кнопкою */}
-      {(parcel as unknown as { photos?: string[] }).photos?.length ? (
+      {parcel.photos?.length ? (
         <div className="flex gap-2 flex-wrap">
-          {(parcel as unknown as { photos: string[] }).photos.map((url, i) => (
+          {parcel.photos!.map((url, i) => (
             <a key={i} href={url} target="_blank" rel="noopener noreferrer">
               <img
                 src={url}
