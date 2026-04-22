@@ -121,6 +121,20 @@ export default function NewOrderPage() {
 
   useEffect(() => {
     fetch('/api/pricing').then(r => r.ok ? r.json() : []).then(setPricingConfigs);
+
+    // Prefill «Відправник (ваші дані)» — ім'я / прізвище / телефон /
+    // країна / місто з профілю клієнта + його основної адреси.
+    fetch('/api/client-portal/me').then(r => r.ok ? r.json() : null).then((me: {
+      firstName: string; lastName: string; phone: string;
+      country: string | null; city: string | null;
+    } | null) => {
+      if (!me) return;
+      if (me.phone) setSenderPhone(me.phone);
+      if (me.firstName) setSenderFirstName(me.firstName);
+      if (me.lastName) setSenderLastName(me.lastName);
+      if (me.country) setSenderCountry(me.country);
+      if (me.city) setSenderCity(me.city);
+    });
   }, []);
 
   function validateCollectionDate(dateStr: string) {
