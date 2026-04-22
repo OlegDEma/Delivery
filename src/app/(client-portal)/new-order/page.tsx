@@ -63,7 +63,7 @@ export default function NewOrderPage() {
   const [receiverPhone, setReceiverPhone] = useState('+');
   const [receiverFirstName, setReceiverFirstName] = useState('');
   const [receiverLastName, setReceiverLastName] = useState('');
-  const [receiverCountry, setReceiverCountry] = useState('UA');
+  const [receiverCountry, setReceiverCountry] = useState('');
   const [receiverCity, setReceiverCity] = useState('');
   const [receiverStreet, setReceiverStreet] = useState('');
   const [receiverDeliveryMethod, setReceiverDeliveryMethod] = useState('address');
@@ -77,6 +77,7 @@ export default function NewOrderPage() {
     id: string; firstName: string; lastName: string; phone: string;
     country: string | null; city: string | null; street: string | null;
     building: string | null; npWarehouseNum: string | null; deliveryMethod: string | null;
+    fromMyHistory?: boolean;
   }>>([]);
   const [showReceiverForm, setShowReceiverForm] = useState(false);
 
@@ -118,6 +119,16 @@ export default function NewOrderPage() {
   const [collectionPointId, setCollectionPointId] = useState('');
   const [collectionDate, setCollectionDate] = useState('');
   const [collectionAddress, setCollectionAddress] = useState('');
+
+  // Автопідставляння країни отримувача за напрямком:
+  // eu_to_ua → UA; ua_to_eu — лишаємо пустим, клієнт вибирає NL/AT/DE.
+  useEffect(() => {
+    if (direction === 'eu_to_ua' && !receiverCountry) {
+      setReceiverCountry('UA');
+    } else if (direction === 'ua_to_eu' && receiverCountry === 'UA') {
+      setReceiverCountry('');
+    }
+  }, [direction]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetch('/api/pricing').then(r => r.ok ? r.json() : []).then(setPricingConfigs);
@@ -186,6 +197,15 @@ export default function NewOrderPage() {
     }
     if (!receiverPhone || !receiverFirstName || !receiverLastName || !receiverCountry || !receiverCity) {
       setError('Заповніть обов\'язкові дані отримувача: телефон, прізвище, ім\'я, країна, населений пункт'); return;
+    }
+    // Для отримувачів в Україні — вулиця/будинок або номер складу НП обов'язкові.
+    if (receiverCountry === 'UA') {
+      const hasStreet = receiverStreet.trim().length > 0;
+      const hasNpWarehouse = receiverDeliveryMethod === 'np_warehouse' && receiverNpWarehouse.trim().length > 0;
+      if (!hasStreet && !hasNpWarehouse) {
+        setError('Для отримувача в Україні вкажіть вулицю + номер дому АБО номер складу Нової Пошти');
+        return;
+      }
     }
     setSaving(true);
 
@@ -359,7 +379,14 @@ export default function NewOrderPage() {
                         onClick={() => pickReceiver(r)}
                         className="w-full text-left p-2 hover:bg-blue-50 text-sm"
                       >
-                        <div className="font-medium">{r.lastName} {r.firstName}</div>
+                        <div className="font-medium flex items-center gap-2">
+                          {r.lastName} {r.firstName}
+                          {r.fromMyHistory && (
+                            <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">
+                              ваш отримувач
+                            </span>
+                          )}
+                        </div>
                         <div className="text-xs text-gray-500">
                           {r.phone}
                           {r.city && <> · {r.city}</>}
@@ -413,9 +440,13 @@ export default function NewOrderPage() {
               <div><Label>Ім&apos;я *</Label><Input value={receiverFirstName} onChange={(e) => setReceiverFirstName(e.target.value)} required /></div>
             </div>
             <div>
-              <Label>Країна</Label>
-              <Select value={receiverCountry} onValueChange={(v) => setReceiverCountry(v ?? 'UA')}>
-                <SelectTrigger><SelectValue>{COUNTRY_LABELS[receiverCountry]}</SelectValue></SelectTrigger>
+              <Label>Країна *</Label>
+              <Select value={receiverCountry} onValueChange={(v) => setReceiverCountry(v ?? '')}>
+                <SelectTrigger>
+                  <SelectValue>
+                    {receiverCountry ? COUNTRY_LABELS[receiverCountry] : <span className="text-gray-400">Виберіть країну…</span>}
+                  </SelectValue>
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="UA">Україна</SelectItem>
                   <SelectItem value="NL">Нідерланди</SelectItem>
