@@ -23,35 +23,54 @@
 
 import type { ParcelStatusType } from '@/lib/constants/statuses';
 
+// Спрощена матриця за ТЗ «Статуси» (6 основних):
+//   1. draft — «Створена»
+//   2. accepted_for_transport_* — «Прийнято до перевезення»
+//   3. in_transit_* — «В дорозі» (auto при старті рейсу — окрема задача)
+//   4. delivered_* — «Доставлено» (термінальний, не змінюється)
+//   5. at_nova_poshta — «На Новій пошті» (auto коли отримано ТТН)
+//   6. not_received — «Не отримано»
+//
+// Технічні склади (at_lviv_warehouse / at_eu_warehouse / at_collection_point)
+// лишаються в enum для сумісності з логістикою/aging, але не пропонуються
+// користувачу в dropdown — вони вмикаються автоматично через PATCH (напр.
+// bulk-status на складі) або з окремих сторінок.
 export const STATUS_TRANSITIONS: Record<ParcelStatusType, ParcelStatusType[]> = {
   draft: [
-    'at_collection_point',
     'accepted_for_transport_to_ua',
     'accepted_for_transport_to_eu',
-    'returned',
   ],
   at_collection_point: [
     'accepted_for_transport_to_ua',
     'accepted_for_transport_to_eu',
-    'returned',
   ],
   // ---- EU → UA ----
-  accepted_for_transport_to_ua: ['in_transit_to_ua', 'at_eu_warehouse'],
-  at_eu_warehouse: ['in_transit_to_ua', 'accepted_for_transport_to_ua'],
-  in_transit_to_ua: ['at_lviv_warehouse'],
-  at_lviv_warehouse: ['at_nova_poshta', 'delivered_ua', 'returned'],
-  at_nova_poshta: ['delivered_ua', 'not_received', 'refused'],
+  accepted_for_transport_to_ua: ['in_transit_to_ua'],
+  at_eu_warehouse: ['in_transit_to_ua'],
+  in_transit_to_ua: ['at_nova_poshta', 'delivered_ua'],
+  at_lviv_warehouse: ['at_nova_poshta', 'delivered_ua'],
+  at_nova_poshta: ['delivered_ua', 'not_received'],
   // ---- UA → EU ----
-  accepted_for_transport_to_eu: ['in_transit_to_eu', 'at_lviv_warehouse'],
-  in_transit_to_eu: ['at_eu_warehouse'],
-  // at_eu_warehouse — вже визначено вище (воно спільне для обох напрямків)
+  accepted_for_transport_to_eu: ['in_transit_to_eu'],
+  in_transit_to_eu: ['delivered_eu', 'not_received'],
   // ---- Кінцеві/проблемні ----
+  // «Доставлено» — фінал, за ТЗ: «коли посилці призначено статус
+  // Доставлено, ніяких статусів (навіть того самого) вже призначати
+  // ніхто (і програма теж) не може». Порожній масив переходів +
+  // сервер відкидає PATCH. Super_admin теж не обходить.
   delivered_ua: [],
   delivered_eu: [],
-  not_received: ['at_nova_poshta', 'at_lviv_warehouse', 'returned', 'refused'],
-  refused: ['returned', 'at_lviv_warehouse'],
+  not_received: ['at_nova_poshta', 'delivered_ua', 'delivered_eu'],
+  refused: [],
   returned: [],
 };
+
+/** Термінальні статуси — після них жодних змін статусу. */
+export const TERMINAL_STATUSES: ParcelStatusType[] = ['delivered_ua', 'delivered_eu'];
+
+export function isTerminal(status: ParcelStatusType | null | undefined): boolean {
+  return !!status && TERMINAL_STATUSES.includes(status);
+}
 
 /**
  * Чи допустимий перехід з поточного статусу в новий.

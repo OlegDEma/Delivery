@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
-import { STATUS_TRANSITIONS } from '@/lib/parcels/status-transitions';
+import { STATUS_TRANSITIONS, isTerminal } from '@/lib/parcels/status-transitions';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { Camera, StickyNote, Lock, Pencil } from 'lucide-react';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
@@ -332,8 +332,34 @@ export default function ParcelDetailPage() {
         </div>
       )}
 
+      {/* Остання нотатка — за ТЗ видно зразу як заходиш в посилку. */}
+      {(() => {
+        const latestNote = parcel.statusHistory.find((h) => h.notes && h.notes.trim());
+        if (!latestNote) return null;
+        return (
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-r px-3 py-2 flex items-start gap-2">
+            <StickyNote className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <div className="text-sm text-yellow-900 whitespace-pre-wrap">{latestNote.notes}</div>
+              <div className="text-xs text-yellow-700 mt-0.5">
+                {formatDateTime(latestNote.changedAt)}
+                {latestNote.changedBy && ` · ${latestNote.changedBy.fullName}`}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ТЗ: після «Доставлено» статус міняти не можна нікому. */}
+      {isTerminal(parcel.status) && (
+        <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 flex items-center gap-2 text-sm text-green-800">
+          <Lock className="w-4 h-4 shrink-0" />
+          Посилка доставлена. Зміна статусу неможлива.
+        </div>
+      )}
+
       {/* Змінити статус — список обмежено правилами переходу (status-transitions.ts). */}
-      {nextStatuses.length > 0 && (
+      {nextStatuses.length > 0 && !isTerminal(parcel.status) && (
         <Card>
           <CardContent className="p-3 flex gap-2 items-end">
             <div className="flex-1">
@@ -422,57 +448,8 @@ export default function ParcelDetailPage() {
       {/* Payment card */}
       <ParcelPaymentCard parcel={parcel} onUpdate={fetchParcel} />
 
-      {/* Estimated delivery window */}
-      <Card>
-        <CardHeader className="py-2 px-3">
-          <CardTitle className="text-sm">Вікно доставки (4 години)</CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3 pt-0">
-          <div className="flex gap-2 items-end">
-            <div>
-              <Label className="text-xs">Дата</Label>
-              <Input
-                type="date"
-                defaultValue={parcel.estimatedDeliveryStart ? new Date(parcel.estimatedDeliveryStart).toISOString().split('T')[0] : ''}
-                id="delivery-date"
-              />
-            </div>
-            <div>
-              <Label className="text-xs">З</Label>
-              <Input
-                type="time"
-                defaultValue={parcel.estimatedDeliveryStart ? new Date(parcel.estimatedDeliveryStart).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', hour12: false }) : ''}
-                id="delivery-from"
-              />
-            </div>
-            <div>
-              <Label className="text-xs">До</Label>
-              <Input
-                type="time"
-                defaultValue={parcel.estimatedDeliveryEnd ? new Date(parcel.estimatedDeliveryEnd).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', hour12: false }) : ''}
-                id="delivery-to"
-              />
-            </div>
-            <Button size="sm" onClick={async () => {
-              const date = (document.getElementById('delivery-date') as HTMLInputElement).value;
-              const from = (document.getElementById('delivery-from') as HTMLInputElement).value;
-              const to = (document.getElementById('delivery-to') as HTMLInputElement).value;
-              if (!date || !from || !to) return;
-              await fetch(`/api/parcels/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  estimatedDeliveryStart: `${date}T${from}:00`,
-                  estimatedDeliveryEnd: `${date}T${to}:00`,
-                }),
-              });
-              fetchParcel();
-            }}>
-              Зберегти
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* «Вікно доставки (4 години)» прибрано — за ТЗ це поле
+          потрібне лише в Маршрутах, а не в тілі посилки. */}
 
       {/* Рейс — показуємо лише дату фактичного рейсу + кур'єра. Редагування
           під кнопкою олівця (щоб не захаращувати картку) */}

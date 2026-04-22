@@ -9,7 +9,7 @@ import { ADMIN_ROLES } from '@/lib/constants/roles';
 import { parseBody, updateParcelSchema, parsePackagingPrices } from '@/lib/validators';
 import { logger } from '@/lib/logger';
 import { writeAuditLog } from '@/lib/audit';
-import { isAllowedTransition } from '@/lib/parcels/status-transitions';
+import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transitions';
 
 // Статуси «прийнято до перевезення» і далі — після них редагування ваги,
 // розмірів та деталей заборонено всім, окрім super_admin. Список дублює
@@ -139,6 +139,14 @@ export async function PATCH(
 
   // Status-only change path (doesn't touch places, can be simple update).
   if (body.status) {
+    // ТЗ: після «Доставлено» жодних змін статусу — навіть super_admin.
+    if (isTerminal(parcel.status)) {
+      return NextResponse.json(
+        { error: 'Посилка має статус «Доставлено» — зміна статусу неможлива.' },
+        { status: 409 }
+      );
+    }
+
     // Валідація переходу — super_admin може обходити правила. Якщо поточний
     // статус === новий, пропускаємо (ідемпотентність).
     if (!isSuperAdmin && !isAllowedTransition(parcel.status, body.status as ParcelStatus)) {
@@ -231,7 +239,24 @@ export async function PATCH(
   }
 
   const updateData: Prisma.ParcelUpdateInput = {};
-  if (body.npTtn !== undefined) updateData.npTtn = body.npTtn;
+  if (body.npTtn !== undefined) {
+    updateData.npTtn = body.npTtn;
+    // Auto-transition: за ТЗ «На Новій пошті» — автоматичний статус що
+    // замінює «В дорозі до України» одразу після того, як посилка отримала
+    // ТТН НП. Виконуємо тільки коли TTN щойно додали (раніше не було) і
+    // поточний статус — у фазі eu_to_ua до НП.
+    const autoEligible: ParcelStatus[] = ['in_transit_to_ua', 'at_lviv_warehouse'];
+    if (body.npTtn && !parcel.npTtn && autoEligible.includes(parcel.status)) {
+      updateData.status = 'at_nova_poshta';
+      updateData.statusHistory = {
+        create: {
+          status: 'at_nova_poshta',
+          changedById: userId,
+          notes: 'Автоматично: отримано ТТН Нової Пошти',
+        },
+      };
+    }
+  }
   if (body.tripId !== undefined) {
     updateData.trip = body.tripId ? { connect: { id: body.tripId } } : { disconnect: true };
   }
