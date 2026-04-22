@@ -65,7 +65,10 @@ function SelectContent({
   sideOffset = 4,
   align = "center",
   alignOffset = 0,
-  alignItemWithTrigger = true,
+  // Дефолт false — щоб випадайка з'являлась ПІД триггером замість перекривати
+  // його обраним елементом. Це «звична» поведінка dropdown'а і відповідає
+  // очікуванням користувача.
+  alignItemWithTrigger = false,
   ...props
 }: SelectPrimitive.Popup.Props &
   Pick<

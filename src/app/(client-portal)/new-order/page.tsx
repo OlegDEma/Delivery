@@ -49,7 +49,8 @@ export default function NewOrderPage() {
   const [pricingConfigs, setPricingConfigs] = useState<PricingConfig[]>([]);
   const [collectionDayWarning, setCollectionDayWarning] = useState('');
 
-  const [direction, setDirection] = useState('eu_to_ua');
+  // ТЗ: клієнт має свідомо вибрати напрямок — без дефолту.
+  const [direction, setDirection] = useState('');
 
   // Sender (client fills about themselves)
   const [senderPhone, setSenderPhone] = useState('+');
@@ -67,6 +68,41 @@ export default function NewOrderPage() {
   const [receiverStreet, setReceiverStreet] = useState('');
   const [receiverDeliveryMethod, setReceiverDeliveryMethod] = useState('address');
   const [receiverNpWarehouse, setReceiverNpWarehouse] = useState('');
+
+  // Пошук серед попередніх отримувачів — за ТЗ «дані беруться з останнього
+  // відправлення». Якщо клієнт колись відправляв цій людині — дає готові
+  // поля на вибір, якщо ні — лишається форма «з чистого листка».
+  const [receiverSearch, setReceiverSearch] = useState('');
+  const [receiverSuggestions, setReceiverSuggestions] = useState<Array<{
+    id: string; firstName: string; lastName: string; phone: string;
+    country: string | null; city: string | null; street: string | null;
+    building: string | null; npWarehouseNum: string | null; deliveryMethod: string | null;
+  }>>([]);
+  const [showReceiverForm, setShowReceiverForm] = useState(false);
+
+  useEffect(() => {
+    const q = receiverSearch.trim();
+    if (q.length < 2) { setReceiverSuggestions([]); return; }
+    const t = setTimeout(async () => {
+      const res = await fetch(`/api/client-portal/receivers?q=${encodeURIComponent(q)}`);
+      if (res.ok) setReceiverSuggestions(await res.json());
+    }, 250);
+    return () => clearTimeout(t);
+  }, [receiverSearch]);
+
+  function pickReceiver(r: typeof receiverSuggestions[number]) {
+    setReceiverPhone(r.phone || '+');
+    setReceiverFirstName(r.firstName);
+    setReceiverLastName(r.lastName);
+    setReceiverCountry(r.country || 'UA');
+    setReceiverCity(r.city || '');
+    setReceiverStreet([r.street, r.building].filter(Boolean).join(' '));
+    setReceiverDeliveryMethod(r.deliveryMethod || 'address');
+    setReceiverNpWarehouse(r.npWarehouseNum || '');
+    setReceiverSuggestions([]);
+    setReceiverSearch('');
+    setShowReceiverForm(true);
+  }
 
   // Parcel
   const [shipmentType, setShipmentType] = useState('parcels_cargo');
@@ -131,8 +167,11 @@ export default function NewOrderPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (!receiverPhone || !receiverFirstName || !receiverLastName) {
-      setError('Заповніть дані отримувача'); return;
+    if (!direction) {
+      setError('Виберіть напрямок'); return;
+    }
+    if (!receiverPhone || !receiverFirstName || !receiverLastName || !receiverCountry || !receiverCity) {
+      setError('Заповніть обов\'язкові дані отримувача: телефон, прізвище, ім\'я, країна, населений пункт'); return;
     }
     setSaving(true);
 
@@ -198,11 +237,15 @@ export default function NewOrderPage() {
 
         <Card>
           <CardHeader className="py-3 px-4">
-            <CardTitle className="text-base">Напрямок</CardTitle>
+            <CardTitle className="text-base">Виберіть напрямок</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0">
-            <Select value={direction} onValueChange={(v) => setDirection(v ?? 'eu_to_ua')}>
-              <SelectTrigger><SelectValue>{DIRECTION_LABELS[direction]}</SelectValue></SelectTrigger>
+            <Select value={direction} onValueChange={(v) => setDirection(v ?? '')}>
+              <SelectTrigger>
+                <SelectValue>
+                  {direction ? DIRECTION_LABELS[direction] : <span className="text-gray-400">Виберіть напрямок…</span>}
+                </SelectValue>
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="eu_to_ua">З Європи в Україну</SelectItem>
                 <SelectItem value="ua_to_eu">З України в Європу</SelectItem>
@@ -282,6 +325,71 @@ export default function NewOrderPage() {
             <CardTitle className="text-base text-blue-600">Отримувач</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-2">
+            {/* Пошук серед попередніх отримувачів. Дані з останнього
+                відправлення: прізвище, ім'я, телефон, місто, адреса. */}
+            {!showReceiverForm && (
+              <div>
+                <Label>Пошук отримувача (прізвище або телефон)</Label>
+                <Input
+                  value={receiverSearch}
+                  onChange={(e) => setReceiverSearch(e.target.value)}
+                  placeholder="Почніть вводити…"
+                  className="text-base"
+                />
+                {receiverSuggestions.length > 0 && (
+                  <div className="mt-2 bg-white border rounded-lg divide-y">
+                    {receiverSuggestions.map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => pickReceiver(r)}
+                        className="w-full text-left p-2 hover:bg-blue-50 text-sm"
+                      >
+                        <div className="font-medium">{r.lastName} {r.firstName}</div>
+                        <div className="text-xs text-gray-500">
+                          {r.phone}
+                          {r.city && <> · {r.city}</>}
+                          {r.street && <>, {r.street}{r.building ? ` ${r.building}` : ''}</>}
+                          {r.npWarehouseNum && <> · НП №{r.npWarehouseNum}</>}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {receiverSearch.trim().length >= 2 && receiverSuggestions.length === 0 && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    Отримувача не знайдено.{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowReceiverForm(true)}
+                      className="text-blue-600 hover:underline"
+                    >
+                      Створити нового
+                    </button>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowReceiverForm(true)}
+                  className="mt-2 text-xs text-blue-600 hover:underline"
+                >
+                  + Ввести нового отримувача
+                </button>
+              </div>
+            )}
+
+            {showReceiverForm && (
+              <>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">Дані отримувача</span>
+              <button
+                type="button"
+                onClick={() => { setShowReceiverForm(false); setReceiverSearch(''); }}
+                className="text-xs text-gray-500 hover:text-gray-900"
+              >
+                ← назад до пошуку
+              </button>
+            </div>
             <div>
               <Label>Телефон *</Label>
               <Input value={receiverPhone} onChange={(e) => setReceiverPhone(e.target.value)} className="text-base" required />
@@ -320,7 +428,9 @@ export default function NewOrderPage() {
               <div><Label>Номер складу НП</Label><Input value={receiverNpWarehouse} onChange={(e) => setReceiverNpWarehouse(e.target.value)} placeholder="1" /></div>
             )}
             {(receiverDeliveryMethod === 'address' || receiverCountry !== 'UA') && (
-              <div><Label>Вулиця, будинок</Label><Input value={receiverStreet} onChange={(e) => setReceiverStreet(e.target.value)} /></div>
+              <div><Label>Вулиця, будинок{receiverCountry === 'UA' && ' *'}</Label><Input value={receiverStreet} onChange={(e) => setReceiverStreet(e.target.value)} /></div>
+            )}
+              </>
             )}
           </CardContent>
         </Card>
