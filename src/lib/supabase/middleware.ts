@@ -43,6 +43,8 @@ const CLIENT_ONLY_PREFIXES = ['/my-orders', '/new-order'];
 const PUBLIC_PREFIXES = [
   '/login',
   '/register',
+  '/forgot-password',
+  '/reset-password',
   '/tracking',
   '/api/tracking',
   '/api/collection-points',

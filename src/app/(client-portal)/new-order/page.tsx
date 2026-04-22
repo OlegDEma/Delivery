@@ -213,7 +213,8 @@ export default function NewOrderPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        direction, shipmentType, description, declaredValue,
+        direction, shipmentType, description,
+        declaredValue: declaredValue ? Number(declaredValue) : undefined,
         payer, paymentMethod, paymentInUkraine,
         senderPhone, senderFirstName, senderLastName, senderCountry, senderCity,
         receiverPhone, receiverFirstName, receiverLastName, receiverCountry, receiverCity,

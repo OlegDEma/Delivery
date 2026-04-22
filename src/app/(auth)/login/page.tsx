@@ -111,6 +111,9 @@ function LoginInner() {
           </Button>
           <div className="flex justify-between text-sm">
             <Link href="/register" className="text-blue-600 hover:underline">Реєстрація</Link>
+            <Link href="/forgot-password" className="text-gray-500 hover:underline">Забув пароль?</Link>
+          </div>
+          <div className="text-center text-sm">
             <Link href="/tracking" className="text-gray-500 hover:underline">Відстежити посилку</Link>
           </div>
         </form>
