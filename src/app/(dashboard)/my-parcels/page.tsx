@@ -31,17 +31,13 @@ interface ParcelItem {
   receiverAddress: { city: string; street: string | null; npWarehouseNum: string | null } | null;
 }
 
-// 3 відра за ТЗ «Логіка Кур'єр»:
-// - mine       — кур'єр оформив з нуля (createdById === user.id)
-// - clientOrders — клієнтські (веб/telegram), прив'язані до його поїздки
-// - toDeliver  — ті, які він має віддати (ua_to_eu на його поїздці або
-//                у фазі доставки в UA: at_lviv_warehouse / at_nova_poshta)
+// 3 відра за ТЗ «Логіка Кур'єр». API вже фільтрує лише прив'язані до
+// цього кур'єра (courierId=me → trip.assignedCourier або assignedCourierId).
+// Тому «прив'язані до його поїздки» вже виконано на рівні запиту.
+// - mine         — оформив з нуля (createdById === user.id)
+// - clientOrders — створені клієнтами через веб/telegram
+// - toDeliver    — посилки з України, які він везе в Європу (ua_to_eu)
 type Bucket = 'all' | 'mine' | 'clientOrders' | 'toDeliver';
-
-const DELIVERY_PHASE: ParcelStatusType[] = [
-  'at_lviv_warehouse', 'at_nova_poshta', 'at_eu_warehouse',
-  'delivered_ua', 'delivered_eu',
-];
 
 export default function MyParcelsPage() {
   const { user } = useAuth();
@@ -87,31 +83,25 @@ export default function MyParcelsPage() {
     return () => clearTimeout(timer);
   }, [fetchParcels]);
 
-  // Bucket filtering — клієнт-сайдом, щоб не переробляти /api/parcels.
-  // API вже віддає лише посилки, прив'язані до цього кур'єра (`courierId`),
-  // тож нам залишається розсортувати їх на 3 відра.
+  // Bucket filtering — клієнт-сайдом.
+  const isMine = (p: ParcelItem) => p.createdById === user?.id;
+  const isClientOrder = (p: ParcelItem) =>
+    p.createdSource === 'client_web' || p.createdSource === 'client_telegram';
+  const isToDeliver = (p: ParcelItem) => p.direction === 'ua_to_eu';
+
   const visibleParcels = parcels.filter((p) => {
     if (bucket === 'all') return true;
-    if (bucket === 'mine') return p.createdById === user?.id;
-    if (bucket === 'clientOrders') {
-      return p.createdSource === 'client_web' || p.createdSource === 'client_telegram';
-    }
-    if (bucket === 'toDeliver') {
-      return p.direction === 'ua_to_eu' || DELIVERY_PHASE.includes(p.status);
-    }
+    if (bucket === 'mine') return isMine(p);
+    if (bucket === 'clientOrders') return isClientOrder(p);
+    if (bucket === 'toDeliver') return isToDeliver(p);
     return true;
   });
 
-  // Counters — для бейджів на табах.
   const counts = {
     all: parcels.length,
-    mine: parcels.filter((p) => p.createdById === user?.id).length,
-    clientOrders: parcels.filter((p) =>
-      p.createdSource === 'client_web' || p.createdSource === 'client_telegram'
-    ).length,
-    toDeliver: parcels.filter((p) =>
-      p.direction === 'ua_to_eu' || DELIVERY_PHASE.includes(p.status)
-    ).length,
+    mine: parcels.filter(isMine).length,
+    clientOrders: parcels.filter(isClientOrder).length,
+    toDeliver: parcels.filter(isToDeliver).length,
   };
 
   // Totals — по видимим в активному відрі.
