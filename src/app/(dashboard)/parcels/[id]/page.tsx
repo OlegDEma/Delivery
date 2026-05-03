@@ -384,10 +384,13 @@ export default function ParcelDetailPage() {
         <div className="flex gap-2 items-center py-1">
           <Label className="text-xs text-gray-500 shrink-0">Статус:</Label>
           <Select value={newStatus} onValueChange={(v) => setNewStatus(v ?? '')}>
-            <SelectTrigger className="h-8 text-sm">
+            {/* min-w-[14rem] так щоб довгі лейбли «Прийнято до перевезення до України»
+                не обрізалися ні в trigger, ні в dropdown (SelectContent наслідує
+                ширину trigger через --anchor-width). */}
+            <SelectTrigger className="h-8 text-sm min-w-[14rem] flex-1 max-w-[20rem]">
               <SelectValue>{newStatus ? statusLabel(newStatus, { tripCountry: parcel.trip?.country, direction: parcel.direction }) : 'Виберіть…'}</SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="min-w-[14rem]">
               {nextStatuses.map((s) => (
                 <SelectItem key={s} value={s}>{statusLabel(s, { tripCountry: parcel.trip?.country, direction: parcel.direction })}</SelectItem>
               ))}
