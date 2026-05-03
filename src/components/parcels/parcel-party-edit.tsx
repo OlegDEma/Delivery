@@ -156,7 +156,6 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
         defaultCountry={defaultCountry}
       />
       <AddressEditor
-        title="Адреса"
         state={addr}
         onChange={(p) => setAddr({ ...addr, ...p })}
       />
