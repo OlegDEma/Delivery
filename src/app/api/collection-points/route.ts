@@ -24,7 +24,9 @@ export async function POST(request: NextRequest) {
   const guard = await requireRole(ADMIN_ROLES);
   if (!guard.ok) return guard.response;
 
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
   const {
     name,
     country,
@@ -45,6 +47,9 @@ export async function POST(request: NextRequest) {
       { error: 'Країна, місто та адреса обовʼязкові' },
       { status: 400 }
     );
+  }
+  if (!['UA', 'NL', 'AT', 'DE'].includes(country)) {
+    return NextResponse.json({ error: 'Невалідна країна (UA/NL/AT/DE)' }, { status: 400 });
   }
 
   const point = await prisma.collectionPoint.create({

@@ -8,6 +8,8 @@ import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/const
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDateTime, formatCurrency, formatDate } from '@/lib/utils/format';
 import { kyivYmd } from '@/lib/utils/tz';
+import { useAuth } from '@/lib/hooks/use-auth';
+import { ROLES } from '@/lib/constants/roles';
 
 interface Activity {
   id: string;
@@ -42,6 +44,7 @@ interface Stats {
 }
 
 export default function DashboardPage() {
+  const { role } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +58,12 @@ export default function DashboardPage() {
   if (loading) return <div className="text-center py-12 text-gray-500">Завантаження...</div>;
   if (!stats) return <div className="text-center py-12 text-gray-500">Помилка завантаження</div>;
 
-  const hasActions = stats.pendingOrders > 0 || stats.unpaidCount > 0 || stats.upcomingTrip;
+  // Admin/cashier widgets — drivers see only trip-related actions on home
+  const isDriver = role === ROLES.DRIVER_COURIER;
+  const showPendingOrders = !isDriver && stats.pendingOrders > 0;
+  const showUnpaid = !isDriver && stats.unpaidCount > 0;
+  const showUpcomingTrip = !!stats.upcomingTrip;
+  const hasActions = showPendingOrders || showUnpaid || showUpcomingTrip;
 
   return (
     <div>
@@ -66,7 +74,7 @@ export default function DashboardPage() {
         <div className="mb-6 space-y-2">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Потрібна увага</h2>
 
-          {stats.pendingOrders > 0 && (
+          {showPendingOrders && (
             <Link href="/parcels/pending-orders" className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-lg p-3 hover:bg-yellow-100 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-yellow-200 rounded-full flex items-center justify-center text-yellow-800 font-bold">{stats.pendingOrders}</div>
@@ -79,7 +87,7 @@ export default function DashboardPage() {
             </Link>
           )}
 
-          {stats.unpaidCount > 0 && (
+          {showUnpaid && (
             <Link href="/debts" className="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3 hover:bg-red-100 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-red-200 rounded-full flex items-center justify-center text-red-800 font-bold">{stats.unpaidCount}</div>
@@ -92,7 +100,7 @@ export default function DashboardPage() {
             </Link>
           )}
 
-          {stats.upcomingTrip && (
+          {showUpcomingTrip && stats.upcomingTrip && (
             <Link href={`/trips/${stats.upcomingTrip.id}`} className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3 hover:bg-blue-100 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center text-blue-800 font-bold">{stats.upcomingTrip._count.parcels}</div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireStaff } from '@/lib/auth/guards';
+import { isUuid } from '@/lib/validators/common';
 
 // GET /api/collection-points/[id]/parcels — parcels linked to this point
 // Query params:
@@ -14,6 +15,7 @@ export async function GET(
   if (!guard.ok) return guard.response;
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
   const { searchParams } = new URL(request.url);
   const statusFilter = searchParams.get('status');
   const includeAccepted = searchParams.get('includeAccepted') === '1';

@@ -16,7 +16,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Тільки адмін може імпортувати' }, { status: 403 });
   }
 
-  const body = await request.json();
+  // Catch JSON parse errors — request without body or with FormData throws otherwise.
+  let body: { type?: string; data?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 });
+  }
   const { type, data } = body;
 
   if (!type || !data || !Array.isArray(data)) {

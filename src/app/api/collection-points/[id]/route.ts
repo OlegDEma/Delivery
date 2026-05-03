@@ -4,6 +4,7 @@ import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { ADMIN_ROLES } from '@/lib/constants/roles';
 import type { Weekday } from '@/generated/prisma/enums';
 import type { Prisma } from '@/generated/prisma/client';
+import { isUuid } from '@/lib/validators/common';
 
 // GET /api/collection-points/[id] — point details with parcels waiting
 export async function GET(
@@ -14,6 +15,7 @@ export async function GET(
   if (!guard.ok) return guard.response;
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
   const point = await prisma.collectionPoint.findUnique({
     where: { id },
     include: {
@@ -43,7 +45,10 @@ export async function PATCH(
   if (!guard.ok) return guard.response;
 
   const { id } = await params;
-  const body = await request.json();
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+  let body;
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
   const data: Prisma.CollectionPointUpdateInput = {};
   if (body.name !== undefined) data.name = body.name || null;
@@ -64,6 +69,9 @@ export async function PATCH(
   if (body.maxCapacity !== undefined) data.maxCapacity = body.maxCapacity ? Number(body.maxCapacity) : null;
   if (body.isActive !== undefined) data.isActive = !!body.isActive;
 
+  const exists = await prisma.collectionPoint.findUnique({ where: { id }, select: { id: true } });
+  if (!exists) return NextResponse.json({ error: 'Пункт не знайдено' }, { status: 404 });
+
   const updated = await prisma.collectionPoint.update({ where: { id }, data });
   return NextResponse.json(updated);
 }
@@ -77,6 +85,10 @@ export async function DELETE(
   if (!guard.ok) return guard.response;
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+
+  const exists = await prisma.collectionPoint.findUnique({ where: { id }, select: { id: true } });
+  if (!exists) return NextResponse.json({ error: 'Пункт не знайдено' }, { status: 404 });
 
   // If the point has parcels associated, just deactivate. If it doesn't, hard delete.
   const count = await prisma.parcel.count({ where: { collectionPointId: id } });

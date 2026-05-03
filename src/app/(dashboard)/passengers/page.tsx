@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Users2, ArrowLeft, UserPlus, Phone, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PhoneLink } from '@/components/shared/phone-link';
+import { PhoneInput } from '@/components/shared/phone-input';
 import { formatCurrency } from '@/lib/utils/format';
 
 interface TripSummary {
@@ -222,10 +223,12 @@ export default function PassengersPage() {
                         <Input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
                       </div>
                     </div>
-                    <div>
-                      <Label className="text-xs">Телефон</Label>
-                      <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+380..." />
-                    </div>
+                    <PhoneInput
+                      label="Телефон"
+                      value={form.phone}
+                      onChange={(v) => setForm({ ...form, phone: v })}
+                      defaultCountry="UA"
+                    />
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <Label className="text-xs">Місце №</Label>

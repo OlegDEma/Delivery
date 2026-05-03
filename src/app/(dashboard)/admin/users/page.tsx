@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { PhoneInput } from '@/components/shared/phone-input';
 
 interface UserProfile {
   id: string;
@@ -277,14 +278,12 @@ export default function AdminUsersPage() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Телефон</Label>
-                <Input
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
-                  placeholder="+380..."
-                />
-              </div>
+              <PhoneInput
+                label="Телефон"
+                value={newPhone}
+                onChange={setNewPhone}
+                defaultCountry="UA"
+              />
               <div className="space-y-2">
                 <Label>Роль</Label>
                 <Select value={newRole} onValueChange={(v) => setNewRole((v ?? '') as Role)}>
@@ -527,14 +526,12 @@ export default function AdminUsersPage() {
                   ⚠️ При зміні email користувач має використовувати новий email для входу.
                 </p>
               </div>
-              <div className="space-y-2">
-                <Label>Телефон</Label>
-                <Input
-                  value={editPhone}
-                  onChange={(e) => setEditPhone(e.target.value)}
-                  placeholder="+380..."
-                />
-              </div>
+              <PhoneInput
+                label="Телефон"
+                value={editPhone}
+                onChange={setEditPhone}
+                defaultCountry="UA"
+              />
               {editError && <p className="text-sm text-red-600">{editError}</p>}
               <div className="flex gap-2 pt-1">
                 <Button

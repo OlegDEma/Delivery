@@ -6,6 +6,7 @@ import { normalizePhone } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
 import { z } from 'zod';
 import { parseBody } from '@/lib/validators';
+import { isUuid } from '@/lib/validators/common';
 import { logger } from '@/lib/logger';
 
 const passengerCreateSchema = z.object({
@@ -170,6 +171,10 @@ export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+
+  const exists = await prisma.passenger.findFirst({ where: { id, deletedAt: null }, select: { id: true } });
+  if (!exists) return NextResponse.json({ error: 'Пасажира не знайдено' }, { status: 404 });
 
   await prisma.passenger.update({
     where: { id },

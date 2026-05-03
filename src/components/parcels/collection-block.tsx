@@ -74,11 +74,11 @@ export function CollectionBlock({ senderCountry, value, onChange, clientFacing =
     });
   }
 
+  // Per ТЗ: «Забрати поле "Передати водію"» — direct_to_driver приховано.
   const methods: CollectionMethod[] = [
     COLLECTION_METHODS.PICKUP_POINT,
     COLLECTION_METHODS.COURIER_PICKUP,
     COLLECTION_METHODS.EXTERNAL_SHIPPING,
-    COLLECTION_METHODS.DIRECT_TO_DRIVER,
   ];
 
   const pointsForCountry = senderCountry

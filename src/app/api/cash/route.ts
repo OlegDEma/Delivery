@@ -32,7 +32,8 @@ export async function GET(request: NextRequest) {
   const where: Prisma.CashRegisterWhereInput = {};
   if (receivedBy) where.receivedById = receivedBy;
   if (dateFrom || dateTo) {
-    where.createdAt = kyivDateRange(dateFrom, dateTo);
+    try { where.createdAt = kyivDateRange(dateFrom, dateTo); }
+    catch { return NextResponse.json({ error: 'Невалідна дата (очікується YYYY-MM-DD)' }, { status: 400 }); }
   }
 
   const [entries, totals] = await Promise.all([
@@ -64,6 +65,12 @@ export async function POST(request: NextRequest) {
   const parsed = await parseBody(request, cashEntrySchema);
   if (parsed instanceof NextResponse) return parsed;
   const body = parsed;
+
+  // Verify parcel exists if linked — otherwise FK violation surfaces as 500.
+  if (body.parcelId) {
+    const parcel = await prisma.parcel.findFirst({ where: { id: body.parcelId, deletedAt: null }, select: { id: true } });
+    if (!parcel) return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
+  }
 
   // Do everything in a single transaction so a cash entry and the paid-flag
   // on the parcel never diverge.

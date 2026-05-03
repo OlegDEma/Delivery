@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { writeAuditLog } from '@/lib/audit';
+import { isUuid } from '@/lib/validators/common';
 
 // PATCH /api/users/[id] — update user role or deactivate
 export async function PATCH(
@@ -19,7 +20,10 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const body = await request.json();
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+  let body;
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
   // Safety: can't change own role or deactivate self — otherwise super_admin
   // can lock themselves out of the system
@@ -114,10 +118,13 @@ export async function PATCH(
     return NextResponse.json({ error: 'ПІБ не може бути пустим' }, { status: 400 });
   }
 
-  // Capture old role for audit.
+  // Capture old role for audit + verify user exists.
   const previous = await prisma.profile.findUnique({
     where: { id }, select: { role: true, isActive: true },
   });
+  if (!previous) {
+    return NextResponse.json({ error: 'Користувача не знайдено' }, { status: 404 });
+  }
 
   const updated = await prisma.profile.update({
     where: { id },
@@ -166,6 +173,7 @@ export async function DELETE(
   }
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
   // Can't delete self
   if (id === user.id) {
@@ -176,6 +184,9 @@ export async function DELETE(
   const target = await prisma.profile.findUnique({
     where: { id }, select: { email: true, role: true },
   });
+  if (!target) {
+    return NextResponse.json({ error: 'Користувача не знайдено' }, { status: 404 });
+  }
 
   // Delete from Supabase Auth
   const serviceClient = await createServiceClient();

@@ -7,6 +7,8 @@ import { ADMIN_ROLES } from '@/lib/constants/roles';
 import { logger } from '@/lib/logger';
 import { writeAuditLog } from '@/lib/audit';
 
+const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 // GET /api/clients/[id]
 export async function GET(
   _request: NextRequest,
@@ -16,6 +18,7 @@ export async function GET(
   if (!guard.ok) return guard.response;
 
   const { id } = await params;
+  if (!UUID_RE.test(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
   const client = await prisma.client.findFirst({
     where: { id, deletedAt: null },
@@ -115,7 +118,11 @@ export async function GET(
     stats: {
       totalSent,
       totalReceived,
-      totalParcels: totalSent + totalReceived,
+      // Distinct parcels involving this client. byDirection sums equal this
+      // because each parcel has exactly one direction. Using sum-of-roles
+      // (totalSent + totalReceived) double-counted parcels where the same
+      // client appears as both sender and receiver.
+      totalParcels: byDirectionEuUa + byDirectionUaEu,
       totalPaid: Number(totalPaidAgg._sum.totalCost) || 0,
       currentDebt: Number(currentDebtAgg._sum.totalCost) || 0,
       unpaidCount,
@@ -146,7 +153,11 @@ export async function PATCH(
   if (!guard.ok) return guard.response;
 
   const { id } = await params;
-  const body = await request.json();
+  if (!UUID_RE.test(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let body: any;
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
   // Update client fields
   if (body.action === 'update') {
@@ -167,16 +178,37 @@ export async function PATCH(
     if (country !== undefined) data.country = country || null;
     if (notes !== undefined) data.notes = notes || null;
 
-    const updated = await prisma.client.update({
-      where: { id },
-      data: data as import('@/generated/prisma/client').Prisma.ClientUpdateInput,
-    });
-    return NextResponse.json(updated);
+    // Verify client exists before update.
+    const exists = await prisma.client.findFirst({ where: { id, deletedAt: null }, select: { id: true } });
+    if (!exists) return NextResponse.json({ error: 'Клієнта не знайдено' }, { status: 404 });
+
+    try {
+      const updated = await prisma.client.update({
+        where: { id },
+        data: data as import('@/generated/prisma/client').Prisma.ClientUpdateInput,
+      });
+      return NextResponse.json(updated);
+    } catch (err) {
+      // P2002: phone uniqueness violated by another client.
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002') {
+        return NextResponse.json({ error: 'Клієнт з таким номером вже існує' }, { status: 409 });
+      }
+      throw err;
+    }
   }
 
   // Add address
   if (body.action === 'addAddress') {
     const addr = body.address;
+    if (!addr || typeof addr !== 'object') {
+      return NextResponse.json({ error: 'Адреса обов\'язкова' }, { status: 400 });
+    }
+    if (!addr.country || !['UA','NL','AT','DE'].includes(addr.country)) {
+      return NextResponse.json({ error: 'Невалідна країна (UA/NL/AT/DE)' }, { status: 400 });
+    }
+    if (!addr.city || !String(addr.city).trim()) {
+      return NextResponse.json({ error: 'Населений пункт обов\'язковий' }, { status: 400 });
+    }
     const address = await prisma.clientAddress.create({
       data: {
         clientId: id,
@@ -189,6 +221,7 @@ export async function PATCH(
         landmark: addr.landmark || null,
         npWarehouseNum: addr.npWarehouseNum || null,
         npPoshtamatNum: addr.npPoshtamatNum || null,
+        pickupPointText: addr.pickupPointText || null,
         deliveryMethod: addr.deliveryMethod || 'address',
       },
     });
@@ -197,6 +230,12 @@ export async function PATCH(
 
   // Update address
   if (body.action === 'updateAddress') {
+    if (!body.addressId || !UUID_RE.test(body.addressId)) {
+      return NextResponse.json({ error: 'Невалідний addressId' }, { status: 400 });
+    }
+    // Verify address exists + belongs to this client (prevents cross-client edit)
+    const exists = await prisma.clientAddress.findFirst({ where: { id: body.addressId, clientId: id } });
+    if (!exists) return NextResponse.json({ error: 'Адресу не знайдено' }, { status: 404 });
     const addr = body.address;
     const updated = await prisma.clientAddress.update({
       where: { id: body.addressId },
@@ -209,6 +248,7 @@ export async function PATCH(
         ...(addr.postalCode !== undefined && { postalCode: addr.postalCode || null }),
         ...(addr.landmark !== undefined && { landmark: addr.landmark || null }),
         ...(addr.npWarehouseNum !== undefined && { npWarehouseNum: addr.npWarehouseNum || null }),
+        ...(addr.pickupPointText !== undefined && { pickupPointText: addr.pickupPointText || null }),
         ...(addr.deliveryMethod !== undefined && { deliveryMethod: addr.deliveryMethod }),
       },
     });
@@ -217,6 +257,26 @@ export async function PATCH(
 
   // Delete address
   if (body.action === 'deleteAddress') {
+    if (!body.addressId || !UUID_RE.test(body.addressId)) {
+      return NextResponse.json({ error: 'Невалідний addressId' }, { status: 400 });
+    }
+    const exists = await prisma.clientAddress.findFirst({ where: { id: body.addressId, clientId: id } });
+    if (!exists) return NextResponse.json({ error: 'Адресу не знайдено' }, { status: 404 });
+    // Block deletion if used in active (non-final) parcels — otherwise we lose
+    // delivery info on shipments still in transit.
+    const usedIn = await prisma.parcel.count({
+      where: {
+        deletedAt: null,
+        status: { notIn: ['delivered_ua', 'delivered_eu', 'returned'] },
+        OR: [{ senderAddressId: body.addressId }, { receiverAddressId: body.addressId }],
+      },
+    });
+    if (usedIn > 0) {
+      return NextResponse.json(
+        { error: `Адреса використовується в ${usedIn} активних посилках. Спочатку завершіть або переприв'яжіть їх.` },
+        { status: 409 }
+      );
+    }
     await prisma.clientAddress.delete({ where: { id: body.addressId } });
     return NextResponse.json({ success: true });
   }
@@ -234,6 +294,7 @@ export async function DELETE(
   const userId = guard.user.userId;
 
   const { id } = await params;
+  if (!UUID_RE.test(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
   const client = await prisma.client.findFirst({ where: { id, deletedAt: null } });
   if (!client) {

@@ -34,7 +34,9 @@ export async function POST(request: NextRequest) {
   if (!guard.ok) return guard.response;
   const user = { id: guard.user.userId };
 
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
   const {
     country, departureDate, euArrivalDate, euReturnDate, endDate,
     assignedCourierId, secondCourierId, vehicleInfo, notes,
@@ -42,6 +44,19 @@ export async function POST(request: NextRequest) {
 
   if (!country || !departureDate) {
     return NextResponse.json({ error: 'Країна та дата виїзду обов\'язкові' }, { status: 400 });
+  }
+  if (!['UA', 'NL', 'AT', 'DE'].includes(country)) {
+    return NextResponse.json({ error: 'Невалідна країна (UA/NL/AT/DE)' }, { status: 400 });
+  }
+  for (const [field, val] of [
+    ['departureDate', departureDate],
+    ['euArrivalDate', euArrivalDate],
+    ['euReturnDate', euReturnDate],
+    ['endDate', endDate],
+  ]) {
+    if (val && Number.isNaN(new Date(val as string).getTime())) {
+      return NextResponse.json({ error: `Невалідна дата: ${field}` }, { status: 400 });
+    }
   }
 
   // Create journey
@@ -104,7 +119,9 @@ export async function PATCH(request: NextRequest) {
   const id = searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'id обов\'язковий' }, { status: 400 });
 
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = {};
   if (body.status !== undefined) data.status = body.status as TripStatus;

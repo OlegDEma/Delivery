@@ -18,6 +18,7 @@ import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDateTime } from '@/lib/utils/format';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { CopyButton } from '@/components/shared/copy-button';
+import { ParcelPartyEdit } from '@/components/parcels/parcel-party-edit';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
 import { ShareButton } from '@/components/shared/share-button';
@@ -51,20 +52,37 @@ interface ParcelDetail {
   estimatedDeliveryEnd: string | null;
   isPaid: boolean;
   totalCost: number | null;
+  insuranceCost: number | null;
   createdAt: string;
   createdSource: string | null;
   sender: {
+    id: string;
     firstName: string; lastName: string; phone: string;
+    country?: string | null;
     addresses: { city: string; street: string | null; country: string }[];
   };
-  senderAddress: { city: string; street: string | null; building: string | null; landmark: string | null; country: string | null } | null;
+  senderAddressId: string | null;
+  senderAddress: {
+    city: string; street: string | null; building: string | null;
+    postalCode: string | null;
+    landmark: string | null; country: string | null;
+    deliveryMethod: string;
+    npWarehouseNum: string | null;
+    pickupPointText: string | null;
+  } | null;
   receiver: {
+    id: string;
     firstName: string; lastName: string; phone: string;
+    country?: string | null;
     addresses: { city: string; street: string | null; country: string }[];
   };
+  receiverAddressId: string | null;
   receiverAddress: {
     city: string; street: string | null; building: string | null; apartment: string | null;
-    landmark: string | null; npWarehouseNum: string | null; deliveryMethod: string; country: string;
+    postalCode: string | null;
+    landmark: string | null; npWarehouseNum: string | null;
+    pickupPointText: string | null;
+    deliveryMethod: string; country: string;
   } | null;
   places: {
     id: string; placeNumber: number; weight: number | null; length: number | null;
@@ -360,32 +378,30 @@ export default function ParcelDetailPage() {
         </div>
       )}
 
-      {/* Змінити статус — список обмежено правилами переходу (status-transitions.ts). */}
+      {/* Змінити статус — список обмежено правилами переходу (status-transitions.ts).
+          Без Card-wrapper'a per ТЗ «максимально стиснути інфо-блоки». */}
       {nextStatuses.length > 0 && !isTerminal(parcel.status) && (
-        <Card>
-          <CardContent className="p-3 flex gap-2 items-end">
-            <div className="flex-1">
-              <Label className="text-xs">Змінити статус</Label>
-              <Select value={newStatus} onValueChange={(v) => setNewStatus(v ?? '')}>
-                <SelectTrigger>
-                  <SelectValue>{newStatus ? statusLabel(newStatus, { tripCountry: parcel.trip?.country, direction: parcel.direction }) : 'Виберіть статус'}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {nextStatuses.map((s) => (
-                    <SelectItem key={s} value={s}>{statusLabel(s, { tripCountry: parcel.trip?.country, direction: parcel.direction })}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={handleStatusChange} disabled={!newStatus || saving} size="sm">
-              {saving ? '...' : 'Змінити'}
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="flex gap-2 items-center py-1">
+          <Label className="text-xs text-gray-500 shrink-0">Статус:</Label>
+          <Select value={newStatus} onValueChange={(v) => setNewStatus(v ?? '')}>
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue>{newStatus ? statusLabel(newStatus, { tripCountry: parcel.trip?.country, direction: parcel.direction }) : 'Виберіть…'}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {nextStatuses.map((s) => (
+                <SelectItem key={s} value={s}>{statusLabel(s, { tripCountry: parcel.trip?.country, direction: parcel.direction })}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={handleStatusChange} disabled={!newStatus || saving} size="sm" className="h-8">
+            {saving ? '...' : 'Змінити'}
+          </Button>
+        </div>
       )}
 
-      {/* Відправник / Отримувач — компактно, без карток (ТЗ: максимально
-          стиснути інфо-блоки). Label-color відрізняє сторони. */}
+      {/* Відправник / Отримувач — компактно, з кнопкою олівця для редагування
+          (per ТЗ: «можна редагувати дані Отримувача або Відправника» навіть
+          після lock на вагу/розміри). Label-color відрізняє сторони. */}
       <div className="text-sm space-y-1.5 py-2 border-y">
         <div className="flex items-baseline gap-2">
           <span className="text-green-600 font-medium shrink-0 w-16">Від:</span>
@@ -399,6 +415,13 @@ export default function ParcelDetailPage() {
                 {parcel.senderAddress.landmark ? ` (${parcel.senderAddress.landmark})` : ''}
               </span>
             )}
+            <ParcelPartyEdit
+              parcelId={parcel.id}
+              role="sender"
+              party={parcel.sender}
+              address={parcel.senderAddress ? { ...parcel.senderAddress, id: parcel.senderAddressId } : null}
+              onSaved={fetchParcel}
+            />
           </div>
         </div>
         <div className="flex items-baseline gap-2">
@@ -415,6 +438,13 @@ export default function ParcelDetailPage() {
                 {parcel.receiverAddress.landmark ? ` (${parcel.receiverAddress.landmark})` : ''}
               </span>
             )}
+            <ParcelPartyEdit
+              parcelId={parcel.id}
+              role="receiver"
+              party={parcel.receiver}
+              address={parcel.receiverAddress ? { ...parcel.receiverAddress, id: parcel.receiverAddressId } : null}
+              onSaved={fetchParcel}
+            />
           </div>
         </div>
       </div>
@@ -440,6 +470,9 @@ export default function ParcelDetailPage() {
         receiverDeliveryMethod={parcel.receiverAddress?.deliveryMethod || null}
         declaredValue={parcel.declaredValue}
         needsPackaging={parcel.needsPackaging}
+        // Insurance opt-in: derived from saved value. Live preview hides the
+        // 3% row when parcel was saved without insurance — matches actual total.
+        insuranceEnabled={Number(parcel.insuranceCost) > 0}
         onUpdate={fetchParcel}
         readOnly={isEditLocked}
       />
@@ -453,35 +486,34 @@ export default function ParcelDetailPage() {
       {/* «Вікно доставки (4 години)» прибрано — за ТЗ це поле
           потрібне лише в Маршрутах, а не в тілі посилки. */}
 
-      {/* Рейс — показуємо лише дату фактичного рейсу + кур'єра. Редагування
-          під кнопкою олівця (щоб не захаращувати картку) */}
-      <Card>
-        <CardContent className="p-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-sm">
-              <span className="text-gray-500">Рейс:</span>{' '}
-              {parcel.trip ? (
-                <span className="font-medium">
-                  {new Date(parcel.trip.departureDate).toLocaleDateString('uk-UA')}
-                  <span className="text-gray-400 ml-1">({parcel.trip.country})</span>
-                </span>
-              ) : (
-                <span className="text-gray-400">Не прив&apos;язано</span>
-              )}
-              <span className="text-gray-300 mx-2">|</span>
-              <span className="text-gray-500">Кур&apos;єр:</span>{' '}
+      {/* Рейс — показуємо лише дату фактичного рейсу + кур'єра без Card-wrapper'а. */}
+      <div className="text-sm py-1 border-y">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <span className="text-gray-500">Рейс:</span>{' '}
+            {parcel.trip ? (
               <span className="font-medium">
-                {parcel.assignedCourier?.fullName || <span className="text-gray-400">Не призначено</span>}
+                {new Date(parcel.trip.departureDate).toLocaleDateString('uk-UA')}
+                <span className="text-gray-400 ml-1">({parcel.trip.country})</span>
               </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setEditTrip((v) => !v)}
-              className="text-blue-600 hover:underline text-xs inline-flex items-center gap-1"
-            >
-              <Pencil className="w-3 h-3" /> Редагувати
-            </button>
+            ) : (
+              <span className="text-gray-400">Не прив&apos;язано</span>
+            )}
+            <span className="text-gray-300 mx-2">|</span>
+            <span className="text-gray-500">Кур&apos;єр:</span>{' '}
+            <span className="font-medium">
+              {parcel.assignedCourier?.fullName || <span className="text-gray-400">Не призначено</span>}
+            </span>
           </div>
+          <button
+            type="button"
+            onClick={() => setEditTrip((v) => !v)}
+            className="text-blue-600 hover:text-blue-800 inline-flex items-center"
+            title="Редагувати рейс/кур'єра"
+          >
+            <Pencil className="w-3 h-3" />
+          </button>
+        </div>
           {editTrip && (
             <div className="mt-3 space-y-2 border-t pt-3">
               <TripSelector
@@ -512,8 +544,7 @@ export default function ParcelDetailPage() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Фото і нотатки — компактні кнопки-дії (замість повноцінних карток). */}
       <div className="flex gap-2 flex-wrap">

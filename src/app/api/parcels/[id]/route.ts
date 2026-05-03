@@ -10,6 +10,7 @@ import { parseBody, updateParcelSchema, parsePackagingPrices } from '@/lib/valid
 import { logger } from '@/lib/logger';
 import { writeAuditLog } from '@/lib/audit';
 import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transitions';
+import { isUuid } from '@/lib/validators/common';
 
 // Статуси «прийнято до перевезення» і далі — після них редагування ваги,
 // розмірів та деталей заборонено всім, окрім super_admin. Список дублює
@@ -29,6 +30,7 @@ export async function GET(
   if (!guard.ok) return guard.response;
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
   const parcel = await prisma.parcel.findFirst({
     where: { id, deletedAt: null },
@@ -113,6 +115,7 @@ export async function PATCH(
   const isSuperAdmin = guard.user.role === 'super_admin';
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
   const parsed = await parseBody(request, updateParcelSchema);
   if (parsed instanceof NextResponse) return parsed;
   const body = parsed;
@@ -258,12 +261,43 @@ export async function PATCH(
     }
   }
   if (body.tripId !== undefined) {
-    updateData.trip = body.tripId ? { connect: { id: body.tripId } } : { disconnect: true };
+    if (body.tripId) {
+      // Reject re-assignment to a finished/cancelled trip — same logic as on create.
+      const trip = await prisma.trip.findUnique({
+        where: { id: body.tripId },
+        select: { status: true },
+      });
+      if (!trip) {
+        return NextResponse.json({ error: 'Рейс не знайдено' }, { status: 404 });
+      }
+      if (trip.status === 'completed' || trip.status === 'cancelled') {
+        const label = trip.status === 'completed' ? 'завершено' : 'скасовано';
+        return NextResponse.json(
+          { error: `Рейс уже ${label} — посилку додавати не можна.` },
+          { status: 409 }
+        );
+      }
+      updateData.trip = { connect: { id: body.tripId } };
+    } else {
+      updateData.trip = { disconnect: true };
+    }
   }
   if (body.assignedCourierId !== undefined) {
-    updateData.assignedCourier = body.assignedCourierId
-      ? { connect: { id: body.assignedCourierId } }
-      : { disconnect: true };
+    if (body.assignedCourierId) {
+      const courier = await prisma.profile.findUnique({
+        where: { id: body.assignedCourierId },
+        select: { id: true, role: true },
+      });
+      if (!courier) {
+        return NextResponse.json({ error: 'Кур\'єра не знайдено' }, { status: 404 });
+      }
+      if (courier.role !== 'driver_courier' && courier.role !== 'super_admin' && courier.role !== 'admin') {
+        return NextResponse.json({ error: 'Користувач не може бути кур\'єром (роль не дозволяє)' }, { status: 400 });
+      }
+      updateData.assignedCourier = { connect: { id: body.assignedCourierId } };
+    } else {
+      updateData.assignedCourier = { disconnect: true };
+    }
   }
   if (body.isPaid !== undefined) {
     updateData.isPaid = body.isPaid;
@@ -438,6 +472,7 @@ export async function DELETE(
   const userId = guard.user.userId;
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
   const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null } });
   if (!parcel) {

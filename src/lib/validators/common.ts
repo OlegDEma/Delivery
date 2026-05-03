@@ -11,7 +11,7 @@ export const directionSchema = z.enum(['eu_to_ua', 'ua_to_eu']);
 
 export const weightTypeSchema = z.enum(['actual', 'volumetric', 'average']);
 
-export const deliveryMethodSchema = z.enum(['address', 'np_warehouse', 'np_poshtamat']);
+export const deliveryMethodSchema = z.enum(['address', 'np_warehouse', 'np_poshtamat', 'pickup_point']);
 
 export const payerSchema = z.enum(['sender', 'receiver']);
 
@@ -54,6 +54,22 @@ export const userRoleSchema = z.enum([
 
 /** UUID v4-ish (Prisma generates v4). Use z.string().uuid() for strict. */
 export const uuidSchema = z.string().uuid();
+
+/** Cheap regex for raw UUID checks in route handlers (no Zod parsing). */
+export const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+export function isUuid(s: string): boolean { return UUID_RE.test(s); }
+
+/**
+ * Safely parse request body as JSON. Returns parsed object on success,
+ * `null` if body is missing/invalid JSON. Caller should respond 400.
+ *
+ * Without this, bare `await request.json()` throws on missing body or
+ * wrong Content-Type and surfaces as opaque 500 to the client.
+ */
+export async function safeJson(request: Request): Promise<unknown | null> {
+  try { return await request.json(); }
+  catch { return null; }
+}
 
 /** Money amount — positive, max ~1M, 2 decimals. */
 export const moneySchema = z

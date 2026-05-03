@@ -27,7 +27,12 @@ export async function GET(request: NextRequest) {
   const fromYmd = searchParams.get('from') || defaultFrom;
   const toYmd = searchParams.get('to') || todayYmd;
 
-  const range = kyivDateRange(fromYmd, toYmd);
+  let range;
+  try {
+    range = kyivDateRange(fromYmd, toYmd);
+  } catch {
+    return NextResponse.json({ error: 'Невалідна дата (очікується YYYY-MM-DD)' }, { status: 400 });
+  }
   const createdAtFilter = range;
 
   // Basic counts & aggregates.

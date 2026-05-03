@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireStaff } from '@/lib/auth/guards';
+import { isUuid } from '@/lib/validators/common';
 
 /**
  * POST /api/parcels/[id]/accept-at-point
@@ -21,6 +22,7 @@ export async function POST(
   const userId = guard.user.userId;
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
   const body = await request.json().catch(() => ({}));
 
   const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null } });
@@ -98,6 +100,7 @@ export async function DELETE(
   const userId = guard.user.userId;
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
   const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null } });
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });

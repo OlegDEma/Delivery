@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { CollectionBlock } from '@/components/parcels/collection-block';
+import { PhoneInput } from '@/components/shared/phone-input';
 
 interface PlaceData {
   weight: string;
@@ -259,10 +260,13 @@ export default function NewOrderPage() {
             <CardTitle className="text-base text-green-600">Відправник (ваші дані)</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-2">
-            <div>
-              <Label>Телефон *</Label>
-              <Input value={senderPhone} onChange={(e) => setSenderPhone(e.target.value)} className="text-base" required />
-            </div>
+            <PhoneInput
+              label="Телефон"
+              required
+              value={senderPhone}
+              onChange={setSenderPhone}
+              defaultCountry={(senderCountry as 'UA' | 'NL' | 'AT' | 'DE') || 'UA'}
+            />
             <div className="grid grid-cols-2 gap-2">
               <div><Label>Прізвище *</Label><Input value={senderLastName} onChange={(e) => setSenderLastName(e.target.value)} required /></div>
               <div><Label>Ім&apos;я *</Label><Input value={senderFirstName} onChange={(e) => setSenderFirstName(e.target.value)} required /></div>
@@ -324,10 +328,13 @@ export default function NewOrderPage() {
             <CardTitle className="text-base text-blue-600">Отримувач</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-2">
-            <div>
-              <Label>Телефон *</Label>
-              <Input value={receiverPhone} onChange={(e) => setReceiverPhone(e.target.value)} className="text-base" required />
-            </div>
+            <PhoneInput
+              label="Телефон"
+              required
+              value={receiverPhone}
+              onChange={setReceiverPhone}
+              defaultCountry={(receiverCountry as 'UA' | 'NL' | 'AT' | 'DE') || 'UA'}
+            />
             <div className="grid grid-cols-2 gap-2">
               <div><Label>Прізвище *</Label><Input value={receiverLastName} onChange={(e) => setReceiverLastName(e.target.value)} required /></div>
               <div><Label>Ім&apos;я *</Label><Input value={receiverFirstName} onChange={(e) => setReceiverFirstName(e.target.value)} required /></div>

@@ -18,6 +18,8 @@ import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { cn } from '@/lib/utils';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { CollectionBlock, type CollectionState } from '@/components/parcels/collection-block';
+import { AddressEditor } from '@/components/parcels/address-editor';
+import { PhoneInput } from '@/components/shared/phone-input';
 
 interface SelectedClient {
   id: string;
@@ -105,21 +107,40 @@ export default function NewParcelPage() {
   const [receiver, setReceiver] = useState<SelectedClient | null>(null);
   const [receiverAddressId, setReceiverAddressId] = useState<string>('');
   const [recvDeliveryMethod, setRecvDeliveryMethod] = useState<string>('address');
+  const [recvPostalCode, setRecvPostalCode] = useState('');
   const [recvCity, setRecvCity] = useState('');
   const [recvStreet, setRecvStreet] = useState('');
   const [recvBuilding, setRecvBuilding] = useState('');
   const [recvNpWarehouse, setRecvNpWarehouse] = useState('');
   const [recvLandmark, setRecvLandmark] = useState('');
+  const [recvPickupPointText, setRecvPickupPointText] = useState('');
+  const [recvPhoneOverride, setRecvPhoneOverride] = useState('');
 
   // Sender
   const [sender, setSender] = useState<SelectedClient | null>(null);
   const [senderAddressId, setSenderAddressId] = useState<string>('');
+  const [senderDeliveryMethod, setSenderDeliveryMethod] = useState<string>('address');
+  const [senderPostalCode, setSenderPostalCode] = useState('');
   const [senderCity, setSenderCity] = useState('');
   const [senderStreet, setSenderStreet] = useState('');
   const [senderBuilding, setSenderBuilding] = useState('');
+  const [senderNpWarehouse, setSenderNpWarehouse] = useState('');
+  const [senderLandmark, setSenderLandmark] = useState('');
+  const [senderPickupPointText, setSenderPickupPointText] = useState('');
+  const [senderPhoneOverride, setSenderPhoneOverride] = useState('');
 
-  // Parcel details
+  // Parcel details — last selected direction is persisted per-browser (per ТЗ).
+  // Read localStorage AFTER mount to avoid SSR/CSR hydration mismatch
+  // (server has no window, so first render must use the static default).
   const [direction, setDirection] = useState<string>('eu_to_ua');
+  useEffect(() => {
+    const stored = window.localStorage.getItem('parcel:lastDirection');
+    if (stored && stored !== direction) setDirection(stored);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    window.localStorage.setItem('parcel:lastDirection', direction);
+  }, [direction]);
   const [shipmentType, setShipmentType] = useState<string>('parcels_cargo');
   const [description, setDescription] = useState('');
 
@@ -131,6 +152,13 @@ export default function NewParcelPage() {
     else if (description === 'Документи' || description === 'Шини та диски') setDescription('');
   }
   const [declaredValue, setDeclaredValue] = useState('');
+  const [insurance, setInsurance] = useState(false);
+
+  // Currency for declared value depends on sender's country (UA → грн, EU → €).
+  const senderCountry = sender?.country || sender?.addresses[0]?.country || null;
+  const declaredCurrency = senderCountry === 'UA' ? 'UAH' : 'EUR';
+  const declaredCurrencyLabel = senderCountry === 'UA' ? 'грн' : 'EUR';
+  const insuranceCost = insurance ? Number((Number(declaredValue) * 0.03).toFixed(2)) : 0;
 
   // General params mode
   const [useGeneralParams, setUseGeneralParams] = useState(false);
@@ -146,6 +174,10 @@ export default function NewParcelPage() {
   const [paymentMethod, setPaymentMethod] = useState<string>('cash');
   const [paymentInUkraine, setPaymentInUkraine] = useState(false);
   const [needsPackaging, setNeedsPackaging] = useState(false);
+  // Send invoice via SMS — per ТЗ: «на телефонний номер Платника за доставку
+  // відправляється повідомлення». Phone defaults to payer's stored phone.
+  const [sendInvoice, setSendInvoice] = useState(false);
+  const [invoicePhone, setInvoicePhone] = useState('');
 
   // Trip date
   const [tripDateMode, setTripDateMode] = useState<string>('trip'); // 'trip' | 'custom'
@@ -194,45 +226,57 @@ export default function NewParcelPage() {
     setPlaces(updated);
   }
 
-  // Auto-select first address and fill editable fields
+  // Auto-select last-used address (sorted by API by role+date) and fill editable fields
   function handleReceiverSelect(client: SelectedClient) {
     setReceiver(client);
-    const addr = client.addresses[0];
+    const addr = client.addresses[0] as (typeof client.addresses)[number] & { pickupPointText?: string | null } | undefined;
     if (addr) {
       setReceiverAddressId(addr.id);
       setRecvDeliveryMethod(addr.deliveryMethod || 'address');
+      setRecvPostalCode(addr.postalCode || '');
       setRecvCity(addr.city || '');
       setRecvStreet(addr.street || '');
       setRecvBuilding(addr.building || '');
       setRecvNpWarehouse(addr.npWarehouseNum || '');
       setRecvLandmark(addr.landmark || '');
+      setRecvPickupPointText(addr.pickupPointText || '');
     } else {
-      setRecvCity(''); setRecvStreet(''); setRecvBuilding(''); setRecvNpWarehouse(''); setRecvLandmark('');
+      setRecvPostalCode(''); setRecvCity(''); setRecvStreet(''); setRecvBuilding(''); setRecvNpWarehouse(''); setRecvLandmark(''); setRecvPickupPointText('');
     }
   }
 
   function handleSenderSelect(client: SelectedClient) {
     setSender(client);
-    const addr = client.addresses[0];
+    const addr = client.addresses[0] as (typeof client.addresses)[number] & { pickupPointText?: string | null } | undefined;
     if (addr) {
       setSenderAddressId(addr.id);
+      setSenderDeliveryMethod(addr.deliveryMethod || 'address');
+      setSenderPostalCode(addr.postalCode || '');
       setSenderCity(addr.city || '');
       setSenderStreet(addr.street || '');
       setSenderBuilding(addr.building || '');
+      setSenderNpWarehouse(addr.npWarehouseNum || '');
+      setSenderLandmark(addr.landmark || '');
+      setSenderPickupPointText(addr.pickupPointText || '');
     } else {
-      setSenderCity(''); setSenderStreet(''); setSenderBuilding('');
+      setSenderPostalCode(''); setSenderCity(''); setSenderStreet(''); setSenderBuilding(''); setSenderNpWarehouse(''); setSenderLandmark(''); setSenderPickupPointText('');
     }
   }
 
-  // Handle payment method / ukraine checkbox coupling
+  // Per ТЗ: Cashless is allowed in any country (UA or EU, both in UAH);
+  // only constraint is «Готівка неможлива у випадку оплати в Україні».
+  // So: Cashless does NOT force "Оплата в Україні" anymore;
+  // but ticking "Оплата в Україні" forces Cashless.
   function handlePaymentMethodChange(val: string) {
+    if (val === 'cash' && paymentInUkraine) {
+      // Cash impossible if payment is in UA — reject.
+      return;
+    }
     setPaymentMethod(val);
-    if (val === 'cashless') setPaymentInUkraine(true);
   }
   function handlePaymentInUkraineChange(checked: boolean) {
     setPaymentInUkraine(checked);
     if (checked) setPaymentMethod('cashless');
-    if (!checked) setPaymentMethod('cash');
   }
 
   // Totals
@@ -277,17 +321,49 @@ export default function NewParcelPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         receiverId: receiver.id,
+        receiverPhoneOverride: recvPhoneOverride || undefined,
+        senderPhoneOverride: senderPhoneOverride || undefined,
         receiverAddressId: receiverAddressId || undefined,
+        // Inline-edited fields — backend updates the linked address (or creates
+        // a new one if no addressId yet). Per ТЗ: «завжди зберігаємо і
+        // оновлюємо останній адрес».
+        receiverAddress: {
+          country: receiver.addresses[0]?.country || (direction === 'eu_to_ua' ? 'UA' : null),
+          deliveryMethod: recvDeliveryMethod,
+          postalCode: recvPostalCode || undefined,
+          city: recvCity || undefined,
+          street: recvStreet || undefined,
+          building: recvBuilding || undefined,
+          landmark: recvLandmark || undefined,
+          npWarehouseNum: recvDeliveryMethod === 'np_warehouse' ? (recvNpWarehouse || undefined) : undefined,
+          pickupPointText: recvDeliveryMethod === 'pickup_point' ? (recvPickupPointText || undefined) : undefined,
+        },
         senderId: sender.id,
         senderAddressId: senderAddressId || undefined,
+        senderAddress: {
+          country: sender.addresses[0]?.country || (direction === 'ua_to_eu' ? 'UA' : null),
+          deliveryMethod: senderDeliveryMethod,
+          postalCode: senderPostalCode || undefined,
+          city: senderCity || undefined,
+          street: senderStreet || undefined,
+          building: senderBuilding || undefined,
+          landmark: senderLandmark || undefined,
+          npWarehouseNum: senderDeliveryMethod === 'np_warehouse' ? (senderNpWarehouse || undefined) : undefined,
+          pickupPointText: senderDeliveryMethod === 'pickup_point' ? (senderPickupPointText || undefined) : undefined,
+        },
         direction,
         shipmentType,
         description: description || undefined,
         declaredValue: declaredValue ? Number(declaredValue) : undefined,
+        declaredValueCurrency: declaredCurrency,
+        insurance,
+        insuranceCost: insurance ? insuranceCost : 0,
         payer,
         paymentMethod,
         paymentInUkraine,
         needsPackaging,
+        sendInvoice,
+        invoicePhone: sendInvoice && invoicePhone ? invoicePhone : undefined,
         tripId: selectedTripId || undefined,
         // Collection (EU→UA only — server ignores otherwise)
         collectionMethod: direction === 'eu_to_ua' && collection.method ? collection.method : undefined,
@@ -361,25 +437,34 @@ export default function NewParcelPage() {
             <ClientSearch
               label="Пошук отримувача (телефон або прізвище)"
               onSelect={handleReceiverSelect}
-              onClear={() => { setReceiver(null); setReceiverAddressId(''); setRecvCity(''); setRecvStreet(''); setRecvBuilding(''); setRecvNpWarehouse(''); setRecvLandmark(''); }}
+              onClear={() => { setReceiver(null); setReceiverAddressId(''); setRecvPostalCode(''); setRecvCity(''); setRecvStreet(''); setRecvBuilding(''); setRecvNpWarehouse(''); setRecvLandmark(''); setRecvPickupPointText(''); setRecvDeliveryMethod('address'); }}
               selected={receiver}
+              direction={direction as 'eu_to_ua' | 'ua_to_eu'}
+              role="receiver"
+              onPhoneEdit={(p) => {
+                setRecvPhoneOverride(p);
+                if (receiver) setReceiver({ ...receiver, phone: p });
+              }}
             />
             {/* Editable address fields — auto-filled from last parcel, can be changed */}
             {receiver && (
               <div className="border-t pt-2 mt-2 space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs text-gray-500 font-medium">Адреса доставки</Label>
-                  {receiver.addresses.length > 1 && (
+                {receiver.addresses.length > 1 && (
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-gray-500 font-medium">Інша адреса з історії</Label>
                     <Select value={receiverAddressId} onValueChange={(v) => {
-                      const addr = receiver.addresses.find(a => a.id === (v ?? ''));
+                      const addr = receiver.addresses.find(a => a.id === (v ?? '')) as
+                        (typeof receiver.addresses)[number] & { pickupPointText?: string | null } | undefined;
                       if (addr) {
                         setReceiverAddressId(addr.id);
                         setRecvDeliveryMethod(addr.deliveryMethod || 'address');
+                        setRecvPostalCode(addr.postalCode || '');
                         setRecvCity(addr.city || '');
                         setRecvStreet(addr.street || '');
                         setRecvBuilding(addr.building || '');
                         setRecvNpWarehouse(addr.npWarehouseNum || '');
                         setRecvLandmark(addr.landmark || '');
+                        setRecvPickupPointText(addr.pickupPointText || '');
                       }
                     }}>
                       <SelectTrigger className="h-7 text-xs w-48">
@@ -393,45 +478,31 @@ export default function NewParcelPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                  )}
-                </div>
-                <div>
-                  <Label className="text-xs">Метод доставки</Label>
-                  <Select value={recvDeliveryMethod} onValueChange={(v) => setRecvDeliveryMethod(v ?? 'address')}>
-                    <SelectTrigger className="h-8"><SelectValue>{recvDeliveryMethod === 'np_warehouse' ? 'Відділення НП' : 'Адреса'}</SelectValue></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="address">Адреса</SelectItem>
-                      <SelectItem value="np_warehouse">Відділення НП</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-xs">Населений пункт</Label>
-                  <CapitalizeInput value={recvCity} onChange={setRecvCity} placeholder="Львів" />
-                </div>
-                {recvDeliveryMethod === 'np_warehouse' ? (
-                  <div>
-                    <Label className="text-xs">Номер складу/поштомату НП</Label>
-                    <Input value={recvNpWarehouse} onChange={(e) => setRecvNpWarehouse(e.target.value)} placeholder="1" />
                   </div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Вулиця</Label>
-                        <CapitalizeInput value={recvStreet} onChange={setRecvStreet} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Будинок</Label>
-                        <Input value={recvBuilding} onChange={(e) => setRecvBuilding(e.target.value)} />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs">Орієнтир</Label>
-                      <Input value={recvLandmark} onChange={(e) => setRecvLandmark(e.target.value)} placeholder="Біля магазину..." />
-                    </div>
-                  </>
                 )}
+                <AddressEditor
+                  cityPlaceholder="Львів"
+                  state={{
+                    deliveryMethod: recvDeliveryMethod,
+                    postalCode: recvPostalCode,
+                    city: recvCity,
+                    street: recvStreet,
+                    building: recvBuilding,
+                    landmark: recvLandmark,
+                    npWarehouseNum: recvNpWarehouse,
+                    pickupPointText: recvPickupPointText,
+                  }}
+                  onChange={(p) => {
+                    if (p.deliveryMethod !== undefined) setRecvDeliveryMethod(p.deliveryMethod);
+                    if (p.postalCode !== undefined) setRecvPostalCode(p.postalCode);
+                    if (p.city !== undefined) setRecvCity(p.city);
+                    if (p.street !== undefined) setRecvStreet(p.street);
+                    if (p.building !== undefined) setRecvBuilding(p.building);
+                    if (p.landmark !== undefined) setRecvLandmark(p.landmark);
+                    if (p.npWarehouseNum !== undefined) setRecvNpWarehouse(p.npWarehouseNum);
+                    if (p.pickupPointText !== undefined) setRecvPickupPointText(p.pickupPointText);
+                  }}
+                />
               </div>
             )}
           </CardContent>
@@ -448,26 +519,41 @@ export default function NewParcelPage() {
             <ClientSearch
               label="Пошук відправника (телефон або прізвище)"
               onSelect={handleSenderSelect}
-              onClear={() => { setSender(null); setSenderAddressId(''); setSenderCity(''); setSenderStreet(''); setSenderBuilding(''); }}
+              onClear={() => { setSender(null); setSenderAddressId(''); setSenderPostalCode(''); setSenderCity(''); setSenderStreet(''); setSenderBuilding(''); setSenderNpWarehouse(''); setSenderLandmark(''); setSenderPickupPointText(''); setSenderDeliveryMethod('address'); }}
               selected={sender}
+              direction={direction as 'eu_to_ua' | 'ua_to_eu'}
+              role="sender"
+              onPhoneEdit={(p) => {
+                setSenderPhoneOverride(p);
+                if (sender) setSender({ ...sender, phone: p });
+              }}
             />
             {sender && (
               <div className="border-t pt-2 mt-2 space-y-2">
-                <Label className="text-xs text-gray-500 font-medium">Адреса відправника</Label>
-                <div>
-                  <Label className="text-xs">Населений пункт</Label>
-                  <CapitalizeInput value={senderCity} onChange={setSenderCity} placeholder="Амстердам" />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-xs">Вулиця</Label>
-                    <CapitalizeInput value={senderStreet} onChange={setSenderStreet} />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Будинок</Label>
-                    <Input value={senderBuilding} onChange={(e) => setSenderBuilding(e.target.value)} />
-                  </div>
-                </div>
+                <AddressEditor
+                  title="Адреса відправника"
+                  cityPlaceholder="Амстердам"
+                  state={{
+                    deliveryMethod: senderDeliveryMethod,
+                    postalCode: senderPostalCode,
+                    city: senderCity,
+                    street: senderStreet,
+                    building: senderBuilding,
+                    landmark: senderLandmark,
+                    npWarehouseNum: senderNpWarehouse,
+                    pickupPointText: senderPickupPointText,
+                  }}
+                  onChange={(p) => {
+                    if (p.deliveryMethod !== undefined) setSenderDeliveryMethod(p.deliveryMethod);
+                    if (p.postalCode !== undefined) setSenderPostalCode(p.postalCode);
+                    if (p.city !== undefined) setSenderCity(p.city);
+                    if (p.street !== undefined) setSenderStreet(p.street);
+                    if (p.building !== undefined) setSenderBuilding(p.building);
+                    if (p.landmark !== undefined) setSenderLandmark(p.landmark);
+                    if (p.npWarehouseNum !== undefined) setSenderNpWarehouse(p.npWarehouseNum);
+                    if (p.pickupPointText !== undefined) setSenderPickupPointText(p.pickupPointText);
+                  }}
+                />
               </div>
             )}
           </CardContent>
@@ -501,7 +587,10 @@ export default function NewParcelPage() {
               </div>
             )}
             <div>
-              <Label>Оголошена вартість (EUR) <FieldHint text="Загальна вартість відправлення, оголошена Відправником. Використовується для розрахунку страхування." /></Label>
+              <Label>
+                Оголошена вартість ({declaredCurrencyLabel}){' '}
+                <FieldHint text="Загальна вартість відправлення, оголошена Відправником. Валюта залежить від країни Відправника: Україна → грн, ЄС → EUR. Використовується для розрахунку страхування." />
+              </Label>
               <Input
                 type="number"
                 step="0.01"
@@ -510,6 +599,34 @@ export default function NewParcelPage() {
                 onChange={(e) => setDeclaredValue(e.target.value)}
                 placeholder="0.00"
               />
+            </div>
+
+            {/* Insurance (per ТЗ) */}
+            <div className="rounded-lg border p-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="insurance-cb"
+                  checked={insurance}
+                  onCheckedChange={(c) => setInsurance(c === true)}
+                />
+                <Label htmlFor="insurance-cb" className="text-sm font-medium cursor-pointer">
+                  Страхування (3% від оголошеної вартості)
+                </Label>
+              </div>
+              <div className="mt-2 text-sm">
+                {insurance ? (
+                  Number(declaredValue) > 0 ? (
+                    <div className="text-green-700">
+                      Застраховано на <span className="font-semibold">{Number(declaredValue).toFixed(2)} {declaredCurrencyLabel}</span>.
+                      Страхування: <span className="font-semibold">{insuranceCost.toFixed(2)} {declaredCurrencyLabel}</span>
+                    </div>
+                  ) : (
+                    <div className="text-amber-700">Вкажіть оголошену вартість, щоб розрахувати страхування</div>
+                  )
+                ) : (
+                  <div className="text-gray-500">Не застраховано</div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -667,14 +784,37 @@ export default function NewParcelPage() {
                 checked={paymentInUkraine}
                 onCheckedChange={(c) => handlePaymentInUkraineChange(c === true)}
               />
-              <Label className="text-sm">Оплата в Україні <FieldHint text="Якщо оплата в Україні — автоматично встановлюється безготівковий розрахунок. І навпаки." /></Label>
+              <Label className="text-sm">
+                Оплата в Україні{' '}
+                <FieldHint text="Якщо оплата в Україні — примусово встановлюється Безготівка (готівка в Україні неможлива). Безготівка ж доступна як в Україні, так і в Європі — в обох випадках у гривнях." />
+              </Label>
             </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={needsPackaging}
-                onCheckedChange={(c) => setNeedsPackaging(c === true)}
-              />
-              <Label className="text-sm">Потребує пакування</Label>
+            {/* Per ТЗ: «Поле "Потребує пакування" забрати. Воно присутнє у
+                вкладці "Параметри відправлення".» */}
+
+            {/* Send invoice (per ТЗ) */}
+            <div className="rounded-lg border p-3 bg-gray-50 space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="send-invoice-cb"
+                  checked={sendInvoice}
+                  onCheckedChange={(c) => setSendInvoice(c === true)}
+                />
+                <Label htmlFor="send-invoice-cb" className="text-sm font-medium cursor-pointer">
+                  Відправити рахунок{' '}
+                  <FieldHint text="Надіслати SMS з реквізитами банку та сумою оплати на телефон Платника." />
+                </Label>
+              </div>
+              {sendInvoice && (
+                <div>
+                  <Label className="text-xs">Телефон Платника (за замовч. — телефон вибраного платника)</Label>
+                  <PhoneInput
+                    value={invoicePhone}
+                    onChange={setInvoicePhone}
+                    defaultCountry="UA"
+                  />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -758,6 +898,7 @@ export default function NewParcelPage() {
           declaredValue={Number(declaredValue) || 0}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
           isAddressDelivery={receiver?.addresses[0]?.deliveryMethod === 'address'}
+          insuranceEnabled={insurance}
         />
 
         {error && (

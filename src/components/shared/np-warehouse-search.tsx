@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -15,29 +14,31 @@ interface NPWarehouse {
 interface NPWarehouseSearchProps {
   cityRef: string;
   label?: string;
-  value: string;
   warehouseRef: string;
   onSelect: (warehouse: { ref: string; number: string; description: string }) => void;
 }
 
-export function NPWarehouseSearch({ cityRef, label, value, warehouseRef, onSelect }: NPWarehouseSearchProps) {
+export function NPWarehouseSearch({ cityRef, label, warehouseRef, onSelect }: NPWarehouseSearchProps) {
   const [warehouses, setWarehouses] = useState<NPWarehouse[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
 
+  // Fetch on cityRef/search change. Empty cityRef returns null below — no
+  // need to clear state synchronously inside the effect (lint complaint).
   useEffect(() => {
-    if (!cityRef) { setWarehouses([]); return; }
-
-    async function fetchWarehouses() {
+    if (!cityRef) return;
+    let cancelled = false;
+    (async () => {
       setLoading(true);
       const res = await fetch(`/api/nova-poshta/warehouses?cityRef=${cityRef}${search ? `&q=${search}` : ''}`);
+      if (cancelled) return;
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) setWarehouses(data);
       }
       setLoading(false);
-    }
-    fetchWarehouses();
+    })();
+    return () => { cancelled = true; };
   }, [cityRef, search]);
 
   if (!cityRef) return null;

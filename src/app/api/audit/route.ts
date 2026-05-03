@@ -28,7 +28,10 @@ export async function GET(request: NextRequest) {
   if (actorId) where.actorId = actorId;
   if (subjectType) where.subjectType = subjectType;
   if (subjectId) where.subjectId = subjectId;
-  if (dateFrom || dateTo) where.createdAt = kyivDateRange(dateFrom, dateTo);
+  if (dateFrom || dateTo) {
+    try { where.createdAt = kyivDateRange(dateFrom, dateTo); }
+    catch { return NextResponse.json({ error: 'Невалідна дата (очікується YYYY-MM-DD)' }, { status: 400 }); }
+  }
 
   const entries = await prisma.auditLog.findMany({
     where,

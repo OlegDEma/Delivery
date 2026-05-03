@@ -27,7 +27,7 @@ export async function GET() {
   ] = await Promise.all([
     prisma.parcel.count({ where: { deletedAt: null } }),
     prisma.parcel.count({ where: { deletedAt: null, createdAt: { gte: today } } }),
-    prisma.parcel.count({ where: { deletedAt: null, status: 'at_lviv_warehouse' } }),
+    prisma.parcel.count({ where: { deletedAt: null, status: { in: ['at_lviv_warehouse', 'at_eu_warehouse'] } } }),
     prisma.parcel.count({ where: { deletedAt: null, status: { in: ['in_transit_to_ua', 'in_transit_to_eu'] } } }),
     prisma.parcel.count({ where: { deletedAt: null, status: { in: ['delivered_ua', 'delivered_eu'] } } }),
     prisma.client.count({ where: { deletedAt: null } }),

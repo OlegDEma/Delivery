@@ -36,6 +36,7 @@ enum DeliveryMethod {
   address
   np_warehouse
   np_poshtamat
+  pickup_point
 }
 
 enum Direction {
@@ -224,6 +225,7 @@ model ClientAddress {
   landmark        String?
   npWarehouseNum  String?        @map("np_warehouse_num")
   npPoshtamatNum  String?        @map("np_poshtamat_num")
+  pickupPointText String?        @map("pickup_point_text")
   deliveryMethod  DeliveryMethod @default(address) @map("delivery_method")
   usageCount      Int            @default(0) @map("usage_count")
   isDefault       Boolean        @default(false) @map("is_default")

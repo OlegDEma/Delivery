@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { PhoneInput } from '@/components/shared/phone-input';
 import { WEEKDAYS, WEEKDAY_LABELS, formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 
 interface CollectionPoint {
@@ -229,23 +230,19 @@ export default function CollectionPointsPage() {
                   placeholder="Damstraat 12"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label>Поштовий код</Label>
-                  <Input
-                    value={form.postalCode}
-                    onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Телефон</Label>
-                  <Input
-                    value={form.contactPhone}
-                    onChange={(e) => setForm({ ...form, contactPhone: e.target.value })}
-                    placeholder="+31..."
-                  />
-                </div>
+              <div>
+                <Label>Поштовий код</Label>
+                <Input
+                  value={form.postalCode}
+                  onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
+                />
               </div>
+              <PhoneInput
+                label="Телефон"
+                value={form.contactPhone}
+                onChange={(v) => setForm({ ...form, contactPhone: v })}
+                defaultCountry={(form.country as CountryCode) || 'NL'}
+              />
 
               <div className="border-t pt-3">
                 <Label className="block mb-1">Дні прийому *</Label>

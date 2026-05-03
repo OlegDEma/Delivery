@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { LOGISTICS_ROLES } from '@/lib/constants/roles';
+import { isUuid } from '@/lib/validators/common';
 
 // GET /api/trips/[id] — staff only
 export async function GET(
@@ -12,6 +13,7 @@ export async function GET(
   if (!guard.ok) return guard.response;
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
   const trip = await prisma.trip.findUnique({
     where: { id },
@@ -48,7 +50,10 @@ export async function PATCH(
   const user = { id: guard.user.userId };
 
   const { id } = await params;
-  const body = await request.json();
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+  let body;
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = {};
@@ -115,6 +120,13 @@ export async function PATCH(
       }
     }
   }
+  // Validate courier IDs exist before assigning to avoid Prisma FK 500.
+  for (const field of ['assignedCourierId', 'secondCourierId'] as const) {
+    if (body[field] !== undefined && body[field]) {
+      const u = await prisma.profile.findUnique({ where: { id: body[field] }, select: { id: true } });
+      if (!u) return NextResponse.json({ error: 'Кур\'єра не знайдено' }, { status: 404 });
+    }
+  }
   if (body.assignedCourierId !== undefined) data.assignedCourierId = body.assignedCourierId || null;
   if (body.secondCourierId !== undefined) data.secondCourierId = body.secondCourierId || null;
   if (body.arrivalDate !== undefined) data.arrivalDate = body.arrivalDate ? new Date(body.arrivalDate) : null;
@@ -144,6 +156,44 @@ export async function PATCH(
     return NextResponse.json(trip);
   }
 
+  const exists = await prisma.trip.findUnique({ where: { id }, select: { id: true } });
+  if (!exists) return NextResponse.json({ error: 'Рейс не знайдено' }, { status: 404 });
+
   const updated = await prisma.trip.update({ where: { id }, data });
   return NextResponse.json(updated);
+}
+
+// DELETE /api/trips/[id] — only allowed if trip has no parcels and is not in_progress.
+// Soft-cancel via PATCH status=cancelled is preferred for trips with history.
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const guard = await requireRole(LOGISTICS_ROLES);
+  if (!guard.ok) return guard.response;
+
+  const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+
+  const trip = await prisma.trip.findUnique({
+    where: { id },
+    select: { status: true, _count: { select: { parcels: { where: { deletedAt: null } } } } },
+  });
+  if (!trip) return NextResponse.json({ error: 'Рейс не знайдено' }, { status: 404 });
+
+  if (trip._count.parcels > 0) {
+    return NextResponse.json(
+      { error: `Неможливо видалити: до рейсу прив'язано ${trip._count.parcels} посилок. Спочатку переприв'яжіть або скасуйте їх. Альтернативно — змініть статус на «Скасовано».` },
+      { status: 409 }
+    );
+  }
+  if (trip.status === 'in_progress' || trip.status === 'completed') {
+    return NextResponse.json(
+      { error: 'Неможливо видалити рейс що вже почався або завершився. Скасуйте через статус.' },
+      { status: 409 }
+    );
+  }
+
+  await prisma.trip.delete({ where: { id } });
+  return NextResponse.json({ success: true });
 }

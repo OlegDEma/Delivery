@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
   if (status) where.status = status as ParcelStatus;
   if (tripId) where.tripId = tripId;
   if (dateFrom || dateTo) {
-    where.createdAt = kyivDateRange(dateFrom, dateTo);
+    try { where.createdAt = kyivDateRange(dateFrom, dateTo); }
+    catch { return NextResponse.json({ error: 'Невалідна дата (очікується YYYY-MM-DD)' }, { status: 400 }); }
   }
 
   const parcels = await prisma.parcel.findMany({

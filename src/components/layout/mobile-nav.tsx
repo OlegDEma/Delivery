@@ -110,7 +110,7 @@ export function MobileNav() {
   }
 
   return (
-    <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-gray-200 bg-white sticky top-0 z-50">
+    <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-gray-200 bg-white sticky top-0 z-50 print:hidden">
       <Link href="/" className="flex items-center gap-2">
         <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white text-xs font-bold">
           D

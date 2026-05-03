@@ -38,10 +38,18 @@ export interface CreateParcelInput {
   shipmentType?: ShipmentType;
   description?: string | null;
   declaredValue?: number | null;
+  declaredValueCurrency?: 'EUR' | 'UAH';
+  /** When true, user explicitly opted in for insurance — overrides pricing config. */
+  insurance?: boolean;
+  /** User-provided insurance cost (3% of declared value). Used when `insurance` is true. */
+  insuranceCost?: number | null;
   payer?: Payer;
   paymentMethod?: PaymentMethod;
   paymentInUkraine?: boolean;
   needsPackaging?: boolean;
+  /** Send invoice on save (per ТЗ). Email goes to invoiceEmail. */
+  sendInvoice?: boolean;
+  invoiceEmail?: string | null;
   places: ParcelPlaceInput[];
   createdById: string;
   createdSource: CreatedSource;
@@ -92,6 +100,31 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
   totalWeight = roundWeight(totalWeight);
   totalVolWeight = roundWeight(totalVolWeight);
 
+  // Pre-validate FK references — Prisma errors otherwise leak as opaque 500.
+  // Sender/receiver are checked separately for clearer error messages.
+  const [senderCheck, receiverCheck] = await Promise.all([
+    prisma.client.findFirst({ where: { id: input.senderId, deletedAt: null }, select: { id: true } }),
+    prisma.client.findFirst({ where: { id: input.receiverId, deletedAt: null }, select: { id: true } }),
+  ]);
+  if (!senderCheck) throw new Error('SENDER_NOT_FOUND');
+  if (!receiverCheck) throw new Error('RECEIVER_NOT_FOUND');
+  if (input.senderAddressId) {
+    const a = await prisma.clientAddress.findUnique({ where: { id: input.senderAddressId }, select: { id: true, clientId: true } });
+    if (!a || a.clientId !== input.senderId) throw new Error('SENDER_ADDRESS_NOT_FOUND');
+  }
+  if (input.receiverAddressId) {
+    const a = await prisma.clientAddress.findUnique({ where: { id: input.receiverAddressId }, select: { id: true, clientId: true } });
+    if (!a || a.clientId !== input.receiverId) throw new Error('RECEIVER_ADDRESS_NOT_FOUND');
+  }
+  if (input.tripId) {
+    const t = await prisma.trip.findUnique({ where: { id: input.tripId }, select: { id: true } });
+    if (!t) throw new Error('TRIP_NOT_FOUND');
+  }
+  if (input.collectionPointId) {
+    const c = await prisma.collectionPoint.findUnique({ where: { id: input.collectionPointId }, select: { id: true } });
+    if (!c) throw new Error('COLLECTION_POINT_NOT_FOUND');
+  }
+
   // Fetch receiver city / pricing inputs outside tx — read-only lookups.
   const [receiver, senderData, receiverAddrForPricing] = await Promise.all([
     prisma.client.findUnique({
@@ -128,8 +161,13 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
   if (input.tripId) {
     const trip = await prisma.trip.findUnique({
       where: { id: input.tripId },
-      select: { country: true },
+      select: { country: true, status: true },
     });
+    // Reject parcel attachment to a finished/cancelled trip — illogical to add
+    // new shipments to a trip that's already arrived or was cancelled.
+    if (trip && (trip.status === 'completed' || trip.status === 'cancelled')) {
+      throw new Error(`TRIP_NOT_ACCEPTING:${trip.status}`);
+    }
     if (trip && trip.country !== 'UA') pricingCountry = trip.country;
   }
   if (!pricingCountry && input.direction === 'eu_to_ua' && input.collectionPointId) {
@@ -179,6 +217,17 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
       insuranceCost = breakdown.insuranceCost;
       addressDeliveryCost = breakdown.addressDeliveryCost;
       totalCost = breakdown.totalCost;
+      // Per ТЗ: insurance is now opt-in via checkbox. If user did NOT tick it,
+      // strip insurance from the total even if pricing config would auto-add it.
+      if (input.insurance === false) {
+        totalCost = Math.max(0, totalCost - insuranceCost);
+        insuranceCost = 0;
+      } else if (input.insurance === true && input.insuranceCost != null) {
+        // User-provided 3% — override config-driven value.
+        const userInsurance = Number(input.insuranceCost);
+        totalCost = totalCost - insuranceCost + userInsurance;
+        insuranceCost = userInsurance;
+      }
     } else {
       logger.warn('parcel.create.pricing_not_found', {
         country: pricingCountry, direction: input.direction,
@@ -228,6 +277,7 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
           shipmentType: input.shipmentType || 'parcels_cargo',
           description: input.description || null,
           declaredValue: input.declaredValue ? Number(input.declaredValue) : null,
+          declaredValueCurrency: input.declaredValueCurrency || 'EUR',
           totalWeight,
           totalVolumetricWeight: totalVolWeight,
           totalPlacesCount: totalPlaces,

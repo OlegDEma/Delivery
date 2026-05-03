@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PhoneInput } from '@/components/shared/phone-input';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -80,10 +81,13 @@ export default function RegisterPage() {
               <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
             </div>
           </div>
-          <div>
-            <Label>Телефон *</Label>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+380..." className="text-base" required />
-          </div>
+          <PhoneInput
+            label="Телефон"
+            required
+            value={phone}
+            onChange={setPhone}
+            defaultCountry="UA"
+          />
           {error && <p className="text-sm text-red-600">{error}</p>}
           {success && <p className="text-sm text-green-600">Реєстрація успішна!</p>}
           <Button type="submit" className="w-full" disabled={loading}>

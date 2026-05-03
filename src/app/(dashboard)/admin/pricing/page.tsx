@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { VOLUMETRIC_DIVISOR } from '@/lib/utils/volumetric';
+import { FieldHint } from '@/components/shared/field-hint';
 
 interface PricingConfig {
   id: string;
@@ -64,6 +66,32 @@ export default function PricingPage() {
     <div>
       <h1 className="text-2xl font-bold mb-4">Тарифи</h1>
 
+      {/* Правила розрахункової ваги (per ТЗ — окрема секція) */}
+      <Card className="mb-4 border-blue-200 bg-blue-50/30">
+        <CardHeader className="py-3 px-4">
+          <CardTitle className="text-base text-blue-900">Правила розрахункової ваги</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-4 pt-0 text-sm text-gray-700 space-y-2">
+          <p>
+            <span className="font-semibold">Об&apos;ємна вага</span>{' '}
+            = (Довжина × Ширина × Висота) ÷ <span className="font-mono">{VOLUMETRIC_DIVISOR}</span>{' '}
+            (у см → кг). Або: об&apos;єм (м³) × 250.
+          </p>
+          <p>
+            <span className="font-semibold">Розрахункова вага</span> — обирається типом ваги нижче для кожної країни:
+          </p>
+          <ul className="list-disc pl-5 space-y-0.5 text-gray-600">
+            <li><span className="font-medium">Фактична (max)</span> — береться більша з фактичної та об&apos;ємної (рекомендовано).</li>
+            <li><span className="font-medium">Об&apos;ємна</span> — завжди об&apos;ємна, незалежно від фактичної.</li>
+            <li><span className="font-medium">Середня</span> — (фактична + об&apos;ємна) ÷ 2.</li>
+          </ul>
+          <p className="text-xs text-amber-700 pt-1">
+            Дільник 4000 та коефіцієнт 250 — глобальні константи (`src/lib/utils/volumetric.ts`).
+            Зміна потребує деплою. Тип ваги (нижче) — налаштовується вільно для кожної країни/напрямку.
+          </p>
+        </CardContent>
+      </Card>
+
       <div className="space-y-4">
         {configs.map(config => (
           <Card key={config.id}>
@@ -97,7 +125,10 @@ export default function PricingPage() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs">Тип ваги</Label>
+                  <Label className="text-xs">
+                    Тип розрахункової ваги{' '}
+                    <FieldHint text="Як рахувати розрахункову вагу при оплаті: брати більшу (max), завжди об'ємну, чи середнє між ними." />
+                  </Label>
                   <Select
                     value={config.weightType}
                     onValueChange={(v) => updateConfig(config.id, 'weightType', v ?? 'actual')}

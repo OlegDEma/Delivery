@@ -37,11 +37,25 @@ export async function POST(request: NextRequest) {
   if (!guard.ok) return guard.response;
   const userId = guard.user.userId;
 
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
   const { direction, country, departureDate, arrivalDate, assignedCourierId, secondCourierId, notes, passengerCapacity } = body;
 
   if (!direction || !country || !departureDate) {
     return NextResponse.json({ error: 'Напрямок, країна та дата обовʼязкові' }, { status: 400 });
+  }
+  if (!['eu_to_ua', 'ua_to_eu'].includes(direction)) {
+    return NextResponse.json({ error: 'Невалідний напрямок (eu_to_ua/ua_to_eu)' }, { status: 400 });
+  }
+  if (!['UA', 'NL', 'AT', 'DE'].includes(country)) {
+    return NextResponse.json({ error: 'Невалідна країна (UA/NL/AT/DE)' }, { status: 400 });
+  }
+  if (Number.isNaN(new Date(departureDate).getTime())) {
+    return NextResponse.json({ error: 'Невалідна дата відправлення' }, { status: 400 });
+  }
+  if (arrivalDate && Number.isNaN(new Date(arrivalDate).getTime())) {
+    return NextResponse.json({ error: 'Невалідна дата прибуття' }, { status: 400 });
   }
 
   const trip = await prisma.trip.create({

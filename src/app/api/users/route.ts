@@ -53,7 +53,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
   const { email, password, fullName, phone, role } = body;
 
   if (!email || !password || !fullName || !role) {
@@ -61,6 +63,15 @@ export async function POST(request: NextRequest) {
       { error: 'Email, пароль, ПІБ та роль обов\'язкові' },
       { status: 400 }
     );
+  }
+
+  const VALID_ROLES = ['super_admin', 'admin', 'cashier', 'warehouse_worker', 'driver_courier', 'client'];
+  if (!VALID_ROLES.includes(role)) {
+    return NextResponse.json({ error: 'Невалідна роль' }, { status: 400 });
+  }
+
+  if (typeof password !== 'string' || password.length < 6) {
+    return NextResponse.json({ error: 'Пароль має містити мінімум 6 символів' }, { status: 400 });
   }
 
   // Create user in Supabase Auth using service role

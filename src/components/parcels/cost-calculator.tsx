@@ -12,6 +12,13 @@ interface CostCalculatorProps {
   declaredValue: number;
   needsPackaging: boolean;
   isAddressDelivery: boolean;
+  /**
+   * Whether insurance is opted in (per ТЗ — checkbox on /parcels/new).
+   * When false, the breakdown hides insurance row + total excludes it.
+   * Defaults to undefined → respects pricing config (legacy behaviour for
+   * components that don't pass this yet).
+   */
+  insuranceEnabled?: boolean;
 }
 
 interface CostBreakdown {
@@ -111,6 +118,13 @@ export function CostCalculator(props: CostCalculatorProps) {
 
   if (!cost) return null;
 
+  // Per ТЗ insurance is opt-in via checkbox. When parent passes
+  // insuranceEnabled=false (existing parcel created without opt-in), strip
+  // the row + subtract from total so live preview matches saved data.
+  const includeInsurance = props.insuranceEnabled !== false;
+  const displayInsurance = includeInsurance ? cost.insuranceCost : 0;
+  const displayTotal = includeInsurance ? cost.totalCost : Math.max(0, cost.totalCost - cost.insuranceCost);
+
   return (
     <div className="bg-blue-50 rounded-lg p-3 text-sm space-y-1">
       <div className="font-medium text-blue-800 mb-1">Розрахунок вартості</div>
@@ -122,10 +136,10 @@ export function CostCalculator(props: CostCalculatorProps) {
         <span className="text-gray-600">Доставка ({cost.pricePerKg} EUR/кг):</span>
         <span>{formatCurrency(cost.deliveryCost, 'EUR')}</span>
       </div>
-      {cost.insuranceCost > 0 && (
+      {displayInsurance > 0 && (
         <div className="flex justify-between">
           <span className="text-gray-600">Страхування:</span>
-          <span>{formatCurrency(cost.insuranceCost, 'EUR')}</span>
+          <span>{formatCurrency(displayInsurance, 'EUR')}</span>
         </div>
       )}
       {cost.packagingCost > 0 && (
@@ -142,7 +156,7 @@ export function CostCalculator(props: CostCalculatorProps) {
       )}
       <div className="flex justify-between font-bold border-t border-blue-200 pt-1 mt-1">
         <span>Всього:</span>
-        <span className="text-blue-800">{formatCurrency(cost.totalCost, 'EUR')}</span>
+        <span className="text-blue-800">{formatCurrency(displayTotal, 'EUR')}</span>
       </div>
     </div>
   );

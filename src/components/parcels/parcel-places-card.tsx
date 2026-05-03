@@ -34,6 +34,8 @@ interface ParcelPlacesCardProps {
   receiverDeliveryMethod?: string | null;
   declaredValue?: number | null;
   needsPackaging?: boolean;
+  /** Whether the parcel has insurance opted in (saved value > 0). */
+  insuranceEnabled?: boolean;
   /** Блокує редагування ваги/розмірів — після accepted_for_transport_* */
   readOnly?: boolean;
   onUpdate: () => void;
@@ -69,6 +71,7 @@ export function ParcelPlacesCard({
   receiverDeliveryMethod,
   declaredValue,
   needsPackaging,
+  insuranceEnabled,
   readOnly = false,
   onUpdate,
 }: ParcelPlacesCardProps) {
@@ -247,6 +250,7 @@ export function ParcelPlacesCard({
                 declaredValue={Number(declaredValue) || 0}
                 needsPackaging={!!needsPackaging}
                 isAddressDelivery={receiverDeliveryMethod === 'address'}
+                insuranceEnabled={insuranceEnabled}
               />
             )}
           </div>
@@ -293,6 +297,7 @@ export function ParcelPlacesCard({
                   declaredValue={Number(declaredValue) || 0}
                   needsPackaging={!!needsPackaging}
                   isAddressDelivery={receiverDeliveryMethod === 'address'}
+                  insuranceEnabled={insuranceEnabled}
                 />
               </div>
             )}

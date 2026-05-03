@@ -30,7 +30,8 @@ interface ParcelListItem {
   createdAt: string;
   sender: { phone: string; firstName: string; lastName: string };
   receiver: { phone: string; firstName: string; lastName: string };
-  receiverAddress: { city: string; street: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
+  receiverAddress: { city: string; street: string | null; building: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
+  senderAddress: { city: string; street: string | null; building: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
   trip?: { id: string; country: string | null } | null;
 }
 
@@ -381,28 +382,41 @@ function ParcelsContent() {
                   <Link href={`/parcels/${p.id}`} className="block flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
+                        {/* flex-wrap so long status badges don't overflow on mobile */}
+                        <div className="flex flex-wrap items-center gap-2 mb-0.5">
                           <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
-                          <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
+                          <Badge className={`text-xs whitespace-normal text-left h-auto py-0.5 ${STATUS_COLORS[p.status]}`}>
                             {statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction })}
                           </Badge>
                           {p.isPaid && <Badge className="text-xs bg-green-100 text-green-800">Оплачено</Badge>}
                         </div>
+                        {/* Receiver block first per ТЗ: Кому/Куди → Від кого/Звідки */}
                         <div className="text-sm">
-                          <span className="text-gray-500">Від:</span>{' '}
-                          <span>{p.sender.lastName} {p.sender.firstName}</span>
-                          <span className="text-gray-400 ml-1">{p.sender.phone}</span>
-                        </div>
-                        <div className="text-sm">
-                          <span className="text-gray-500">Кому:</span>{' '}
+                          <span className="text-gray-500 font-medium">Кому:</span>{' '}
                           <span>{p.receiver.lastName} {p.receiver.firstName}</span>
                           <span className="text-gray-400 ml-1">{p.receiver.phone}</span>
                         </div>
                         {p.receiverAddress && (
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-gray-500">
+                            <span className="text-gray-400">Куди:</span>{' '}
                             {p.receiverAddress.city}
                             {p.receiverAddress.street ? `, ${p.receiverAddress.street}` : ''}
+                            {p.receiverAddress.building ? ` ${p.receiverAddress.building}` : ''}
                             {p.receiverAddress.npWarehouseNum ? ` (НП №${p.receiverAddress.npWarehouseNum})` : ''}
+                          </div>
+                        )}
+                        <div className="text-sm mt-1">
+                          <span className="text-gray-500 font-medium">Від кого:</span>{' '}
+                          <span>{p.sender.lastName} {p.sender.firstName}</span>
+                          <span className="text-gray-400 ml-1">{p.sender.phone}</span>
+                        </div>
+                        {p.senderAddress && (
+                          <div className="text-xs text-gray-500">
+                            <span className="text-gray-400">Звідки:</span>{' '}
+                            {p.senderAddress.city}
+                            {p.senderAddress.street ? `, ${p.senderAddress.street}` : ''}
+                            {p.senderAddress.building ? ` ${p.senderAddress.building}` : ''}
+                            {p.senderAddress.npWarehouseNum ? ` (НП №${p.senderAddress.npWarehouseNum})` : ''}
                           </div>
                         )}
                       </div>

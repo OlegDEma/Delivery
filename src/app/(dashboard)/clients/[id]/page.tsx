@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
+import { PhoneInput } from '@/components/shared/phone-input';
+import { AddressEditor, type AddressEditorState } from '@/components/parcels/address-editor';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatCurrency, formatDateTime } from '@/lib/utils/format';
@@ -101,17 +103,17 @@ export default function ClientDetailPage() {
   const [middleName, setMiddleName] = useState('');
   const [notes, setNotes] = useState('');
 
-  // New address form
+  // New address form (uses AddressEditor — 3 delivery methods + index + pickup point)
   const [addrCountry, setAddrCountry] = useState<string>('UA');
-  const [addrCity, setAddrCity] = useState('');
-  const [addrStreet, setAddrStreet] = useState('');
-  const [addrBuilding, setAddrBuilding] = useState('');
-  const [addrLandmark, setAddrLandmark] = useState('');
-  const [addrNpWarehouse, setAddrNpWarehouse] = useState('');
+  const emptyAddrState = (): AddressEditorState => ({
+    deliveryMethod: 'address', postalCode: '', city: '', street: '', building: '',
+    landmark: '', npWarehouseNum: '', pickupPointText: '',
+  });
+  const [newAddr, setNewAddr] = useState<AddressEditorState>(emptyAddrState());
 
-  // Edit address
+  // Edit address (inline, uses same AddressEditor)
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
-  const [editAddr, setEditAddr] = useState({ city: '', street: '', building: '', npWarehouseNum: '', landmark: '' });
+  const [editAddr, setEditAddr] = useState<AddressEditorState>(emptyAddrState());
 
   async function fetchClient() {
     const res = await fetch(`/api/clients/${id}`);
@@ -150,21 +152,19 @@ export default function ClientDetailPage() {
         action: 'addAddress',
         address: {
           country: addrCountry,
-          city: addrCity,
-          street: addrStreet || undefined,
-          building: addrBuilding || undefined,
-          landmark: addrLandmark || undefined,
-          npWarehouseNum: addrNpWarehouse || undefined,
-          deliveryMethod: addrNpWarehouse ? 'np_warehouse' : 'address',
+          city: newAddr.city,
+          deliveryMethod: newAddr.deliveryMethod || 'address',
+          postalCode: newAddr.postalCode || undefined,
+          street: newAddr.street || undefined,
+          building: newAddr.building || undefined,
+          landmark: newAddr.landmark || undefined,
+          npWarehouseNum: newAddr.npWarehouseNum || undefined,
+          pickupPointText: newAddr.pickupPointText || undefined,
         },
       }),
     });
     setAddressDialogOpen(false);
-    setAddrCity('');
-    setAddrStreet('');
-    setAddrBuilding('');
-    setAddrLandmark('');
-    setAddrNpWarehouse('');
+    setNewAddr(emptyAddrState());
     fetchClient();
   }
 
@@ -285,10 +285,12 @@ export default function ClientDetailPage() {
                 <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
               </div>
             </div>
-            <div>
-              <Label className="text-xs">Телефон</Label>
-              <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="text-base" />
-            </div>
+            <PhoneInput
+              label="Телефон"
+              value={phone}
+              onChange={setPhone}
+              defaultCountry={(client.country as CountryCode) || 'UA'}
+            />
             <div>
               <Label className="text-xs">Нотатки</Label>
               <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
@@ -369,31 +371,13 @@ export default function ClientDetailPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label>Місто *</Label>
-                  <Input value={addrCity} onChange={(e) => setAddrCity(e.target.value)} required />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label>Вулиця</Label>
-                    <Input value={addrStreet} onChange={(e) => setAddrStreet(e.target.value)} />
-                  </div>
-                  <div>
-                    <Label>Будинок</Label>
-                    <Input value={addrBuilding} onChange={(e) => setAddrBuilding(e.target.value)} />
-                  </div>
-                </div>
-                <div>
-                  <Label>Орієнтир</Label>
-                  <Input value={addrLandmark} onChange={(e) => setAddrLandmark(e.target.value)} />
-                </div>
-                {addrCountry === 'UA' && (
-                  <div>
-                    <Label>Склад НП (номер)</Label>
-                    <Input value={addrNpWarehouse} onChange={(e) => setAddrNpWarehouse(e.target.value)} placeholder="1" />
-                  </div>
-                )}
-                <Button type="submit" className="w-full">Додати</Button>
+                <AddressEditor
+                  state={newAddr}
+                  onChange={(p) => setNewAddr({ ...newAddr, ...p })}
+                />
+                <Button type="submit" className="w-full" disabled={!newAddr.city}>
+                  Додати
+                </Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -403,38 +387,31 @@ export default function ClientDetailPage() {
             {client.addresses.map(a => (
               <div key={a.id} className="px-4 py-2">
                 {editingAddressId === a.id ? (
-                  /* Inline edit form */
+                  /* Inline edit form — same AddressEditor used everywhere */
                   <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Місто</Label>
-                        <Input value={editAddr.city} onChange={(e) => setEditAddr({...editAddr, city: e.target.value})} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Вулиця</Label>
-                        <Input value={editAddr.street} onChange={(e) => setEditAddr({...editAddr, street: e.target.value})} />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <Label className="text-xs">Будинок</Label>
-                        <Input value={editAddr.building} onChange={(e) => setEditAddr({...editAddr, building: e.target.value})} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Склад НП</Label>
-                        <Input value={editAddr.npWarehouseNum} onChange={(e) => setEditAddr({...editAddr, npWarehouseNum: e.target.value})} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Орієнтир</Label>
-                        <Input value={editAddr.landmark} onChange={(e) => setEditAddr({...editAddr, landmark: e.target.value})} />
-                      </div>
-                    </div>
+                    <AddressEditor
+                      state={editAddr}
+                      onChange={(p) => setEditAddr({ ...editAddr, ...p })}
+                    />
                     <div className="flex gap-2">
                       <Button size="sm" onClick={async () => {
                         await fetch(`/api/clients/${id}`, {
                           method: 'PATCH',
                           headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ action: 'updateAddress', addressId: a.id, address: editAddr }),
+                          body: JSON.stringify({
+                            action: 'updateAddress',
+                            addressId: a.id,
+                            address: {
+                              deliveryMethod: editAddr.deliveryMethod,
+                              postalCode: editAddr.postalCode || null,
+                              city: editAddr.city,
+                              street: editAddr.street || null,
+                              building: editAddr.building || null,
+                              landmark: editAddr.landmark || null,
+                              npWarehouseNum: editAddr.npWarehouseNum || null,
+                              pickupPointText: editAddr.pickupPointText || null,
+                            },
+                          }),
                         });
                         setEditingAddressId(null);
                         fetchClient();
@@ -467,11 +444,14 @@ export default function ClientDetailPage() {
                         onClick={() => {
                           setEditingAddressId(a.id);
                           setEditAddr({
+                            deliveryMethod: a.deliveryMethod || 'address',
+                            postalCode: a.postalCode || '',
                             city: a.city || '',
                             street: a.street || '',
                             building: a.building || '',
                             npWarehouseNum: a.npWarehouseNum || '',
                             landmark: a.landmark || '',
+                            pickupPointText: (a as Address & { pickupPointText?: string | null }).pickupPointText || '',
                           });
                         }}
                       >

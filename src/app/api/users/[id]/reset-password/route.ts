@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { isUuid } from '@/lib/validators/common';
 
 // POST /api/users/[id]/reset-password — super_admin only, returns new password
 export async function POST(
@@ -17,6 +18,7 @@ export async function POST(
   }
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
   // Generate random 12-char password (alphanumeric + safe symbols)
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';

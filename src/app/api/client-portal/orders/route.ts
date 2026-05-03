@@ -64,6 +64,12 @@ export async function POST(request: NextRequest) {
   if (parsed instanceof NextResponse) return parsed;
   const body = parsed;
 
+  // Per ТЗ: client must explicitly pick direction («Виберіть напрямок» — без
+  // дефолту). Reject if missing instead of silently defaulting.
+  if (!body.direction) {
+    return NextResponse.json({ error: 'Виберіть напрямок' }, { status: 400 });
+  }
+
   // SECURITY: Sender must always be the authenticated client themselves.
   // Ignore any senderPhone in the body to prevent spoofing.
   let sender = await prisma.client.findUnique({
@@ -185,6 +191,21 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : '';
+    if (msg.startsWith('TRIP_NOT_ACCEPTING:')) {
+      const tripStatus = msg.split(':')[1];
+      const label = tripStatus === 'completed' ? 'завершено' : 'скасовано';
+      return NextResponse.json({ error: `Рейс уже ${label} — нові посилки додавати не можна.` }, { status: 409 });
+    }
+    const fkErrors: Record<string, string> = {
+      SENDER_NOT_FOUND: 'Відправника не знайдено',
+      RECEIVER_NOT_FOUND: 'Отримувача не знайдено',
+      SENDER_ADDRESS_NOT_FOUND: 'Адресу відправника не знайдено',
+      RECEIVER_ADDRESS_NOT_FOUND: 'Адресу отримувача не знайдено',
+      TRIP_NOT_FOUND: 'Рейс не знайдено',
+      COLLECTION_POINT_NOT_FOUND: 'Пункт збору не знайдено',
+    };
+    if (fkErrors[msg]) return NextResponse.json({ error: fkErrors[msg] }, { status: 404 });
     logger.error('client_portal.order.create_failed', err, { userId: user.id });
     return NextResponse.json(
       { error: 'Не вдалося створити замовлення. Спробуйте ще раз.' },

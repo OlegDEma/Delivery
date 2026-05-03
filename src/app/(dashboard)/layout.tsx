@@ -11,8 +11,8 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
       <MobileNav />
-      <main className="md:ml-64">
-        <div className="p-4 md:p-6 max-w-7xl">
+      <main className="md:ml-64 print:ml-0">
+        <div className="p-4 md:p-6 max-w-7xl print:p-0 print:max-w-none">
           {children}
         </div>
       </main>

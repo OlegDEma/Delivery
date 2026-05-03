@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { isUuid } from '@/lib/validators/common';
 
 // POST /api/parcels/[id]/photos — upload photo
 export async function POST(
@@ -12,14 +13,29 @@ export async function POST(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
   const formData = await request.formData();
   const file = formData.get('file') as File;
   if (!file) return NextResponse.json({ error: 'Файл не знайдено' }, { status: 400 });
 
+  // Validate MIME — photos only. Without this anyone could dump arbitrary
+  // files into our public storage bucket.
+  const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
+  if (!ALLOWED_MIME.has(file.type)) {
+    return NextResponse.json({ error: 'Дозволені тільки зображення (JPEG/PNG/WebP/HEIC)' }, { status: 400 });
+  }
+  // 15 MB cap — modern phone photos run 5–10 MB, headroom for HEIC.
+  const MAX_SIZE = 15 * 1024 * 1024;
+  if (file.size > MAX_SIZE) {
+    return NextResponse.json({ error: `Файл завеликий (макс ${MAX_SIZE / 1024 / 1024} MB)` }, { status: 400 });
+  }
+
   // Upload to Supabase Storage
   const serviceClient = await createServiceClient();
-  const fileName = `parcels/${id}/${Date.now()}-${file.name}`;
+  // Sanitize filename — strip path separators + non-ascii, keep extension.
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80);
+  const fileName = `parcels/${id}/${Date.now()}-${safeName}`;
 
   const { error: uploadError } = await serviceClient.storage
     .from('photos')

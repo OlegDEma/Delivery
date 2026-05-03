@@ -4,6 +4,7 @@ import type { PaymentMethod, CashPaymentType } from '@/generated/prisma/enums';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { FINANCE_ROLES } from '@/lib/constants/roles';
 import { parseBody, acceptPaymentSchema } from '@/lib/validators';
+import { isUuid } from '@/lib/validators/common';
 import { logger } from '@/lib/logger';
 
 // Payments within this tolerance (0.5 EUR / UAH) of totalCost are accepted
@@ -21,6 +22,7 @@ export async function POST(
   const userId = guard.user.userId;
 
   const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
   const raw = await request.clone().json().catch(() => ({}));
   const allowDeviation = !!raw?.allowDeviation;
@@ -32,6 +34,14 @@ export async function POST(
   const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null } });
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
+  }
+
+  // Reject duplicate payment — caller should DELETE existing one first.
+  if (parcel.isPaid) {
+    return NextResponse.json(
+      { error: 'Посилка вже оплачена. Скасуйте попередню оплату, щоб прийняти нову.' },
+      { status: 409 }
+    );
   }
 
   // Compare payment amount against expected totalCost (when known). We only
@@ -100,6 +110,15 @@ export async function DELETE(
   const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null } });
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
+  }
+
+  // Per ТЗ: «Доставлено» — фінальний статус. Скасування оплати після доставки
+  // створює неконсистентний стан (delivered + не оплачено). Блокуємо.
+  if (parcel.status === 'delivered_ua' || parcel.status === 'delivered_eu') {
+    return NextResponse.json(
+      { error: 'Не можна скасувати оплату на доставленій посилці.' },
+      { status: 409 }
+    );
   }
 
   await prisma.$transaction([

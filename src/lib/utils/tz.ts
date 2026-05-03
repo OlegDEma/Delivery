@@ -45,8 +45,12 @@ export function kyivYmd(date: Date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
+/** "YYYY-MM-DD" sanity check — bare regex, callers should validate before passing. */
+const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 /** UTC Date corresponding to 00:00:00 local-Kyiv for the given "YYYY-MM-DD". */
 export function startOfKyivDay(ymd: string): Date {
+  if (!YMD_RE.test(ymd)) throw new Error(`Invalid YYYY-MM-DD: ${ymd}`);
   // Build a probe in the middle of the day to pick the right offset (handles DST boundary days).
   const probe = new Date(`${ymd}T12:00:00Z`);
   const offset = formatOffset(kyivOffsetHours(probe));
@@ -55,6 +59,7 @@ export function startOfKyivDay(ymd: string): Date {
 
 /** UTC Date corresponding to 23:59:59.999 local-Kyiv for the given "YYYY-MM-DD". */
 export function endOfKyivDay(ymd: string): Date {
+  if (!YMD_RE.test(ymd)) throw new Error(`Invalid YYYY-MM-DD: ${ymd}`);
   const probe = new Date(`${ymd}T12:00:00Z`);
   const offset = formatOffset(kyivOffsetHours(probe));
   return new Date(`${ymd}T23:59:59.999${offset}`);

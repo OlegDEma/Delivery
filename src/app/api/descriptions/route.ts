@@ -27,14 +27,21 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const body = await request.json();
-  const { text } = body;
-  if (!text?.trim()) return NextResponse.json({ error: 'Text required' }, { status: 400 });
+  let body;
+  try { body = await request.json(); }
+  catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
+  const text = String(body?.text ?? '').trim();
+  if (!text) return NextResponse.json({ error: 'Text required' }, { status: 400 });
+  // Match Parcel.description max-length so suggestions never exceed what
+  // can actually be entered as a description.
+  if (text.length > 500) {
+    return NextResponse.json({ error: 'Опис задовгий (макс 500)' }, { status: 400 });
+  }
 
   await prisma.descriptionSuggestion.upsert({
-    where: { text: text.trim() },
+    where: { text },
     update: { usageCount: { increment: 1 } },
-    create: { text: text.trim() },
+    create: { text },
   });
 
   return NextResponse.json({ success: true });
