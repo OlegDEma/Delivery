@@ -207,7 +207,7 @@ export default function RoutesPage() {
             <SelectTrigger className="w-56 h-8 text-sm">
               <SelectValue>{selectedCourierId ? (couriers.find(c => c.id === selectedCourierId)?.fullName || 'Виберіть кур\'єра') : 'Виберіть кур\'єра'}</SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="min-w-[16rem]">
               {couriers.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>
               ))}

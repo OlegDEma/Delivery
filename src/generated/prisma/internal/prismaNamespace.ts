@@ -1915,6 +1915,7 @@ export const ClientAddressScalarFieldEnum = {
   landmark: 'landmark',
   npWarehouseNum: 'npWarehouseNum',
   npPoshtamatNum: 'npPoshtamatNum',
+  pickupPointText: 'pickupPointText',
   deliveryMethod: 'deliveryMethod',
   usageCount: 'usageCount',
   isDefault: 'isDefault',

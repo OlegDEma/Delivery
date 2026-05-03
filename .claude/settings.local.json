@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(pandoc \"/d/Delivery/Завдання_по_посилках_спрощений_варіант.docx\" -o /tmp/task1.md)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx tsc *)",
+      "Bash(mkdir -p D:/Delivery/prisma/migrations/20260428100000_add_pickup_point)",
+      "Bash(cat)",
+      "Bash(npx prisma *)",
+      "Bash(npx next *)",
+      "Bash(npx eslint *)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('deps:', list\\(d.get\\('dependencies',{}\\).keys\\(\\)\\)\\)\")",
+      "Bash(awk 'NR>=285 && NR<=295' D:/Delivery/src/components/clients/client-create-form.tsx)",
+      "Bash(node /tmp/restore-client.mjs)",
+      "Bash(node restore-client-tmp.mjs)"
     ]
   }
 }

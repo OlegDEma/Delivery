@@ -344,7 +344,7 @@ function ParcelsContent() {
             <SelectTrigger className="w-52 h-8">
               <SelectValue placeholder="Змінити статус" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="min-w-[18rem]">
               {BULK_STATUS_OPTIONS.map(s => (
                 <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
               ))}

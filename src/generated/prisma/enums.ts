@@ -42,7 +42,8 @@ export type ClientType = (typeof ClientType)[keyof typeof ClientType]
 export const DeliveryMethod = {
   address: 'address',
   np_warehouse: 'np_warehouse',
-  np_poshtamat: 'np_poshtamat'
+  np_poshtamat: 'np_poshtamat',
+  pickup_point: 'pickup_point'
 } as const
 
 export type DeliveryMethod = (typeof DeliveryMethod)[keyof typeof DeliveryMethod]

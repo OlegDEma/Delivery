@@ -46,6 +46,7 @@ export type ClientAddressMinAggregateOutputType = {
   landmark: string | null
   npWarehouseNum: string | null
   npPoshtamatNum: string | null
+  pickupPointText: string | null
   deliveryMethod: $Enums.DeliveryMethod | null
   usageCount: number | null
   isDefault: boolean | null
@@ -65,6 +66,7 @@ export type ClientAddressMaxAggregateOutputType = {
   landmark: string | null
   npWarehouseNum: string | null
   npPoshtamatNum: string | null
+  pickupPointText: string | null
   deliveryMethod: $Enums.DeliveryMethod | null
   usageCount: number | null
   isDefault: boolean | null
@@ -84,6 +86,7 @@ export type ClientAddressCountAggregateOutputType = {
   landmark: number
   npWarehouseNum: number
   npPoshtamatNum: number
+  pickupPointText: number
   deliveryMethod: number
   usageCount: number
   isDefault: number
@@ -113,6 +116,7 @@ export type ClientAddressMinAggregateInputType = {
   landmark?: true
   npWarehouseNum?: true
   npPoshtamatNum?: true
+  pickupPointText?: true
   deliveryMethod?: true
   usageCount?: true
   isDefault?: true
@@ -132,6 +136,7 @@ export type ClientAddressMaxAggregateInputType = {
   landmark?: true
   npWarehouseNum?: true
   npPoshtamatNum?: true
+  pickupPointText?: true
   deliveryMethod?: true
   usageCount?: true
   isDefault?: true
@@ -151,6 +156,7 @@ export type ClientAddressCountAggregateInputType = {
   landmark?: true
   npWarehouseNum?: true
   npPoshtamatNum?: true
+  pickupPointText?: true
   deliveryMethod?: true
   usageCount?: true
   isDefault?: true
@@ -257,6 +263,7 @@ export type ClientAddressGroupByOutputType = {
   landmark: string | null
   npWarehouseNum: string | null
   npPoshtamatNum: string | null
+  pickupPointText: string | null
   deliveryMethod: $Enums.DeliveryMethod
   usageCount: number
   isDefault: boolean
@@ -299,6 +306,7 @@ export type ClientAddressWhereInput = {
   landmark?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
   npWarehouseNum?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
   npPoshtamatNum?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
+  pickupPointText?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFilter<"ClientAddress"> | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFilter<"ClientAddress"> | number
   isDefault?: Prisma.BoolFilter<"ClientAddress"> | boolean
@@ -322,6 +330,7 @@ export type ClientAddressOrderByWithRelationInput = {
   landmark?: Prisma.SortOrderInput | Prisma.SortOrder
   npWarehouseNum?: Prisma.SortOrderInput | Prisma.SortOrder
   npPoshtamatNum?: Prisma.SortOrderInput | Prisma.SortOrder
+  pickupPointText?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveryMethod?: Prisma.SortOrder
   usageCount?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
@@ -348,6 +357,7 @@ export type ClientAddressWhereUniqueInput = Prisma.AtLeast<{
   landmark?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
   npWarehouseNum?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
   npPoshtamatNum?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
+  pickupPointText?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFilter<"ClientAddress"> | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFilter<"ClientAddress"> | number
   isDefault?: Prisma.BoolFilter<"ClientAddress"> | boolean
@@ -371,6 +381,7 @@ export type ClientAddressOrderByWithAggregationInput = {
   landmark?: Prisma.SortOrderInput | Prisma.SortOrder
   npWarehouseNum?: Prisma.SortOrderInput | Prisma.SortOrder
   npPoshtamatNum?: Prisma.SortOrderInput | Prisma.SortOrder
+  pickupPointText?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveryMethod?: Prisma.SortOrder
   usageCount?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
@@ -398,6 +409,7 @@ export type ClientAddressScalarWhereWithAggregatesInput = {
   landmark?: Prisma.StringNullableWithAggregatesFilter<"ClientAddress"> | string | null
   npWarehouseNum?: Prisma.StringNullableWithAggregatesFilter<"ClientAddress"> | string | null
   npPoshtamatNum?: Prisma.StringNullableWithAggregatesFilter<"ClientAddress"> | string | null
+  pickupPointText?: Prisma.StringNullableWithAggregatesFilter<"ClientAddress"> | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodWithAggregatesFilter<"ClientAddress"> | $Enums.DeliveryMethod
   usageCount?: Prisma.IntWithAggregatesFilter<"ClientAddress"> | number
   isDefault?: Prisma.BoolWithAggregatesFilter<"ClientAddress"> | boolean
@@ -416,6 +428,7 @@ export type ClientAddressCreateInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -439,6 +452,7 @@ export type ClientAddressUncheckedCreateInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -460,6 +474,7 @@ export type ClientAddressUpdateInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -483,6 +498,7 @@ export type ClientAddressUncheckedUpdateInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -505,6 +521,7 @@ export type ClientAddressCreateManyInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -523,6 +540,7 @@ export type ClientAddressUpdateManyMutationInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -542,6 +560,7 @@ export type ClientAddressUncheckedUpdateManyInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -571,6 +590,7 @@ export type ClientAddressCountOrderByAggregateInput = {
   landmark?: Prisma.SortOrder
   npWarehouseNum?: Prisma.SortOrder
   npPoshtamatNum?: Prisma.SortOrder
+  pickupPointText?: Prisma.SortOrder
   deliveryMethod?: Prisma.SortOrder
   usageCount?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
@@ -594,6 +614,7 @@ export type ClientAddressMaxOrderByAggregateInput = {
   landmark?: Prisma.SortOrder
   npWarehouseNum?: Prisma.SortOrder
   npPoshtamatNum?: Prisma.SortOrder
+  pickupPointText?: Prisma.SortOrder
   deliveryMethod?: Prisma.SortOrder
   usageCount?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
@@ -613,6 +634,7 @@ export type ClientAddressMinOrderByAggregateInput = {
   landmark?: Prisma.SortOrder
   npWarehouseNum?: Prisma.SortOrder
   npPoshtamatNum?: Prisma.SortOrder
+  pickupPointText?: Prisma.SortOrder
   deliveryMethod?: Prisma.SortOrder
   usageCount?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
@@ -746,6 +768,7 @@ export type ClientAddressCreateWithoutClientInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -767,6 +790,7 @@ export type ClientAddressUncheckedCreateWithoutClientInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -818,6 +842,7 @@ export type ClientAddressScalarWhereInput = {
   landmark?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
   npWarehouseNum?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
   npPoshtamatNum?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
+  pickupPointText?: Prisma.StringNullableFilter<"ClientAddress"> | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFilter<"ClientAddress"> | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFilter<"ClientAddress"> | number
   isDefault?: Prisma.BoolFilter<"ClientAddress"> | boolean
@@ -836,6 +861,7 @@ export type ClientAddressCreateWithoutSenderParcelsInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -858,6 +884,7 @@ export type ClientAddressUncheckedCreateWithoutSenderParcelsInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -883,6 +910,7 @@ export type ClientAddressCreateWithoutReceiverParcelsInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -905,6 +933,7 @@ export type ClientAddressUncheckedCreateWithoutReceiverParcelsInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -941,6 +970,7 @@ export type ClientAddressUpdateWithoutSenderParcelsInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -963,6 +993,7 @@ export type ClientAddressUncheckedUpdateWithoutSenderParcelsInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -994,6 +1025,7 @@ export type ClientAddressUpdateWithoutReceiverParcelsInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1016,6 +1048,7 @@ export type ClientAddressUncheckedUpdateWithoutReceiverParcelsInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1036,6 +1069,7 @@ export type ClientAddressCreateWithoutRouteTasksInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -1058,6 +1092,7 @@ export type ClientAddressUncheckedCreateWithoutRouteTasksInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -1094,6 +1129,7 @@ export type ClientAddressUpdateWithoutRouteTasksInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1116,6 +1152,7 @@ export type ClientAddressUncheckedUpdateWithoutRouteTasksInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1136,6 +1173,7 @@ export type ClientAddressCreateManyClientInput = {
   landmark?: string | null
   npWarehouseNum?: string | null
   npPoshtamatNum?: string | null
+  pickupPointText?: string | null
   deliveryMethod?: $Enums.DeliveryMethod
   usageCount?: number
   isDefault?: boolean
@@ -1154,6 +1192,7 @@ export type ClientAddressUpdateWithoutClientInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1175,6 +1214,7 @@ export type ClientAddressUncheckedUpdateWithoutClientInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1196,6 +1236,7 @@ export type ClientAddressUncheckedUpdateManyWithoutClientInput = {
   landmark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npWarehouseNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npPoshtamatNum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupPointText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryMethod?: Prisma.EnumDeliveryMethodFieldUpdateOperationsInput | $Enums.DeliveryMethod
   usageCount?: Prisma.IntFieldUpdateOperationsInput | number
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1264,6 +1305,7 @@ export type ClientAddressSelect<ExtArgs extends runtime.Types.Extensions.Interna
   landmark?: boolean
   npWarehouseNum?: boolean
   npPoshtamatNum?: boolean
+  pickupPointText?: boolean
   deliveryMethod?: boolean
   usageCount?: boolean
   isDefault?: boolean
@@ -1288,6 +1330,7 @@ export type ClientAddressSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   landmark?: boolean
   npWarehouseNum?: boolean
   npPoshtamatNum?: boolean
+  pickupPointText?: boolean
   deliveryMethod?: boolean
   usageCount?: boolean
   isDefault?: boolean
@@ -1308,6 +1351,7 @@ export type ClientAddressSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   landmark?: boolean
   npWarehouseNum?: boolean
   npPoshtamatNum?: boolean
+  pickupPointText?: boolean
   deliveryMethod?: boolean
   usageCount?: boolean
   isDefault?: boolean
@@ -1328,6 +1372,7 @@ export type ClientAddressSelectScalar = {
   landmark?: boolean
   npWarehouseNum?: boolean
   npPoshtamatNum?: boolean
+  pickupPointText?: boolean
   deliveryMethod?: boolean
   usageCount?: boolean
   isDefault?: boolean
@@ -1335,7 +1380,7 @@ export type ClientAddressSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ClientAddressOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "country" | "city" | "street" | "building" | "apartment" | "postalCode" | "landmark" | "npWarehouseNum" | "npPoshtamatNum" | "deliveryMethod" | "usageCount" | "isDefault" | "createdAt" | "updatedAt", ExtArgs["result"]["clientAddress"]>
+export type ClientAddressOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "country" | "city" | "street" | "building" | "apartment" | "postalCode" | "landmark" | "npWarehouseNum" | "npPoshtamatNum" | "pickupPointText" | "deliveryMethod" | "usageCount" | "isDefault" | "createdAt" | "updatedAt", ExtArgs["result"]["clientAddress"]>
 export type ClientAddressInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   senderParcels?: boolean | Prisma.ClientAddress$senderParcelsArgs<ExtArgs>
@@ -1370,6 +1415,7 @@ export type $ClientAddressPayload<ExtArgs extends runtime.Types.Extensions.Inter
     landmark: string | null
     npWarehouseNum: string | null
     npPoshtamatNum: string | null
+    pickupPointText: string | null
     deliveryMethod: $Enums.DeliveryMethod
     usageCount: number
     isDefault: boolean
@@ -1813,6 +1859,7 @@ export interface ClientAddressFieldRefs {
   readonly landmark: Prisma.FieldRef<"ClientAddress", 'String'>
   readonly npWarehouseNum: Prisma.FieldRef<"ClientAddress", 'String'>
   readonly npPoshtamatNum: Prisma.FieldRef<"ClientAddress", 'String'>
+  readonly pickupPointText: Prisma.FieldRef<"ClientAddress", 'String'>
   readonly deliveryMethod: Prisma.FieldRef<"ClientAddress", 'DeliveryMethod'>
   readonly usageCount: Prisma.FieldRef<"ClientAddress", 'Int'>
   readonly isDefault: Prisma.FieldRef<"ClientAddress", 'Boolean'>

@@ -470,7 +470,7 @@ export default function NewParcelPage() {
                       <SelectTrigger className="h-7 text-xs w-48">
                         <SelectValue>{receiver.addresses.find(a => a.id === receiverAddressId)?.city || 'Інша адреса'}</SelectValue>
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="min-w-[20rem]">
                         {receiver.addresses.map(a => (
                           <SelectItem key={a.id} value={a.id}>
                             {a.city}{a.npWarehouseNum ? ` НП ${a.npWarehouseNum}` : ''}{a.street ? `, ${a.street}` : ''}
