@@ -39,6 +39,7 @@ interface ParcelDetail {
   shipmentType: string;
   description: string | null;
   declaredValue: number | null;
+  declaredValueCurrency?: string | null;
   totalWeight: number | null;
   totalVolumetricWeight: number | null;
   totalPlacesCount: number;
@@ -407,27 +408,6 @@ export default function ParcelDetailPage() {
           після lock на вагу/розміри). Label-color відрізняє сторони. */}
       <div className="text-sm space-y-1.5 py-2 border-y">
         <div className="flex items-baseline gap-2">
-          <span className="text-green-600 font-medium shrink-0 w-16">Від:</span>
-          <div className="min-w-0 flex-1">
-            <span className="font-medium">{parcel.sender.lastName} {parcel.sender.firstName}</span>
-            <span className="text-gray-400 mx-1">·</span>
-            <PhoneLink phone={parcel.sender.phone} />
-            {parcel.senderAddress && (
-              <span className="text-xs text-gray-500 ml-2">
-                <AddressLink address={`${parcel.senderAddress.city}${parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}${parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}`} />
-                {parcel.senderAddress.landmark ? ` (${parcel.senderAddress.landmark})` : ''}
-              </span>
-            )}
-            <ParcelPartyEdit
-              parcelId={parcel.id}
-              role="sender"
-              party={parcel.sender}
-              address={parcel.senderAddress ? { ...parcel.senderAddress, id: parcel.senderAddressId } : null}
-              onSaved={fetchParcel}
-            />
-          </div>
-        </div>
-        <div className="flex items-baseline gap-2">
           <span className="text-blue-600 font-medium shrink-0 w-16">Кому:</span>
           <div className="min-w-0 flex-1">
             <span className="font-medium">{parcel.receiver.lastName} {parcel.receiver.firstName}</span>
@@ -446,6 +426,27 @@ export default function ParcelDetailPage() {
               role="receiver"
               party={parcel.receiver}
               address={parcel.receiverAddress ? { ...parcel.receiverAddress, id: parcel.receiverAddressId } : null}
+              onSaved={fetchParcel}
+            />
+          </div>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span className="text-green-600 font-medium shrink-0 w-16">Від:</span>
+          <div className="min-w-0 flex-1">
+            <span className="font-medium">{parcel.sender.lastName} {parcel.sender.firstName}</span>
+            <span className="text-gray-400 mx-1">·</span>
+            <PhoneLink phone={parcel.sender.phone} />
+            {parcel.senderAddress && (
+              <span className="text-xs text-gray-500 ml-2">
+                <AddressLink address={`${parcel.senderAddress.city}${parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}${parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}`} />
+                {parcel.senderAddress.landmark ? ` (${parcel.senderAddress.landmark})` : ''}
+              </span>
+            )}
+            <ParcelPartyEdit
+              parcelId={parcel.id}
+              role="sender"
+              party={parcel.sender}
+              address={parcel.senderAddress ? { ...parcel.senderAddress, id: parcel.senderAddressId } : null}
               onSaved={fetchParcel}
             />
           </div>

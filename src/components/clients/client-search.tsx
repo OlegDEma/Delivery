@@ -58,6 +58,10 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  // Per ТЗ: при знаходженні клієнта в пошуку відкривається ТА САМА форма, що
+  // й при «+», заповнена даними з останньої відправки. Кнопка «Зберегти»
+  // підтверджує актуальність або зберігає правки.
+  const [editCandidate, setEditCandidate] = useState<ClientResult | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -133,9 +137,15 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
   }
 
   function handleSelect(client: ClientResult) {
-    onSelect(client);
     setQuery('');
     setShowDropdown(false);
+    // Open the same modal as «+», prefilled — worker confirms with «Зберегти».
+    setEditCandidate(client);
+  }
+
+  function handleEditConfirmed(client: ClientResult) {
+    setEditCandidate(null);
+    onSelect(client);
   }
 
   function handleOpenCreate() {
@@ -165,13 +175,8 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
         <Label className="text-xs text-gray-500">{label}</Label>
         <div className="flex items-start justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
           <div>
-            {role && (
-              <span className={`inline-block text-[10px] font-bold uppercase px-1.5 py-0.5 rounded mb-1 ${
-                role === 'receiver' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-              }`}>
-                Статус: {role === 'receiver' ? 'Отримувач' : 'Відправник'}
-              </span>
-            )}
+            {/* Per ТЗ: «у даних Відправника та Отримувача забрати дублюючі надписи
+                (статус клієнта Відправник та Отримувач)» — роль вже є в заголовку картки. */}
             <div className="font-medium text-sm">
               {selected.lastName} {selected.firstName}
               {selected.middleName ? ` ${selected.middleName}` : ''}
@@ -282,14 +287,7 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
                     className="w-full text-left px-3 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-0 transition-colors"
                     onClick={() => handleSelect(c)}
                   >
-                    <div className="flex items-center justify-between gap-2 mb-0.5">
-                      {role ? (
-                        <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                          role === 'receiver' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-                        }`}>
-                          {role === 'receiver' ? 'Отримувач' : 'Відправник'}
-                        </span>
-                      ) : <span />}
+                    <div className="flex items-center justify-end gap-2 mb-0.5">
                       <span className="text-sm text-blue-600 font-mono shrink-0">{c.phone}</span>
                     </div>
                     <div className="font-semibold text-sm text-gray-900">{c.lastName} {c.firstName}</div>
@@ -345,6 +343,29 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
             direction={direction}
             role={role}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit-existing dialog — opens on search-select per ТЗ. Same form, prefilled. */}
+      <Dialog open={!!editCandidate} onOpenChange={(o) => { if (!o) setEditCandidate(null); }}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {role === 'receiver' ? 'Отримувач' : role === 'sender' ? 'Відправник' : 'Клієнт'}
+              <span className="text-xs font-normal text-gray-500 ml-2">
+                — підтвердьте або оновіть дані
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+          {editCandidate && (
+            <ClientCreateForm
+              onSuccess={handleEditConfirmed}
+              onCancel={() => setEditCandidate(null)}
+              direction={direction}
+              role={role}
+              initialData={editCandidate}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

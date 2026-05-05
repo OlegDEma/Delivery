@@ -15,6 +15,7 @@ interface ParcelPaymentCardProps {
     id: string;
     totalCost: number | null;
     declaredValue: number | null;
+    declaredValueCurrency?: string | null;
     paymentMethod: string;
     isPaid: boolean;
     paidAt?: string | null;
@@ -141,7 +142,7 @@ export function ParcelPaymentCard({ parcel, onUpdate }: ParcelPaymentCardProps) 
               ⚠️ Вартість послуг ще не розрахована. Перед прийняттям оплати
               вкажіть вагу та розміри у блоці «Місця» — вартість підрахується
               за вагою + пакування + адресна доставка. Оголошена вартість
-              ({parcel.declaredValue ? Number(parcel.declaredValue).toFixed(2) + ' EUR' : '—'}) —
+              ({parcel.declaredValue ? Number(parcel.declaredValue).toFixed(2) + ' ' + (parcel.declaredValueCurrency === 'UAH' ? 'грн' : 'EUR') : '—'}) —
               це заявлена вартість речей, а не плата за доставку.
             </div>
           )}

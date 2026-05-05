@@ -42,6 +42,36 @@ interface ClientCreateFormProps {
   role?: 'sender' | 'receiver';
   /** Default country preselected (overrides direction-based default). */
   defaultCountry?: CountryCode;
+  /**
+   * If present, the form opens in EDIT mode for an existing client (per ТЗ:
+   * «При знаходженні потрібного Клієнта в пошуку, всі його дані відкриваються
+   * у тій самій формі ... заповнена даними Клієнта, взятими з останньої
+   * відправки. Якщо всі дані незмінні, Працівник має підтвердити актуальність
+   * даних (кнопка "Зберегти")»). Submit PATCHes the existing client+address
+   * instead of creating a new one.
+   */
+  initialData?: {
+    id: string;
+    phone: string;
+    firstName: string;
+    lastName: string;
+    middleName: string | null;
+    country: string | null;
+    addresses: {
+      id: string;
+      country: string;
+      city: string;
+      street: string | null;
+      building: string | null;
+      apartment: string | null;
+      postalCode: string | null;
+      landmark: string | null;
+      npWarehouseNum: string | null;
+      npPoshtamatNum: string | null;
+      deliveryMethod: string;
+      usageCount: number;
+    }[];
+  };
 }
 
 function getDefaultCountry(
@@ -67,24 +97,33 @@ export function ClientCreateForm({
   direction,
   role,
   defaultCountry,
+  initialData,
 }: ClientCreateFormProps) {
-  const initialCountry = getDefaultCountry(direction, role, defaultCountry);
+  const isEditMode = !!initialData;
+  const initialCountry: CountryCode = (initialData?.addresses[0]?.country as CountryCode)
+    || (initialData?.country as CountryCode)
+    || getDefaultCountry(direction, role, defaultCountry);
   // For eu_to_ua + receiver — country is locked to UA per ТЗ.
   const countryLocked = direction === 'eu_to_ua' && role === 'receiver';
+  const initialAddr = initialData?.addresses[0] as
+    (NonNullable<typeof initialData>['addresses'][number] & { pickupPointText?: string | null })
+    | undefined;
 
-  const [phone, setPhone] = useState(initialPhone || '');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [middleName, setMiddleName] = useState('');
+  const [phone, setPhone] = useState(initialData?.phone || initialPhone || '');
+  const [firstName, setFirstName] = useState(initialData?.firstName || '');
+  const [lastName, setLastName] = useState(initialData?.lastName || '');
+  const [middleName, setMiddleName] = useState(initialData?.middleName || '');
   const [country, setCountry] = useState<CountryCode>(initialCountry);
-  const [deliveryMethod, setDeliveryMethod] = useState<'address' | 'np_warehouse' | 'pickup_point'>('address');
-  const [postalCode, setPostalCode] = useState('');
-  const [city, setCity] = useState('');
-  const [street, setStreet] = useState('');
-  const [building, setBuilding] = useState('');
-  const [landmark, setLandmark] = useState('');
-  const [npWarehouseNum, setNpWarehouseNum] = useState('');
-  const [pickupPointText, setPickupPointText] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState<'address' | 'np_warehouse' | 'pickup_point'>(
+    (initialAddr?.deliveryMethod as 'address' | 'np_warehouse' | 'pickup_point') || 'address'
+  );
+  const [postalCode, setPostalCode] = useState(initialAddr?.postalCode || '');
+  const [city, setCity] = useState(initialAddr?.city || '');
+  const [street, setStreet] = useState(initialAddr?.street || '');
+  const [building, setBuilding] = useState(initialAddr?.building || '');
+  const [landmark, setLandmark] = useState(initialAddr?.landmark || '');
+  const [npWarehouseNum, setNpWarehouseNum] = useState(initialAddr?.npWarehouseNum || '');
+  const [pickupPointText, setPickupPointText] = useState(initialAddr?.pickupPointText || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -147,6 +186,62 @@ export function ClientCreateForm({
                 landmark: landmark || undefined,
               };
 
+      if (isEditMode && initialData) {
+        // Per ТЗ: confirm/update existing client + their last-used address.
+        // If nothing changed, this is just an idempotent confirm.
+        const phoneChanged = phone !== initialData.phone;
+        const nameChanged = firstName !== initialData.firstName
+          || lastName !== initialData.lastName
+          || (middleName || null) !== (initialData.middleName || null);
+
+        if (phoneChanged || nameChanged) {
+          const r = await fetch(`/api/clients/${initialData.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'update',
+              ...(phoneChanged ? { phone } : {}),
+              ...(nameChanged ? { firstName, lastName, middleName: middleName || null } : {}),
+            }),
+          });
+          if (!r.ok) {
+            const d = await r.json().catch(() => ({}));
+            throw new Error(d.error || 'Помилка оновлення клієнта');
+          }
+        }
+
+        if (initialAddr?.id) {
+          const r = await fetch(`/api/clients/${initialData.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'updateAddress',
+              addressId: initialAddr.id,
+              address: {
+                deliveryMethod,
+                postalCode: postalCode || null,
+                city,
+                street: street || null,
+                building: building || null,
+                landmark: landmark || null,
+                npWarehouseNum: deliveryMethod === 'np_warehouse' ? (npWarehouseNum || null) : null,
+                pickupPointText: deliveryMethod === 'pickup_point' ? (pickupPointText || null) : null,
+              },
+            }),
+          });
+          if (!r.ok) {
+            const d = await r.json().catch(() => ({}));
+            throw new Error(d.error || 'Помилка оновлення адреси');
+          }
+        }
+
+        toast.success('Дані підтверджено');
+        // Re-fetch the updated client so caller has fresh data.
+        const fresh = await fetch(`/api/clients/${initialData.id}`).then(r => r.ok ? r.json() : null);
+        onSuccess(fresh || initialData);
+        return;
+      }
+
       const res = await fetch('/api/clients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -168,8 +263,8 @@ export function ClientCreateForm({
         const data = await res.json();
         setError(data.error || 'Помилка створення клієнта');
       }
-    } catch {
-      setError('Помилка мережі');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Помилка мережі');
     } finally {
       setSaving(false);
     }
@@ -229,30 +324,29 @@ export function ClientCreateForm({
         </Select>
       </div>
 
-      <div className="border-t pt-3">
-        <SectionTitle>Адреса</SectionTitle>
-        <Select
-          value={deliveryMethod}
-          onValueChange={(v) => setDeliveryMethod((v ?? 'address') as 'address' | 'np_warehouse' | 'pickup_point')}
-        >
-          <SelectTrigger>
-            <SelectValue>
-              {deliveryMethod === 'np_warehouse' ? 'Відділення' : deliveryMethod === 'pickup_point' ? 'Пункт збору' : 'Адресна доставка'}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="address">Адресна доставка</SelectItem>
-            <SelectItem value="np_warehouse">Відділення</SelectItem>
-            <SelectItem value="pickup_point">Пункт збору</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="border-t pt-3 space-y-2">
-        {deliveryMethod === 'address' && <SectionTitle>Адресна доставка</SectionTitle>}
-        {deliveryMethod === 'np_warehouse' && <SectionTitle>Відділення</SectionTitle>}
-        {deliveryMethod === 'pickup_point' && <SectionTitle>Пункт збору</SectionTitle>}
-
+      {/* Per ТЗ: «надпис "Індекс" поставити справа від надрису "Адреса", а поле
+          "Індекс" поставити справа від випадаючого списку "Адреса"». Дубль назви
+          методу нижче (Адресна доставка/Відділення/Пункт збору) прибрано — селектор
+          уже показує вибране. */}
+      <div className="border-t pt-3 grid grid-cols-[1fr_9rem] gap-2 items-end">
+        <div>
+          <SectionTitle>Адреса</SectionTitle>
+          <Select
+            value={deliveryMethod}
+            onValueChange={(v) => setDeliveryMethod((v ?? 'address') as 'address' | 'np_warehouse' | 'pickup_point')}
+          >
+            <SelectTrigger>
+              <SelectValue>
+                {deliveryMethod === 'np_warehouse' ? 'Відділення' : deliveryMethod === 'pickup_point' ? 'Пункт збору' : 'Адресна доставка'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="address">Адресна доставка</SelectItem>
+              <SelectItem value="np_warehouse">Відділення</SelectItem>
+              <SelectItem value="pickup_point">Пункт збору</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div>
           <Label>
             Індекс <FieldHint text="Поштовий код, призначений даній адресі." />
@@ -263,6 +357,9 @@ export function ClientCreateForm({
             placeholder="00-000"
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
         <div>
           <Label>Населений пункт *</Label>
           <CapitalizeInput value={city} onChange={setCity} required />

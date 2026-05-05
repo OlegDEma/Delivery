@@ -14,6 +14,7 @@ interface PrintData {
   totalPlacesCount: number;
   totalWeight: number | null;
   declaredValue: number | null;
+  declaredValueCurrency?: string | null;
   payer: string;
   paymentMethod: string;
   paymentInUkraine: boolean;
@@ -170,7 +171,7 @@ export default function PrintLabelPage() {
           {data.description && <div>{data.description}</div>}
           <div>Місць: {data.totalPlacesCount}</div>
           <div>Вага: {data.totalWeight ? `${Number(data.totalWeight).toFixed(2)} кг` : '—'}</div>
-          {data.declaredValue && <div>Оголошена вартість: {Number(data.declaredValue).toFixed(2)} EUR</div>}
+          {data.declaredValue && <div>Оголошена вартість: {Number(data.declaredValue).toFixed(2)} {data.declaredValueCurrency === 'UAH' ? 'грн' : 'EUR'}</div>}
           <div>Платник: {data.payer === 'sender' ? 'Відправник' : 'Отримувач'}</div>
           <div>Оплата: {data.paymentMethod === 'cash' ? 'Готівка' : 'Безготівка'}{data.paymentInUkraine ? ' (в Україні)' : ''}</div>
           {data.totalCost && <div className="font-bold mt-0.5">Вартість: {Number(data.totalCost).toFixed(2)} EUR</div>}

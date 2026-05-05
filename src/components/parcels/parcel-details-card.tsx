@@ -16,6 +16,7 @@ interface ParcelDetailsCardProps {
     direction: string;
     description: string | null;
     declaredValue: number | null;
+    declaredValueCurrency?: string | null;
     payer: string;
     paymentMethod: string;
     paymentInUkraine: boolean;
@@ -121,18 +122,22 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
           </div>
         )}
 
-        {/* Declared value */}
-        {editing ? (
-          <div>
-            <Label className="text-xs text-gray-500">Оголошена вартість (EUR)</Label>
-            <Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} className="text-sm h-8" />
-          </div>
-        ) : parcel.declaredValue ? (
-          <div className="flex justify-between">
-            <span className="text-gray-500">Оголошена вартість</span>
-            <span>{Number(parcel.declaredValue).toFixed(2)} EUR</span>
-          </div>
-        ) : null}
+        {/* Declared value — currency stored per parcel (UAH for UA-sender, EUR otherwise) */}
+        {(() => {
+          const cur = parcel.declaredValueCurrency || 'EUR';
+          const curLabel = cur === 'UAH' ? 'грн' : 'EUR';
+          return editing ? (
+            <div>
+              <Label className="text-xs text-gray-500">Оголошена вартість ({curLabel})</Label>
+              <Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} className="text-sm h-8" />
+            </div>
+          ) : parcel.declaredValue ? (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Оголошена вартість</span>
+              <span>{Number(parcel.declaredValue).toFixed(2)} {curLabel}</span>
+            </div>
+          ) : null;
+        })()}
 
         {/* Payer */}
         {editing ? (

@@ -53,42 +53,56 @@ export function AddressEditor({
       {title && (
         <Label className="text-xs text-gray-500 font-medium">{title}</Label>
       )}
+      {/* Per ТЗ: «надпис "Індекс" поставити справа від надрису "Адреса", а поле
+          "Індекс" поставити справа від випадаючого списку "Адреса"». Також не
+          дублювати назву методу нижче — селектор уже показує що вибрано. */}
       {showDeliveryMethod && (
-        <div>
-          <SectionTitle>Адреса</SectionTitle>
-          <Select
-            value={dm}
-            onValueChange={(v) => onChange({ deliveryMethod: (v ?? 'address') })}
-          >
-            <SelectTrigger className="h-8">
-              <SelectValue>
-                {dm === 'np_warehouse' ? 'Відділення' : dm === 'pickup_point' ? 'Пункт збору' : 'Адресна доставка'}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="address">Адресна доставка</SelectItem>
-              <SelectItem value="np_warehouse">Відділення</SelectItem>
-              <SelectItem value="pickup_point">Пункт збору</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-[1fr_8rem] gap-2 items-end">
+          <div>
+            <SectionTitle>Адреса</SectionTitle>
+            <Select
+              value={dm}
+              onValueChange={(v) => onChange({ deliveryMethod: (v ?? 'address') })}
+            >
+              <SelectTrigger className="h-8">
+                <SelectValue>
+                  {dm === 'np_warehouse' ? 'Відділення' : dm === 'pickup_point' ? 'Пункт збору' : 'Адресна доставка'}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="address">Адресна доставка</SelectItem>
+                <SelectItem value="np_warehouse">Відділення</SelectItem>
+                <SelectItem value="pickup_point">Пункт збору</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">
+              Індекс <FieldHint text="Поштовий код, призначений даній адресі." />
+            </Label>
+            <Input
+              value={state.postalCode}
+              onChange={(e) => onChange({ postalCode: e.target.value })}
+              placeholder="00-000"
+              className="h-8"
+            />
+          </div>
         </div>
       )}
 
       <div className="border-l-2 border-blue-100 pl-3 space-y-2">
-        {dm === 'address' && <SectionTitle>Адресна доставка</SectionTitle>}
-        {dm === 'np_warehouse' && <SectionTitle>Відділення</SectionTitle>}
-        {dm === 'pickup_point' && <SectionTitle>Пункт збору</SectionTitle>}
-
-        <div>
-          <Label className="text-xs">
-            Індекс <FieldHint text="Поштовий код, призначений даній адресі." />
-          </Label>
-          <Input
-            value={state.postalCode}
-            onChange={(e) => onChange({ postalCode: e.target.value })}
-            placeholder="00-000"
-          />
-        </div>
+        {!showDeliveryMethod && (
+          <div>
+            <Label className="text-xs">
+              Індекс <FieldHint text="Поштовий код, призначений даній адресі." />
+            </Label>
+            <Input
+              value={state.postalCode}
+              onChange={(e) => onChange({ postalCode: e.target.value })}
+              placeholder="00-000"
+            />
+          </div>
+        )}
         <div>
           <Label className="text-xs">Населений пункт</Label>
           <CapitalizeInput
