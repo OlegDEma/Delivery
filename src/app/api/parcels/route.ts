@@ -242,6 +242,10 @@ export async function GET(request: NextRequest) {
         },
         // Для динамічного лейблу статусу («В дорозі до …»).
         trip: { select: { id: true, country: true, departureDate: true } },
+        // ТЗ — фільтр по кур'єру, який приймав посилку: показуємо також у
+        // списку, щоб оператор бачив контекст без переходу в деталі.
+        collectedBy: { select: { id: true, fullName: true } },
+        assignedCourier: { select: { id: true, fullName: true } },
       },
       orderBy: { [sortBy]: sortOrderParam },
       skip: (page - 1) * limit,

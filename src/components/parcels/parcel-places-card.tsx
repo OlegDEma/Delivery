@@ -36,6 +36,10 @@ interface ParcelPlacesCardProps {
   needsPackaging?: boolean;
   /** Whether the parcel has insurance opted in (saved value > 0). */
   insuranceEnabled?: boolean;
+  /** «Пакет» сума — для коректної live-оцінки фактично збереженого розрахунку. */
+  parcelMoneyAmount?: number | null;
+  /** Чи передача через пункт збору — впливає на додатковий компонент вартості. */
+  isPickupPoint?: boolean;
   /** Блокує редагування ваги/розмірів — після accepted_for_transport_* */
   readOnly?: boolean;
   onUpdate: () => void;
@@ -72,6 +76,8 @@ export function ParcelPlacesCard({
   declaredValue,
   needsPackaging,
   insuranceEnabled,
+  parcelMoneyAmount,
+  isPickupPoint,
   readOnly = false,
   onUpdate,
 }: ParcelPlacesCardProps) {
@@ -251,6 +257,8 @@ export function ParcelPlacesCard({
                 needsPackaging={!!needsPackaging}
                 isAddressDelivery={receiverDeliveryMethod === 'address'}
                 insurance={insuranceEnabled}
+                isPickupPoint={!!isPickupPoint}
+                parcelMoneyAmount={parcelMoneyAmount ? Number(parcelMoneyAmount) : 0}
               />
             )}
           </div>
@@ -298,6 +306,8 @@ export function ParcelPlacesCard({
                   needsPackaging={!!needsPackaging}
                   isAddressDelivery={receiverDeliveryMethod === 'address'}
                   insurance={insuranceEnabled}
+                  isPickupPoint={!!isPickupPoint}
+                  parcelMoneyAmount={parcelMoneyAmount ? Number(parcelMoneyAmount) : 0}
                 />
               </div>
             )}

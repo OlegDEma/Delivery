@@ -493,9 +493,12 @@ export default function ParcelDetailPage() {
         receiverDeliveryMethod={parcel.receiverAddress?.deliveryMethod || null}
         declaredValue={parcel.declaredValue}
         needsPackaging={parcel.needsPackaging}
-        // Insurance opt-in: derived from saved value. Live preview hides the
-        // 3% row when parcel was saved without insurance — matches actual total.
-        insuranceEnabled={Number(parcel.insuranceCost) > 0}
+        // Insurance opt-in: prefer the explicit boolean if the column was
+        // backfilled (post-migration), fall back to deriving from cost > 0
+        // for historical data.
+        insuranceEnabled={parcel.insuranceApplied ?? (Number(parcel.insuranceCost) > 0)}
+        parcelMoneyAmount={parcel.parcelMoneyAmount}
+        isPickupPoint={parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'pickup_point'}
         onUpdate={fetchParcel}
         readOnly={isEditLocked}
       />

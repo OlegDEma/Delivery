@@ -33,6 +33,10 @@ interface ParcelListItem {
   receiverAddress: { city: string; street: string | null; building: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
   senderAddress: { city: string; street: string | null; building: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
   trip?: { id: string; country: string | null } | null;
+  /** Хто прийняв посилку (collectedBy) — для відображення поряд з посилкою. */
+  collectedBy?: { id: string; fullName: string } | null;
+  /** Хто призначений на доставку (assignedCourier) — для контексту. */
+  assignedCourier?: { id: string; fullName: string } | null;
 }
 
 // Спец-значення для фільтра по кур'єру: «всі» / «без кур'єра».
@@ -421,6 +425,14 @@ function ParcelsContent() {
                             {p.senderAddress.street ? `, ${p.senderAddress.street}` : ''}
                             {p.senderAddress.building ? ` ${p.senderAddress.building}` : ''}
                             {p.senderAddress.npWarehouseNum ? ` (НП №${p.senderAddress.npWarehouseNum})` : ''}
+                          </div>
+                        )}
+                        {/* ТЗ — поряд з посилкою показуємо хто її прийняв
+                            (collectedBy). Допомагає розуміти контекст без
+                            переходу в деталі. */}
+                        {p.collectedBy && (
+                          <div className="text-xs text-blue-600 mt-1">
+                            ✓ Прийняв: <span className="font-medium">{p.collectedBy.fullName}</span>
                           </div>
                         )}
                       </div>
