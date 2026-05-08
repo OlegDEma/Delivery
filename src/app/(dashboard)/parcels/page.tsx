@@ -110,10 +110,12 @@ function ParcelsContent() {
     if (search) params.set('q', search);
     if (statusFilter !== 'all') params.set('status', statusFilter);
     if (dateFrom) { params.set('dateFrom', dateFrom); params.set('dateTo', dateFrom); }
+    // ТЗ: фільтр «по кур'єру, який приймав посилку» — це хто фізично
+    // забрав посилку (collectedBy), а не призначений на доставку.
     if (courierFilter === COURIER_UNASSIGNED) {
-      params.set('unassigned', '1');
+      params.set('acceptedUnassigned', '1');
     } else if (courierFilter !== COURIER_ALL) {
-      params.set('courierId', courierFilter);
+      params.set('acceptedById', courierFilter);
     }
     params.set('page', String(page));
     params.set('limit', '20');
@@ -310,22 +312,24 @@ function ParcelsContent() {
               )}
             </div>
 
-            {/* Фільтр по кур'єру, який приймав посилку. Дефолт — «Без кур'єра». */}
+            {/* ТЗ: фільтр «по кур'єру, який приймав посилку» — це хто фізично
+                забрав посилку (collectedBy), не призначений на доставку.
+                Дефолт — «Не прийняті» (collectedById IS NULL). */}
             <Select value={courierFilter} onValueChange={(v) => { setCourierFilter(v ?? COURIER_UNASSIGNED); setPage(1); }}>
-              <SelectTrigger className={cn('md:w-56', isCourierActive && activeCls)}>
+              <SelectTrigger className={cn('md:w-64', isCourierActive && activeCls)}>
                 <SelectValue>{
                   courierFilter === COURIER_UNASSIGNED
-                    ? 'Без кур\'єра'
+                    ? 'Не прийняті кур\'єром'
                     : courierFilter === COURIER_ALL
                       ? 'Всі посилки'
-                      : couriers.find((c) => c.id === courierFilter)?.fullName || 'Кур\'єр'
+                      : `Прийняв: ${couriers.find((c) => c.id === courierFilter)?.fullName || ''}`
                 }</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={COURIER_UNASSIGNED}>Без кур&apos;єра</SelectItem>
+                <SelectItem value={COURIER_UNASSIGNED}>Не прийняті кур&apos;єром</SelectItem>
                 <SelectItem value={COURIER_ALL}>Всі посилки</SelectItem>
                 {couriers.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>
+                  <SelectItem key={c.id} value={c.id}>Прийняв: {c.fullName}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

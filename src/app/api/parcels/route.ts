@@ -114,6 +114,10 @@ export async function GET(request: NextRequest) {
   const tripId = searchParams.get('tripId');
   const courierId = searchParams.get('courierId');
   const unassigned = searchParams.get('unassigned');
+  // Per ТЗ — фільтр «по кур'єру, який приймав посилку» (хто фізично її
+  // забрав = collectedBy). Окремий від assignedCourier (хто має везти).
+  const acceptedById = searchParams.get('acceptedById');
+  const acceptedUnassigned = searchParams.get('acceptedUnassigned');
   const q = searchParams.get('q');
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit')) || 20));
@@ -149,6 +153,8 @@ export async function GET(request: NextRequest) {
   if (tripId) where.tripId = tripId;
   if (courierId) where.assignedCourierId = courierId;
   if (unassigned === '1') where.assignedCourierId = null;
+  if (acceptedById) where.collectedById = acceptedById;
+  if (acceptedUnassigned === '1') where.collectedById = null;
 
   // Driver scoping: drivers see only parcels assigned to them OR unassigned
   // (unless they explicitly pass ?courierId=other — which we reject below).
