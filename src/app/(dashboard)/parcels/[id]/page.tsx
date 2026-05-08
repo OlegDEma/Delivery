@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { STATUS_TRANSITIONS, isTerminal } from '@/lib/parcels/status-transitions';
 import { statusLabel } from '@/lib/parcels/status-label';
 import { useAuth } from '@/lib/hooks/use-auth';
@@ -55,7 +55,11 @@ interface ParcelDetail {
   estimatedDeliveryEnd: string | null;
   isPaid: boolean;
   totalCost: number | null;
+  /** Cost components — used by the payment breakdown panel. */
+  deliveryCost: number | null;
+  packagingCost: number | null;
   insuranceCost: number | null;
+  addressDeliveryCost: number | null;
   /** Per ТЗ — opt-in checkbox state at creation. */
   insuranceApplied?: boolean;
   /** «Пакет» — money sender transfers to receiver. */

@@ -45,6 +45,12 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
   const [paymentMethod, setPaymentMethod] = useState(parcel.paymentMethod);
   const [paymentInUkraine, setPaymentInUkraine] = useState(parcel.paymentInUkraine);
   const [needsPackaging, setNeedsPackaging] = useState(parcel.needsPackaging);
+  const [insuranceApplied, setInsuranceApplied] = useState(!!parcel.insuranceApplied);
+  // Stored as string so user can clear the field while editing (per fix
+  // applied to admin tariffs editor — `Number('')` would snap back to 0).
+  const [parcelMoneyAmount, setParcelMoneyAmount] = useState(
+    parcel.parcelMoneyAmount ? String(parcel.parcelMoneyAmount) : ''
+  );
 
   const PAYER_LABELS: Record<string, string> = { sender: 'Відправник', receiver: 'Отримувач' };
   const METHOD_LABELS: Record<string, string> = { cash: 'Готівка', cashless: 'Безготівка' };
@@ -56,6 +62,8 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
     setPaymentMethod(parcel.paymentMethod);
     setPaymentInUkraine(parcel.paymentInUkraine);
     setNeedsPackaging(parcel.needsPackaging);
+    setInsuranceApplied(!!parcel.insuranceApplied);
+    setParcelMoneyAmount(parcel.parcelMoneyAmount ? String(parcel.parcelMoneyAmount) : '');
     setEditing(true);
   }
 
@@ -72,6 +80,10 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
           paymentMethod,
           paymentInUkraine,
           needsPackaging,
+          insuranceApplied,
+          parcelMoneyAmount: parcelMoneyAmount && Number(parcelMoneyAmount) > 0
+            ? Number(parcelMoneyAmount)
+            : null,
         }),
       });
       if (res.ok) {
@@ -203,11 +215,24 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
           </label>
         )}
 
+        {/* Insurance — opt-in editable post-creation per ТЗ. */}
+        {editing ? (
+          <label className="flex items-center gap-2 text-sm py-1">
+            <Checkbox checked={insuranceApplied} onCheckedChange={(c) => setInsuranceApplied(c === true)} />
+            Страхування
+          </label>
+        ) : parcel.insuranceApplied && (
+          <div className="flex justify-between">
+            <span className="text-gray-500">Страхування</span>
+            <span>Так</span>
+          </div>
+        )}
+
         {/* Needs packaging */}
         {editing ? (
           <label className="flex items-center gap-2 text-sm py-1">
             <Checkbox checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
-            Потребує пакування
+            Пакування
           </label>
         ) : parcel.needsPackaging && (
           <div className="flex justify-between">
@@ -216,16 +241,23 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
           </div>
         )}
 
-        {/* Insurance (read-only display — opt-in is set on creation). */}
-        {!editing && parcel.insuranceApplied && (
-          <div className="flex justify-between">
-            <span className="text-gray-500">Страхування</span>
-            <span>Так</span>
+        {/* «Пакет» — money transfer. Editable in edit mode, displayed as «(N)»
+            in read mode (per ТЗ). */}
+        {editing ? (
+          <div>
+            <Label className="text-xs text-gray-500">Пакет (передача готівки, EUR)</Label>
+            <Input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              value={parcelMoneyAmount}
+              onChange={(e) => setParcelMoneyAmount(e.target.value)}
+              placeholder="0 = немає"
+              className="text-sm h-8"
+            />
           </div>
-        )}
-
-        {/* «Пакет» — money transfer. Per ТЗ shown as «(N)». */}
-        {!editing && parcel.parcelMoneyAmount && Number(parcel.parcelMoneyAmount) > 0 && (
+        ) : parcel.parcelMoneyAmount && Number(parcel.parcelMoneyAmount) > 0 && (
           <div className="flex justify-between">
             <span className="text-gray-500">Пакет</span>
             <span>({Number(parcel.parcelMoneyAmount).toFixed(0)})</span>
