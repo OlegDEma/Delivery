@@ -313,7 +313,13 @@ export async function PATCH(
   if (body.shortNumber !== undefined) updateData.shortNumber = body.shortNumber;
   if (body.description !== undefined) updateData.description = body.description;
   if (body.declaredValue !== undefined) updateData.declaredValue = body.declaredValue ? Number(body.declaredValue) : null;
+  if (body.insuranceApplied !== undefined) updateData.insuranceApplied = body.insuranceApplied;
   if (body.needsPackaging !== undefined) updateData.needsPackaging = body.needsPackaging;
+  if (body.parcelMoneyAmount !== undefined) {
+    updateData.parcelMoneyAmount = body.parcelMoneyAmount && Number(body.parcelMoneyAmount) > 0
+      ? Number(body.parcelMoneyAmount)
+      : null;
+  }
   if (body.payer !== undefined) updateData.payer = body.payer;
   if (body.paymentMethod !== undefined) updateData.paymentMethod = body.paymentMethod;
   if (body.paymentInUkraine !== undefined) updateData.paymentInUkraine = body.paymentInUkraine;
@@ -407,18 +413,34 @@ export async function PATCH(
 
         if (pricing) {
           const isAddressDelivery = receiverAddr?.deliveryMethod === 'address';
+          // Recalc must reflect the values being SAVED, not the loaded snapshot.
+          // updateData has fresh user-supplied fields; fall back to the stored
+          // record for fields untouched by this PATCH.
+          const declaredValue = (updateData.declaredValue ?? parcel.declaredValue) ?? 0;
+          const insuranceApplied = updateData.insuranceApplied !== undefined
+            ? updateData.insuranceApplied
+            : parcel.insuranceApplied;
+          const needsPackaging = updateData.needsPackaging !== undefined
+            ? updateData.needsPackaging
+            : parcel.needsPackaging;
+          const parcelMoneyAmount = updateData.parcelMoneyAmount !== undefined
+            ? updateData.parcelMoneyAmount
+            : parcel.parcelMoneyAmount;
+          const collectionMethod = updateData.collectionMethod !== undefined
+            ? updateData.collectionMethod
+            : parcel.collectionMethod;
           const breakdown = calculateParcelCost(
             buildPricingInput(pricing),
             {
               actualWeight: totalWeight,
               volumetricWeight: totalVolWeight,
-              declaredValue: Number(parcel.declaredValue) || 0,
-              insurance: parcel.insuranceApplied,
-              needsPackaging: parcel.needsPackaging,
+              declaredValue: Number(declaredValue) || 0,
+              insurance: !!insuranceApplied,
+              needsPackaging: !!needsPackaging,
               isAddressDelivery,
               isPickupPoint:
-                parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'pickup_point',
-              parcelMoneyAmount: parcel.parcelMoneyAmount ? Number(parcel.parcelMoneyAmount) : 0,
+                parcel.direction === 'eu_to_ua' && collectionMethod === 'pickup_point',
+              parcelMoneyAmount: parcelMoneyAmount ? Number(parcelMoneyAmount) : 0,
             }
           );
           updateData.deliveryCost = breakdown.deliveryCost;

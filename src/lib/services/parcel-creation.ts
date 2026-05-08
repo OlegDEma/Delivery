@@ -53,9 +53,13 @@ export interface CreateParcelInput {
   needsPackaging?: boolean;
   /** «Пакет» — money sender transfers to receiver (optional). 0/undef = no Пакет. */
   parcelMoneyAmount?: number | null;
-  /** Send invoice on save (per ТЗ). Email goes to invoiceEmail. */
+  /**
+   * Send invoice SMS on save (per ТЗ). The /api/parcels POST handler reads
+   * this flag separately to call `invoice-sms.ts` after the parcel exists —
+   * `createParcel()` itself doesn't fire SMS, since the recipient phone /
+   * payer is fully derivable from the saved record.
+   */
   sendInvoice?: boolean;
-  invoiceEmail?: string | null;
   places: ParcelPlaceInput[];
   createdById: string;
   createdSource: CreatedSource;

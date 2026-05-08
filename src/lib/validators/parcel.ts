@@ -74,8 +74,6 @@ export const createParcelSchema = z.object({
   sendInvoice: z.boolean().optional(),
   /** Phone of the payer to send invoice SMS to (defaults to payer's stored phone). */
   invoicePhone: phoneSchema.optional(),
-  /** @deprecated kept for backwards compat — invoice now goes via SMS, not email. */
-  invoiceEmail: z.string().trim().email().optional().nullable(),
   places: z.array(placeInputSchema).min(1, 'Додайте хоча б одне місце').max(20),
   tripId: uuidSchema.optional().nullable(),
   collectionMethod: collectionMethodSchema.optional().nullable(),
@@ -137,7 +135,11 @@ export const updateParcelSchema = z.object({
   shortNumber: z.number().int().min(0).max(10000).optional().nullable(),
   description: z.string().trim().max(500).optional().nullable(),
   declaredValue: moneySchema.optional().nullable(),
+  /** Insurance opt-in checkbox state (per ТЗ — editable post-creation). */
+  insuranceApplied: z.boolean().optional(),
   needsPackaging: z.boolean().optional(),
+  /** «Пакет» — money sender transfers. Setting to 0/null clears the option. */
+  parcelMoneyAmount: moneySchema.optional().nullable(),
   payer: payerSchema.optional(),
   paymentMethod: paymentMethodSchema.optional(),
   paymentInUkraine: z.boolean().optional(),

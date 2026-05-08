@@ -82,16 +82,57 @@ interface SendResult {
 }
 
 /**
- * Stubbed provider call. Swap with a real Twilio / TurboSMS implementation
- * later. The stub returns 'queued' so audit logs read consistently once a
- * provider is plugged in.
+ * Provider call. Currently uses Twilio when TWILIO_ACCOUNT_SID +
+ * TWILIO_AUTH_TOKEN + TWILIO_FROM_NUMBER are configured; otherwise falls
+ * back to a stub that returns 'queued' so the rest of the pipeline still
+ * runs (and the operator gets audit visibility via `sms_log`).
+ *
+ * Swap the inner `if (sid && ...)` block with TurboSMS / Viber / etc to
+ * change provider — the wrapping orchestrator (`sendInvoice`) doesn't need
+ * to know.
  */
-async function sendViaProvider(_phone: string, _body: string): Promise<SendResult> {
-  // Intentionally minimal — the body is already in `sms_log` for audit and
-  // we don't want PII in stdout outside dev. `logger.info` keeps the trail
-  // structured.
-  logger.info('sms.invoice.stub_send', { phone: _phone, bodyLength: _body.length });
-  return { status: 'queued', provider: null };
+async function sendViaProvider(phone: string, body: string): Promise<SendResult> {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const from = process.env.TWILIO_FROM_NUMBER;
+
+  if (!sid || !token || !from) {
+    // Stub: log, mark as queued. Once provider env is set, real send kicks in
+    // automatically without touching this file.
+    logger.info('sms.invoice.stub_send', { phone, bodyLength: body.length });
+    return { status: 'queued', provider: null };
+  }
+
+  try {
+    const auth = Buffer.from(`${sid}:${token}`).toString('base64');
+    const form = new URLSearchParams({ From: from, To: phone, Body: body });
+    const res = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: form.toString(),
+      }
+    );
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      return {
+        status: 'failed',
+        provider: 'twilio',
+        errorMessage: `HTTP ${res.status}: ${detail.slice(0, 300)}`,
+      };
+    }
+    return { status: 'sent', provider: 'twilio' };
+  } catch (err) {
+    return {
+      status: 'failed',
+      provider: 'twilio',
+      errorMessage: err instanceof Error ? err.message : 'unknown',
+    };
+  }
 }
 
 export interface SendInvoiceArgs {

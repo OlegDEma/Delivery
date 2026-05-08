@@ -334,7 +334,6 @@ export async function POST(request: NextRequest) {
       paymentInUkraine: parsed.paymentInUkraine,
       needsPackaging: parsed.needsPackaging,
       sendInvoice: parsed.sendInvoice,
-      invoiceEmail: parsed.invoiceEmail ?? null,
       places: parsed.places,
       createdById: userId,
       createdSource: 'worker',
@@ -345,30 +344,19 @@ export async function POST(request: NextRequest) {
       collectionAddress: parsed.collectionAddress ?? null,
     });
 
-    // Send invoice SMS — best-effort, non-blocking. Real transport via Twilio
-    // (TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_FROM_NUMBER env vars).
-    // Per ТЗ: «на телефонний номер 'Платник за доставку' відправляється
-    // повідомлення». Without credentials, sender logs warning and continues.
+    // Send invoice SMS — best-effort, non-blocking. Per ТЗ: «на телефонний
+    // номер 'Платник за доставку' відправляється повідомлення». Тепер усе
+    // йде через єдиний сервіс `invoice-sms.ts`: він рендерить шаблон з
+    // InvoiceSettings, дзвонить провайдеру (Twilio коли env заданий, інакше
+    // стуб), пише в SmsLog, оновлює invoiceSentToPayerAt.
     if (parsed.sendInvoice) {
-      const { sendInvoiceEmail } = await import('@/lib/email/send-invoice');
-      const payerClient = parsed.payer === 'receiver'
-        ? await prisma.client.findUnique({ where: { id: parsed.receiverId }, select: { phone: true, firstName: true, lastName: true } })
-        : await prisma.client.findUnique({ where: { id: parsed.senderId }, select: { phone: true, firstName: true, lastName: true } });
-      const targetPhone = parsed.invoicePhone || payerClient?.phone;
-      if (targetPhone) {
-        void sendInvoiceEmail({
-          to: targetPhone,
-          parcelInternalNumber: created.internalNumber,
-          parcelItn: created.itn,
-          payerName: payerClient ? `${payerClient.lastName} ${payerClient.firstName}` : '',
-          totalCost: created.totalCost,
-          currency: parsed.declaredValueCurrency || 'EUR',
-          declaredValue: parsed.declaredValue ?? null,
-          insuranceCost: parsed.insuranceCost ?? null,
-        }).catch((err) => logger.error('parcel.invoice.send_failed', err, { parcelId: created.id }));
-      } else {
-        logger.warn('parcel.invoice.no_phone', { parcelId: created.id });
-      }
+      const { sendInvoice: sendInvoiceSms } = await import('@/lib/services/invoice-sms');
+      void sendInvoiceSms({
+        parcelId: created.id,
+        toParty: parsed.payer === 'receiver' ? 'receiver' : 'sender',
+        overridePhone: parsed.invoicePhone,
+        sentById: userId,
+      }).catch((err) => logger.error('parcel.invoice.send_failed', err, { parcelId: created.id }));
     }
 
     const full = await prisma.parcel.findUnique({
