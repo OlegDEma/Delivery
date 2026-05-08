@@ -67,6 +67,8 @@ export const ModelName = {
   WarehouseInventory: 'WarehouseInventory',
   NpSyncLog: 'NpSyncLog',
   YearlySequence: 'YearlySequence',
+  InvoiceSettings: 'InvoiceSettings',
+  SmsLog: 'SmsLog',
   DescriptionSuggestion: 'DescriptionSuggestion',
   AuditLog: 'AuditLog',
   Claim: 'Claim'
@@ -438,6 +440,36 @@ export const YearlySequenceScalarFieldEnum = {
 } as const
 
 export type YearlySequenceScalarFieldEnum = (typeof YearlySequenceScalarFieldEnum)[keyof typeof YearlySequenceScalarFieldEnum]
+
+
+export const InvoiceSettingsScalarFieldEnum = {
+  id: 'id',
+  isSingleton: 'isSingleton',
+  bankName: 'bankName',
+  iban: 'iban',
+  accountHolder: 'accountHolder',
+  swift: 'swift',
+  smsTemplate: 'smsTemplate',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceSettingsScalarFieldEnum = (typeof InvoiceSettingsScalarFieldEnum)[keyof typeof InvoiceSettingsScalarFieldEnum]
+
+
+export const SmsLogScalarFieldEnum = {
+  id: 'id',
+  parcelId: 'parcelId',
+  toParty: 'toParty',
+  toPhone: 'toPhone',
+  body: 'body',
+  provider: 'provider',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  sentById: 'sentById',
+  createdAt: 'createdAt'
+} as const
+
+export type SmsLogScalarFieldEnum = (typeof SmsLogScalarFieldEnum)[keyof typeof SmsLogScalarFieldEnum]
 
 
 export const DescriptionSuggestionScalarFieldEnum = {

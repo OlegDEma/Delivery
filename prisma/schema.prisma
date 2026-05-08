@@ -654,6 +654,57 @@ model YearlySequence {
   @@map("yearly_sequence")
 }
 
+/**
+ * Singleton row holding the carrier's bank requisites + invoice SMS
+ * template (per ТЗ — «повідомлення включає наперед заданий шаблон з
+ * реквізитами банку надавача послуг»).
+ *
+ * Template placeholders supported by `renderInvoiceTemplate`:
+ *  {{name}} — recipient's full name
+ *  {{amount}} — total cost in EUR (2 decimals)
+ *  {{itn}} — parcel ITN
+ *  {{internalNumber}} — internal parcel number
+ *  {{bankName}}, {{iban}}, {{accountHolder}}, {{swift}} — bank details
+ */
+model InvoiceSettings {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Marker so we always work with a single row. Always set to TRUE.
+  isSingleton   Boolean  @unique @default(true) @map("is_singleton")
+  bankName      String?  @map("bank_name")
+  iban          String?
+  accountHolder String?  @map("account_holder")
+  swift         String?
+  /// Free-form template; placeholders above are substituted at send time.
+  smsTemplate   String?  @map("sms_template")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("invoice_settings")
+}
+
+/**
+ * Audit log of every SMS-invoice send attempt — kept regardless of whether
+ * the underlying provider succeeded. Lets us answer «коли і кому ми
+ * надсилали рахунок» without trusting a remote service log.
+ */
+model SmsLog {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parcelId     String?  @map("parcel_id") @db.Uuid
+  toParty      String   @map("to_party") // 'sender' | 'receiver'
+  toPhone      String   @map("to_phone")
+  body         String
+  /// Provider name once we wire one up (e.g. «twilio», «turbosms»). Null
+  /// while we still run the stub-only sender (logs without external call).
+  provider     String?
+  status       String   // 'queued' | 'sent' | 'failed'
+  errorMessage String?  @map("error_message")
+  sentById     String?  @map("sent_by") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([parcelId])
+  @@index([createdAt])
+  @@map("sms_log")
+}
+
 model DescriptionSuggestion {
   id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   text       String @unique

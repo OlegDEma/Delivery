@@ -400,6 +400,8 @@ export const ModelName = {
   WarehouseInventory: 'WarehouseInventory',
   NpSyncLog: 'NpSyncLog',
   YearlySequence: 'YearlySequence',
+  InvoiceSettings: 'InvoiceSettings',
+  SmsLog: 'SmsLog',
   DescriptionSuggestion: 'DescriptionSuggestion',
   AuditLog: 'AuditLog',
   Claim: 'Claim'
@@ -418,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "passenger" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "descriptionSuggestion" | "auditLog" | "claim"
+    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "passenger" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "invoiceSettings" | "smsLog" | "descriptionSuggestion" | "auditLog" | "claim"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1606,6 +1608,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    InvoiceSettings: {
+      payload: Prisma.$InvoiceSettingsPayload<ExtArgs>
+      fields: Prisma.InvoiceSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InvoiceSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InvoiceSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.InvoiceSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InvoiceSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.InvoiceSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.InvoiceSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.InvoiceSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InvoiceSettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.InvoiceSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        update: {
+          args: Prisma.InvoiceSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.InvoiceSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InvoiceSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InvoiceSettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.InvoiceSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.InvoiceSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInvoiceSettings>
+        }
+        groupBy: {
+          args: Prisma.InvoiceSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoiceSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InvoiceSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoiceSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+    SmsLog: {
+      payload: Prisma.$SmsLogPayload<ExtArgs>
+      fields: Prisma.SmsLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SmsLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SmsLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        findFirst: {
+          args: Prisma.SmsLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SmsLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        findMany: {
+          args: Prisma.SmsLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>[]
+        }
+        create: {
+          args: Prisma.SmsLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        createMany: {
+          args: Prisma.SmsLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SmsLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>[]
+        }
+        delete: {
+          args: Prisma.SmsLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        update: {
+          args: Prisma.SmsLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.SmsLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SmsLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SmsLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.SmsLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        aggregate: {
+          args: Prisma.SmsLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSmsLog>
+        }
+        groupBy: {
+          args: Prisma.SmsLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SmsLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SmsLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SmsLogCountAggregateOutputType> | number
+        }
+      }
+    }
     DescriptionSuggestion: {
       payload: Prisma.$DescriptionSuggestionPayload<ExtArgs>
       fields: Prisma.DescriptionSuggestionFieldRefs
@@ -2219,6 +2369,36 @@ export const YearlySequenceScalarFieldEnum = {
 export type YearlySequenceScalarFieldEnum = (typeof YearlySequenceScalarFieldEnum)[keyof typeof YearlySequenceScalarFieldEnum]
 
 
+export const InvoiceSettingsScalarFieldEnum = {
+  id: 'id',
+  isSingleton: 'isSingleton',
+  bankName: 'bankName',
+  iban: 'iban',
+  accountHolder: 'accountHolder',
+  swift: 'swift',
+  smsTemplate: 'smsTemplate',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceSettingsScalarFieldEnum = (typeof InvoiceSettingsScalarFieldEnum)[keyof typeof InvoiceSettingsScalarFieldEnum]
+
+
+export const SmsLogScalarFieldEnum = {
+  id: 'id',
+  parcelId: 'parcelId',
+  toParty: 'toParty',
+  toPhone: 'toPhone',
+  body: 'body',
+  provider: 'provider',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  sentById: 'sentById',
+  createdAt: 'createdAt'
+} as const
+
+export type SmsLogScalarFieldEnum = (typeof SmsLogScalarFieldEnum)[keyof typeof SmsLogScalarFieldEnum]
+
+
 export const DescriptionSuggestionScalarFieldEnum = {
   id: 'id',
   text: 'text',
@@ -2771,6 +2951,8 @@ export type GlobalOmitConfig = {
   warehouseInventory?: Prisma.WarehouseInventoryOmit
   npSyncLog?: Prisma.NpSyncLogOmit
   yearlySequence?: Prisma.YearlySequenceOmit
+  invoiceSettings?: Prisma.InvoiceSettingsOmit
+  smsLog?: Prisma.SmsLogOmit
   descriptionSuggestion?: Prisma.DescriptionSuggestionOmit
   auditLog?: Prisma.AuditLogOmit
   claim?: Prisma.ClaimOmit

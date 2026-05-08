@@ -19,6 +19,7 @@ import { formatDateTime } from '@/lib/utils/format';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { CopyButton } from '@/components/shared/copy-button';
 import { ParcelPartyEdit } from '@/components/parcels/parcel-party-edit';
+import { SendInvoiceButton } from '@/components/parcels/send-invoice-button';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
 import { ShareButton } from '@/components/shared/share-button';
@@ -434,6 +435,13 @@ export default function ParcelDetailPage() {
               address={parcel.receiverAddress ? { ...parcel.receiverAddress, id: parcel.receiverAddressId } : null}
               onSaved={fetchParcel}
             />
+            {/* ТЗ: чекбокс «Відправити рахунок» — справа від значка
+                редагувати, для уже створеної але ще не доставленої посилки. */}
+            <SendInvoiceButton
+              parcelId={parcel.id}
+              toParty="receiver"
+              disabled={parcel.status === 'delivered_ua' || parcel.status === 'delivered_eu'}
+            />
           </div>
         </div>
         <div className="flex items-baseline gap-2">
@@ -454,6 +462,11 @@ export default function ParcelDetailPage() {
               party={parcel.sender}
               address={parcel.senderAddress ? { ...parcel.senderAddress, id: parcel.senderAddressId } : null}
               onSaved={fetchParcel}
+            />
+            <SendInvoiceButton
+              parcelId={parcel.id}
+              toParty="sender"
+              disabled={parcel.status === 'delivered_ua' || parcel.status === 'delivered_eu'}
             />
           </div>
         </div>

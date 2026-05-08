@@ -124,6 +124,29 @@ export type NpSyncLog = Prisma.NpSyncLogModel
  */
 export type YearlySequence = Prisma.YearlySequenceModel
 /**
+ * Model InvoiceSettings
+ * *
+ *  * Singleton row holding the carrier's bank requisites + invoice SMS
+ *  * template (per ТЗ — «повідомлення включає наперед заданий шаблон з
+ *  * реквізитами банку надавача послуг»).
+ *  *
+ *  * Template placeholders supported by `renderInvoiceTemplate`:
+ *  *  {{name}} — recipient's full name
+ *  *  {{amount}} — total cost in EUR (2 decimals)
+ *  *  {{itn}} — parcel ITN
+ *  *  {{internalNumber}} — internal parcel number
+ *  *  {{bankName}}, {{iban}}, {{accountHolder}}, {{swift}} — bank details
+ */
+export type InvoiceSettings = Prisma.InvoiceSettingsModel
+/**
+ * Model SmsLog
+ * *
+ *  * Audit log of every SMS-invoice send attempt — kept regardless of whether
+ *  * the underlying provider succeeded. Lets us answer «коли і кому ми
+ *  * надсилали рахунок» without trusting a remote service log.
+ */
+export type SmsLog = Prisma.SmsLogModel
+/**
  * Model DescriptionSuggestion
  * 
  */
