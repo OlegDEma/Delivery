@@ -11,6 +11,8 @@ interface SendInvoiceButtonProps {
   disabled?: boolean;
   /** ISO timestamp of last successful send for this parcel (any party). */
   lastSentAt?: string | null;
+  /** Called after a successful send so a parent can refresh the invoice-history panel. */
+  onSent?: () => void;
 }
 
 /**
@@ -22,7 +24,7 @@ interface SendInvoiceButtonProps {
  * for resolving the phone, rendering the template, and writing the audit
  * log — this is just a thin trigger.
  */
-export function SendInvoiceButton({ parcelId, toParty, disabled, lastSentAt }: SendInvoiceButtonProps) {
+export function SendInvoiceButton({ parcelId, toParty, disabled, lastSentAt, onSent }: SendInvoiceButtonProps) {
   const [busy, setBusy] = useState(false);
 
   if (disabled) return null;
@@ -38,7 +40,12 @@ export function SendInvoiceButton({ parcelId, toParty, disabled, lastSentAt }: S
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
-        toast.success('Рахунок поставлено в чергу на відправку');
+        toast.success(
+          data.status === 'sent'
+            ? 'Рахунок надіслано'
+            : 'Рахунок поставлено в чергу на відправку'
+        );
+        onSent?.();
       } else {
         toast.error(data.error || 'Помилка');
       }

@@ -20,6 +20,7 @@ import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { CopyButton } from '@/components/shared/copy-button';
 import { ParcelPartyEdit } from '@/components/parcels/parcel-party-edit';
 import { SendInvoiceButton } from '@/components/parcels/send-invoice-button';
+import { InvoiceHistory } from '@/components/parcels/invoice-history';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
 import { ShareButton } from '@/components/shared/share-button';
@@ -135,6 +136,9 @@ export default function ParcelDetailPage() {
   const [saving, setSaving] = useState(false);
   const [trips, setTrips] = useState<TripOption[]>([]);
   const [couriers, setCouriers] = useState<{ id: string; fullName: string }[]>([]);
+  // Bumped after a successful send-invoice click — triggers <InvoiceHistory>
+  // refetch without depending on the parent fetchParcel call.
+  const [invoiceRefreshKey, setInvoiceRefreshKey] = useState(0);
 
   useEffect(() => {
     fetch('/api/trips').then(r => r.ok ? r.json() : []).then(setTrips);
@@ -441,6 +445,7 @@ export default function ParcelDetailPage() {
               parcelId={parcel.id}
               toParty="receiver"
               disabled={parcel.status === 'delivered_ua' || parcel.status === 'delivered_eu'}
+              onSent={() => setInvoiceRefreshKey((k) => k + 1)}
             />
           </div>
         </div>
@@ -467,6 +472,7 @@ export default function ParcelDetailPage() {
               parcelId={parcel.id}
               toParty="sender"
               disabled={parcel.status === 'delivered_ua' || parcel.status === 'delivered_eu'}
+              onSent={() => setInvoiceRefreshKey((k) => k + 1)}
             />
           </div>
         </div>
@@ -508,6 +514,9 @@ export default function ParcelDetailPage() {
 
       {/* Payment card */}
       <ParcelPaymentCard parcel={parcel} onUpdate={fetchParcel} />
+
+      {/* Invoice history — only renders when ≥1 SMS sent for this parcel. */}
+      <InvoiceHistory parcelId={parcel.id} refreshKey={invoiceRefreshKey} />
 
       {/* «Вікно доставки (4 години)» прибрано — за ТЗ це поле
           потрібне лише в Маршрутах, а не в тілі посилки. */}
