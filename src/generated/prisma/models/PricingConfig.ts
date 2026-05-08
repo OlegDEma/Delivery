@@ -30,6 +30,9 @@ export type PricingConfigAvgAggregateOutputType = {
   pricePerKg: runtime.Decimal | null
   insuranceThreshold: runtime.Decimal | null
   insuranceRate: runtime.Decimal | null
+  packagingPer10kg: runtime.Decimal | null
+  parcelMoneyPercent: runtime.Decimal | null
+  pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
 }
 
@@ -37,6 +40,9 @@ export type PricingConfigSumAggregateOutputType = {
   pricePerKg: runtime.Decimal | null
   insuranceThreshold: runtime.Decimal | null
   insuranceRate: runtime.Decimal | null
+  packagingPer10kg: runtime.Decimal | null
+  parcelMoneyPercent: runtime.Decimal | null
+  pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
 }
 
@@ -50,6 +56,9 @@ export type PricingConfigMinAggregateOutputType = {
   insuranceRate: runtime.Decimal | null
   insuranceEnabled: boolean | null
   packagingEnabled: boolean | null
+  packagingPer10kg: runtime.Decimal | null
+  parcelMoneyPercent: runtime.Decimal | null
+  pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
   isActive: boolean | null
   updatedById: string | null
@@ -67,6 +76,9 @@ export type PricingConfigMaxAggregateOutputType = {
   insuranceRate: runtime.Decimal | null
   insuranceEnabled: boolean | null
   packagingEnabled: boolean | null
+  packagingPer10kg: runtime.Decimal | null
+  parcelMoneyPercent: runtime.Decimal | null
+  pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
   isActive: boolean | null
   updatedById: string | null
@@ -85,6 +97,9 @@ export type PricingConfigCountAggregateOutputType = {
   insuranceEnabled: number
   packagingEnabled: number
   packagingPrices: number
+  packagingPer10kg: number
+  parcelMoneyPercent: number
+  pickupPointPrice: number
   addressDeliveryPrice: number
   collectionDays: number
   isActive: number
@@ -99,6 +114,9 @@ export type PricingConfigAvgAggregateInputType = {
   pricePerKg?: true
   insuranceThreshold?: true
   insuranceRate?: true
+  packagingPer10kg?: true
+  parcelMoneyPercent?: true
+  pickupPointPrice?: true
   addressDeliveryPrice?: true
 }
 
@@ -106,6 +124,9 @@ export type PricingConfigSumAggregateInputType = {
   pricePerKg?: true
   insuranceThreshold?: true
   insuranceRate?: true
+  packagingPer10kg?: true
+  parcelMoneyPercent?: true
+  pickupPointPrice?: true
   addressDeliveryPrice?: true
 }
 
@@ -119,6 +140,9 @@ export type PricingConfigMinAggregateInputType = {
   insuranceRate?: true
   insuranceEnabled?: true
   packagingEnabled?: true
+  packagingPer10kg?: true
+  parcelMoneyPercent?: true
+  pickupPointPrice?: true
   addressDeliveryPrice?: true
   isActive?: true
   updatedById?: true
@@ -136,6 +160,9 @@ export type PricingConfigMaxAggregateInputType = {
   insuranceRate?: true
   insuranceEnabled?: true
   packagingEnabled?: true
+  packagingPer10kg?: true
+  parcelMoneyPercent?: true
+  pickupPointPrice?: true
   addressDeliveryPrice?: true
   isActive?: true
   updatedById?: true
@@ -154,6 +181,9 @@ export type PricingConfigCountAggregateInputType = {
   insuranceEnabled?: true
   packagingEnabled?: true
   packagingPrices?: true
+  packagingPer10kg?: true
+  parcelMoneyPercent?: true
+  pickupPointPrice?: true
   addressDeliveryPrice?: true
   collectionDays?: true
   isActive?: true
@@ -260,6 +290,9 @@ export type PricingConfigGroupByOutputType = {
   insuranceEnabled: boolean
   packagingEnabled: boolean
   packagingPrices: runtime.JsonValue | null
+  packagingPer10kg: runtime.Decimal
+  parcelMoneyPercent: runtime.Decimal
+  pickupPointPrice: runtime.Decimal
   addressDeliveryPrice: runtime.Decimal
   collectionDays: string[]
   isActive: boolean
@@ -302,6 +335,9 @@ export type PricingConfigWhereInput = {
   insuranceEnabled?: Prisma.BoolFilter<"PricingConfig"> | boolean
   packagingEnabled?: Prisma.BoolFilter<"PricingConfig"> | boolean
   packagingPrices?: Prisma.JsonNullableFilter<"PricingConfig">
+  packagingPer10kg?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.StringNullableListFilter<"PricingConfig">
   isActive?: Prisma.BoolFilter<"PricingConfig"> | boolean
@@ -322,6 +358,9 @@ export type PricingConfigOrderByWithRelationInput = {
   insuranceEnabled?: Prisma.SortOrder
   packagingEnabled?: Prisma.SortOrder
   packagingPrices?: Prisma.SortOrderInput | Prisma.SortOrder
+  packagingPer10kg?: Prisma.SortOrder
+  parcelMoneyPercent?: Prisma.SortOrder
+  pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   collectionDays?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -345,6 +384,9 @@ export type PricingConfigWhereUniqueInput = Prisma.AtLeast<{
   insuranceEnabled?: Prisma.BoolFilter<"PricingConfig"> | boolean
   packagingEnabled?: Prisma.BoolFilter<"PricingConfig"> | boolean
   packagingPrices?: Prisma.JsonNullableFilter<"PricingConfig">
+  packagingPer10kg?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.StringNullableListFilter<"PricingConfig">
   isActive?: Prisma.BoolFilter<"PricingConfig"> | boolean
@@ -365,6 +407,9 @@ export type PricingConfigOrderByWithAggregationInput = {
   insuranceEnabled?: Prisma.SortOrder
   packagingEnabled?: Prisma.SortOrder
   packagingPrices?: Prisma.SortOrderInput | Prisma.SortOrder
+  packagingPer10kg?: Prisma.SortOrder
+  parcelMoneyPercent?: Prisma.SortOrder
+  pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   collectionDays?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -392,6 +437,9 @@ export type PricingConfigScalarWhereWithAggregatesInput = {
   insuranceEnabled?: Prisma.BoolWithAggregatesFilter<"PricingConfig"> | boolean
   packagingEnabled?: Prisma.BoolWithAggregatesFilter<"PricingConfig"> | boolean
   packagingPrices?: Prisma.JsonNullableWithAggregatesFilter<"PricingConfig">
+  packagingPer10kg?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.StringNullableListFilter<"PricingConfig">
   isActive?: Prisma.BoolWithAggregatesFilter<"PricingConfig"> | boolean
@@ -411,6 +459,9 @@ export type PricingConfigCreateInput = {
   insuranceEnabled?: boolean
   packagingEnabled?: boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
   isActive?: boolean
@@ -430,6 +481,9 @@ export type PricingConfigUncheckedCreateInput = {
   insuranceEnabled?: boolean
   packagingEnabled?: boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
   isActive?: boolean
@@ -449,6 +503,9 @@ export type PricingConfigUpdateInput = {
   insuranceEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -468,6 +525,9 @@ export type PricingConfigUncheckedUpdateInput = {
   insuranceEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -487,6 +547,9 @@ export type PricingConfigCreateManyInput = {
   insuranceEnabled?: boolean
   packagingEnabled?: boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
   isActive?: boolean
@@ -506,6 +569,9 @@ export type PricingConfigUpdateManyMutationInput = {
   insuranceEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -524,6 +590,9 @@ export type PricingConfigUncheckedUpdateManyInput = {
   insuranceEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -553,6 +622,9 @@ export type PricingConfigCountOrderByAggregateInput = {
   insuranceEnabled?: Prisma.SortOrder
   packagingEnabled?: Prisma.SortOrder
   packagingPrices?: Prisma.SortOrder
+  packagingPer10kg?: Prisma.SortOrder
+  parcelMoneyPercent?: Prisma.SortOrder
+  pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   collectionDays?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -565,6 +637,9 @@ export type PricingConfigAvgOrderByAggregateInput = {
   pricePerKg?: Prisma.SortOrder
   insuranceThreshold?: Prisma.SortOrder
   insuranceRate?: Prisma.SortOrder
+  packagingPer10kg?: Prisma.SortOrder
+  parcelMoneyPercent?: Prisma.SortOrder
+  pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
 }
 
@@ -578,6 +653,9 @@ export type PricingConfigMaxOrderByAggregateInput = {
   insuranceRate?: Prisma.SortOrder
   insuranceEnabled?: Prisma.SortOrder
   packagingEnabled?: Prisma.SortOrder
+  packagingPer10kg?: Prisma.SortOrder
+  parcelMoneyPercent?: Prisma.SortOrder
+  pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
@@ -595,6 +673,9 @@ export type PricingConfigMinOrderByAggregateInput = {
   insuranceRate?: Prisma.SortOrder
   insuranceEnabled?: Prisma.SortOrder
   packagingEnabled?: Prisma.SortOrder
+  packagingPer10kg?: Prisma.SortOrder
+  parcelMoneyPercent?: Prisma.SortOrder
+  pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
@@ -606,6 +687,9 @@ export type PricingConfigSumOrderByAggregateInput = {
   pricePerKg?: Prisma.SortOrder
   insuranceThreshold?: Prisma.SortOrder
   insuranceRate?: Prisma.SortOrder
+  packagingPer10kg?: Prisma.SortOrder
+  parcelMoneyPercent?: Prisma.SortOrder
+  pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
 }
 
@@ -683,6 +767,9 @@ export type PricingConfigCreateWithoutUpdatedByInput = {
   insuranceEnabled?: boolean
   packagingEnabled?: boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
   isActive?: boolean
@@ -701,6 +788,9 @@ export type PricingConfigUncheckedCreateWithoutUpdatedByInput = {
   insuranceEnabled?: boolean
   packagingEnabled?: boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
   isActive?: boolean
@@ -748,6 +838,9 @@ export type PricingConfigScalarWhereInput = {
   insuranceEnabled?: Prisma.BoolFilter<"PricingConfig"> | boolean
   packagingEnabled?: Prisma.BoolFilter<"PricingConfig"> | boolean
   packagingPrices?: Prisma.JsonNullableFilter<"PricingConfig">
+  packagingPer10kg?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.StringNullableListFilter<"PricingConfig">
   isActive?: Prisma.BoolFilter<"PricingConfig"> | boolean
@@ -767,6 +860,9 @@ export type PricingConfigCreateManyUpdatedByInput = {
   insuranceEnabled?: boolean
   packagingEnabled?: boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
   isActive?: boolean
@@ -785,6 +881,9 @@ export type PricingConfigUpdateWithoutUpdatedByInput = {
   insuranceEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -803,6 +902,9 @@ export type PricingConfigUncheckedUpdateWithoutUpdatedByInput = {
   insuranceEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -821,6 +923,9 @@ export type PricingConfigUncheckedUpdateManyWithoutUpdatedByInput = {
   insuranceEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -841,6 +946,9 @@ export type PricingConfigSelect<ExtArgs extends runtime.Types.Extensions.Interna
   insuranceEnabled?: boolean
   packagingEnabled?: boolean
   packagingPrices?: boolean
+  packagingPer10kg?: boolean
+  parcelMoneyPercent?: boolean
+  pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
   collectionDays?: boolean
   isActive?: boolean
@@ -861,6 +969,9 @@ export type PricingConfigSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   insuranceEnabled?: boolean
   packagingEnabled?: boolean
   packagingPrices?: boolean
+  packagingPer10kg?: boolean
+  parcelMoneyPercent?: boolean
+  pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
   collectionDays?: boolean
   isActive?: boolean
@@ -881,6 +992,9 @@ export type PricingConfigSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   insuranceEnabled?: boolean
   packagingEnabled?: boolean
   packagingPrices?: boolean
+  packagingPer10kg?: boolean
+  parcelMoneyPercent?: boolean
+  pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
   collectionDays?: boolean
   isActive?: boolean
@@ -901,6 +1015,9 @@ export type PricingConfigSelectScalar = {
   insuranceEnabled?: boolean
   packagingEnabled?: boolean
   packagingPrices?: boolean
+  packagingPer10kg?: boolean
+  parcelMoneyPercent?: boolean
+  pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
   collectionDays?: boolean
   isActive?: boolean
@@ -909,7 +1026,7 @@ export type PricingConfigSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PricingConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "direction" | "pricePerKg" | "weightType" | "insuranceThreshold" | "insuranceRate" | "insuranceEnabled" | "packagingEnabled" | "packagingPrices" | "addressDeliveryPrice" | "collectionDays" | "isActive" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["pricingConfig"]>
+export type PricingConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "direction" | "pricePerKg" | "weightType" | "insuranceThreshold" | "insuranceRate" | "insuranceEnabled" | "packagingEnabled" | "packagingPrices" | "packagingPer10kg" | "parcelMoneyPercent" | "pickupPointPrice" | "addressDeliveryPrice" | "collectionDays" | "isActive" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["pricingConfig"]>
 export type PricingConfigInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   updatedBy?: boolean | Prisma.PricingConfig$updatedByArgs<ExtArgs>
 }
@@ -936,6 +1053,20 @@ export type $PricingConfigPayload<ExtArgs extends runtime.Types.Extensions.Inter
     insuranceEnabled: boolean
     packagingEnabled: boolean
     packagingPrices: runtime.JsonValue | null
+    /**
+     * Sum charged per each (full or partial) 10 kg when packaging checkbox is on.
+     * Replaces the legacy tier JSON in `packagingPrices`.
+     */
+    packagingPer10kg: runtime.Decimal
+    /**
+     * Whole-percent rate applied to the "Пакет" amount (cash transferred by sender).
+     * 0 disables the option.
+     */
+    parcelMoneyPercent: runtime.Decimal
+    /**
+     * Flat price for handing the parcel over at a collection point (per ТЗ).
+     */
+    pickupPointPrice: runtime.Decimal
     addressDeliveryPrice: runtime.Decimal
     collectionDays: string[]
     isActive: boolean
@@ -1376,6 +1507,9 @@ export interface PricingConfigFieldRefs {
   readonly insuranceEnabled: Prisma.FieldRef<"PricingConfig", 'Boolean'>
   readonly packagingEnabled: Prisma.FieldRef<"PricingConfig", 'Boolean'>
   readonly packagingPrices: Prisma.FieldRef<"PricingConfig", 'Json'>
+  readonly packagingPer10kg: Prisma.FieldRef<"PricingConfig", 'Decimal'>
+  readonly parcelMoneyPercent: Prisma.FieldRef<"PricingConfig", 'Decimal'>
+  readonly pickupPointPrice: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly addressDeliveryPrice: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly collectionDays: Prisma.FieldRef<"PricingConfig", 'String[]'>
   readonly isActive: Prisma.FieldRef<"PricingConfig", 'Boolean'>

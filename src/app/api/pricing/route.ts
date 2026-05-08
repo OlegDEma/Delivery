@@ -30,7 +30,15 @@ export async function PATCH(request: NextRequest) {
   let body;
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
-  const { id, pricePerKg, weightType, insuranceEnabled, insuranceRate, insuranceThreshold, packagingEnabled, addressDeliveryPrice, collectionDays } = body;
+  const {
+    id,
+    pricePerKg, weightType,
+    insuranceEnabled, insuranceRate, insuranceThreshold,
+    packagingEnabled, packagingPer10kg,
+    parcelMoneyPercent,
+    addressDeliveryPrice, pickupPointPrice,
+    collectionDays,
+  } = body;
 
   if (!id) return NextResponse.json({ error: 'ID обов\'язковий' }, { status: 400 });
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
@@ -41,39 +49,51 @@ export async function PATCH(request: NextRequest) {
   // Validate numeric inputs — Prisma accepts negative or string values which
   // would corrupt the pricing. Reject before update.
   const validNumber = (v: unknown, min: number, max: number, label: string): string | null => {
+    if (v === null) return null; // null = «не змінювати», ігноруємо
     const n = Number(v);
     if (!Number.isFinite(n)) return `${label}: очікується число`;
     if (n < min) return `${label}: не може бути менше ${min}`;
     if (n > max) return `${label}: не може бути більше ${max}`;
     return null;
   };
-  if (pricePerKg !== undefined) {
-    const e = validNumber(pricePerKg, 0, 1000, 'pricePerKg'); if (e) return NextResponse.json({ error: e }, { status: 400 });
-  }
-  if (addressDeliveryPrice !== undefined) {
-    const e = validNumber(addressDeliveryPrice, 0, 1000, 'addressDeliveryPrice'); if (e) return NextResponse.json({ error: e }, { status: 400 });
-  }
-  if (insuranceRate !== undefined) {
-    const e = validNumber(insuranceRate, 0, 1, 'insuranceRate (0..1)'); if (e) return NextResponse.json({ error: e }, { status: 400 });
-  }
-  if (insuranceThreshold !== undefined) {
-    const e = validNumber(insuranceThreshold, 0, 100000, 'insuranceThreshold'); if (e) return NextResponse.json({ error: e }, { status: 400 });
+  const checks: Array<[unknown, number, number, string]> = [
+    [pricePerKg,           0, 1000,   'pricePerKg'],
+    [addressDeliveryPrice, 0, 1000,   'addressDeliveryPrice'],
+    [pickupPointPrice,     0, 1000,   'pickupPointPrice'],
+    [packagingPer10kg,     0, 1000,   'packagingPer10kg'],
+    [insuranceRate,        0, 1,      'insuranceRate (0..1)'],
+    [parcelMoneyPercent,   0, 100,    'parcelMoneyPercent'],
+    [insuranceThreshold,   0, 100000, 'insuranceThreshold'],
+  ];
+  for (const [v, min, max, label] of checks) {
+    if (v !== undefined) {
+      const e = validNumber(v, min, max, label);
+      if (e) return NextResponse.json({ error: e }, { status: 400 });
+    }
   }
   if (weightType !== undefined && !['actual', 'volumetric', 'average'].includes(weightType)) {
     return NextResponse.json({ error: 'weightType: actual/volumetric/average' }, { status: 400 });
   }
 
+  // Numeric fields: only update when caller supplied a non-null value. `null`
+  // means "user cleared the input — keep DB unchanged" (UI guards against
+  // submitting null for required fields, see pricing/page.tsx validation).
+  const numIfPresent = (v: unknown) => (v !== undefined && v !== null ? Number(v) : undefined);
+
   const updated = await prisma.pricingConfig.update({
     where: { id },
     data: {
-      ...(pricePerKg !== undefined && { pricePerKg: Number(pricePerKg) }),
-      ...(weightType !== undefined && { weightType }),
-      ...(insuranceEnabled !== undefined && { insuranceEnabled }),
-      ...(insuranceRate !== undefined && { insuranceRate: Number(insuranceRate) }),
-      ...(insuranceThreshold !== undefined && { insuranceThreshold: Number(insuranceThreshold) }),
-      ...(packagingEnabled !== undefined && { packagingEnabled }),
-      ...(addressDeliveryPrice !== undefined && { addressDeliveryPrice: Number(addressDeliveryPrice) }),
-      ...(collectionDays !== undefined && { collectionDays }),
+      ...(numIfPresent(pricePerKg)           !== undefined && { pricePerKg:           numIfPresent(pricePerKg)! }),
+      ...(weightType                         !== undefined && { weightType }),
+      ...(insuranceEnabled                   !== undefined && { insuranceEnabled }),
+      ...(numIfPresent(insuranceRate)        !== undefined && { insuranceRate:        numIfPresent(insuranceRate)! }),
+      ...(numIfPresent(insuranceThreshold)   !== undefined && { insuranceThreshold:   numIfPresent(insuranceThreshold)! }),
+      ...(packagingEnabled                   !== undefined && { packagingEnabled }),
+      ...(numIfPresent(packagingPer10kg)     !== undefined && { packagingPer10kg:     numIfPresent(packagingPer10kg)! }),
+      ...(numIfPresent(parcelMoneyPercent)   !== undefined && { parcelMoneyPercent:   numIfPresent(parcelMoneyPercent)! }),
+      ...(numIfPresent(addressDeliveryPrice) !== undefined && { addressDeliveryPrice: numIfPresent(addressDeliveryPrice)! }),
+      ...(numIfPresent(pickupPointPrice)     !== undefined && { pickupPointPrice:     numIfPresent(pickupPointPrice)! }),
+      ...(collectionDays                     !== undefined && { collectionDays }),
       updatedById: user.id,
     },
   });
