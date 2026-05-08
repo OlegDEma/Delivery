@@ -250,7 +250,7 @@ export function ParcelPlacesCard({
                 declaredValue={Number(declaredValue) || 0}
                 needsPackaging={!!needsPackaging}
                 isAddressDelivery={receiverDeliveryMethod === 'address'}
-                insuranceEnabled={insuranceEnabled}
+                insurance={insuranceEnabled}
               />
             )}
           </div>
@@ -297,7 +297,7 @@ export function ParcelPlacesCard({
                   declaredValue={Number(declaredValue) || 0}
                   needsPackaging={!!needsPackaging}
                   isAddressDelivery={receiverDeliveryMethod === 'address'}
-                  insuranceEnabled={insuranceEnabled}
+                  insurance={insuranceEnabled}
                 />
               </div>
             )}

@@ -21,6 +21,10 @@ interface ParcelDetailsCardProps {
     paymentMethod: string;
     paymentInUkraine: boolean;
     needsPackaging: boolean;
+    /** Per ТЗ: signal of opted-in insurance (vs deriving from cost > 0). */
+    insuranceApplied?: boolean;
+    /** «Пакет» — money sender transfers to receiver. Shown as «(N)». */
+    parcelMoneyAmount?: number | null;
     isPaid: boolean;
     assignedCourier: { id: string; fullName: string } | null;
     estimatedDeliveryStart: string | null;
@@ -208,7 +212,23 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
         ) : parcel.needsPackaging && (
           <div className="flex justify-between">
             <span className="text-gray-500">Пакування</span>
-            <span>Потребує</span>
+            <span>Так</span>
+          </div>
+        )}
+
+        {/* Insurance (read-only display — opt-in is set on creation). */}
+        {!editing && parcel.insuranceApplied && (
+          <div className="flex justify-between">
+            <span className="text-gray-500">Страхування</span>
+            <span>Так</span>
+          </div>
+        )}
+
+        {/* «Пакет» — money transfer. Per ТЗ shown as «(N)». */}
+        {!editing && parcel.parcelMoneyAmount && Number(parcel.parcelMoneyAmount) > 0 && (
+          <div className="flex justify-between">
+            <span className="text-gray-500">Пакет</span>
+            <span>({Number(parcel.parcelMoneyAmount).toFixed(0)})</span>
           </div>
         )}
 

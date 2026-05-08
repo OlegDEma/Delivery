@@ -74,6 +74,13 @@ export default function NewOrderPage() {
   const [shipmentType, setShipmentType] = useState('parcels_cargo');
   const [description, setDescription] = useState('');
   const [declaredValue, setDeclaredValue] = useState('');
+  // Per ТЗ — opt-in services. Прихований 3% автоматичний бонус скасовано.
+  const [insurance, setInsurance] = useState(false);
+  const [needsPackaging, setNeedsPackaging] = useState(false);
+  // «Пакет» — sender's cash transfer to receiver. % від суми додається до
+  // вартості посилки (% задається в Тарифах).
+  const [parcelMoneyEnabled, setParcelMoneyEnabled] = useState(false);
+  const [parcelMoneyAmount, setParcelMoneyAmount] = useState('');
   const [places, setPlaces] = useState<PlaceData[]>([emptyPlace()]);
   const [payer, setPayer] = useState('sender');
   const [paymentMethod, setPaymentMethod] = useState('cash');
@@ -85,15 +92,16 @@ export default function NewOrderPage() {
   const [collectionDate, setCollectionDate] = useState('');
   const [collectionAddress, setCollectionAddress] = useState('');
 
-  // Автопідставляння країни отримувача за напрямком:
-  // eu_to_ua → UA; ua_to_eu — лишаємо пустим, клієнт вибирає NL/AT/DE.
-  useEffect(() => {
-    if (direction === 'eu_to_ua' && !receiverCountry) {
+  // Автопідставляння країни отримувача за напрямком (виноситься в колбек,
+  // щоб не дзеркалити стейт у useEffect — react-hooks/set-state-in-effect).
+  function handleDirectionChange(next: string) {
+    setDirection(next);
+    if (next === 'eu_to_ua' && !receiverCountry) {
       setReceiverCountry('UA');
-    } else if (direction === 'ua_to_eu' && receiverCountry === 'UA') {
+    } else if (next === 'ua_to_eu' && receiverCountry === 'UA') {
       setReceiverCountry('');
     }
-  }, [direction]); // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
   useEffect(() => {
     fetch('/api/pricing').then(r => r.ok ? r.json() : []).then(setPricingConfigs);
@@ -180,6 +188,11 @@ export default function NewOrderPage() {
       body: JSON.stringify({
         direction, shipmentType, description,
         declaredValue: declaredValue ? Number(declaredValue) : undefined,
+        insurance, needsPackaging,
+        parcelMoneyAmount:
+          parcelMoneyEnabled && Number(parcelMoneyAmount) > 0
+            ? Number(parcelMoneyAmount)
+            : undefined,
         payer, paymentMethod, paymentInUkraine,
         senderPhone, senderFirstName, senderLastName, senderCountry, senderCity,
         receiverPhone, receiverFirstName, receiverLastName, receiverCountry, receiverCity,
@@ -240,7 +253,7 @@ export default function NewOrderPage() {
             <CardTitle className="text-base">Виберіть напрямок</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0">
-            <Select value={direction} onValueChange={(v) => setDirection(v ?? '')}>
+            <Select value={direction} onValueChange={(v) => handleDirectionChange(v ?? '')}>
               <SelectTrigger>
                 <SelectValue>
                   {direction ? DIRECTION_LABELS[direction] : <span className="text-gray-400">Виберіть напрямок…</span>}
@@ -397,6 +410,47 @@ export default function NewOrderPage() {
               <div><Label>Опис</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Побутові речі, продукти..." rows={2} /></div>
             )}
             <div><Label>Оголошена вартість (EUR)</Label><Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} /></div>
+
+            {/* Додаткові послуги — кожна вмикається чекбоксом, % і суми
+                визначаються тарифом для напрямку. */}
+            <div className="space-y-2 pt-2 border-t">
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox checked={insurance} onCheckedChange={(c) => setInsurance(c === true)} />
+                Страхування (% від оголошеної вартості — згідно тарифу)
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
+                Пакування (€ за кожні 10 кг — згідно тарифу)
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={parcelMoneyEnabled}
+                  onCheckedChange={(c) => {
+                    const enabled = c === true;
+                    setParcelMoneyEnabled(enabled);
+                    if (!enabled) setParcelMoneyAmount('');
+                  }}
+                />
+                Пакет (передача готівки отримувачу)
+              </label>
+              {parcelMoneyEnabled && (
+                <div>
+                  <Label className="text-xs">Сума передачі (EUR)</Label>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    value={parcelMoneyAmount}
+                    onChange={(e) => setParcelMoneyAmount(e.target.value)}
+                    placeholder="1000"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    До вартості посилки додається % від цієї суми (% задається в тарифі).
+                  </p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 

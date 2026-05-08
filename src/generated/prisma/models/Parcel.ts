@@ -37,6 +37,9 @@ export type ParcelAvgAggregateOutputType = {
   packagingCost: runtime.Decimal | null
   insuranceCost: runtime.Decimal | null
   addressDeliveryCost: runtime.Decimal | null
+  pickupPointCost: runtime.Decimal | null
+  parcelMoneyAmount: runtime.Decimal | null
+  parcelMoneyCost: runtime.Decimal | null
   totalCost: runtime.Decimal | null
 }
 
@@ -51,6 +54,9 @@ export type ParcelSumAggregateOutputType = {
   packagingCost: runtime.Decimal | null
   insuranceCost: runtime.Decimal | null
   addressDeliveryCost: runtime.Decimal | null
+  pickupPointCost: runtime.Decimal | null
+  parcelMoneyAmount: runtime.Decimal | null
+  parcelMoneyCost: runtime.Decimal | null
   totalCost: runtime.Decimal | null
 }
 
@@ -80,7 +86,11 @@ export type ParcelMinAggregateOutputType = {
   deliveryCost: runtime.Decimal | null
   packagingCost: runtime.Decimal | null
   insuranceCost: runtime.Decimal | null
+  insuranceApplied: boolean | null
   addressDeliveryCost: runtime.Decimal | null
+  pickupPointCost: runtime.Decimal | null
+  parcelMoneyAmount: runtime.Decimal | null
+  parcelMoneyCost: runtime.Decimal | null
   totalCost: runtime.Decimal | null
   costCurrency: string | null
   npTtn: string | null
@@ -93,6 +103,7 @@ export type ParcelMinAggregateOutputType = {
   estimatedDeliveryEnd: Date | null
   isPaid: boolean | null
   paidAt: Date | null
+  invoiceSentToPayerAt: Date | null
   collectionMethod: $Enums.CollectionMethod | null
   collectionPointId: string | null
   collectionDate: Date | null
@@ -133,7 +144,11 @@ export type ParcelMaxAggregateOutputType = {
   deliveryCost: runtime.Decimal | null
   packagingCost: runtime.Decimal | null
   insuranceCost: runtime.Decimal | null
+  insuranceApplied: boolean | null
   addressDeliveryCost: runtime.Decimal | null
+  pickupPointCost: runtime.Decimal | null
+  parcelMoneyAmount: runtime.Decimal | null
+  parcelMoneyCost: runtime.Decimal | null
   totalCost: runtime.Decimal | null
   costCurrency: string | null
   npTtn: string | null
@@ -146,6 +161,7 @@ export type ParcelMaxAggregateOutputType = {
   estimatedDeliveryEnd: Date | null
   isPaid: boolean | null
   paidAt: Date | null
+  invoiceSentToPayerAt: Date | null
   collectionMethod: $Enums.CollectionMethod | null
   collectionPointId: string | null
   collectionDate: Date | null
@@ -186,7 +202,11 @@ export type ParcelCountAggregateOutputType = {
   deliveryCost: number
   packagingCost: number
   insuranceCost: number
+  insuranceApplied: number
   addressDeliveryCost: number
+  pickupPointCost: number
+  parcelMoneyAmount: number
+  parcelMoneyCost: number
   totalCost: number
   costCurrency: number
   npTtn: number
@@ -199,6 +219,7 @@ export type ParcelCountAggregateOutputType = {
   estimatedDeliveryEnd: number
   isPaid: number
   paidAt: number
+  invoiceSentToPayerAt: number
   photos: number
   collectionMethod: number
   collectionPointId: number
@@ -227,6 +248,9 @@ export type ParcelAvgAggregateInputType = {
   packagingCost?: true
   insuranceCost?: true
   addressDeliveryCost?: true
+  pickupPointCost?: true
+  parcelMoneyAmount?: true
+  parcelMoneyCost?: true
   totalCost?: true
 }
 
@@ -241,6 +265,9 @@ export type ParcelSumAggregateInputType = {
   packagingCost?: true
   insuranceCost?: true
   addressDeliveryCost?: true
+  pickupPointCost?: true
+  parcelMoneyAmount?: true
+  parcelMoneyCost?: true
   totalCost?: true
 }
 
@@ -270,7 +297,11 @@ export type ParcelMinAggregateInputType = {
   deliveryCost?: true
   packagingCost?: true
   insuranceCost?: true
+  insuranceApplied?: true
   addressDeliveryCost?: true
+  pickupPointCost?: true
+  parcelMoneyAmount?: true
+  parcelMoneyCost?: true
   totalCost?: true
   costCurrency?: true
   npTtn?: true
@@ -283,6 +314,7 @@ export type ParcelMinAggregateInputType = {
   estimatedDeliveryEnd?: true
   isPaid?: true
   paidAt?: true
+  invoiceSentToPayerAt?: true
   collectionMethod?: true
   collectionPointId?: true
   collectionDate?: true
@@ -323,7 +355,11 @@ export type ParcelMaxAggregateInputType = {
   deliveryCost?: true
   packagingCost?: true
   insuranceCost?: true
+  insuranceApplied?: true
   addressDeliveryCost?: true
+  pickupPointCost?: true
+  parcelMoneyAmount?: true
+  parcelMoneyCost?: true
   totalCost?: true
   costCurrency?: true
   npTtn?: true
@@ -336,6 +372,7 @@ export type ParcelMaxAggregateInputType = {
   estimatedDeliveryEnd?: true
   isPaid?: true
   paidAt?: true
+  invoiceSentToPayerAt?: true
   collectionMethod?: true
   collectionPointId?: true
   collectionDate?: true
@@ -376,7 +413,11 @@ export type ParcelCountAggregateInputType = {
   deliveryCost?: true
   packagingCost?: true
   insuranceCost?: true
+  insuranceApplied?: true
   addressDeliveryCost?: true
+  pickupPointCost?: true
+  parcelMoneyAmount?: true
+  parcelMoneyCost?: true
   totalCost?: true
   costCurrency?: true
   npTtn?: true
@@ -389,6 +430,7 @@ export type ParcelCountAggregateInputType = {
   estimatedDeliveryEnd?: true
   isPaid?: true
   paidAt?: true
+  invoiceSentToPayerAt?: true
   photos?: true
   collectionMethod?: true
   collectionPointId?: true
@@ -517,7 +559,11 @@ export type ParcelGroupByOutputType = {
   deliveryCost: runtime.Decimal | null
   packagingCost: runtime.Decimal | null
   insuranceCost: runtime.Decimal | null
+  insuranceApplied: boolean
   addressDeliveryCost: runtime.Decimal | null
+  pickupPointCost: runtime.Decimal | null
+  parcelMoneyAmount: runtime.Decimal | null
+  parcelMoneyCost: runtime.Decimal | null
   totalCost: runtime.Decimal | null
   costCurrency: string
   npTtn: string | null
@@ -530,6 +576,7 @@ export type ParcelGroupByOutputType = {
   estimatedDeliveryEnd: Date | null
   isPaid: boolean
   paidAt: Date | null
+  invoiceSentToPayerAt: Date | null
   photos: string[]
   collectionMethod: $Enums.CollectionMethod | null
   collectionPointId: string | null
@@ -594,7 +641,11 @@ export type ParcelWhereInput = {
   deliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFilter<"Parcel"> | boolean
   addressDeliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableFilter<"Parcel"> | string | null
@@ -607,6 +658,7 @@ export type ParcelWhereInput = {
   estimatedDeliveryEnd?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
   isPaid?: Prisma.BoolFilter<"Parcel"> | boolean
   paidAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
+  invoiceSentToPayerAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
   photos?: Prisma.StringNullableListFilter<"Parcel">
   collectionMethod?: Prisma.EnumCollectionMethodNullableFilter<"Parcel"> | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
@@ -664,7 +716,11 @@ export type ParcelOrderByWithRelationInput = {
   deliveryCost?: Prisma.SortOrderInput | Prisma.SortOrder
   packagingCost?: Prisma.SortOrderInput | Prisma.SortOrder
   insuranceCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  insuranceApplied?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  pickupPointCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  parcelMoneyAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  parcelMoneyCost?: Prisma.SortOrderInput | Prisma.SortOrder
   totalCost?: Prisma.SortOrderInput | Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -677,6 +733,7 @@ export type ParcelOrderByWithRelationInput = {
   estimatedDeliveryEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  invoiceSentToPayerAt?: Prisma.SortOrderInput | Prisma.SortOrder
   photos?: Prisma.SortOrder
   collectionMethod?: Prisma.SortOrderInput | Prisma.SortOrder
   collectionPointId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -737,7 +794,11 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
   deliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFilter<"Parcel"> | boolean
   addressDeliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableFilter<"Parcel"> | string | null
@@ -750,6 +811,7 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
   estimatedDeliveryEnd?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
   isPaid?: Prisma.BoolFilter<"Parcel"> | boolean
   paidAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
+  invoiceSentToPayerAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
   photos?: Prisma.StringNullableListFilter<"Parcel">
   collectionMethod?: Prisma.EnumCollectionMethodNullableFilter<"Parcel"> | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
@@ -807,7 +869,11 @@ export type ParcelOrderByWithAggregationInput = {
   deliveryCost?: Prisma.SortOrderInput | Prisma.SortOrder
   packagingCost?: Prisma.SortOrderInput | Prisma.SortOrder
   insuranceCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  insuranceApplied?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  pickupPointCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  parcelMoneyAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  parcelMoneyCost?: Prisma.SortOrderInput | Prisma.SortOrder
   totalCost?: Prisma.SortOrderInput | Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -820,6 +886,7 @@ export type ParcelOrderByWithAggregationInput = {
   estimatedDeliveryEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  invoiceSentToPayerAt?: Prisma.SortOrderInput | Prisma.SortOrder
   photos?: Prisma.SortOrder
   collectionMethod?: Prisma.SortOrderInput | Prisma.SortOrder
   collectionPointId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -869,7 +936,11 @@ export type ParcelScalarWhereWithAggregatesInput = {
   deliveryCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolWithAggregatesFilter<"Parcel"> | boolean
   addressDeliveryCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringWithAggregatesFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableWithAggregatesFilter<"Parcel"> | string | null
@@ -882,6 +953,7 @@ export type ParcelScalarWhereWithAggregatesInput = {
   estimatedDeliveryEnd?: Prisma.DateTimeNullableWithAggregatesFilter<"Parcel"> | Date | string | null
   isPaid?: Prisma.BoolWithAggregatesFilter<"Parcel"> | boolean
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Parcel"> | Date | string | null
+  invoiceSentToPayerAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Parcel"> | Date | string | null
   photos?: Prisma.StringNullableListFilter<"Parcel">
   collectionMethod?: Prisma.EnumCollectionMethodNullableWithAggregatesFilter<"Parcel"> | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.UuidNullableWithAggregatesFilter<"Parcel"> | string | null
@@ -918,7 +990,11 @@ export type ParcelCreateInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -929,6 +1005,7 @@ export type ParcelCreateInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -984,7 +1061,11 @@ export type ParcelUncheckedCreateInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -997,6 +1078,7 @@ export type ParcelUncheckedCreateInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -1040,7 +1122,11 @@ export type ParcelUpdateInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1051,6 +1137,7 @@ export type ParcelUpdateInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1106,7 +1193,11 @@ export type ParcelUncheckedUpdateInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1119,6 +1210,7 @@ export type ParcelUncheckedUpdateInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1167,7 +1259,11 @@ export type ParcelCreateManyInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -1180,6 +1276,7 @@ export type ParcelCreateManyInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -1216,7 +1313,11 @@ export type ParcelUpdateManyMutationInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1227,6 +1328,7 @@ export type ParcelUpdateManyMutationInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1266,7 +1368,11 @@ export type ParcelUncheckedUpdateManyInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1279,6 +1385,7 @@ export type ParcelUncheckedUpdateManyInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1338,7 +1445,11 @@ export type ParcelCountOrderByAggregateInput = {
   deliveryCost?: Prisma.SortOrder
   packagingCost?: Prisma.SortOrder
   insuranceCost?: Prisma.SortOrder
+  insuranceApplied?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrder
+  pickupPointCost?: Prisma.SortOrder
+  parcelMoneyAmount?: Prisma.SortOrder
+  parcelMoneyCost?: Prisma.SortOrder
   totalCost?: Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrder
@@ -1351,6 +1462,7 @@ export type ParcelCountOrderByAggregateInput = {
   estimatedDeliveryEnd?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
+  invoiceSentToPayerAt?: Prisma.SortOrder
   photos?: Prisma.SortOrder
   collectionMethod?: Prisma.SortOrder
   collectionPointId?: Prisma.SortOrder
@@ -1377,6 +1489,9 @@ export type ParcelAvgOrderByAggregateInput = {
   packagingCost?: Prisma.SortOrder
   insuranceCost?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrder
+  pickupPointCost?: Prisma.SortOrder
+  parcelMoneyAmount?: Prisma.SortOrder
+  parcelMoneyCost?: Prisma.SortOrder
   totalCost?: Prisma.SortOrder
 }
 
@@ -1406,7 +1521,11 @@ export type ParcelMaxOrderByAggregateInput = {
   deliveryCost?: Prisma.SortOrder
   packagingCost?: Prisma.SortOrder
   insuranceCost?: Prisma.SortOrder
+  insuranceApplied?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrder
+  pickupPointCost?: Prisma.SortOrder
+  parcelMoneyAmount?: Prisma.SortOrder
+  parcelMoneyCost?: Prisma.SortOrder
   totalCost?: Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrder
@@ -1419,6 +1538,7 @@ export type ParcelMaxOrderByAggregateInput = {
   estimatedDeliveryEnd?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
+  invoiceSentToPayerAt?: Prisma.SortOrder
   collectionMethod?: Prisma.SortOrder
   collectionPointId?: Prisma.SortOrder
   collectionDate?: Prisma.SortOrder
@@ -1459,7 +1579,11 @@ export type ParcelMinOrderByAggregateInput = {
   deliveryCost?: Prisma.SortOrder
   packagingCost?: Prisma.SortOrder
   insuranceCost?: Prisma.SortOrder
+  insuranceApplied?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrder
+  pickupPointCost?: Prisma.SortOrder
+  parcelMoneyAmount?: Prisma.SortOrder
+  parcelMoneyCost?: Prisma.SortOrder
   totalCost?: Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrder
@@ -1472,6 +1596,7 @@ export type ParcelMinOrderByAggregateInput = {
   estimatedDeliveryEnd?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
+  invoiceSentToPayerAt?: Prisma.SortOrder
   collectionMethod?: Prisma.SortOrder
   collectionPointId?: Prisma.SortOrder
   collectionDate?: Prisma.SortOrder
@@ -1497,6 +1622,9 @@ export type ParcelSumOrderByAggregateInput = {
   packagingCost?: Prisma.SortOrder
   insuranceCost?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrder
+  pickupPointCost?: Prisma.SortOrder
+  parcelMoneyAmount?: Prisma.SortOrder
+  parcelMoneyCost?: Prisma.SortOrder
   totalCost?: Prisma.SortOrder
 }
 
@@ -2046,7 +2174,11 @@ export type ParcelCreateWithoutAssignedCourierInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2057,6 +2189,7 @@ export type ParcelCreateWithoutAssignedCourierInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -2111,7 +2244,11 @@ export type ParcelUncheckedCreateWithoutAssignedCourierInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2123,6 +2260,7 @@ export type ParcelUncheckedCreateWithoutAssignedCourierInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -2176,7 +2314,11 @@ export type ParcelCreateWithoutCreatedByInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2187,6 +2329,7 @@ export type ParcelCreateWithoutCreatedByInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -2241,7 +2384,11 @@ export type ParcelUncheckedCreateWithoutCreatedByInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2253,6 +2400,7 @@ export type ParcelUncheckedCreateWithoutCreatedByInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -2306,7 +2454,11 @@ export type ParcelCreateWithoutCollectedByInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2317,6 +2469,7 @@ export type ParcelCreateWithoutCollectedByInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -2371,7 +2524,11 @@ export type ParcelUncheckedCreateWithoutCollectedByInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2384,6 +2541,7 @@ export type ParcelUncheckedCreateWithoutCollectedByInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -2460,7 +2618,11 @@ export type ParcelScalarWhereInput = {
   deliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFilter<"Parcel"> | boolean
   addressDeliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableFilter<"Parcel"> | string | null
@@ -2473,6 +2635,7 @@ export type ParcelScalarWhereInput = {
   estimatedDeliveryEnd?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
   isPaid?: Prisma.BoolFilter<"Parcel"> | boolean
   paidAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
+  invoiceSentToPayerAt?: Prisma.DateTimeNullableFilter<"Parcel"> | Date | string | null
   photos?: Prisma.StringNullableListFilter<"Parcel">
   collectionMethod?: Prisma.EnumCollectionMethodNullableFilter<"Parcel"> | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
@@ -2541,7 +2704,11 @@ export type ParcelCreateWithoutSenderInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2552,6 +2719,7 @@ export type ParcelCreateWithoutSenderInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -2605,7 +2773,11 @@ export type ParcelUncheckedCreateWithoutSenderInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2618,6 +2790,7 @@ export type ParcelUncheckedCreateWithoutSenderInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -2671,7 +2844,11 @@ export type ParcelCreateWithoutReceiverInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2682,6 +2859,7 @@ export type ParcelCreateWithoutReceiverInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -2735,7 +2913,11 @@ export type ParcelUncheckedCreateWithoutReceiverInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2748,6 +2930,7 @@ export type ParcelUncheckedCreateWithoutReceiverInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -2833,7 +3016,11 @@ export type ParcelCreateWithoutSenderAddressInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2844,6 +3031,7 @@ export type ParcelCreateWithoutSenderAddressInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -2897,7 +3085,11 @@ export type ParcelUncheckedCreateWithoutSenderAddressInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2910,6 +3102,7 @@ export type ParcelUncheckedCreateWithoutSenderAddressInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -2963,7 +3156,11 @@ export type ParcelCreateWithoutReceiverAddressInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2974,6 +3171,7 @@ export type ParcelCreateWithoutReceiverAddressInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -3027,7 +3225,11 @@ export type ParcelUncheckedCreateWithoutReceiverAddressInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3040,6 +3242,7 @@ export type ParcelUncheckedCreateWithoutReceiverAddressInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -3125,7 +3328,11 @@ export type ParcelCreateWithoutTripInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3136,6 +3343,7 @@ export type ParcelCreateWithoutTripInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -3189,7 +3397,11 @@ export type ParcelUncheckedCreateWithoutTripInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3202,6 +3414,7 @@ export type ParcelUncheckedCreateWithoutTripInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -3271,7 +3484,11 @@ export type ParcelCreateWithoutPlacesInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3282,6 +3499,7 @@ export type ParcelCreateWithoutPlacesInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -3336,7 +3554,11 @@ export type ParcelUncheckedCreateWithoutPlacesInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3349,6 +3571,7 @@ export type ParcelUncheckedCreateWithoutPlacesInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -3407,7 +3630,11 @@ export type ParcelUpdateWithoutPlacesInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3418,6 +3645,7 @@ export type ParcelUpdateWithoutPlacesInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3472,7 +3700,11 @@ export type ParcelUncheckedUpdateWithoutPlacesInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3485,6 +3717,7 @@ export type ParcelUncheckedUpdateWithoutPlacesInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3527,7 +3760,11 @@ export type ParcelCreateWithoutStatusHistoryInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3538,6 +3775,7 @@ export type ParcelCreateWithoutStatusHistoryInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -3592,7 +3830,11 @@ export type ParcelUncheckedCreateWithoutStatusHistoryInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3605,6 +3847,7 @@ export type ParcelUncheckedCreateWithoutStatusHistoryInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -3663,7 +3906,11 @@ export type ParcelUpdateWithoutStatusHistoryInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3674,6 +3921,7 @@ export type ParcelUpdateWithoutStatusHistoryInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3728,7 +3976,11 @@ export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3741,6 +3993,7 @@ export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3783,7 +4036,11 @@ export type ParcelCreateWithoutCollectionPointInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3794,6 +4051,7 @@ export type ParcelCreateWithoutCollectionPointInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -3848,7 +4106,11 @@ export type ParcelUncheckedCreateWithoutCollectionPointInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3861,6 +4123,7 @@ export type ParcelUncheckedCreateWithoutCollectionPointInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -3929,7 +4192,11 @@ export type ParcelCreateWithoutCashEntriesInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3940,6 +4207,7 @@ export type ParcelCreateWithoutCashEntriesInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -3994,7 +4262,11 @@ export type ParcelUncheckedCreateWithoutCashEntriesInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4007,6 +4279,7 @@ export type ParcelUncheckedCreateWithoutCashEntriesInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -4065,7 +4338,11 @@ export type ParcelUpdateWithoutCashEntriesInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4076,6 +4353,7 @@ export type ParcelUpdateWithoutCashEntriesInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4130,7 +4408,11 @@ export type ParcelUncheckedUpdateWithoutCashEntriesInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4143,6 +4425,7 @@ export type ParcelUncheckedUpdateWithoutCashEntriesInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4185,7 +4468,11 @@ export type ParcelCreateWithoutRouteTasksInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4196,6 +4483,7 @@ export type ParcelCreateWithoutRouteTasksInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -4250,7 +4538,11 @@ export type ParcelUncheckedCreateWithoutRouteTasksInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4263,6 +4555,7 @@ export type ParcelUncheckedCreateWithoutRouteTasksInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -4321,7 +4614,11 @@ export type ParcelUpdateWithoutRouteTasksInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4332,6 +4629,7 @@ export type ParcelUpdateWithoutRouteTasksInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4386,7 +4684,11 @@ export type ParcelUncheckedUpdateWithoutRouteTasksInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4399,6 +4701,7 @@ export type ParcelUncheckedUpdateWithoutRouteTasksInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4441,7 +4744,11 @@ export type ParcelCreateWithoutWarehouseActionsInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4452,6 +4759,7 @@ export type ParcelCreateWithoutWarehouseActionsInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -4506,7 +4814,11 @@ export type ParcelUncheckedCreateWithoutWarehouseActionsInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4519,6 +4831,7 @@ export type ParcelUncheckedCreateWithoutWarehouseActionsInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -4577,7 +4890,11 @@ export type ParcelUpdateWithoutWarehouseActionsInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4588,6 +4905,7 @@ export type ParcelUpdateWithoutWarehouseActionsInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4642,7 +4960,11 @@ export type ParcelUncheckedUpdateWithoutWarehouseActionsInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4655,6 +4977,7 @@ export type ParcelUncheckedUpdateWithoutWarehouseActionsInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4697,7 +5020,11 @@ export type ParcelCreateWithoutNpSyncLogsInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4708,6 +5035,7 @@ export type ParcelCreateWithoutNpSyncLogsInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -4762,7 +5090,11 @@ export type ParcelUncheckedCreateWithoutNpSyncLogsInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4775,6 +5107,7 @@ export type ParcelUncheckedCreateWithoutNpSyncLogsInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -4833,7 +5166,11 @@ export type ParcelUpdateWithoutNpSyncLogsInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4844,6 +5181,7 @@ export type ParcelUpdateWithoutNpSyncLogsInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4898,7 +5236,11 @@ export type ParcelUncheckedUpdateWithoutNpSyncLogsInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4911,6 +5253,7 @@ export type ParcelUncheckedUpdateWithoutNpSyncLogsInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4953,7 +5296,11 @@ export type ParcelCreateWithoutClaimsInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4964,6 +5311,7 @@ export type ParcelCreateWithoutClaimsInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -5018,7 +5366,11 @@ export type ParcelUncheckedCreateWithoutClaimsInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5031,6 +5383,7 @@ export type ParcelUncheckedCreateWithoutClaimsInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -5089,7 +5442,11 @@ export type ParcelUpdateWithoutClaimsInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5100,6 +5457,7 @@ export type ParcelUpdateWithoutClaimsInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5154,7 +5512,11 @@ export type ParcelUncheckedUpdateWithoutClaimsInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5167,6 +5529,7 @@ export type ParcelUncheckedUpdateWithoutClaimsInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5214,7 +5577,11 @@ export type ParcelCreateManyAssignedCourierInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5226,6 +5593,7 @@ export type ParcelCreateManyAssignedCourierInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -5267,7 +5635,11 @@ export type ParcelCreateManyCreatedByInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5279,6 +5651,7 @@ export type ParcelCreateManyCreatedByInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -5320,7 +5693,11 @@ export type ParcelCreateManyCollectedByInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5333,6 +5710,7 @@ export type ParcelCreateManyCollectedByInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -5368,7 +5746,11 @@ export type ParcelUpdateWithoutAssignedCourierInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5379,6 +5761,7 @@ export type ParcelUpdateWithoutAssignedCourierInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5433,7 +5816,11 @@ export type ParcelUncheckedUpdateWithoutAssignedCourierInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5445,6 +5832,7 @@ export type ParcelUncheckedUpdateWithoutAssignedCourierInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5493,7 +5881,11 @@ export type ParcelUncheckedUpdateManyWithoutAssignedCourierInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5505,6 +5897,7 @@ export type ParcelUncheckedUpdateManyWithoutAssignedCourierInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5541,7 +5934,11 @@ export type ParcelUpdateWithoutCreatedByInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5552,6 +5949,7 @@ export type ParcelUpdateWithoutCreatedByInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5606,7 +6004,11 @@ export type ParcelUncheckedUpdateWithoutCreatedByInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5618,6 +6020,7 @@ export type ParcelUncheckedUpdateWithoutCreatedByInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5666,7 +6069,11 @@ export type ParcelUncheckedUpdateManyWithoutCreatedByInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5678,6 +6085,7 @@ export type ParcelUncheckedUpdateManyWithoutCreatedByInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5714,7 +6122,11 @@ export type ParcelUpdateWithoutCollectedByInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5725,6 +6137,7 @@ export type ParcelUpdateWithoutCollectedByInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5779,7 +6192,11 @@ export type ParcelUncheckedUpdateWithoutCollectedByInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5792,6 +6209,7 @@ export type ParcelUncheckedUpdateWithoutCollectedByInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5839,7 +6257,11 @@ export type ParcelUncheckedUpdateManyWithoutCollectedByInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5852,6 +6274,7 @@ export type ParcelUncheckedUpdateManyWithoutCollectedByInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5891,7 +6314,11 @@ export type ParcelCreateManySenderInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5904,6 +6331,7 @@ export type ParcelCreateManySenderInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -5944,7 +6372,11 @@ export type ParcelCreateManyReceiverInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5957,6 +6389,7 @@ export type ParcelCreateManyReceiverInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -5993,7 +6426,11 @@ export type ParcelUpdateWithoutSenderInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6004,6 +6441,7 @@ export type ParcelUpdateWithoutSenderInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6057,7 +6495,11 @@ export type ParcelUncheckedUpdateWithoutSenderInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6070,6 +6512,7 @@ export type ParcelUncheckedUpdateWithoutSenderInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6117,7 +6560,11 @@ export type ParcelUncheckedUpdateManyWithoutSenderInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6130,6 +6577,7 @@ export type ParcelUncheckedUpdateManyWithoutSenderInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6166,7 +6614,11 @@ export type ParcelUpdateWithoutReceiverInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6177,6 +6629,7 @@ export type ParcelUpdateWithoutReceiverInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6230,7 +6683,11 @@ export type ParcelUncheckedUpdateWithoutReceiverInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6243,6 +6700,7 @@ export type ParcelUncheckedUpdateWithoutReceiverInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6290,7 +6748,11 @@ export type ParcelUncheckedUpdateManyWithoutReceiverInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6303,6 +6765,7 @@ export type ParcelUncheckedUpdateManyWithoutReceiverInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6343,7 +6806,11 @@ export type ParcelCreateManySenderAddressInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -6356,6 +6823,7 @@ export type ParcelCreateManySenderAddressInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -6396,7 +6864,11 @@ export type ParcelCreateManyReceiverAddressInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -6409,6 +6881,7 @@ export type ParcelCreateManyReceiverAddressInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -6445,7 +6918,11 @@ export type ParcelUpdateWithoutSenderAddressInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6456,6 +6933,7 @@ export type ParcelUpdateWithoutSenderAddressInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6509,7 +6987,11 @@ export type ParcelUncheckedUpdateWithoutSenderAddressInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6522,6 +7004,7 @@ export type ParcelUncheckedUpdateWithoutSenderAddressInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6569,7 +7052,11 @@ export type ParcelUncheckedUpdateManyWithoutSenderAddressInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6582,6 +7069,7 @@ export type ParcelUncheckedUpdateManyWithoutSenderAddressInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6618,7 +7106,11 @@ export type ParcelUpdateWithoutReceiverAddressInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6629,6 +7121,7 @@ export type ParcelUpdateWithoutReceiverAddressInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6682,7 +7175,11 @@ export type ParcelUncheckedUpdateWithoutReceiverAddressInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6695,6 +7192,7 @@ export type ParcelUncheckedUpdateWithoutReceiverAddressInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6742,7 +7240,11 @@ export type ParcelUncheckedUpdateManyWithoutReceiverAddressInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6755,6 +7257,7 @@ export type ParcelUncheckedUpdateManyWithoutReceiverAddressInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6795,7 +7298,11 @@ export type ParcelCreateManyTripInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -6808,6 +7315,7 @@ export type ParcelCreateManyTripInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionPointId?: string | null
@@ -6844,7 +7352,11 @@ export type ParcelUpdateWithoutTripInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6855,6 +7367,7 @@ export type ParcelUpdateWithoutTripInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6908,7 +7421,11 @@ export type ParcelUncheckedUpdateWithoutTripInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6921,6 +7438,7 @@ export type ParcelUncheckedUpdateWithoutTripInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6968,7 +7486,11 @@ export type ParcelUncheckedUpdateManyWithoutTripInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6981,6 +7503,7 @@ export type ParcelUncheckedUpdateManyWithoutTripInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7022,7 +7545,11 @@ export type ParcelCreateManyCollectionPointInput = {
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -7035,6 +7562,7 @@ export type ParcelCreateManyCollectionPointInput = {
   estimatedDeliveryEnd?: Date | string | null
   isPaid?: boolean
   paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
   photos?: Prisma.ParcelCreatephotosInput | string[]
   collectionMethod?: $Enums.CollectionMethod | null
   collectionDate?: Date | string | null
@@ -7070,7 +7598,11 @@ export type ParcelUpdateWithoutCollectionPointInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7081,6 +7613,7 @@ export type ParcelUpdateWithoutCollectionPointInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7135,7 +7668,11 @@ export type ParcelUncheckedUpdateWithoutCollectionPointInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7148,6 +7685,7 @@ export type ParcelUncheckedUpdateWithoutCollectionPointInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7195,7 +7733,11 @@ export type ParcelUncheckedUpdateManyWithoutCollectionPointInput = {
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7208,6 +7750,7 @@ export type ParcelUncheckedUpdateManyWithoutCollectionPointInput = {
   estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.ParcelUpdatephotosInput | string[]
   collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
   collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7333,7 +7876,11 @@ export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   deliveryCost?: boolean
   packagingCost?: boolean
   insuranceCost?: boolean
+  insuranceApplied?: boolean
   addressDeliveryCost?: boolean
+  pickupPointCost?: boolean
+  parcelMoneyAmount?: boolean
+  parcelMoneyCost?: boolean
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
@@ -7346,6 +7893,7 @@ export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   estimatedDeliveryEnd?: boolean
   isPaid?: boolean
   paidAt?: boolean
+  invoiceSentToPayerAt?: boolean
   photos?: boolean
   collectionMethod?: boolean
   collectionPointId?: boolean
@@ -7404,7 +7952,11 @@ export type ParcelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   deliveryCost?: boolean
   packagingCost?: boolean
   insuranceCost?: boolean
+  insuranceApplied?: boolean
   addressDeliveryCost?: boolean
+  pickupPointCost?: boolean
+  parcelMoneyAmount?: boolean
+  parcelMoneyCost?: boolean
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
@@ -7417,6 +7969,7 @@ export type ParcelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   estimatedDeliveryEnd?: boolean
   isPaid?: boolean
   paidAt?: boolean
+  invoiceSentToPayerAt?: boolean
   photos?: boolean
   collectionMethod?: boolean
   collectionPointId?: boolean
@@ -7467,7 +8020,11 @@ export type ParcelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   deliveryCost?: boolean
   packagingCost?: boolean
   insuranceCost?: boolean
+  insuranceApplied?: boolean
   addressDeliveryCost?: boolean
+  pickupPointCost?: boolean
+  parcelMoneyAmount?: boolean
+  parcelMoneyCost?: boolean
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
@@ -7480,6 +8037,7 @@ export type ParcelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   estimatedDeliveryEnd?: boolean
   isPaid?: boolean
   paidAt?: boolean
+  invoiceSentToPayerAt?: boolean
   photos?: boolean
   collectionMethod?: boolean
   collectionPointId?: boolean
@@ -7530,7 +8088,11 @@ export type ParcelSelectScalar = {
   deliveryCost?: boolean
   packagingCost?: boolean
   insuranceCost?: boolean
+  insuranceApplied?: boolean
   addressDeliveryCost?: boolean
+  pickupPointCost?: boolean
+  parcelMoneyAmount?: boolean
+  parcelMoneyCost?: boolean
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
@@ -7543,6 +8105,7 @@ export type ParcelSelectScalar = {
   estimatedDeliveryEnd?: boolean
   isPaid?: boolean
   paidAt?: boolean
+  invoiceSentToPayerAt?: boolean
   photos?: boolean
   collectionMethod?: boolean
   collectionPointId?: boolean
@@ -7558,7 +8121,7 @@ export type ParcelSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "deliveryCost" | "packagingCost" | "insuranceCost" | "addressDeliveryCost" | "totalCost" | "costCurrency" | "npTtn" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
+export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "deliveryCost" | "packagingCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "parcelMoneyAmount" | "parcelMoneyCost" | "totalCost" | "costCurrency" | "npTtn" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
 export type ParcelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sender?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   senderAddress?: boolean | Prisma.Parcel$senderAddressArgs<ExtArgs>
@@ -7647,7 +8210,27 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     deliveryCost: runtime.Decimal | null
     packagingCost: runtime.Decimal | null
     insuranceCost: runtime.Decimal | null
+    /**
+     * User opted in for insurance via checkbox at parcel creation. Distinct
+     * from `insuranceCost > 0` so we can tell "checked but 0% rate" apart
+     * from "not checked at all" — important for receipts and audit.
+     */
+    insuranceApplied: boolean
     addressDeliveryCost: runtime.Decimal | null
+    /**
+     * Pickup-point hand-off fee (per ТЗ — окреме поле тарифу). 0/null when
+     * hand-off is not via pickup point.
+     */
+    pickupPointCost: runtime.Decimal | null
+    /**
+     * "Пакет" — сума готівки, яку клієнт передає одержувачу. Опціональна
+     * послуга: введена сума додається в квитанцію окремим рядком (N).
+     */
+    parcelMoneyAmount: runtime.Decimal | null
+    /**
+     * Calculated fee = parcelMoneyAmount × parcelMoneyPercent / 100.
+     */
+    parcelMoneyCost: runtime.Decimal | null
     totalCost: runtime.Decimal | null
     costCurrency: string
     npTtn: string | null
@@ -7660,6 +8243,11 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     estimatedDeliveryEnd: Date | null
     isPaid: boolean
     paidAt: Date | null
+    /**
+     * SMS-рахунок надіслано платнику (Отримувачу або Відправнику — згідно `payer`).
+     * Null = ще не надіслано.
+     */
+    invoiceSentToPayerAt: Date | null
     photos: string[]
     collectionMethod: $Enums.CollectionMethod | null
     collectionPointId: string | null
@@ -8137,7 +8725,11 @@ export interface ParcelFieldRefs {
   readonly deliveryCost: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly packagingCost: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly insuranceCost: Prisma.FieldRef<"Parcel", 'Decimal'>
+  readonly insuranceApplied: Prisma.FieldRef<"Parcel", 'Boolean'>
   readonly addressDeliveryCost: Prisma.FieldRef<"Parcel", 'Decimal'>
+  readonly pickupPointCost: Prisma.FieldRef<"Parcel", 'Decimal'>
+  readonly parcelMoneyAmount: Prisma.FieldRef<"Parcel", 'Decimal'>
+  readonly parcelMoneyCost: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly totalCost: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly costCurrency: Prisma.FieldRef<"Parcel", 'String'>
   readonly npTtn: Prisma.FieldRef<"Parcel", 'String'>
@@ -8150,6 +8742,7 @@ export interface ParcelFieldRefs {
   readonly estimatedDeliveryEnd: Prisma.FieldRef<"Parcel", 'DateTime'>
   readonly isPaid: Prisma.FieldRef<"Parcel", 'Boolean'>
   readonly paidAt: Prisma.FieldRef<"Parcel", 'DateTime'>
+  readonly invoiceSentToPayerAt: Prisma.FieldRef<"Parcel", 'DateTime'>
   readonly photos: Prisma.FieldRef<"Parcel", 'String[]'>
   readonly collectionMethod: Prisma.FieldRef<"Parcel", 'CollectionMethod'>
   readonly collectionPointId: Prisma.FieldRef<"Parcel", 'String'>

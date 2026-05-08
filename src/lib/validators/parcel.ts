@@ -69,6 +69,8 @@ export const createParcelSchema = z.object({
   paymentMethod: paymentMethodSchema.optional(),
   paymentInUkraine: z.boolean().optional(),
   needsPackaging: z.boolean().optional(),
+  /** «Пакет» — money sender transfers to receiver. Optional. */
+  parcelMoneyAmount: moneySchema.optional().nullable(),
   sendInvoice: z.boolean().optional(),
   /** Phone of the payer to send invoice SMS to (defaults to payer's stored phone). */
   invoicePhone: phoneSchema.optional(),
@@ -88,6 +90,12 @@ export const clientOrderSchema = z.object({
   shipmentType: shipmentTypeSchema.optional(),
   description: z.string().trim().max(500).optional().nullable(),
   declaredValue: moneySchema.optional().nullable(),
+  /** Insurance opt-in checkbox (per ТЗ). */
+  insurance: z.boolean().optional(),
+  /** Packaging opt-in checkbox (per ТЗ). */
+  needsPackaging: z.boolean().optional(),
+  /** «Пакет» — money sender transfers to receiver. Optional. */
+  parcelMoneyAmount: moneySchema.optional().nullable(),
   payer: payerSchema.optional(),
   paymentMethod: paymentMethodSchema.optional(),
   paymentInUkraine: z.boolean().optional(),
@@ -153,8 +161,14 @@ export const calculateCostSchema = z.object({
   actualWeight: weightSchema.optional(),
   volumetricWeight: weightSchema.optional(),
   declaredValue: moneySchema.optional(),
+  /** Insurance opt-in checkbox state — drives whether insurance is added. */
+  insurance: z.boolean().optional(),
   needsPackaging: z.boolean().optional(),
   isAddressDelivery: z.boolean().optional(),
+  /** Parcel handed over at a pickup point (EU→UA). */
+  isPickupPoint: z.boolean().optional(),
+  /** «Пакет» — amount of cash sender transfers. */
+  parcelMoneyAmount: moneySchema.optional(),
 });
 
 /** POST /api/parcels/[id]/payment */

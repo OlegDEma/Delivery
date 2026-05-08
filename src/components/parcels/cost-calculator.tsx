@@ -10,15 +10,15 @@ interface CostCalculatorProps {
   actualWeight: number;
   volumetricWeight: number;
   declaredValue: number;
+  /** Insurance opt-in checkbox state. */
+  insurance?: boolean;
+  /** Packaging opt-in checkbox state. */
   needsPackaging: boolean;
   isAddressDelivery: boolean;
-  /**
-   * Whether insurance is opted in (per ТЗ — checkbox on /parcels/new).
-   * When false, the breakdown hides insurance row + total excludes it.
-   * Defaults to undefined → respects pricing config (legacy behaviour for
-   * components that don't pass this yet).
-   */
-  insuranceEnabled?: boolean;
+  /** Hand-off via pickup point — adds the pickup-point fee row. */
+  isPickupPoint?: boolean;
+  /** «Пакет» — money sender transfers (drives the % fee row). */
+  parcelMoneyAmount?: number;
 }
 
 interface CostBreakdown {
@@ -26,6 +26,8 @@ interface CostBreakdown {
   insuranceCost: number;
   packagingCost: number;
   addressDeliveryCost: number;
+  pickupPointCost: number;
+  parcelMoneyCost: number;
   totalCost: number;
   billableWeight: number;
   pricePerKg: number;
@@ -47,24 +49,20 @@ export function CostCalculator(props: CostCalculatorProps) {
     ? props.senderCountry
     : props.receiverCountry;
 
-  useEffect(() => {
-    if (!country || props.actualWeight <= 0) {
-      setCost(null);
-      setError('');
-      return;
-    }
+  // The "skip" branches (no country / no weight / UA-only) used to setState
+  // synchronously inside useEffect — that triggers cascading renders and
+  // is now flagged by react-hooks/set-state-in-effect. Instead we derive
+  // those branches at render time below; the effect only handles the
+  // network fetch when it's actually needed.
+  const shouldFetch = !!country && country !== 'UA' && props.actualWeight > 0;
+  const inlineErrorMessage = country === 'UA'
+    ? (props.direction === 'eu_to_ua'
+        ? 'Не визначено європейську країну збору. Привʼяжіть рейс або пункт збору.'
+        : 'Не визначено країну отримувача.')
+    : '';
 
-    // For eu_to_ua we need an EU country, for ua_to_eu also an EU country on the
-    // receiver side. UA pricing configs don't exist by design.
-    if (country === 'UA') {
-      setCost(null);
-      setError(
-        props.direction === 'eu_to_ua'
-          ? 'Не визначено європейську країну збору. Привʼяжіть рейс або пункт збору.'
-          : 'Не визначено країну отримувача.'
-      );
-      return;
-    }
+  useEffect(() => {
+    if (!shouldFetch) return;
 
     // AbortController pairs with the debounce timer so in-flight requests are
     // cancelled when the user keeps typing or the component unmounts.
@@ -82,8 +80,11 @@ export function CostCalculator(props: CostCalculatorProps) {
             actualWeight: props.actualWeight,
             volumetricWeight: props.volumetricWeight,
             declaredValue: props.declaredValue,
+            insurance: props.insurance ?? false,
             needsPackaging: props.needsPackaging,
             isAddressDelivery: props.isAddressDelivery,
+            isPickupPoint: props.isPickupPoint ?? false,
+            parcelMoneyAmount: props.parcelMoneyAmount ?? 0,
           }),
         });
         if (res.ok) {
@@ -104,9 +105,26 @@ export function CostCalculator(props: CostCalculatorProps) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [country, props.direction, props.actualWeight, props.volumetricWeight, props.declaredValue, props.needsPackaging, props.isAddressDelivery]);
+  }, [
+    shouldFetch,
+    country, props.direction,
+    props.actualWeight, props.volumetricWeight, props.declaredValue,
+    props.insurance, props.needsPackaging, props.isAddressDelivery,
+    props.isPickupPoint, props.parcelMoneyAmount,
+  ]);
 
-  if (!cost && !error) return null;
+  // Inline error has priority over fetched state (UA / no country picked yet).
+  if (inlineErrorMessage) {
+    return (
+      <div className="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded p-2">
+        ⚠️ {inlineErrorMessage}
+      </div>
+    );
+  }
+  // Nothing to show until a fetch is possible. Stale cost from a previous
+  // input combination is intentionally NOT rendered: shouldFetch guards both
+  // the effect and the render path.
+  if (!shouldFetch) return null;
 
   if (error) {
     return (
@@ -117,13 +135,6 @@ export function CostCalculator(props: CostCalculatorProps) {
   }
 
   if (!cost) return null;
-
-  // Per ТЗ insurance is opt-in via checkbox. When parent passes
-  // insuranceEnabled=false (existing parcel created without opt-in), strip
-  // the row + subtract from total so live preview matches saved data.
-  const includeInsurance = props.insuranceEnabled !== false;
-  const displayInsurance = includeInsurance ? cost.insuranceCost : 0;
-  const displayTotal = includeInsurance ? cost.totalCost : Math.max(0, cost.totalCost - cost.insuranceCost);
 
   return (
     <div className="bg-blue-50 rounded-lg p-3 text-sm space-y-1">
@@ -136,10 +147,10 @@ export function CostCalculator(props: CostCalculatorProps) {
         <span className="text-gray-600">Доставка ({cost.pricePerKg} EUR/кг):</span>
         <span>{formatCurrency(cost.deliveryCost, 'EUR')}</span>
       </div>
-      {displayInsurance > 0 && (
+      {cost.insuranceCost > 0 && (
         <div className="flex justify-between">
           <span className="text-gray-600">Страхування:</span>
-          <span>{formatCurrency(displayInsurance, 'EUR')}</span>
+          <span>{formatCurrency(cost.insuranceCost, 'EUR')}</span>
         </div>
       )}
       {cost.packagingCost > 0 && (
@@ -154,9 +165,21 @@ export function CostCalculator(props: CostCalculatorProps) {
           <span>{formatCurrency(cost.addressDeliveryCost, 'EUR')}</span>
         </div>
       )}
+      {cost.pickupPointCost > 0 && (
+        <div className="flex justify-between">
+          <span className="text-gray-600">Пункт збору:</span>
+          <span>{formatCurrency(cost.pickupPointCost, 'EUR')}</span>
+        </div>
+      )}
+      {cost.parcelMoneyCost > 0 && (
+        <div className="flex justify-between">
+          <span className="text-gray-600">Пакет ({props.parcelMoneyAmount} €):</span>
+          <span>{formatCurrency(cost.parcelMoneyCost, 'EUR')}</span>
+        </div>
+      )}
       <div className="flex justify-between font-bold border-t border-blue-200 pt-1 mt-1">
         <span>Всього:</span>
-        <span className="text-blue-800">{formatCurrency(displayTotal, 'EUR')}</span>
+        <span className="text-blue-800">{formatCurrency(cost.totalCost, 'EUR')}</span>
       </div>
     </div>
   );

@@ -175,6 +175,10 @@ export async function POST(request: NextRequest) {
       shipmentType: body.shipmentType,
       description: body.description ?? null,
       declaredValue: body.declaredValue ?? null,
+      // Per ТЗ: opt-in послуги. Тариф для напрямку визначає % і суми.
+      insurance: body.insurance ?? false,
+      needsPackaging: body.needsPackaging ?? false,
+      parcelMoneyAmount: body.parcelMoneyAmount ?? null,
       payer: body.payer,
       paymentMethod: body.paymentMethod,
       paymentInUkraine: body.paymentInUkraine,

@@ -6,7 +6,8 @@ import { calculateParcelCost } from '@/lib/utils/pricing';
 import { calculateVolumetricWeight, roundWeight } from '@/lib/utils/volumetric';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { ADMIN_ROLES } from '@/lib/constants/roles';
-import { parseBody, updateParcelSchema, parsePackagingPrices } from '@/lib/validators';
+import { parseBody, updateParcelSchema } from '@/lib/validators';
+import { buildPricingInput } from '@/lib/utils/pricing-input';
 import { logger } from '@/lib/logger';
 import { writeAuditLog } from '@/lib/audit';
 import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transitions';
@@ -407,28 +408,25 @@ export async function PATCH(
         if (pricing) {
           const isAddressDelivery = receiverAddr?.deliveryMethod === 'address';
           const breakdown = calculateParcelCost(
-            {
-              pricePerKg: Number(pricing.pricePerKg),
-              weightType: pricing.weightType,
-              insuranceThreshold: Number(pricing.insuranceThreshold),
-              insuranceRate: Number(pricing.insuranceRate),
-              insuranceEnabled: pricing.insuranceEnabled,
-              packagingEnabled: pricing.packagingEnabled,
-              packagingPrices: parsePackagingPrices(pricing.packagingPrices),
-              addressDeliveryPrice: Number(pricing.addressDeliveryPrice),
-            },
+            buildPricingInput(pricing),
             {
               actualWeight: totalWeight,
               volumetricWeight: totalVolWeight,
               declaredValue: Number(parcel.declaredValue) || 0,
+              insurance: parcel.insuranceApplied,
               needsPackaging: parcel.needsPackaging,
               isAddressDelivery,
+              isPickupPoint:
+                parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'pickup_point',
+              parcelMoneyAmount: parcel.parcelMoneyAmount ? Number(parcel.parcelMoneyAmount) : 0,
             }
           );
           updateData.deliveryCost = breakdown.deliveryCost;
           updateData.insuranceCost = breakdown.insuranceCost;
           updateData.packagingCost = breakdown.packagingCost;
           updateData.addressDeliveryCost = breakdown.addressDeliveryCost;
+          updateData.pickupPointCost = breakdown.pickupPointCost;
+          updateData.parcelMoneyCost = breakdown.parcelMoneyCost;
           updateData.totalCost = breakdown.totalCost;
         }
       }

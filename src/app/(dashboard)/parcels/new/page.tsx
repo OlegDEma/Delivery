@@ -153,12 +153,16 @@ export default function NewParcelPage() {
   }
   const [declaredValue, setDeclaredValue] = useState('');
   const [insurance, setInsurance] = useState(false);
+  // «Пакет» (per ТЗ) — sender's cash transfer to receiver. The amount is NOT
+  // a delivery cost; the calculator computes a % fee from it instead. Empty
+  // string means «opt-out» — Пакет row hidden from receipt and total.
+  const [parcelMoneyAmount, setParcelMoneyAmount] = useState('');
+  const [parcelMoneyEnabled, setParcelMoneyEnabled] = useState(false);
 
   // Currency for declared value depends on sender's country (UA → грн, EU → €).
   const senderCountry = sender?.country || sender?.addresses[0]?.country || null;
   const declaredCurrency = senderCountry === 'UA' ? 'UAH' : 'EUR';
   const declaredCurrencyLabel = senderCountry === 'UA' ? 'грн' : 'EUR';
-  const insuranceCost = insurance ? Number((Number(declaredValue) * 0.03).toFixed(2)) : 0;
 
   // General params mode
   const [useGeneralParams, setUseGeneralParams] = useState(false);
@@ -357,7 +361,10 @@ export default function NewParcelPage() {
         declaredValue: declaredValue ? Number(declaredValue) : undefined,
         declaredValueCurrency: declaredCurrency,
         insurance,
-        insuranceCost: insurance ? insuranceCost : 0,
+        parcelMoneyAmount:
+          parcelMoneyEnabled && Number(parcelMoneyAmount) > 0
+            ? Number(parcelMoneyAmount)
+            : undefined,
         payer,
         paymentMethod,
         paymentInUkraine,
@@ -601,7 +608,7 @@ export default function NewParcelPage() {
               />
             </div>
 
-            {/* Insurance (per ТЗ) */}
+            {/* Insurance — opt-in per ТЗ. % береться з тарифу. */}
             <div className="rounded-lg border p-3 bg-gray-50">
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -610,23 +617,65 @@ export default function NewParcelPage() {
                   onCheckedChange={(c) => setInsurance(c === true)}
                 />
                 <Label htmlFor="insurance-cb" className="text-sm font-medium cursor-pointer">
-                  Страхування (3% від оголошеної вартості)
+                  Страхування{' '}
+                  <FieldHint text="При активації до вартості посилки додається % від оголошеної вартості. Розмір % береться з налаштувань тарифу для напрямку (Адміністрування → Тарифи)." />
                 </Label>
               </div>
-              <div className="mt-2 text-sm">
-                {insurance ? (
-                  Number(declaredValue) > 0 ? (
-                    <div className="text-green-700">
-                      Застраховано на <span className="font-semibold">{Number(declaredValue).toFixed(2)} {declaredCurrencyLabel}</span>.
-                      Страхування: <span className="font-semibold">{insuranceCost.toFixed(2)} {declaredCurrencyLabel}</span>
-                    </div>
-                  ) : (
-                    <div className="text-amber-700">Вкажіть оголошену вартість, щоб розрахувати страхування</div>
-                  )
-                ) : (
-                  <div className="text-gray-500">Не застраховано</div>
-                )}
+              <div className="mt-1 text-xs text-gray-500">
+                {insurance
+                  ? (Number(declaredValue) > 0
+                      ? `Сума страхування рахується автоматично — див. блок «Розрахунок вартості» нижче.`
+                      : 'Вкажіть оголошену вартість, щоб розрахувати страхування.')
+                  : 'Не застраховано.'}
               </div>
+            </div>
+
+            {/* Packaging — opt-in per ТЗ. €/10кг береться з тарифу. */}
+            <div className="rounded-lg border p-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="packaging-cb"
+                  checked={needsPackaging}
+                  onCheckedChange={(c) => setNeedsPackaging(c === true)}
+                />
+                <Label htmlFor="packaging-cb" className="text-sm font-medium cursor-pointer">
+                  Пакування{' '}
+                  <FieldHint text="При активації до вартості посилки додається фікс. сума за кожні (повні і неповні) 10 кг. Сума за 10 кг береться з налаштувань тарифу для напрямку." />
+                </Label>
+              </div>
+            </div>
+
+            {/* «Пакет» — sender transfers cash to receiver. */}
+            <div className="rounded-lg border p-3 bg-gray-50 space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="parcel-money-cb"
+                  checked={parcelMoneyEnabled}
+                  onCheckedChange={(c) => {
+                    const enabled = c === true;
+                    setParcelMoneyEnabled(enabled);
+                    if (!enabled) setParcelMoneyAmount('');
+                  }}
+                />
+                <Label htmlFor="parcel-money-cb" className="text-sm font-medium cursor-pointer">
+                  Пакет (передача готівки){' '}
+                  <FieldHint text="Сума готівки, яку Відправник передає Отримувачу. До вартості посилки додається % від цієї суми (% задається в Адміністрування → Тарифи). У квитанції сума відображається окремим рядком у круглих дужках." />
+                </Label>
+              </div>
+              {parcelMoneyEnabled && (
+                <div>
+                  <Label className="text-xs">Сума передачі (EUR)</Label>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    value={parcelMoneyAmount}
+                    onChange={(e) => setParcelMoneyAmount(e.target.value)}
+                    placeholder="1000"
+                  />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -896,9 +945,11 @@ export default function NewParcelPage() {
           actualWeight={totalWeight}
           volumetricWeight={totalVolWeight}
           declaredValue={Number(declaredValue) || 0}
+          insurance={insurance}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
           isAddressDelivery={receiver?.addresses[0]?.deliveryMethod === 'address'}
-          insuranceEnabled={insurance}
+          isPickupPoint={direction === 'eu_to_ua' && collection.method === 'pickup_point'}
+          parcelMoneyAmount={parcelMoneyEnabled ? Number(parcelMoneyAmount) || 0 : 0}
         />
 
         {error && (

@@ -15,8 +15,8 @@ import type { Country, Direction, ShipmentType, Payer, PaymentMethod, CreatedSou
 import { prisma } from '@/lib/prisma';
 import { calculateVolumetricWeight, roundWeight } from '@/lib/utils/volumetric';
 import { calculateParcelCost } from '@/lib/utils/pricing';
-import { generateITN, generateInternalNumber, generatePlaceITN, withItnRetry } from '@/lib/utils/itn';
-import { parsePackagingPrices } from '@/lib/validators/common';
+import { buildPricingInput } from '@/lib/utils/pricing-input';
+import { generateInternalNumber, generatePlaceITN, withItnRetry } from '@/lib/utils/itn';
 import { logger } from '@/lib/logger';
 
 export interface ParcelPlaceInput {
@@ -41,12 +41,18 @@ export interface CreateParcelInput {
   declaredValueCurrency?: 'EUR' | 'UAH';
   /** When true, user explicitly opted in for insurance — overrides pricing config. */
   insurance?: boolean;
-  /** User-provided insurance cost (3% of declared value). Used when `insurance` is true. */
+  /**
+   * @deprecated Insurance cost is now computed from `insurance` + tariff
+   * `insurancePercent`. Field kept so older callers don't break, but its
+   * value is ignored — the calculator is the single source of truth.
+   */
   insuranceCost?: number | null;
   payer?: Payer;
   paymentMethod?: PaymentMethod;
   paymentInUkraine?: boolean;
   needsPackaging?: boolean;
+  /** «Пакет» — money sender transfers to receiver (optional). 0/undef = no Пакет. */
+  parcelMoneyAmount?: number | null;
   /** Send invoice on save (per ТЗ). Email goes to invoiceEmail. */
   sendInvoice?: boolean;
   invoiceEmail?: string | null;
@@ -185,7 +191,13 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
     if (country && country !== 'UA') pricingCountry = country;
   }
 
-  let deliveryCost = 0, packagingCost = 0, insuranceCost = 0, addressDeliveryCost = 0, totalCost = 0;
+  let deliveryCost = 0;
+  let packagingCost = 0;
+  let insuranceCost = 0;
+  let addressDeliveryCost = 0;
+  let pickupPointCost = 0;
+  let parcelMoneyCost = 0;
+  let totalCost = 0;
   if (pricingCountry) {
     const config = await prisma.pricingConfig.findFirst({
       where: { country: pricingCountry, direction: input.direction, isActive: true },
@@ -194,40 +206,30 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
     if (config) {
       const deliveryMethod = (receiverAddrForPricing?.deliveryMethod ?? receiver?.addresses[0]?.deliveryMethod) as DeliveryMethod | undefined;
       const breakdown = calculateParcelCost(
-        {
-          pricePerKg: Number(config.pricePerKg),
-          weightType: config.weightType,
-          insuranceThreshold: Number(config.insuranceThreshold),
-          insuranceRate: Number(config.insuranceRate),
-          insuranceEnabled: config.insuranceEnabled,
-          packagingEnabled: config.packagingEnabled,
-          packagingPrices: parsePackagingPrices(config.packagingPrices),
-          addressDeliveryPrice: Number(config.addressDeliveryPrice),
-        },
+        buildPricingInput(config),
         {
           actualWeight: totalWeight,
           volumetricWeight: totalVolWeight,
           declaredValue: input.declaredValue ? Number(input.declaredValue) : 0,
+          // ТЗ: insurance/packaging — opt-in checkboxes. Default off when
+          // caller didn't pass an explicit boolean (e.g. legacy admin form
+          // before retrofit). Pricing config gates whether the option is
+          // even allowed for the direction.
+          insurance: input.insurance === true,
           needsPackaging: input.needsPackaging ?? false,
           isAddressDelivery: deliveryMethod === 'address',
+          isPickupPoint:
+            input.direction === 'eu_to_ua' && input.collectionMethod === 'pickup_point',
+          parcelMoneyAmount: input.parcelMoneyAmount ? Number(input.parcelMoneyAmount) : 0,
         }
       );
       deliveryCost = breakdown.deliveryCost;
       packagingCost = breakdown.packagingCost;
       insuranceCost = breakdown.insuranceCost;
       addressDeliveryCost = breakdown.addressDeliveryCost;
+      pickupPointCost = breakdown.pickupPointCost;
+      parcelMoneyCost = breakdown.parcelMoneyCost;
       totalCost = breakdown.totalCost;
-      // Per ТЗ: insurance is now opt-in via checkbox. If user did NOT tick it,
-      // strip insurance from the total even if pricing config would auto-add it.
-      if (input.insurance === false) {
-        totalCost = Math.max(0, totalCost - insuranceCost);
-        insuranceCost = 0;
-      } else if (input.insurance === true && input.insuranceCost != null) {
-        // User-provided 3% — override config-driven value.
-        const userInsurance = Number(input.insuranceCost);
-        totalCost = totalCost - insuranceCost + userInsurance;
-        insuranceCost = userInsurance;
-      }
     } else {
       logger.warn('parcel.create.pricing_not_found', {
         country: pricingCountry, direction: input.direction,
@@ -288,7 +290,14 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
           deliveryCost: deliveryCost || null,
           packagingCost: packagingCost || null,
           insuranceCost: insuranceCost || null,
+          insuranceApplied: input.insurance === true,
           addressDeliveryCost: addressDeliveryCost || null,
+          pickupPointCost: pickupPointCost || null,
+          parcelMoneyAmount:
+            input.parcelMoneyAmount && Number(input.parcelMoneyAmount) > 0
+              ? Number(input.parcelMoneyAmount)
+              : null,
+          parcelMoneyCost: parcelMoneyCost || null,
           totalCost: totalCost || null,
           collectionMethod: input.direction === 'eu_to_ua' ? (input.collectionMethod ?? null) : null,
           collectionPointId:

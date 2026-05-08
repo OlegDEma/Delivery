@@ -1,24 +1,59 @@
 import { getBillableWeight } from './volumetric';
 
-interface PricingConfig {
+/**
+ * Pricing inputs used by `calculateParcelCost`. Mirrors the persisted
+ * `PricingConfig` row (Decimal columns are converted to plain `number` by
+ * the caller).
+ */
+export interface PricingConfigInput {
   pricePerKg: number;
   weightType: 'actual' | 'volumetric' | 'average';
-  insuranceThreshold: number;
-  insuranceRate: number;
+
+  /** Whether the «Страхування» option is offered for this direction. */
   insuranceEnabled: boolean;
+  /** Whole-percent rate applied to declaredValue when insurance is opted in. */
+  insurancePercent: number;
+
+  /** Whether the «Пакування» option is offered for this direction. */
   packagingEnabled: boolean;
-  packagingPrices: Record<string, number> | null;
+  /** € charged per each (full or partial) 10 kg block when needsPackaging=true. */
+  packagingPer10kg: number;
+  /**
+   * Legacy tiered packaging prices (e.g. {"10":1,"20":2,"30+":5}). Used as
+   * a fallback when `packagingPer10kg` is 0 and `packagingPrices` is set.
+   * New tariffs should leave this null.
+   */
+  packagingPrices?: Record<string, number> | null;
+
+  /** Address delivery surcharge (flat). */
   addressDeliveryPrice: number;
-  /** Optional — if set, insurance fee cannot be below this value. */
-  minInsuranceFee?: number;
+
+  /** Pickup-point hand-off fee (flat, EU→UA only). */
+  pickupPointPrice: number;
+
+  /** Whole-percent rate applied to the «Пакет» amount. */
+  parcelMoneyPercent: number;
 }
 
-interface ParcelData {
+/** Per-parcel inputs for the cost calculation. All booleans are explicit. */
+export interface ParcelCostInput {
   actualWeight: number;
   volumetricWeight: number;
   declaredValue: number;
+
+  /** User opted in for insurance via checkbox. */
+  insurance: boolean;
+  /** User opted in for packaging via checkbox. */
   needsPackaging: boolean;
+  /** Receiver chose address delivery (vs NP warehouse / poshtomat). */
   isAddressDelivery: boolean;
+  /** EU→UA parcel handed over at a pickup point. */
+  isPickupPoint: boolean;
+  /**
+   * «Пакет» — money sender transfers to receiver. 0 / undefined = option not used.
+   * The amount itself is NOT a delivery cost — only the % fee from it is.
+   */
+  parcelMoneyAmount?: number;
 }
 
 export interface CostBreakdown {
@@ -26,32 +61,30 @@ export interface CostBreakdown {
   insuranceCost: number;
   packagingCost: number;
   addressDeliveryCost: number;
+  pickupPointCost: number;
+  parcelMoneyCost: number;
   totalCost: number;
   billableWeight: number;
 }
 
-/** Minimum insurance fee in EUR when insurance actually applies. */
-export const DEFAULT_MIN_INSURANCE_FEE = 0.5;
-
-/** Rounds a money amount to 2 decimals with banker's rounding safety. */
+/** Rounds a money amount to 2 decimals. */
 export function roundMoney(value: number): number {
   if (!Number.isFinite(value)) return 0;
-  // Use multiply-round-divide. Avoids floating-point display artifacts like 10.005 → 10.00.
+  // Multiply-round-divide. Avoids floating-point display artifacts like
+  // 10.005 → 10.00 (which IEEE-754 may otherwise produce).
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
 /**
- * Calculate total parcel cost based on pricing config.
- *
- * Rounding policy: intermediate weights are kept at full precision; money
- * amounts are rounded at the final step only. Small components (insurance
- * below the minimum fee) are bumped up to the minimum.
+ * Calculate total parcel cost. Each component is computed independently and
+ * the total is rounded once at the end. Callers convert Prisma Decimal to
+ * plain numbers before passing them in.
  */
 export function calculateParcelCost(
-  config: PricingConfig,
-  parcel: ParcelData
+  config: PricingConfigInput,
+  parcel: ParcelCostInput
 ): CostBreakdown {
-  // 1. Delivery cost based on weight
+  // 1. Delivery — weight × price/kg.
   const billableWeight = getBillableWeight(
     parcel.actualWeight,
     parcel.volumetricWeight,
@@ -59,41 +92,64 @@ export function calculateParcelCost(
   );
   const deliveryCost = roundMoney(billableWeight * config.pricePerKg);
 
-  // 2. Insurance cost — applies only above threshold, with a minimum fee.
+  // 2. Insurance — opt-in via checkbox, % from declaredValue.
+  // ТЗ: безумовне +3% скасовано — додається ТІЛЬКИ якщо клієнт відмітив.
   let insuranceCost = 0;
-  if (config.insuranceEnabled && parcel.declaredValue > config.insuranceThreshold) {
-    const raw = parcel.declaredValue * config.insuranceRate;
-    const minFee = config.minInsuranceFee ?? DEFAULT_MIN_INSURANCE_FEE;
-    insuranceCost = roundMoney(Math.max(raw, minFee));
+  if (parcel.insurance && config.insuranceEnabled && parcel.declaredValue > 0) {
+    insuranceCost = roundMoney(parcel.declaredValue * (config.insurancePercent / 100));
   }
 
-  // 3. Packaging cost — based on actual weight tiers
+  // 3. Packaging — opt-in. New: € per (full or partial) 10 kg block.
+  // Legacy fallback: tier table (used while older tariffs are still in DB).
   let packagingCost = 0;
-  if (config.packagingEnabled && parcel.needsPackaging && config.packagingPrices) {
-    packagingCost = roundMoney(getPackagingPrice(config.packagingPrices, parcel.actualWeight));
+  if (parcel.needsPackaging && config.packagingEnabled) {
+    if (config.packagingPer10kg > 0) {
+      const blocks = Math.max(1, Math.ceil(parcel.actualWeight / 10));
+      packagingCost = roundMoney(blocks * config.packagingPer10kg);
+    } else if (config.packagingPrices) {
+      packagingCost = roundMoney(getLegacyPackagingPrice(config.packagingPrices, parcel.actualWeight));
+    }
   }
 
-  // 4. Address delivery cost
+  // 4. Address delivery surcharge.
   const addressDeliveryCost = parcel.isAddressDelivery ? roundMoney(config.addressDeliveryPrice) : 0;
 
-  // Total
-  const totalCost = roundMoney(deliveryCost + insuranceCost + packagingCost + addressDeliveryCost);
+  // 5. Pickup-point hand-off fee.
+  const pickupPointCost = parcel.isPickupPoint ? roundMoney(config.pickupPointPrice) : 0;
+
+  // 6. «Пакет» (money transfer) — % fee from the amount.
+  let parcelMoneyCost = 0;
+  if (parcel.parcelMoneyAmount && parcel.parcelMoneyAmount > 0 && config.parcelMoneyPercent > 0) {
+    parcelMoneyCost = roundMoney(parcel.parcelMoneyAmount * (config.parcelMoneyPercent / 100));
+  }
+
+  const totalCost = roundMoney(
+    deliveryCost +
+    insuranceCost +
+    packagingCost +
+    addressDeliveryCost +
+    pickupPointCost +
+    parcelMoneyCost
+  );
 
   return {
     deliveryCost,
     insuranceCost,
     packagingCost,
     addressDeliveryCost,
+    pickupPointCost,
+    parcelMoneyCost,
     totalCost,
     billableWeight,
   };
 }
 
 /**
- * Get packaging price based on weight tiers.
- * packagingPrices format: { "10": 1, "20": 2, "30": 3, "30+": 5 }
+ * Legacy packaging price lookup. Format: {"10":1, "20":2, "30":3, "30+":5}.
+ * Used only when `packagingPer10kg` is 0 in the config — kept for tariffs
+ * that haven't been migrated to the flat €/10kg model yet.
  */
-function getPackagingPrice(prices: Record<string, number>, weight: number): number {
+function getLegacyPackagingPrice(prices: Record<string, number>, weight: number): number {
   const sortedTiers = Object.entries(prices)
     .filter(([key]) => !key.includes('+'))
     .map(([key, value]) => ({ threshold: Number(key), price: value }))
@@ -102,8 +158,7 @@ function getPackagingPrice(prices: Record<string, number>, weight: number): numb
   for (const tier of sortedTiers) {
     if (weight <= tier.threshold) return tier.price;
   }
-
-  // Over max tier — use the "+" price
+  // Above the highest tier — use the «+» price if present, else last tier.
   const overMaxKey = Object.keys(prices).find(k => k.includes('+'));
   return overMaxKey ? prices[overMaxKey] : sortedTiers[sortedTiers.length - 1]?.price ?? 0;
 }

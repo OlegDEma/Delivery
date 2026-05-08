@@ -54,6 +54,12 @@ interface ParcelDetail {
   isPaid: boolean;
   totalCost: number | null;
   insuranceCost: number | null;
+  /** Per ТЗ — opt-in checkbox state at creation. */
+  insuranceApplied?: boolean;
+  /** «Пакет» — money sender transfers to receiver. */
+  parcelMoneyAmount: number | null;
+  parcelMoneyCost: number | null;
+  pickupPointCost: number | null;
   createdAt: string;
   createdSource: string | null;
   sender: {

@@ -366,7 +366,19 @@ model Parcel {
   deliveryCost          Decimal?      @map("delivery_cost") @db.Decimal(10, 2)
   packagingCost         Decimal?      @default(0) @map("packaging_cost") @db.Decimal(10, 2)
   insuranceCost         Decimal?      @default(0) @map("insurance_cost") @db.Decimal(10, 2)
+  /// User opted in for insurance via checkbox at parcel creation. Distinct
+  /// from `insuranceCost > 0` so we can tell "checked but 0% rate" apart
+  /// from "not checked at all" — important for receipts and audit.
+  insuranceApplied      Boolean       @default(false) @map("insurance_applied")
   addressDeliveryCost   Decimal?      @default(0) @map("address_delivery_cost") @db.Decimal(10, 2)
+  /// Pickup-point hand-off fee (per ТЗ — окреме поле тарифу). 0/null when
+  /// hand-off is not via pickup point.
+  pickupPointCost       Decimal?      @default(0) @map("pickup_point_cost") @db.Decimal(10, 2)
+  /// "Пакет" — сума готівки, яку клієнт передає одержувачу. Опціональна
+  /// послуга: введена сума додається в квитанцію окремим рядком (N).
+  parcelMoneyAmount     Decimal?      @map("parcel_money_amount") @db.Decimal(10, 2)
+  /// Calculated fee = parcelMoneyAmount × parcelMoneyPercent / 100.
+  parcelMoneyCost       Decimal?      @default(0) @map("parcel_money_cost") @db.Decimal(10, 2)
   totalCost             Decimal?      @map("total_cost") @db.Decimal(10, 2)
   costCurrency          String        @default("EUR") @map("cost_currency")
   npTtn                 String?       @map("np_ttn")
@@ -379,6 +391,9 @@ model Parcel {
   estimatedDeliveryEnd   DateTime?    @map("estimated_delivery_end") @db.Timestamptz
   isPaid                Boolean       @default(false) @map("is_paid")
   paidAt                DateTime?     @map("paid_at") @db.Timestamptz
+  /// SMS-рахунок надіслано платнику (Отримувачу або Відправнику — згідно `payer`).
+  /// Null = ще не надіслано.
+  invoiceSentToPayerAt  DateTime?     @map("invoice_sent_to_payer_at") @db.Timestamptz
   photos                String[]      @default([])
   // Collection (how the company receives the parcel from sender, EU→UA side)
   collectionMethod      CollectionMethod? @map("collection_method")

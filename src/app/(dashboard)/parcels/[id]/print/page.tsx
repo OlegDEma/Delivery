@@ -26,6 +26,8 @@ interface PrintData {
   places: { placeNumber: number; weight: number | null; itnPlace: string | null; volumetricWeight: number | null }[];
   description: string | null;
   totalCost: number | null;
+  /** «Пакет» — money sender transfers to receiver. Shown as separate (N) row. */
+  parcelMoneyAmount: number | null;
   createdBy: { fullName: string } | null;
 }
 
@@ -172,6 +174,11 @@ export default function PrintLabelPage() {
           <div>Місць: {data.totalPlacesCount}</div>
           <div>Вага: {data.totalWeight ? `${Number(data.totalWeight).toFixed(2)} кг` : '—'}</div>
           {data.declaredValue && <div>Оголошена вартість: {Number(data.declaredValue).toFixed(2)} {data.declaredValueCurrency === 'UAH' ? 'грн' : 'EUR'}</div>}
+          {data.parcelMoneyAmount && Number(data.parcelMoneyAmount) > 0 && (
+            // ТЗ: «у підтвердженні для Відправника сума, відображена у віконечку,
+            // додається як окреме місце у вигляді числа в круглих дужках».
+            <div>Пакет: ({Number(data.parcelMoneyAmount).toFixed(0)})</div>
+          )}
           <div>Платник: {data.payer === 'sender' ? 'Відправник' : 'Отримувач'}</div>
           <div>Оплата: {data.paymentMethod === 'cash' ? 'Готівка' : 'Безготівка'}{data.paymentInUkraine ? ' (в Україні)' : ''}</div>
           {data.totalCost && <div className="font-bold mt-0.5">Вартість: {Number(data.totalCost).toFixed(2)} EUR</div>}

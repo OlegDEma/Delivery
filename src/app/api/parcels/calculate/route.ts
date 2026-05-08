@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth/guards';
 import { calculateParcelCost } from '@/lib/utils/pricing';
-import { parseBody, calculateCostSchema, parsePackagingPrices } from '@/lib/validators';
+import { parseBody, calculateCostSchema } from '@/lib/validators';
+import { buildPricingInput } from '@/lib/utils/pricing-input';
 import { logger } from '@/lib/logger';
 
 // POST /api/parcels/calculate — calculate parcel cost based on pricing config
@@ -29,29 +30,30 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const pricingInput = buildPricingInput(config);
   const result = calculateParcelCost(
-    {
-      pricePerKg: Number(config.pricePerKg),
-      weightType: config.weightType,
-      insuranceThreshold: Number(config.insuranceThreshold),
-      insuranceRate: Number(config.insuranceRate),
-      insuranceEnabled: config.insuranceEnabled,
-      packagingEnabled: config.packagingEnabled,
-      packagingPrices: parsePackagingPrices(config.packagingPrices),
-      addressDeliveryPrice: Number(config.addressDeliveryPrice),
-    },
+    pricingInput,
     {
       actualWeight: body.actualWeight ?? 0,
       volumetricWeight: body.volumetricWeight ?? 0,
       declaredValue: body.declaredValue ?? 0,
+      insurance: body.insurance ?? false,
       needsPackaging: body.needsPackaging ?? false,
       isAddressDelivery: body.isAddressDelivery ?? false,
+      isPickupPoint: body.isPickupPoint ?? false,
+      parcelMoneyAmount: body.parcelMoneyAmount ?? 0,
     }
   );
 
   return NextResponse.json({
     ...result,
-    pricePerKg: Number(config.pricePerKg),
-    weightType: config.weightType,
+    pricePerKg: pricingInput.pricePerKg,
+    weightType: pricingInput.weightType,
+    // Echo configured rates so the UI can render context-aware hints
+    // (e.g. "Страхування: 1% від 100€ = 1€"). Optional client-side use.
+    insurancePercent: pricingInput.insurancePercent,
+    packagingPer10kg: pricingInput.packagingPer10kg,
+    parcelMoneyPercent: pricingInput.parcelMoneyPercent,
+    pickupPointPrice: pricingInput.pickupPointPrice,
   });
 }
