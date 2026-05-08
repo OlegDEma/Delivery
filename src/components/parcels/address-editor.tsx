@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { FieldHint } from '@/components/shared/field-hint';
+import { AddressInput } from '@/components/parcels/address-input';
 
 export interface AddressEditorState {
   deliveryMethod: string; // 'address' | 'np_warehouse' | 'pickup_point'
@@ -25,6 +26,9 @@ export interface AddressEditorProps {
   cityPlaceholder?: string;
   /** Whether to show the delivery-method selector (default true). */
   showDeliveryMethod?: boolean;
+  /** ISO country code (UA / NL / AT / DE). When provided, city & street
+   *  fields use AddressInput with autocomplete + Latin keyboard for EU. */
+  country?: string | null;
 }
 
 /**
@@ -35,18 +39,25 @@ export interface AddressEditorProps {
  * Fields per ТЗ: «Адреса» selector → 3 options (Адресна доставка / Відділення /
  * Пункт збору), Індекс (postal code) before Населений пункт, виразні заголовки.
  */
+// Hoisted out of AddressEditor — declaring components inside render resets
+// their state each render and trips the react-hooks/static-components rule.
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm font-bold text-blue-700 underline underline-offset-4">{children}</p>;
+}
+
 export function AddressEditor({
   state,
   onChange,
   title,
   cityPlaceholder,
   showDeliveryMethod = true,
+  country,
 }: AddressEditorProps) {
   const dm = state.deliveryMethod || 'address';
-
-  const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <p className="text-sm font-bold text-blue-700 underline underline-offset-4">{children}</p>
-  );
+  // When country is known we wire AddressInput (autocomplete + Latin keyboard
+  // for EU per ТЗ). Otherwise fall back to CapitalizeInput so editor still
+  // works in screens that don't pass country down yet.
+  const useAutocomplete = !!country;
 
   return (
     <div className="space-y-2">
@@ -105,11 +116,21 @@ export function AddressEditor({
         )}
         <div>
           <Label className="text-xs">Населений пункт</Label>
-          <CapitalizeInput
-            value={state.city}
-            onChange={(v) => onChange({ city: v })}
-            placeholder={cityPlaceholder}
-          />
+          {useAutocomplete ? (
+            <AddressInput
+              field="city"
+              country={country!}
+              value={state.city}
+              onChange={(v) => onChange({ city: v })}
+              placeholder={cityPlaceholder}
+            />
+          ) : (
+            <CapitalizeInput
+              value={state.city}
+              onChange={(v) => onChange({ city: v })}
+              placeholder={cityPlaceholder}
+            />
+          )}
         </div>
 
         {dm === 'np_warehouse' && (
@@ -139,10 +160,19 @@ export function AddressEditor({
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label className="text-xs">Вулиця</Label>
-                <CapitalizeInput
-                  value={state.street}
-                  onChange={(v) => onChange({ street: v })}
-                />
+                {useAutocomplete ? (
+                  <AddressInput
+                    field="street"
+                    country={country!}
+                    value={state.street}
+                    onChange={(v) => onChange({ street: v })}
+                  />
+                ) : (
+                  <CapitalizeInput
+                    value={state.street}
+                    onChange={(v) => onChange({ street: v })}
+                  />
+                )}
               </div>
               <div>
                 <Label className="text-xs">Будинок</Label>

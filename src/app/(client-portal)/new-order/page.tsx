@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { CollectionBlock } from '@/components/parcels/collection-block';
+import { AddressInput } from '@/components/parcels/address-input';
 import { PhoneInput } from '@/components/shared/phone-input';
 
 interface PlaceData {
@@ -296,7 +297,10 @@ export default function NewOrderPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div><Label>Місто</Label><Input value={senderCity} onChange={(e) => setSenderCity(e.target.value)} /></div>
+            <div>
+              <Label>Місто</Label>
+              <AddressInput field="city" country={senderCountry} value={senderCity} onChange={setSenderCity} />
+            </div>
           </CardContent>
         </Card>
 
@@ -368,7 +372,10 @@ export default function NewOrderPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div><Label>Місто *</Label><Input value={receiverCity} onChange={(e) => setReceiverCity(e.target.value)} required /></div>
+            <div>
+              <Label>Місто *</Label>
+              <AddressInput field="city" country={receiverCountry} value={receiverCity} onChange={setReceiverCity} required />
+            </div>
             {receiverCountry === 'UA' && (
               <div>
                 <Label>Спосіб доставки</Label>
@@ -386,7 +393,10 @@ export default function NewOrderPage() {
               <div><Label>Номер складу НП</Label><Input value={receiverNpWarehouse} onChange={(e) => setReceiverNpWarehouse(e.target.value)} placeholder="1" /></div>
             )}
             {(receiverDeliveryMethod === 'address' || receiverCountry !== 'UA') && (
-              <div><Label>Вулиця, будинок{receiverCountry === 'UA' && ' *'}</Label><Input value={receiverStreet} onChange={(e) => setReceiverStreet(e.target.value)} /></div>
+              <div>
+                <Label>Вулиця, будинок{receiverCountry === 'UA' && ' *'}</Label>
+                <AddressInput field="street" country={receiverCountry} value={receiverStreet} onChange={setReceiverStreet} />
+              </div>
             )}
           </CardContent>
         </Card>

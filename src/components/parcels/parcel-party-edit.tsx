@@ -157,6 +157,9 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
       />
       <AddressEditor
         state={addr}
+        // ТЗ: автокомпліт міста/вулиці + латиниця для EU. Передаємо країну
+        // зі збереженої адреси клієнта (або falback на party.country).
+        country={(address?.country ?? party.country) || null}
         onChange={(p) => setAddr({ ...addr, ...p })}
       />
       <div className="flex gap-2 pt-1">

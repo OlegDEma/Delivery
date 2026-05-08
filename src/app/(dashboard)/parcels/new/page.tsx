@@ -489,6 +489,12 @@ export default function NewParcelPage() {
                 )}
                 <AddressEditor
                   cityPlaceholder="Львів"
+                  // ТЗ: автокомпліт міста/вулиці з історії + латиниця для EU.
+                  // Країна отримувача — або з обраної адреси, або UA для eu_to_ua.
+                  country={
+                    receiver?.addresses[0]?.country
+                    ?? (direction === 'eu_to_ua' ? 'UA' : null)
+                  }
                   state={{
                     deliveryMethod: recvDeliveryMethod,
                     postalCode: recvPostalCode,
@@ -540,6 +546,12 @@ export default function NewParcelPage() {
                 <AddressEditor
                   title="Адреса відправника"
                   cityPlaceholder="Амстердам"
+                  // ТЗ: автокомпліт + латиниця для EU. Країна відправника —
+                  // з обраної адреси клієнта, або UA для ua_to_eu.
+                  country={
+                    sender?.addresses[0]?.country
+                    ?? (direction === 'ua_to_eu' ? 'UA' : null)
+                  }
                   state={{
                     deliveryMethod: senderDeliveryMethod,
                     postalCode: senderPostalCode,

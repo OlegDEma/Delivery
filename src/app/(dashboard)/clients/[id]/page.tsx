@@ -373,6 +373,8 @@ export default function ClientDetailPage() {
                 </div>
                 <AddressEditor
                   state={newAddr}
+                  // ТЗ: автокомпліт + латиниця для EU.
+                  country={addrCountry}
                   onChange={(p) => setNewAddr({ ...newAddr, ...p })}
                 />
                 <Button type="submit" className="w-full" disabled={!newAddr.city}>
@@ -391,6 +393,9 @@ export default function ClientDetailPage() {
                   <div className="space-y-2">
                     <AddressEditor
                       state={editAddr}
+                      // Country with the address being edited drives autocomplete
+                      // & keyboard. Untracked in inline state — read from row.
+                      country={a.country}
                       onChange={(p) => setEditAddr({ ...editAddr, ...p })}
                     />
                     <div className="flex gap-2">
