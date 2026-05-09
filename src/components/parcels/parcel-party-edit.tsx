@@ -157,6 +157,8 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
       />
       <AddressEditor
         state={addr}
+        // ТЗ: для відправника опція address = «Адреса відправки».
+        role={role}
         // ТЗ: автокомпліт міста/вулиці + латиниця для EU. Передаємо країну
         // зі збереженої адреси клієнта (або falback на party.country).
         country={(address?.country ?? party.country) || null}

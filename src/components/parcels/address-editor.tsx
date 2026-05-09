@@ -29,6 +29,12 @@ export interface AddressEditorProps {
   /** ISO country code (UA / NL / AT / DE). When provided, city & street
    *  fields use AddressInput with autocomplete + Latin keyboard for EU. */
   country?: string | null;
+  /**
+   * Per ТЗ — для відправника опція "address" має називатись «Адреса
+   * відправки» (бо звідти забирають), для отримувача — «Адресна доставка»
+   * (бо туди привозять). Default 'receiver' зберігає попередню поведінку.
+   */
+  role?: 'sender' | 'receiver';
 }
 
 /**
@@ -52,12 +58,15 @@ export function AddressEditor({
   cityPlaceholder,
   showDeliveryMethod = true,
   country,
+  role = 'receiver',
 }: AddressEditorProps) {
   const dm = state.deliveryMethod || 'address';
   // When country is known we wire AddressInput (autocomplete + Latin keyboard
   // for EU per ТЗ). Otherwise fall back to CapitalizeInput so editor still
   // works in screens that don't pass country down yet.
   const useAutocomplete = !!country;
+  // Lable of the "address" delivery method differs for sender vs receiver.
+  const addressMethodLabel = role === 'sender' ? 'Адреса відправки' : 'Адресна доставка';
 
   return (
     <div className="space-y-2">
@@ -77,11 +86,11 @@ export function AddressEditor({
             >
               <SelectTrigger className="h-8">
                 <SelectValue>
-                  {dm === 'np_warehouse' ? 'Відділення' : dm === 'pickup_point' ? 'Пункт збору' : 'Адресна доставка'}
+                  {dm === 'np_warehouse' ? 'Відділення' : dm === 'pickup_point' ? 'Пункт збору' : addressMethodLabel}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="address">Адресна доставка</SelectItem>
+                <SelectItem value="address">{addressMethodLabel}</SelectItem>
                 <SelectItem value="np_warehouse">Відділення</SelectItem>
                 <SelectItem value="pickup_point">Пункт збору</SelectItem>
               </SelectContent>

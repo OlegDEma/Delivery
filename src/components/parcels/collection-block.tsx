@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import {
   COLLECTION_METHODS,
   COLLECTION_METHOD_LABELS,
-  COLLECTION_METHOD_HINTS,
+  COLLECTION_METHOD_HINTS_CLIENT,
   COLLECTION_METHOD_ICONS,
   formatWorkingDays,
   nextWorkingDay,
@@ -38,6 +39,12 @@ export interface CollectionState {
   pointId: string;
   date: string;  // YYYY-MM-DD
   address: string;
+  /**
+   * Per ТЗ — при courier_pickup оператор обирає чи це «єдина посилка» (false)
+   * чи «2+ посилок з цієї локації» (true). Впливає на мінімальний тариф.
+   * Null коли method ≠ courier_pickup або відповідь ще не надана.
+   */
+  isMultiParcelPickup?: boolean | null;
 }
 
 interface CollectionBlockProps {
@@ -45,87 +52,133 @@ interface CollectionBlockProps {
   senderCountry: CountryCode | string | null;
   value: CollectionState;
   onChange: (next: CollectionState) => void;
-  /** If true, shows only minimal UI (client-portal). If false, full (staff). */
+  /** If true, shows minimal client-portal UI. If false, full staff UI. */
   clientFacing?: boolean;
 }
+
+// Per ТЗ: «Передати водію» приховано. Залишаються три способи.
+const METHODS: CollectionMethod[] = [
+  COLLECTION_METHODS.PICKUP_POINT,
+  COLLECTION_METHODS.COURIER_PICKUP,
+  COLLECTION_METHODS.EXTERNAL_SHIPPING,
+];
 
 export function CollectionBlock({ senderCountry, value, onChange, clientFacing = false }: CollectionBlockProps) {
   const [points, setPoints] = useState<CollectionPointOption[]>([]);
   const [loadingPoints, setLoadingPoints] = useState(true);
 
+  // Initial fetch + refetch коли змінюється країна. setLoading(true) робимо
+  // лише ASYNC після старту запиту, щоб уникнути sync-setState-in-effect.
   useEffect(() => {
-    setLoadingPoints(true);
-    const qs = senderCountry ? `?country=${encodeURIComponent(senderCountry)}` : '';
-    fetch(`/api/collection-points${qs}`)
-      .then(r => (r.ok ? r.json() : []))
-      .then((list: CollectionPointOption[]) => {
+    let cancelled = false;
+    (async () => {
+      setLoadingPoints(true);
+      const qs = senderCountry ? `?country=${encodeURIComponent(senderCountry)}` : '';
+      try {
+        const r = await fetch(`/api/collection-points${qs}`);
+        if (cancelled) return;
+        const list: CollectionPointOption[] = r.ok ? await r.json() : [];
+        if (cancelled) return;
         setPoints(list.filter(p => p.isActive));
-      })
-      .finally(() => setLoadingPoints(false));
+      } finally {
+        if (!cancelled) setLoadingPoints(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, [senderCountry]);
 
   function setMethod(m: CollectionMethod | '') {
-    // Clear point/address when method doesn't need them
     onChange({
       ...value,
       method: m,
       pointId: m === 'pickup_point' ? value.pointId : '',
       address: m === 'courier_pickup' ? value.address : '',
+      // Reset multi-parcel flag коли вибір не courier_pickup.
+      isMultiParcelPickup: m === 'courier_pickup' ? value.isMultiParcelPickup ?? null : null,
     });
   }
 
-  // Per ТЗ: «Забрати поле "Передати водію"» — direct_to_driver приховано.
-  const methods: CollectionMethod[] = [
-    COLLECTION_METHODS.PICKUP_POINT,
-    COLLECTION_METHODS.COURIER_PICKUP,
-    COLLECTION_METHODS.EXTERNAL_SHIPPING,
-  ];
+  // ТЗ: для клієнта courier_pickup доступний лише якщо адреса відправника
+  // у одній з обслуговуваних EU-країн. В Україні — лише Львів. На цьому
+  // рівні ми знаємо тільки країну; фактичну перевірку на «Львів» робимо
+  // нижче через workingHours кур'єрських пунктів.
+  // TODO: додати поле в Адмініструванні щоб конкретно вмикати ua-cities.
+  const courierPickupAvailableForClient =
+    !clientFacing ||
+    (senderCountry !== null && senderCountry !== 'UA');
+
+  // ТЗ: для клієнта external_shipping поки що неактивний.
+  const externalShippingAvailableForClient = !clientFacing;
 
   const pointsForCountry = senderCountry
     ? points.filter(p => p.country === senderCountry)
     : points;
 
+  // ТЗ Staff: «При виборі одного з трьох полів два інших зникають».
+  // ТЗ Client: те саме.
+  const hideOthers = !!value.method;
+  const visibleMethods = hideOthers ? METHODS.filter(m => m === value.method) : METHODS;
+
   return (
     <div className="space-y-3">
+      {/* Title — ТЗ для клієнта залишити, для staff прибрати. */}
+      {clientFacing && (
+        <Label className="text-xs text-gray-500 mb-1 block">Як Ви передасте нам посилку?</Label>
+      )}
+
       {/* Method cards */}
       <div>
-        <Label className="text-xs text-gray-500 mb-1 block">Як ви передасте нам посилку?</Label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {methods.map(m => {
+          {visibleMethods.map(m => {
             const on = value.method === m;
+            const disabled =
+              (m === COLLECTION_METHODS.COURIER_PICKUP && !courierPickupAvailableForClient) ||
+              (m === COLLECTION_METHODS.EXTERNAL_SHIPPING && !externalShippingAvailableForClient);
+
             return (
               <button
                 key={m}
                 type="button"
-                onClick={() => setMethod(m)}
+                disabled={disabled}
+                onClick={() => !disabled && setMethod(m)}
                 className={cn(
                   'text-left border rounded-lg p-3 transition-all',
-                  on
-                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                  on && 'border-blue-500 bg-blue-50 ring-2 ring-blue-200',
+                  !on && !disabled && 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50',
+                  disabled && 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
                 )}
               >
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-lg">{COLLECTION_METHOD_ICONS[m]}</span>
                   <span className="font-medium text-sm">{COLLECTION_METHOD_LABELS[m]}</span>
                 </div>
-                <div className="text-xs text-gray-500 leading-snug">
-                  {COLLECTION_METHOD_HINTS[m]}
-                </div>
+                {/* Підказки — лише для клієнта (per ТЗ, staff працює без них). */}
+                {clientFacing && (
+                  <div className="text-xs text-gray-500 leading-snug">
+                    {COLLECTION_METHOD_HINTS_CLIENT[m]}
+                    {disabled && m === COLLECTION_METHODS.COURIER_PICKUP && (
+                      <div className="mt-1 text-amber-700">
+                        Доступно лише якщо адреса відправника у країні, яку ми обслуговуємо
+                        (для України — тільки Львів).
+                      </div>
+                    )}
+                    {disabled && m === COLLECTION_METHODS.EXTERNAL_SHIPPING && (
+                      <div className="mt-1 text-amber-700">
+                        Опція тимчасово недоступна.
+                      </div>
+                    )}
+                  </div>
+                )}
               </button>
             );
           })}
         </div>
-        {!clientFacing && (
+        {/* «Очистити вибір» — і для staff, і для клієнта (per ТЗ). */}
+        {value.method && (
           <button
             type="button"
             onClick={() => setMethod('')}
-            className={cn(
-              'mt-2 text-xs',
-              value.method === ''
-                ? 'text-gray-700 font-medium'
-                : 'text-gray-400 hover:text-gray-600'
-            )}
+            className="mt-2 text-xs text-gray-500 hover:text-gray-700"
           >
             ⊘ Очистити вибір
           </button>
@@ -207,36 +260,79 @@ export function CollectionBlock({ senderCountry, value, onChange, clientFacing =
         </div>
       )}
 
-      {/* Courier pickup — date + address */}
+      {/* Courier pickup */}
       {value.method === 'courier_pickup' && (
-        <div className="border-t pt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div>
-            <Label className="text-xs text-gray-500">Бажана дата виїзду</Label>
-            <Input
-              type="date"
-              value={value.date}
-              onChange={(e) => onChange({ ...value, date: e.target.value })}
-            />
-            {value.date && (
-              <p className="text-xs text-gray-400 mt-1">
-                {WEEKDAY_LABELS_FULL[weekdayFromDate(new Date(value.date))]},{' '}
-                {formatDate(value.date)}
-              </p>
-            )}
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500">Адреса забору</Label>
-            <Input
-              value={value.address}
-              onChange={(e) => onChange({ ...value, address: e.target.value })}
-              placeholder="Вулиця, дім, квартира, місто"
-            />
-          </div>
+        <div className="border-t pt-3 space-y-3">
+          {/* Per ТЗ Staff: запитання «Це буде єдина посилка від цього
+              Відправника?» з двома чекбоксами. Вибір обов'язковий — впливає
+              на мінімальний тариф. Для клієнта це не показуємо: оператор
+              зробить вибір при прийнятті. */}
+          {!clientFacing && (
+            <div className="bg-amber-50 border border-amber-200 rounded p-2 space-y-1.5">
+              <div className="text-xs font-medium text-amber-900">
+                Це буде єдина посилка від цього Відправника?
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <Checkbox
+                    checked={value.isMultiParcelPickup === false}
+                    onCheckedChange={(c) =>
+                      c === true && onChange({ ...value, isMultiParcelPickup: false })
+                    }
+                  />
+                  Одна посилка
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <Checkbox
+                    checked={value.isMultiParcelPickup === true}
+                    onCheckedChange={(c) =>
+                      c === true && onChange({ ...value, isMultiParcelPickup: true })
+                    }
+                  />
+                  Дві або більше посилок
+                </label>
+              </div>
+              {value.isMultiParcelPickup === null || value.isMultiParcelPickup === undefined ? (
+                <div className="text-[11px] text-amber-700">
+                  Відповідь обов&apos;язкова — від неї залежить мінімальна вартість посилки.
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {/* Для staff лишаємо date + address. ТЗ для клієнта забороняє ці
+              два поля (адреса = адреса відправника, дата визначається рейсом). */}
+          {!clientFacing && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs text-gray-500">Бажана дата виїзду</Label>
+                <Input
+                  type="date"
+                  value={value.date}
+                  onChange={(e) => onChange({ ...value, date: e.target.value })}
+                />
+                {value.date && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    {WEEKDAY_LABELS_FULL[weekdayFromDate(new Date(value.date))]},{' '}
+                    {formatDate(value.date)}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label className="text-xs text-gray-500">Адреса забору</Label>
+                <Input
+                  value={value.address}
+                  onChange={(e) => onChange({ ...value, address: e.target.value })}
+                  placeholder="Вулиця, дім, квартира, місто"
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* External shipping hint */}
-      {value.method === 'external_shipping' && (
+      {/* External shipping hint — лише для staff (для клієнта поле disabled). */}
+      {value.method === 'external_shipping' && !clientFacing && (
         <div className="border-t pt-3">
           <div className="text-xs text-gray-500 bg-gray-50 rounded p-2">
             Після створення замовлення ми надішлемо вам адресу нашого складу в{' '}

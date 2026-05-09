@@ -10,20 +10,29 @@ export type CollectionMethod = (typeof COLLECTION_METHODS)[keyof typeof COLLECTI
 export const COLLECTION_METHOD_LABELS: Record<CollectionMethod, string> = {
   pickup_point: 'Пункт збору',
   courier_pickup: "Виклик кур'єра",
-  external_shipping: 'Сам відправить поштою (PostNL/DPD)',
+  // ТЗ: «Сам відправить поштою» → «Відправка поштою».
+  external_shipping: 'Відправка поштою',
   direct_to_driver: 'Передати водію',
 };
 
-export const COLLECTION_METHOD_HINTS: Record<CollectionMethod, string> = {
+/**
+ * Hints shown ONLY in the client-facing variant of CollectionBlock — staff
+ * version hides them per ТЗ to save vertical space.
+ */
+export const COLLECTION_METHOD_HINTS_CLIENT: Record<CollectionMethod, string> = {
   pickup_point:
-    'Клієнт привозить посилку у наш пункт збору — найдешевше, зручно для нас',
+    'Привезіть посилку у наш пункт збору — це буде дешевше для Вас',
   courier_pickup:
-    'Ми заберемо посилку від клієнта на вказану дату — доплата за виклик',
+    "Ми заберемо Вашу посилку з Вашої адреси",
   external_shipping:
-    'Клієнт відправляє посилку сам на нашу адресу локальною поштою',
+    'Відправте посилку нам локальною поштою',
   direct_to_driver:
     'Клієнт передасть водію напряму у день рейсу',
 };
+
+/** @deprecated kept for callers still rendering staff-side hints. Use empty
+ *  string for staff (ТЗ: «пояснення забрати»). */
+export const COLLECTION_METHOD_HINTS = COLLECTION_METHOD_HINTS_CLIENT;
 
 export const COLLECTION_METHOD_ICONS: Record<CollectionMethod, string> = {
   pickup_point: '🏢',

@@ -30,6 +30,10 @@ interface ConfigForm {
   parcelMoneyPercent: string;
   pickupPointPrice: string;
   addressDeliveryPrice: string;
+  /** Per ТЗ — мін. вартість при 2+ посилок з однієї локації на різні адреси. */
+  minMultiPerAddress: string;
+  /** Per ТЗ — мін. вартість при одночасному UA→EU + EU→UA з однієї локації. */
+  minBothDirections: string;
   collectionDays: string[];
 }
 
@@ -46,6 +50,8 @@ interface ApiPricingConfig {
   parcelMoneyPercent: string | number;
   pickupPointPrice: string | number;
   addressDeliveryPrice: string | number;
+  minMultiPerAddress: string | number;
+  minBothDirections: string | number;
   collectionDays: string[];
 }
 
@@ -65,6 +71,8 @@ function toForm(c: ApiPricingConfig): ConfigForm {
     parcelMoneyPercent: String(c.parcelMoneyPercent ?? '0'),
     pickupPointPrice: String(c.pickupPointPrice ?? '0'),
     addressDeliveryPrice: String(c.addressDeliveryPrice ?? '0'),
+    minMultiPerAddress: String(c.minMultiPerAddress ?? '0'),
+    minBothDirections: String(c.minBothDirections ?? '0'),
     collectionDays: c.collectionDays ?? [],
   };
 }
@@ -116,12 +124,14 @@ export default function PricingPage() {
     // Validate. Negative or non-numeric values are rejected client-side so the
     // operator gets a clear message instead of a generic 400.
     const fields: Array<{ key: keyof ConfigForm; label: string; min: number; max: number }> = [
-      { key: 'pricePerKg',           label: 'Ціна за кг',         min: 0, max: 1000 },
-      { key: 'addressDeliveryPrice', label: 'Адресна доставка',   min: 0, max: 1000 },
-      { key: 'pickupPointPrice',     label: 'Пункт збору',        min: 0, max: 1000 },
-      { key: 'packagingPer10kg',     label: 'Пакування (€/10кг)', min: 0, max: 1000 },
-      { key: 'insurancePercent',     label: 'Страхування (%)',    min: 0, max: 100 },
-      { key: 'parcelMoneyPercent',   label: 'Пакет (%)',          min: 0, max: 100 },
+      { key: 'pricePerKg',           label: 'Ціна за кг',                   min: 0, max: 1000 },
+      { key: 'addressDeliveryPrice', label: 'Адресна доставка',             min: 0, max: 1000 },
+      { key: 'pickupPointPrice',     label: 'Пункт збору',                  min: 0, max: 1000 },
+      { key: 'minMultiPerAddress',   label: '2+ посилок з локації (мін.)',  min: 0, max: 1000 },
+      { key: 'minBothDirections',    label: 'Туди-сюди з локації (мін.)',   min: 0, max: 1000 },
+      { key: 'packagingPer10kg',     label: 'Пакування (€/10кг)',           min: 0, max: 1000 },
+      { key: 'insurancePercent',     label: 'Страхування (%)',              min: 0, max: 100 },
+      { key: 'parcelMoneyPercent',   label: 'Пакет (%)',                    min: 0, max: 100 },
     ];
     for (const f of fields) {
       const n = parseNum(c[f.key] as string);
@@ -139,6 +149,8 @@ export default function PricingPage() {
         weightType:           c.weightType,
         addressDeliveryPrice: parseNum(c.addressDeliveryPrice),
         pickupPointPrice:     parseNum(c.pickupPointPrice),
+        minMultiPerAddress:   parseNum(c.minMultiPerAddress),
+        minBothDirections:    parseNum(c.minBothDirections),
         insuranceEnabled:     c.insuranceEnabled,
         // UI is whole-percent; DB stores 0..1 fraction.
         insuranceRate:        (parseNum(c.insurancePercent) ?? 0) / 100,
@@ -205,9 +217,11 @@ export default function PricingPage() {
           <Card key={config.id}>
             <CardHeader className="py-3 px-4">
               <CardTitle className="text-base">
-                {COUNTRY_LABELS[config.country as CountryCode] || config.country}
-                {' '}
-                {config.direction === 'eu_to_ua' ? '→ Україна' : '← Україна'}
+                {/* ТЗ: «у назві поля завжди першою іде країна з якої
+                    відправляють, друга — країна призначення». */}
+                {config.direction === 'eu_to_ua'
+                  ? `${COUNTRY_LABELS[config.country as CountryCode] || config.country} → Україна`
+                  : `Україна → ${COUNTRY_LABELS[config.country as CountryCode] || config.country}`}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4 pt-0 space-y-3">
@@ -225,7 +239,10 @@ export default function PricingPage() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs">Адресна доставка (EUR)</Label>
+                  <Label className="text-xs">
+                    Адресна доставка (EUR){' '}
+                    <FieldHint text="Мінімальна вартість однієї посилки при заїзді кур'єра на адресу відправника (одна посилка від цього відправника)." />
+                  </Label>
                   <Input
                     type="number"
                     inputMode="decimal"
@@ -238,7 +255,7 @@ export default function PricingPage() {
                 <div>
                   <Label className="text-xs">
                     Пункт збору (EUR){' '}
-                    <FieldHint text="Фіксована сума за здачу посилки на пункт збору. 0 = окрема плата не береться (діє лише мінімалка)." />
+                    <FieldHint text="Мінімальна вартість однієї посилки при здачі/отриманні посилки на Пункті збору." />
                   </Label>
                   <Input
                     type="number"
@@ -247,6 +264,34 @@ export default function PricingPage() {
                     min="0"
                     value={config.pickupPointPrice}
                     onChange={(e) => update(config.id, 'pickupPointPrice', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">
+                    2+ посилок з локації (EUR){' '}
+                    <FieldHint text="Мінімальна вартість КОЖНОЇ посилки коли від одного відправника забираємо 2+ посилок на різні адреси одержувачів." />
+                  </Label>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    value={config.minMultiPerAddress}
+                    onChange={(e) => update(config.id, 'minMultiPerAddress', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">
+                    Туди-сюди з локації (EUR){' '}
+                    <FieldHint text="Мінімальна вартість посилки коли клієнт ОДНОЧАСНО і відправляє в Україну, і отримує з України з тієї ж локації." />
+                  </Label>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    value={config.minBothDirections}
+                    onChange={(e) => update(config.id, 'minBothDirections', e.target.value)}
                   />
                 </div>
                 <div>

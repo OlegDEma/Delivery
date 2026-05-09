@@ -80,6 +80,8 @@ export const createParcelSchema = z.object({
   collectionPointId: uuidSchema.optional().nullable(),
   collectionDate: z.string().optional().nullable(),
   collectionAddress: z.string().trim().max(300).optional().nullable(),
+  /** Per ТЗ: при courier_pickup — true якщо 2+ посилок з цієї локації. */
+  isMultiParcelPickup: z.boolean().optional().nullable(),
 });
 
 /** Client portal POST /api/client-portal/orders */
@@ -169,6 +171,12 @@ export const calculateCostSchema = z.object({
   isAddressDelivery: z.boolean().optional(),
   /** Parcel handed over at a pickup point (EU→UA). */
   isPickupPoint: z.boolean().optional(),
+  /** Sender обрав «Виклик кур'єра» (collection method = courier_pickup). */
+  isCourierPickup: z.boolean().optional(),
+  /** При courier_pickup — оператор обрав «2+ посилок з цієї локації». */
+  isMultiParcelPickup: z.boolean().optional(),
+  /** Detection: client одночасно і відправляє в UA, і отримує з UA. */
+  isBothDirections: z.boolean().optional(),
   /** «Пакет» — amount of cash sender transfers. */
   parcelMoneyAmount: moneySchema.optional(),
 });

@@ -37,6 +37,7 @@ export async function PATCH(request: NextRequest) {
     packagingEnabled, packagingPer10kg,
     parcelMoneyPercent,
     addressDeliveryPrice, pickupPointPrice,
+    minMultiPerAddress, minBothDirections,
     collectionDays,
   } = body;
 
@@ -60,6 +61,8 @@ export async function PATCH(request: NextRequest) {
     [pricePerKg,           0, 1000,   'pricePerKg'],
     [addressDeliveryPrice, 0, 1000,   'addressDeliveryPrice'],
     [pickupPointPrice,     0, 1000,   'pickupPointPrice'],
+    [minMultiPerAddress,   0, 1000,   'minMultiPerAddress'],
+    [minBothDirections,    0, 1000,   'minBothDirections'],
     [packagingPer10kg,     0, 1000,   'packagingPer10kg'],
     [insuranceRate,        0, 1,      'insuranceRate (0..1)'],
     [parcelMoneyPercent,   0, 100,    'parcelMoneyPercent'],
@@ -93,6 +96,8 @@ export async function PATCH(request: NextRequest) {
       ...(numIfPresent(parcelMoneyPercent)   !== undefined && { parcelMoneyPercent:   numIfPresent(parcelMoneyPercent)! }),
       ...(numIfPresent(addressDeliveryPrice) !== undefined && { addressDeliveryPrice: numIfPresent(addressDeliveryPrice)! }),
       ...(numIfPresent(pickupPointPrice)     !== undefined && { pickupPointPrice:     numIfPresent(pickupPointPrice)! }),
+      ...(numIfPresent(minMultiPerAddress)   !== undefined && { minMultiPerAddress:   numIfPresent(minMultiPerAddress)! }),
+      ...(numIfPresent(minBothDirections)    !== undefined && { minBothDirections:    numIfPresent(minBothDirections)! }),
       ...(collectionDays                     !== undefined && { collectionDays }),
       updatedById: user.id,
     },

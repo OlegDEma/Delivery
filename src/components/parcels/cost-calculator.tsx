@@ -15,17 +15,28 @@ interface CostCalculatorProps {
   /** Packaging opt-in checkbox state. */
   needsPackaging: boolean;
   isAddressDelivery: boolean;
-  /** Hand-off via pickup point — adds the pickup-point fee row. */
+  /** Hand-off via pickup point — впливає на мінімальний тариф. */
   isPickupPoint?: boolean;
+  /** Виклик кур'єра (sender side, EU→UA). */
+  isCourierPickup?: boolean;
+  /** При courier_pickup — 2+ посилок з цієї локації (per ТЗ). */
+  isMultiParcelPickup?: boolean;
+  /** Туди-сюди з однієї локації (детектується на бекенді). */
+  isBothDirections?: boolean;
   /** «Пакет» — money sender transfers (drives the % fee row). */
   parcelMoneyAmount?: number;
 }
 
 interface CostBreakdown {
+  baseDeliveryCost: number;
+  minimumApplied: number;
+  minimumLabel: string | null;
   deliveryCost: number;
   insuranceCost: number;
   packagingCost: number;
+  /** @deprecated тепер 0 (мінімум вкладено в deliveryCost). */
   addressDeliveryCost: number;
+  /** @deprecated тепер 0 (мінімум вкладено в deliveryCost). */
   pickupPointCost: number;
   parcelMoneyCost: number;
   totalCost: number;
@@ -84,6 +95,9 @@ export function CostCalculator(props: CostCalculatorProps) {
             needsPackaging: props.needsPackaging,
             isAddressDelivery: props.isAddressDelivery,
             isPickupPoint: props.isPickupPoint ?? false,
+            isCourierPickup: props.isCourierPickup ?? false,
+            isMultiParcelPickup: props.isMultiParcelPickup ?? false,
+            isBothDirections: props.isBothDirections ?? false,
             parcelMoneyAmount: props.parcelMoneyAmount ?? 0,
           }),
         });
@@ -110,7 +124,8 @@ export function CostCalculator(props: CostCalculatorProps) {
     country, props.direction,
     props.actualWeight, props.volumetricWeight, props.declaredValue,
     props.insurance, props.needsPackaging, props.isAddressDelivery,
-    props.isPickupPoint, props.parcelMoneyAmount,
+    props.isPickupPoint, props.isCourierPickup, props.isMultiParcelPickup,
+    props.isBothDirections, props.parcelMoneyAmount,
   ]);
 
   // Inline error has priority over fetched state (UA / no country picked yet).
@@ -145,7 +160,14 @@ export function CostCalculator(props: CostCalculatorProps) {
       </div>
       <div className="flex justify-between">
         <span className="text-gray-600">Доставка ({cost.pricePerKg} EUR/кг):</span>
-        <span>{formatCurrency(cost.deliveryCost, 'EUR')}</span>
+        <span>
+          {formatCurrency(cost.deliveryCost, 'EUR')}
+          {cost.minimumApplied > 0 && cost.minimumLabel && (
+            <span className="ml-1 text-[10px] text-amber-700" title={`Базова ${cost.baseDeliveryCost} EUR замінена мінімумом «${cost.minimumLabel}» = ${cost.minimumApplied} EUR`}>
+              (мін. {cost.minimumLabel})
+            </span>
+          )}
+        </span>
       </div>
       {cost.insuranceCost > 0 && (
         <div className="flex justify-between">
@@ -157,18 +179,6 @@ export function CostCalculator(props: CostCalculatorProps) {
         <div className="flex justify-between">
           <span className="text-gray-600">Пакування:</span>
           <span>{formatCurrency(cost.packagingCost, 'EUR')}</span>
-        </div>
-      )}
-      {cost.addressDeliveryCost > 0 && (
-        <div className="flex justify-between">
-          <span className="text-gray-600">Адресна доставка:</span>
-          <span>{formatCurrency(cost.addressDeliveryCost, 'EUR')}</span>
-        </div>
-      )}
-      {cost.pickupPointCost > 0 && (
-        <div className="flex justify-between">
-          <span className="text-gray-600">Пункт збору:</span>
-          <span>{formatCurrency(cost.pickupPointCost, 'EUR')}</span>
         </div>
       )}
       {cost.parcelMoneyCost > 0 && (

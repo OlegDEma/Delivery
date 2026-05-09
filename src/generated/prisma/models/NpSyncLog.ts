@@ -413,10 +413,6 @@ export type NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput = {
   deleteMany?: Prisma.NpSyncLogScalarWhereInput | Prisma.NpSyncLogScalarWhereInput[]
 }
 
-export type NullableBoolFieldUpdateOperationsInput = {
-  set?: boolean | null
-}
-
 export type NpSyncLogCreateWithoutParcelInput = {
   id?: string
   action: string

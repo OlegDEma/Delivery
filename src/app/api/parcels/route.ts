@@ -346,6 +346,7 @@ export async function POST(request: NextRequest) {
       collectionPointId: parsed.collectionPointId ?? null,
       collectionDate: parsed.collectionDate ? new Date(parsed.collectionDate) : null,
       collectionAddress: parsed.collectionAddress ?? null,
+      isMultiParcelPickup: parsed.isMultiParcelPickup ?? null,
     });
 
     // Send invoice SMS — best-effort, non-blocking. Per ТЗ: «на телефонний

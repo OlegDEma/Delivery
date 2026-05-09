@@ -374,6 +374,10 @@ model Parcel {
   /// Pickup-point hand-off fee (per ТЗ — окреме поле тарифу). 0/null when
   /// hand-off is not via pickup point.
   pickupPointCost       Decimal?      @default(0) @map("pickup_point_cost") @db.Decimal(10, 2)
+  /// Per ТЗ: при courier_pickup оператор зазначає, чи від цього відправника
+  /// це єдина посилка чи їх 2+. Впливає на мінімальний тариф.
+  /// NULL коли collectionMethod ≠ courier_pickup.
+  isMultiParcelPickup   Boolean?      @map("is_multi_parcel_pickup")
   /// "Пакет" — сума готівки, яку клієнт передає одержувачу. Опціональна
   /// послуга: введена сума додається в квитанцію окремим рядком (N).
   parcelMoneyAmount     Decimal?      @map("parcel_money_amount") @db.Decimal(10, 2)
@@ -513,8 +517,21 @@ model PricingConfig {
   /// 0 disables the option.
   parcelMoneyPercent   Decimal     @default(0) @map("parcel_money_percent") @db.Decimal(5, 2)
   /// Flat price for handing the parcel over at a collection point (per ТЗ).
+  /// "Мінімальна вартість кожної посилки при самостійній доставці/отриманні
+  /// клієнтом посилки на Пункті збору" — діє як поріг (max(weight×price, цей)).
   pickupPointPrice     Decimal     @default(0) @map("pickup_point_price") @db.Decimal(10, 2)
+  /// "Адресна доставка" — мінімальна вартість посилки при заїзді кур'єра
+  /// на адресу (одна посилка від відправника). Діє як поріг.
   addressDeliveryPrice Decimal     @default(0) @map("address_delivery_price") @db.Decimal(10, 2)
+  /// Per ТЗ: «При передачі двох і більше посилок з однієї локації на різні
+  /// адреси — мінімальна вартість посилки на кожну одну адресу». Поріг
+  /// діє коли в формі обрано "Дві або більше посилок" для courier_pickup.
+  minMultiPerAddress   Decimal     @default(0) @map("min_multi_per_address") @db.Decimal(10, 2)
+  /// Per ТЗ: «При отриманні з України та передачі в Україну одномоментно
+  /// з однієї локації — мінімальна вартість посилки з/на кожну одну адресу».
+  /// Поріг діє коли відправник одночасно і отримує і відправляє з тієї ж
+  /// локації. Логіка детекції — на бекенді.
+  minBothDirections    Decimal     @default(0) @map("min_both_directions") @db.Decimal(10, 2)
   collectionDays       String[]    @map("collection_days")
   isActive             Boolean     @default(true) @map("is_active")
   updatedById          String?     @map("updated_by") @db.Uuid

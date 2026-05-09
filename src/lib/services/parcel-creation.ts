@@ -51,6 +51,11 @@ export interface CreateParcelInput {
   paymentMethod?: PaymentMethod;
   paymentInUkraine?: boolean;
   needsPackaging?: boolean;
+  /**
+   * Per ТЗ: при collectionMethod = courier_pickup — true якщо «2+ посилок
+   * з цієї локації» (впливає на мінімальний тариф).
+   */
+  isMultiParcelPickup?: boolean | null;
   /** «Пакет» — money sender transfers to receiver (optional). 0/undef = no Пакет. */
   parcelMoneyAmount?: number | null;
   /**
@@ -224,6 +229,15 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
           isAddressDelivery: deliveryMethod === 'address',
           isPickupPoint:
             input.direction === 'eu_to_ua' && input.collectionMethod === 'pickup_point',
+          isCourierPickup:
+            input.direction === 'eu_to_ua' && input.collectionMethod === 'courier_pickup',
+          isMultiParcelPickup:
+            input.collectionMethod === 'courier_pickup' && !!input.isMultiParcelPickup,
+          // Both-directions detection: на момент створення складно — лишаємо
+          // false. Можна буде включити при ручному редагуванні через PATCH
+          // або в окремій перевірці бекенда (TODO: scan інші посилки клієнта
+          // у вікні ±день з тієї ж локації).
+          isBothDirections: false,
           parcelMoneyAmount: input.parcelMoneyAmount ? Number(input.parcelMoneyAmount) : 0,
         }
       );
@@ -297,6 +311,10 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
           insuranceApplied: input.insurance === true,
           addressDeliveryCost: addressDeliveryCost || null,
           pickupPointCost: pickupPointCost || null,
+          isMultiParcelPickup:
+            input.collectionMethod === 'courier_pickup'
+              ? !!input.isMultiParcelPickup
+              : null,
           parcelMoneyAmount:
             input.parcelMoneyAmount && Number(input.parcelMoneyAmount) > 0
               ? Number(input.parcelMoneyAmount)

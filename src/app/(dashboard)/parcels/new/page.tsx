@@ -194,6 +194,7 @@ export default function NewParcelPage() {
     pointId: '',
     date: '',
     address: '',
+    isMultiParcelPickup: null,
   });
 
   useEffect(() => {
@@ -377,6 +378,12 @@ export default function NewParcelPage() {
         collectionPointId: collection.method === 'pickup_point' ? collection.pointId || undefined : undefined,
         collectionDate: collection.date || undefined,
         collectionAddress: collection.method === 'courier_pickup' ? collection.address || undefined : undefined,
+        // Per ТЗ: при courier_pickup оператор обирає чи це 2+ посилок з
+        // цієї локації. Впливає на мінімальний тариф.
+        isMultiParcelPickup:
+          collection.method === 'courier_pickup'
+            ? !!collection.isMultiParcelPickup
+            : undefined,
         places: useGeneralParams
           ? Array.from({ length: Number(generalPlaces) || 1 }, (_, i) => ({
               weight: (Number(generalWeight) || 0) / (Number(generalPlaces) || 1),
@@ -546,6 +553,8 @@ export default function NewParcelPage() {
                 <AddressEditor
                   title="Адреса відправника"
                   cityPlaceholder="Амстердам"
+                  // ТЗ: для відправника опція address = «Адреса відправки».
+                  role="sender"
                   // ТЗ: автокомпліт + латиниця для EU. Країна відправника —
                   // з обраної адреси клієнта, або UA для ua_to_eu.
                   country={
@@ -961,6 +970,8 @@ export default function NewParcelPage() {
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
           isAddressDelivery={receiver?.addresses[0]?.deliveryMethod === 'address'}
           isPickupPoint={direction === 'eu_to_ua' && collection.method === 'pickup_point'}
+          isCourierPickup={direction === 'eu_to_ua' && collection.method === 'courier_pickup'}
+          isMultiParcelPickup={!!collection.isMultiParcelPickup}
           parcelMoneyAmount={parcelMoneyEnabled ? Number(parcelMoneyAmount) || 0 : 0}
         />
 

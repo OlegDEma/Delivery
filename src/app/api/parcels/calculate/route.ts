@@ -41,6 +41,9 @@ export async function POST(request: NextRequest) {
       needsPackaging: body.needsPackaging ?? false,
       isAddressDelivery: body.isAddressDelivery ?? false,
       isPickupPoint: body.isPickupPoint ?? false,
+      isCourierPickup: body.isCourierPickup ?? false,
+      isMultiParcelPickup: body.isMultiParcelPickup ?? false,
+      isBothDirections: body.isBothDirections ?? false,
       parcelMoneyAmount: body.parcelMoneyAmount ?? 0,
     }
   );

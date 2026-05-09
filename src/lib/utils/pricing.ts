@@ -25,11 +25,27 @@ export interface PricingConfigInput {
    */
   packagingPrices?: Record<string, number> | null;
 
-  /** Address delivery surcharge (flat). */
+  /**
+   * Per ТЗ — це не «надбавка», а МІНІМУМ для одиничної посилки коли кур'єр
+   * заїжджає на адресу відправника. Діє як підлога: max(weight × pricePerKg,
+   * addressDeliveryPrice).
+   */
   addressDeliveryPrice: number;
 
-  /** Pickup-point hand-off fee (flat, EU→UA only). */
+  /** Те саме як addressDeliveryPrice, але для здачі/отримання на пункті збору. */
   pickupPointPrice: number;
+
+  /**
+   * Мінімум коли від ОДНОГО відправника забираємо 2+ посилок на РІЗНІ адреси
+   * одержувачів. Діє як підлога per parcel.
+   */
+  minMultiPerAddress: number;
+
+  /**
+   * Мінімум коли клієнт ОДНОЧАСНО і відправляє в UA, і отримує з UA з тієї ж
+   * локації. Діє як підлога per parcel.
+   */
+  minBothDirections: number;
 
   /** Whole-percent rate applied to the «Пакет» amount. */
   parcelMoneyPercent: number;
@@ -50,6 +66,21 @@ export interface ParcelCostInput {
   /** EU→UA parcel handed over at a pickup point. */
   isPickupPoint: boolean;
   /**
+   * Sender хоче, щоб ми приїхали на його адресу за посилкою (collection
+   * method = courier_pickup). Діє як підлога addressDeliveryPrice.
+   */
+  isCourierPickup?: boolean;
+  /**
+   * При courier_pickup — оператор обрав «Дві або більше посилок» (per ТЗ).
+   * Тоді замість addressDeliveryPrice діє minMultiPerAddress.
+   */
+  isMultiParcelPickup?: boolean;
+  /**
+   * Клієнт одночасно і відправляє в UA, і отримує з UA з тієї ж локації.
+   * Діє як підлога minBothDirections (детекція — на бекенді при створенні).
+   */
+  isBothDirections?: boolean;
+  /**
    * «Пакет» — money sender transfers to receiver. 0 / undefined = option not used.
    * The amount itself is NOT a delivery cost — only the % fee from it is.
    */
@@ -57,10 +88,22 @@ export interface ParcelCostInput {
 }
 
 export interface CostBreakdown {
+  /** weight × pricePerKg (без застосування мінімуму). Лишається для прозорості. */
+  baseDeliveryCost: number;
+  /** Який тариф-мінімум був застосований (0 якщо не діяв). */
+  minimumApplied: number;
+  /** Назва підлоги для UI («Адресна доставка», «Пункт збору» тощо). */
+  minimumLabel: string | null;
+  /**
+   * Фактично нарахована вартість перевезення (з урахуванням мінімуму) =
+   * max(baseDeliveryCost, minimumApplied).
+   */
   deliveryCost: number;
   insuranceCost: number;
   packagingCost: number;
+  /** @deprecated тепер вкладено в deliveryCost (мінімум). Завжди 0. */
   addressDeliveryCost: number;
+  /** @deprecated тепер вкладено в deliveryCost (мінімум). Завжди 0. */
   pickupPointCost: number;
   parcelMoneyCost: number;
   totalCost: number;
@@ -84,23 +127,58 @@ export function calculateParcelCost(
   config: PricingConfigInput,
   parcel: ParcelCostInput
 ): CostBreakdown {
-  // 1. Delivery — weight × price/kg.
+  // 1. Базова вартість перевезення = вага × ціна/кг.
   const billableWeight = getBillableWeight(
     parcel.actualWeight,
     parcel.volumetricWeight,
     config.weightType
   );
-  const deliveryCost = roundMoney(billableWeight * config.pricePerKg);
+  const baseDeliveryCost = roundMoney(billableWeight * config.pricePerKg);
 
-  // 2. Insurance — opt-in via checkbox, % from declaredValue.
-  // ТЗ: безумовне +3% скасовано — додається ТІЛЬКИ якщо клієнт відмітив.
+  // 2. Визначаємо релевантний мінімум-поріг. ТЗ — пріоритети:
+  //    1) «Туди-сюди» (одночасний UA→EU + EU→UA з однієї локації)
+  //    2) «2+ посилок з однієї локації» (multi-parcel courier_pickup)
+  //    3) Single courier_pickup → addressDeliveryPrice
+  //    4) Pickup point → pickupPointPrice
+  //    5) Receiver address delivery → addressDeliveryPrice (історично)
+  // У сумнівах беремо найнижчий ненульовий поріг — щоб клієнт не платив
+  // зайве при подвійній підставі.
+  let minimumApplied = 0;
+  let minimumLabel: string | null = null;
+  if (parcel.isBothDirections && config.minBothDirections > 0) {
+    minimumApplied = config.minBothDirections;
+    minimumLabel = 'Туди-сюди з локації';
+  } else if (parcel.isMultiParcelPickup && config.minMultiPerAddress > 0) {
+    minimumApplied = config.minMultiPerAddress;
+    minimumLabel = '2+ посилок з локації';
+  } else if (parcel.isCourierPickup && config.addressDeliveryPrice > 0) {
+    minimumApplied = config.addressDeliveryPrice;
+    minimumLabel = 'Адресна доставка';
+  } else if (parcel.isPickupPoint && config.pickupPointPrice > 0) {
+    minimumApplied = config.pickupPointPrice;
+    minimumLabel = 'Пункт збору';
+  } else if (parcel.isAddressDelivery && config.addressDeliveryPrice > 0) {
+    // Якщо одержувач обрав адресну доставку (не НП), застосовуємо ту ж
+    // підлогу. Це покриває напрям ua_to_eu, де sender = клієнт в UA,
+    // а receiver — в EU з адресною доставкою.
+    minimumApplied = config.addressDeliveryPrice;
+    minimumLabel = 'Адресна доставка';
+  }
+  // Поріг не діє якщо базова вже більша.
+  if (baseDeliveryCost >= minimumApplied) {
+    minimumApplied = 0;
+    minimumLabel = null;
+  }
+  const deliveryCost = roundMoney(Math.max(baseDeliveryCost, minimumApplied));
+
+  // 3. Страхування — opt-in via checkbox, % from declaredValue.
   let insuranceCost = 0;
   if (parcel.insurance && config.insuranceEnabled && parcel.declaredValue > 0) {
     insuranceCost = roundMoney(parcel.declaredValue * (config.insurancePercent / 100));
   }
 
-  // 3. Packaging — opt-in. New: € per (full or partial) 10 kg block.
-  // Legacy fallback: tier table (used while older tariffs are still in DB).
+  // 4. Пакування — opt-in. € per (full or partial) 10 kg block.
+  // Legacy fallback: tier table.
   let packagingCost = 0;
   if (parcel.needsPackaging && config.packagingEnabled) {
     if (config.packagingPer10kg > 0) {
@@ -111,33 +189,27 @@ export function calculateParcelCost(
     }
   }
 
-  // 4. Address delivery surcharge.
-  const addressDeliveryCost = parcel.isAddressDelivery ? roundMoney(config.addressDeliveryPrice) : 0;
-
-  // 5. Pickup-point hand-off fee.
-  const pickupPointCost = parcel.isPickupPoint ? roundMoney(config.pickupPointPrice) : 0;
-
-  // 6. «Пакет» (money transfer) — % fee from the amount.
+  // 5. «Пакет» (money transfer) — % fee.
   let parcelMoneyCost = 0;
   if (parcel.parcelMoneyAmount && parcel.parcelMoneyAmount > 0 && config.parcelMoneyPercent > 0) {
     parcelMoneyCost = roundMoney(parcel.parcelMoneyAmount * (config.parcelMoneyPercent / 100));
   }
 
   const totalCost = roundMoney(
-    deliveryCost +
-    insuranceCost +
-    packagingCost +
-    addressDeliveryCost +
-    pickupPointCost +
-    parcelMoneyCost
+    deliveryCost + insuranceCost + packagingCost + parcelMoneyCost
   );
 
   return {
+    baseDeliveryCost,
+    minimumApplied,
+    minimumLabel,
     deliveryCost,
     insuranceCost,
     packagingCost,
-    addressDeliveryCost,
-    pickupPointCost,
+    // Lagacy: ці компоненти більше не нараховуються окремо — вони стали
+    // мінімумом. Лишаємо у відповіді як 0, щоб не зламати legacy споживачів.
+    addressDeliveryCost: 0,
+    pickupPointCost: 0,
     parcelMoneyCost,
     totalCost,
     billableWeight,

@@ -440,6 +440,10 @@ export async function PATCH(
               isAddressDelivery,
               isPickupPoint:
                 parcel.direction === 'eu_to_ua' && collectionMethod === 'pickup_point',
+              isCourierPickup:
+                parcel.direction === 'eu_to_ua' && collectionMethod === 'courier_pickup',
+              isMultiParcelPickup: !!parcel.isMultiParcelPickup,
+              isBothDirections: false,
               parcelMoneyAmount: parcelMoneyAmount ? Number(parcelMoneyAmount) : 0,
             }
           );
