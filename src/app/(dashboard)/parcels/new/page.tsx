@@ -160,9 +160,12 @@ export default function NewParcelPage() {
   const [parcelMoneyEnabled, setParcelMoneyEnabled] = useState(false);
 
   // Currency for declared value depends on sender's country (UA → грн, EU → €).
+  // Якщо sender ще не обраний — спираємось на напрямок: ua_to_eu означає
+  // що відправник в Україні (грн), eu_to_ua — у EU (євро).
   const senderCountry = sender?.country || sender?.addresses[0]?.country || null;
-  const declaredCurrency = senderCountry === 'UA' ? 'UAH' : 'EUR';
-  const declaredCurrencyLabel = senderCountry === 'UA' ? 'грн' : 'EUR';
+  const senderInUA = senderCountry === 'UA' || (!senderCountry && direction === 'ua_to_eu');
+  const declaredCurrency = senderInUA ? 'UAH' : 'EUR';
+  const declaredCurrencyLabel = senderInUA ? 'грн' : 'EUR';
 
   // General params mode
   const [useGeneralParams, setUseGeneralParams] = useState(false);
