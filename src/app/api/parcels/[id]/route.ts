@@ -340,30 +340,34 @@ export async function PATCH(
     updateData.routeTaskReschedDate = body.routeTaskReschedDate ? new Date(body.routeTaskReschedDate) : null;
   }
 
-  // Places update — replaces dimensions/weight per place; delete missing ones;
-  // all mutations happen in a single transaction so the parcel aggregate
-  // weights and cost stay consistent with place records.
+  // Places update — replaces dimensions/weight per place; delete missing ones.
+  // Підготовляємо оновлення місць (якщо є в body) ТА паралельно завжди
+  // перераховуємо вартість, бо клієнт міг змінити лише оголошену вартість,
+  // страхування, Пакет, спосіб прийому — усе це впливає на ціну.
+  let placeUpdates: Array<{ id: string; data: Record<string, unknown> }> = [];
+  let placesToDelete: string[] = [];
+  let totalWeight = parcel.totalWeight ? Number(parcel.totalWeight) : 0;
+  let totalVolWeight = parcel.totalVolumetricWeight ? Number(parcel.totalVolumetricWeight) : 0;
+
   if (Array.isArray(body.places)) {
     const incomingIds = new Set(
       body.places.map(p => p.id).filter((x): x is string => typeof x === 'string')
     );
     const existingIds = parcel.places.map(p => p.id);
-    const placesToDelete = existingIds.filter(eid => !incomingIds.has(eid));
+    placesToDelete = existingIds.filter(eid => !incomingIds.has(eid));
 
-    let totalWeight = 0;
-    let totalVolWeight = 0;
-
-    // Pre-compute normalized blueprints so we don't repeat Number() calls.
-    const placeUpdates = body.places
-      .filter(p => p.id) // only existing places can be updated in-place; new places would need create
+    let tw = 0;
+    let tv = 0;
+    placeUpdates = body.places
+      .filter(p => p.id)
       .map(p => {
         const w = Number(p.weight) || 0;
         const l = p.length != null ? Number(p.length) : null;
         const wd = p.width != null ? Number(p.width) : null;
         const h = p.height != null ? Number(p.height) : null;
         const volW = l && wd && h ? calculateVolumetricWeight(l, wd, h) : 0;
-        totalWeight += w;
-        totalVolWeight += volW;
+        tw += w;
+        tv += volW;
         return {
           id: p.id!,
           data: {
@@ -377,10 +381,28 @@ export async function PATCH(
         };
       });
 
-    updateData.totalWeight = roundWeight(totalWeight);
-    updateData.totalVolumetricWeight = roundWeight(totalVolWeight);
+    totalWeight = roundWeight(tw);
+    totalVolWeight = roundWeight(tv);
+    updateData.totalWeight = totalWeight;
+    updateData.totalVolumetricWeight = totalVolWeight;
+  }
 
-    // Recalculate costs before transaction. Priority: trip → collectionPoint → senderAddr → receiverAddr.
+  // ВАЖЛИВО: recalc вартості — ВЖИВАЄТЬСЯ ЗАВЖДИ якщо в PATCH є хоча б одне
+  // cost-affecting поле або зміна місць. До цього recalc стояв всередині
+  // блоку `if (body.places)`, тож редагування лише `declaredValue` /
+  // `insuranceApplied` / `parcelMoneyAmount` не оновлювало `totalCost`,
+  // `insuranceCost` тощо — клієнт бачив один live-розрахунок, інший —
+  // у блоці «Оплата». Це і був баг.
+  const costAffectingTouched =
+    Array.isArray(body.places) ||
+    body.declaredValue !== undefined ||
+    body.insuranceApplied !== undefined ||
+    body.needsPackaging !== undefined ||
+    body.parcelMoneyAmount !== undefined ||
+    body.collectionMethod !== undefined ||
+    body.collectionPointId !== undefined;
+
+  if (costAffectingTouched) {
     try {
       const [trip, collectionPoint, senderAddr, receiverAddr] = await Promise.all([
         parcel.tripId
@@ -413,21 +435,22 @@ export async function PATCH(
 
         if (pricing) {
           const isAddressDelivery = receiverAddr?.deliveryMethod === 'address';
-          // Recalc must reflect the values being SAVED, not the loaded snapshot.
-          // updateData has fresh user-supplied fields; fall back to the stored
-          // record for fields untouched by this PATCH.
-          const declaredValue = (updateData.declaredValue ?? parcel.declaredValue) ?? 0;
-          const insuranceApplied = updateData.insuranceApplied !== undefined
-            ? updateData.insuranceApplied
+          // Recalc враховує СВІЖІ значення з body, з fallback на збережений
+          // запис коли поле не торкалось у цьому PATCH.
+          const declaredValue = body.declaredValue !== undefined
+            ? (body.declaredValue ?? 0)
+            : (parcel.declaredValue ?? 0);
+          const insuranceApplied = body.insuranceApplied !== undefined
+            ? body.insuranceApplied
             : parcel.insuranceApplied;
-          const needsPackaging = updateData.needsPackaging !== undefined
-            ? updateData.needsPackaging
+          const needsPackaging = body.needsPackaging !== undefined
+            ? body.needsPackaging
             : parcel.needsPackaging;
-          const parcelMoneyAmount = updateData.parcelMoneyAmount !== undefined
-            ? updateData.parcelMoneyAmount
+          const parcelMoneyAmount = body.parcelMoneyAmount !== undefined
+            ? body.parcelMoneyAmount
             : parcel.parcelMoneyAmount;
-          const collectionMethod = updateData.collectionMethod !== undefined
-            ? updateData.collectionMethod
+          const collectionMethod = body.collectionMethod !== undefined
+            ? body.collectionMethod
             : parcel.collectionMethod;
           const breakdown = calculateParcelCost(
             buildPricingInput(pricing),
@@ -460,8 +483,10 @@ export async function PATCH(
       logger.error('parcel.cost_recalc_failed', e, { parcelId: id });
       // Leave cost fields as-is; user can set manually.
     }
+  }
 
-    // Run everything in one transaction.
+  // Single transaction: places + parcel update.
+  if (Array.isArray(body.places)) {
     await prisma.$transaction(async (tx) => {
       for (const p of placeUpdates) {
         await tx.parcelPlace.update({ where: { id: p.id }, data: p.data });
@@ -473,12 +498,11 @@ export async function PATCH(
       }
       await tx.parcel.update({ where: { id }, data: updateData });
     });
-
     const full = await prisma.parcel.findUnique({ where: { id } });
     return NextResponse.json(full);
   }
 
-  // No places — single update.
+  // No places change — single update (recalc уже всередині updateData).
   const updated = await prisma.parcel.update({
     where: { id },
     data: updateData,
