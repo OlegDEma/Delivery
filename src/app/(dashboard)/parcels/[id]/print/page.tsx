@@ -8,6 +8,8 @@ import { formatDate } from '@/lib/utils/format';
 
 interface PrintData {
   itn: string;
+  /** Per ТЗ §7 — на квитанції ТТН відображається поряд з ІТН коли є. */
+  npTtn: string | null;
   internalNumber: string;
   shortNumber: number | null;
   direction: string;
@@ -146,7 +148,15 @@ export default function PrintLabelPage() {
       <div className="print-label border-2 border-black p-2 mb-4 max-w-[58mm] mx-auto text-[10px] leading-tight">
         <div className="text-center font-bold text-[12px] mb-1">КВИТАНЦІЯ</div>
         <div className="text-center font-mono text-[11px] font-bold">{data.internalNumber}</div>
-        <div className="text-center text-[8px] mb-1">{data.itn}</div>
+        <div className="text-center text-[8px] mb-1">
+          ІТН: {data.itn}
+          {data.npTtn && (
+            <>
+              <br />
+              ТТН: {data.npTtn}
+            </>
+          )}
+        </div>
 
         <div className="border-t border-black pt-1 mb-1">
           <div className="font-bold">ВІД:</div>

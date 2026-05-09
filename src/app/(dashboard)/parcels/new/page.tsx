@@ -893,7 +893,7 @@ export default function NewParcelPage() {
         {direction === 'eu_to_ua' && (
           <Card>
             <CardHeader className="py-3 px-4">
-              <CardTitle className="text-base">Спосіб прийому посилки</CardTitle>
+              <CardTitle className="text-base">Спосіб прийому/видачі посилки</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4 pt-0">
               <CollectionBlock

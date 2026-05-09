@@ -11,6 +11,8 @@ interface Order {
   id: string;
   internalNumber: string;
   itn: string;
+  /** Per ТЗ §7 — поряд з ІТН відображаємо ТТН Нової Пошти, коли є. */
+  npTtn: string | null;
   direction: string;
   status: ParcelStatusType;
   totalPlacesCount: number;
@@ -50,7 +52,16 @@ export default function MyOrdersPage() {
               <div className="flex items-start justify-between mb-1">
                 <div>
                   <div className="font-mono text-sm font-medium">{o.internalNumber}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">ІТН: {o.itn}</div>
+                  <div className="text-xs text-gray-400 mt-0.5">
+                    ІТН: <span className="font-mono">{o.itn}</span>
+                    {/* ТЗ §7: поряд з ІТН — ТТН Нової Пошти коли вона є. */}
+                    {o.npTtn && (
+                      <>
+                        <span className="mx-1.5 text-gray-300">|</span>
+                        ТТН: <span className="font-mono">{o.npTtn}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <Badge className={STATUS_COLORS[o.status]}>
                   {STATUS_LABELS[o.status]}

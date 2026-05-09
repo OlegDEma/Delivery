@@ -147,7 +147,7 @@ export function ParcelCollectionCard({ parcel, onUpdate }: ParcelCollectionCardP
   return (
     <Card>
       <CardHeader className="py-2 px-3 flex flex-row items-center justify-between">
-        <CardTitle className="text-sm">📥 Спосіб прийому посилки</CardTitle>
+        <CardTitle className="text-sm">📥 Спосіб прийому/видачі посилки</CardTitle>
         {!editing ? (
           <Button variant="ghost" size="sm" onClick={startEdit} className="text-xs h-7">
             ✏️ Редагувати
@@ -253,7 +253,7 @@ export function ParcelCollectionCard({ parcel, onUpdate }: ParcelCollectionCardP
           </div>
         ) : (
           <div className="text-xs text-gray-500 bg-gray-50 rounded p-2">
-            Спосіб прийому не вказано. Натисніть «Редагувати» щоб додати.
+            Спосіб прийому/видачі не вказано. Натисніть «Редагувати» щоб додати.
           </div>
         )}
       </CardContent>

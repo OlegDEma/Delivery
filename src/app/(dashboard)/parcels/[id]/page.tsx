@@ -531,11 +531,11 @@ export default function ParcelDetailPage() {
           корисні для оператора. */}
       {parcel.collectionMethod && (
         <div className="text-sm py-1 border-y bg-amber-50/50 px-2 -mx-2 rounded">
-          <span className="text-gray-500">Спосіб прийому:</span>{' '}
+          <span className="text-gray-500">Спосіб прийому/видачі:</span>{' '}
           <span className="font-medium">
             {parcel.collectionMethod === 'pickup_point' && '🏢 Пункт збору'}
             {parcel.collectionMethod === 'courier_pickup' && '🚐 Виклик кур\'єра'}
-            {parcel.collectionMethod === 'external_shipping' && '📦 Сам відправляє поштою'}
+            {parcel.collectionMethod === 'external_shipping' && '📦 Відправка поштою'}
           </span>
           {parcel.collectionPoint && (
             <span className="text-gray-600 ml-2">
