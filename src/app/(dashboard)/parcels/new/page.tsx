@@ -234,6 +234,7 @@ export default function NewParcelPage() {
   // Auto-select last-used address (sorted by API by role+date) and fill editable fields
   function handleReceiverSelect(client: SelectedClient) {
     setReceiver(client);
+    setError('');
     const addr = client.addresses[0] as (typeof client.addresses)[number] & { pickupPointText?: string | null } | undefined;
     if (addr) {
       setReceiverAddressId(addr.id);
@@ -252,6 +253,9 @@ export default function NewParcelPage() {
 
   function handleSenderSelect(client: SelectedClient) {
     setSender(client);
+    // Якщо валідація залишила помилку «Виберіть відправника» з попереднього
+    // натискання Submit — миттєво ховаємо її, бо причину усунули.
+    setError('');
     const addr = client.addresses[0] as (typeof client.addresses)[number] & { pickupPointText?: string | null } | undefined;
     if (addr) {
       setSenderAddressId(addr.id);
