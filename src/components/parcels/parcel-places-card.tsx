@@ -40,6 +40,10 @@ interface ParcelPlacesCardProps {
   parcelMoneyAmount?: number | null;
   /** Чи передача через пункт збору — впливає на додатковий компонент вартості. */
   isPickupPoint?: boolean;
+  /** Чи виклик кур'єра (collectionMethod=courier_pickup) — впливає на мінімум. */
+  isCourierPickup?: boolean;
+  /** Multi-parcel pickup flag — впливає на мінімальний тариф. */
+  isMultiParcelPickup?: boolean;
   /** Блокує редагування ваги/розмірів — після accepted_for_transport_* */
   readOnly?: boolean;
   onUpdate: () => void;
@@ -78,6 +82,8 @@ export function ParcelPlacesCard({
   insuranceEnabled,
   parcelMoneyAmount,
   isPickupPoint,
+  isCourierPickup,
+  isMultiParcelPickup,
   readOnly = false,
   onUpdate,
 }: ParcelPlacesCardProps) {
@@ -258,6 +264,8 @@ export function ParcelPlacesCard({
                 isAddressDelivery={receiverDeliveryMethod === 'address'}
                 insurance={insuranceEnabled}
                 isPickupPoint={!!isPickupPoint}
+                isCourierPickup={!!isCourierPickup}
+                isMultiParcelPickup={!!isMultiParcelPickup}
                 parcelMoneyAmount={parcelMoneyAmount ? Number(parcelMoneyAmount) : 0}
               />
             )}
@@ -307,6 +315,8 @@ export function ParcelPlacesCard({
                   isAddressDelivery={receiverDeliveryMethod === 'address'}
                   insurance={insuranceEnabled}
                   isPickupPoint={!!isPickupPoint}
+                  isCourierPickup={!!isCourierPickup}
+                  isMultiParcelPickup={!!isMultiParcelPickup}
                   parcelMoneyAmount={parcelMoneyAmount ? Number(parcelMoneyAmount) : 0}
                 />
               </div>

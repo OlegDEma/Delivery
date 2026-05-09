@@ -116,6 +116,7 @@ interface ParcelDetail {
   createdBy: { fullName: string } | null;
   // Collection
   collectionMethod: string | null;
+  isMultiParcelPickup: boolean | null;
   collectionPointId: string | null;
   collectionDate: string | null;
   collectionAddress: string | null;
@@ -509,6 +510,8 @@ export default function ParcelDetailPage() {
         insuranceEnabled={parcel.insuranceApplied ?? (Number(parcel.insuranceCost) > 0)}
         parcelMoneyAmount={parcel.parcelMoneyAmount}
         isPickupPoint={parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'pickup_point'}
+        isCourierPickup={parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'courier_pickup'}
+        isMultiParcelPickup={!!parcel.isMultiParcelPickup}
         onUpdate={fetchParcel}
         readOnly={isEditLocked}
       />
