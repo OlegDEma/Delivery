@@ -50,6 +50,7 @@ export async function PATCH(request: NextRequest) {
     accountHolder?: string | null;
     swift?: string | null;
     smsTemplate?: string | null;
+    uahPerEur?: number | string;
   };
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
@@ -72,6 +73,14 @@ export async function PATCH(request: NextRequest) {
       ...(body.accountHolder !== undefined && { accountHolder: norm(body.accountHolder,  200) }),
       ...(body.swift         !== undefined && { swift:         norm(body.swift,           20) }),
       ...(body.smsTemplate   !== undefined && { smsTemplate:   norm(body.smsTemplate,   1000) }),
+      ...(body.uahPerEur     !== undefined && {
+        // Курс UAH/EUR: clamp [1, 1000]. Якщо ввели сміття — ігноруємо.
+        uahPerEur: (() => {
+          const n = Number(body.uahPerEur);
+          if (!Number.isFinite(n) || n < 1 || n > 1000) return undefined as never;
+          return n;
+        })(),
+      }),
     },
   });
 

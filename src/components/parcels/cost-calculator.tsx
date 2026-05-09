@@ -10,6 +10,8 @@ interface CostCalculatorProps {
   actualWeight: number;
   volumetricWeight: number;
   declaredValue: number;
+  /** Currency of declaredValue (EUR | UAH). Default EUR. */
+  declaredValueCurrency?: 'EUR' | 'UAH';
   /** Insurance opt-in checkbox state. */
   insurance?: boolean;
   /** Packaging opt-in checkbox state. */
@@ -91,6 +93,7 @@ export function CostCalculator(props: CostCalculatorProps) {
             actualWeight: props.actualWeight,
             volumetricWeight: props.volumetricWeight,
             declaredValue: props.declaredValue,
+            declaredValueCurrency: props.declaredValueCurrency ?? 'EUR',
             insurance: props.insurance ?? false,
             needsPackaging: props.needsPackaging,
             isAddressDelivery: props.isAddressDelivery,
@@ -123,6 +126,7 @@ export function CostCalculator(props: CostCalculatorProps) {
     shouldFetch,
     country, props.direction,
     props.actualWeight, props.volumetricWeight, props.declaredValue,
+    props.declaredValueCurrency,
     props.insurance, props.needsPackaging, props.isAddressDelivery,
     props.isPickupPoint, props.isCourierPickup, props.isMultiParcelPickup,
     props.isBothDirections, props.parcelMoneyAmount,

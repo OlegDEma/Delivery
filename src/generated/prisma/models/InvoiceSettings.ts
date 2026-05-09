@@ -30,8 +30,18 @@ export type InvoiceSettingsModel = runtime.Types.Result.DefaultSelection<Prisma.
 
 export type AggregateInvoiceSettings = {
   _count: InvoiceSettingsCountAggregateOutputType | null
+  _avg: InvoiceSettingsAvgAggregateOutputType | null
+  _sum: InvoiceSettingsSumAggregateOutputType | null
   _min: InvoiceSettingsMinAggregateOutputType | null
   _max: InvoiceSettingsMaxAggregateOutputType | null
+}
+
+export type InvoiceSettingsAvgAggregateOutputType = {
+  uahPerEur: runtime.Decimal | null
+}
+
+export type InvoiceSettingsSumAggregateOutputType = {
+  uahPerEur: runtime.Decimal | null
 }
 
 export type InvoiceSettingsMinAggregateOutputType = {
@@ -42,6 +52,7 @@ export type InvoiceSettingsMinAggregateOutputType = {
   accountHolder: string | null
   swift: string | null
   smsTemplate: string | null
+  uahPerEur: runtime.Decimal | null
   updatedAt: Date | null
 }
 
@@ -53,6 +64,7 @@ export type InvoiceSettingsMaxAggregateOutputType = {
   accountHolder: string | null
   swift: string | null
   smsTemplate: string | null
+  uahPerEur: runtime.Decimal | null
   updatedAt: Date | null
 }
 
@@ -64,10 +76,19 @@ export type InvoiceSettingsCountAggregateOutputType = {
   accountHolder: number
   swift: number
   smsTemplate: number
+  uahPerEur: number
   updatedAt: number
   _all: number
 }
 
+
+export type InvoiceSettingsAvgAggregateInputType = {
+  uahPerEur?: true
+}
+
+export type InvoiceSettingsSumAggregateInputType = {
+  uahPerEur?: true
+}
 
 export type InvoiceSettingsMinAggregateInputType = {
   id?: true
@@ -77,6 +98,7 @@ export type InvoiceSettingsMinAggregateInputType = {
   accountHolder?: true
   swift?: true
   smsTemplate?: true
+  uahPerEur?: true
   updatedAt?: true
 }
 
@@ -88,6 +110,7 @@ export type InvoiceSettingsMaxAggregateInputType = {
   accountHolder?: true
   swift?: true
   smsTemplate?: true
+  uahPerEur?: true
   updatedAt?: true
 }
 
@@ -99,6 +122,7 @@ export type InvoiceSettingsCountAggregateInputType = {
   accountHolder?: true
   swift?: true
   smsTemplate?: true
+  uahPerEur?: true
   updatedAt?: true
   _all?: true
 }
@@ -141,6 +165,18 @@ export type InvoiceSettingsAggregateArgs<ExtArgs extends runtime.Types.Extension
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: InvoiceSettingsAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: InvoiceSettingsSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: InvoiceSettingsMinAggregateInputType
@@ -171,6 +207,8 @@ export type InvoiceSettingsGroupByArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   _count?: InvoiceSettingsCountAggregateInputType | true
+  _avg?: InvoiceSettingsAvgAggregateInputType
+  _sum?: InvoiceSettingsSumAggregateInputType
   _min?: InvoiceSettingsMinAggregateInputType
   _max?: InvoiceSettingsMaxAggregateInputType
 }
@@ -183,8 +221,11 @@ export type InvoiceSettingsGroupByOutputType = {
   accountHolder: string | null
   swift: string | null
   smsTemplate: string | null
+  uahPerEur: runtime.Decimal
   updatedAt: Date
   _count: InvoiceSettingsCountAggregateOutputType | null
+  _avg: InvoiceSettingsAvgAggregateOutputType | null
+  _sum: InvoiceSettingsSumAggregateOutputType | null
   _min: InvoiceSettingsMinAggregateOutputType | null
   _max: InvoiceSettingsMaxAggregateOutputType | null
 }
@@ -215,6 +256,7 @@ export type InvoiceSettingsWhereInput = {
   accountHolder?: Prisma.StringNullableFilter<"InvoiceSettings"> | string | null
   swift?: Prisma.StringNullableFilter<"InvoiceSettings"> | string | null
   smsTemplate?: Prisma.StringNullableFilter<"InvoiceSettings"> | string | null
+  uahPerEur?: Prisma.DecimalFilter<"InvoiceSettings"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedAt?: Prisma.DateTimeFilter<"InvoiceSettings"> | Date | string
 }
 
@@ -226,6 +268,7 @@ export type InvoiceSettingsOrderByWithRelationInput = {
   accountHolder?: Prisma.SortOrderInput | Prisma.SortOrder
   swift?: Prisma.SortOrderInput | Prisma.SortOrder
   smsTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
+  uahPerEur?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -240,6 +283,7 @@ export type InvoiceSettingsWhereUniqueInput = Prisma.AtLeast<{
   accountHolder?: Prisma.StringNullableFilter<"InvoiceSettings"> | string | null
   swift?: Prisma.StringNullableFilter<"InvoiceSettings"> | string | null
   smsTemplate?: Prisma.StringNullableFilter<"InvoiceSettings"> | string | null
+  uahPerEur?: Prisma.DecimalFilter<"InvoiceSettings"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedAt?: Prisma.DateTimeFilter<"InvoiceSettings"> | Date | string
 }, "id" | "isSingleton">
 
@@ -251,10 +295,13 @@ export type InvoiceSettingsOrderByWithAggregationInput = {
   accountHolder?: Prisma.SortOrderInput | Prisma.SortOrder
   swift?: Prisma.SortOrderInput | Prisma.SortOrder
   smsTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
+  uahPerEur?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.InvoiceSettingsCountOrderByAggregateInput
+  _avg?: Prisma.InvoiceSettingsAvgOrderByAggregateInput
   _max?: Prisma.InvoiceSettingsMaxOrderByAggregateInput
   _min?: Prisma.InvoiceSettingsMinOrderByAggregateInput
+  _sum?: Prisma.InvoiceSettingsSumOrderByAggregateInput
 }
 
 export type InvoiceSettingsScalarWhereWithAggregatesInput = {
@@ -268,6 +315,7 @@ export type InvoiceSettingsScalarWhereWithAggregatesInput = {
   accountHolder?: Prisma.StringNullableWithAggregatesFilter<"InvoiceSettings"> | string | null
   swift?: Prisma.StringNullableWithAggregatesFilter<"InvoiceSettings"> | string | null
   smsTemplate?: Prisma.StringNullableWithAggregatesFilter<"InvoiceSettings"> | string | null
+  uahPerEur?: Prisma.DecimalWithAggregatesFilter<"InvoiceSettings"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"InvoiceSettings"> | Date | string
 }
 
@@ -279,6 +327,7 @@ export type InvoiceSettingsCreateInput = {
   accountHolder?: string | null
   swift?: string | null
   smsTemplate?: string | null
+  uahPerEur?: runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedAt?: Date | string
 }
 
@@ -290,6 +339,7 @@ export type InvoiceSettingsUncheckedCreateInput = {
   accountHolder?: string | null
   swift?: string | null
   smsTemplate?: string | null
+  uahPerEur?: runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedAt?: Date | string
 }
 
@@ -301,6 +351,7 @@ export type InvoiceSettingsUpdateInput = {
   accountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   swift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smsTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uahPerEur?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -312,6 +363,7 @@ export type InvoiceSettingsUncheckedUpdateInput = {
   accountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   swift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smsTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uahPerEur?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -323,6 +375,7 @@ export type InvoiceSettingsCreateManyInput = {
   accountHolder?: string | null
   swift?: string | null
   smsTemplate?: string | null
+  uahPerEur?: runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedAt?: Date | string
 }
 
@@ -334,6 +387,7 @@ export type InvoiceSettingsUpdateManyMutationInput = {
   accountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   swift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smsTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uahPerEur?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -345,6 +399,7 @@ export type InvoiceSettingsUncheckedUpdateManyInput = {
   accountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   swift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smsTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uahPerEur?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -356,7 +411,12 @@ export type InvoiceSettingsCountOrderByAggregateInput = {
   accountHolder?: Prisma.SortOrder
   swift?: Prisma.SortOrder
   smsTemplate?: Prisma.SortOrder
+  uahPerEur?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type InvoiceSettingsAvgOrderByAggregateInput = {
+  uahPerEur?: Prisma.SortOrder
 }
 
 export type InvoiceSettingsMaxOrderByAggregateInput = {
@@ -367,6 +427,7 @@ export type InvoiceSettingsMaxOrderByAggregateInput = {
   accountHolder?: Prisma.SortOrder
   swift?: Prisma.SortOrder
   smsTemplate?: Prisma.SortOrder
+  uahPerEur?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -378,7 +439,12 @@ export type InvoiceSettingsMinOrderByAggregateInput = {
   accountHolder?: Prisma.SortOrder
   swift?: Prisma.SortOrder
   smsTemplate?: Prisma.SortOrder
+  uahPerEur?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type InvoiceSettingsSumOrderByAggregateInput = {
+  uahPerEur?: Prisma.SortOrder
 }
 
 
@@ -391,6 +457,7 @@ export type InvoiceSettingsSelect<ExtArgs extends runtime.Types.Extensions.Inter
   accountHolder?: boolean
   swift?: boolean
   smsTemplate?: boolean
+  uahPerEur?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["invoiceSettings"]>
 
@@ -402,6 +469,7 @@ export type InvoiceSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   accountHolder?: boolean
   swift?: boolean
   smsTemplate?: boolean
+  uahPerEur?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["invoiceSettings"]>
 
@@ -413,6 +481,7 @@ export type InvoiceSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   accountHolder?: boolean
   swift?: boolean
   smsTemplate?: boolean
+  uahPerEur?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["invoiceSettings"]>
 
@@ -424,10 +493,11 @@ export type InvoiceSettingsSelectScalar = {
   accountHolder?: boolean
   swift?: boolean
   smsTemplate?: boolean
+  uahPerEur?: boolean
   updatedAt?: boolean
 }
 
-export type InvoiceSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "isSingleton" | "bankName" | "iban" | "accountHolder" | "swift" | "smsTemplate" | "updatedAt", ExtArgs["result"]["invoiceSettings"]>
+export type InvoiceSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "isSingleton" | "bankName" | "iban" | "accountHolder" | "swift" | "smsTemplate" | "uahPerEur" | "updatedAt", ExtArgs["result"]["invoiceSettings"]>
 
 export type $InvoiceSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "InvoiceSettings"
@@ -446,6 +516,12 @@ export type $InvoiceSettingsPayload<ExtArgs extends runtime.Types.Extensions.Int
      * Free-form template; placeholders above are substituted at send time.
      */
     smsTemplate: string | null
+    /**
+     * Курс UAH/EUR. Використовується для конвертації оголошеної вартості з
+     * гривень в євро при розрахунку страхування — інакше 2500 грн дають
+     * 75 EUR страхування при 3% (бо рахунок ведеться в EUR).
+     */
+    uahPerEur: runtime.Decimal
     updatedAt: Date
   }, ExtArgs["result"]["invoiceSettings"]>
   composites: {}
@@ -877,6 +953,7 @@ export interface InvoiceSettingsFieldRefs {
   readonly accountHolder: Prisma.FieldRef<"InvoiceSettings", 'String'>
   readonly swift: Prisma.FieldRef<"InvoiceSettings", 'String'>
   readonly smsTemplate: Prisma.FieldRef<"InvoiceSettings", 'String'>
+  readonly uahPerEur: Prisma.FieldRef<"InvoiceSettings", 'Decimal'>
   readonly updatedAt: Prisma.FieldRef<"InvoiceSettings", 'DateTime'>
 }
     

@@ -703,6 +703,10 @@ model InvoiceSettings {
   swift         String?
   /// Free-form template; placeholders above are substituted at send time.
   smsTemplate   String?  @map("sms_template")
+  /// Курс UAH/EUR. Використовується для конвертації оголошеної вартості з
+  /// гривень в євро при розрахунку страхування — інакше 2500 грн дають
+  /// 75 EUR страхування при 3% (бо рахунок ведеться в EUR).
+  uahPerEur     Decimal  @default(42) @map("uah_per_eur") @db.Decimal(8, 2)
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("invoice_settings")

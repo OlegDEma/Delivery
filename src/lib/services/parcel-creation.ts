@@ -16,6 +16,7 @@ import { prisma } from '@/lib/prisma';
 import { calculateVolumetricWeight, roundWeight } from '@/lib/utils/volumetric';
 import { calculateParcelCost } from '@/lib/utils/pricing';
 import { buildPricingInput } from '@/lib/utils/pricing-input';
+import { toEur } from '@/lib/utils/currency';
 import { generateInternalNumber, generatePlaceITN, withItnRetry } from '@/lib/utils/itn';
 import { logger } from '@/lib/logger';
 
@@ -226,12 +227,17 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
     });
     if (config) {
       const deliveryMethod = (receiverAddrForPricing?.deliveryMethod ?? receiver?.addresses[0]?.deliveryMethod) as DeliveryMethod | undefined;
+      // Перевід declaredValue з UAH в EUR — інакше 2500 грн × 3% дають
+      // 75 «EUR» страхування (бо весь розрахунок ведеться в EUR).
+      const declaredValueEur = input.declaredValue
+        ? await toEur(Number(input.declaredValue), input.declaredValueCurrency || 'EUR')
+        : 0;
       const breakdown = calculateParcelCost(
         buildPricingInput(config),
         {
           actualWeight: totalWeight,
           volumetricWeight: totalVolWeight,
-          declaredValue: input.declaredValue ? Number(input.declaredValue) : 0,
+          declaredValue: declaredValueEur,
           // ТЗ: insurance/packaging — opt-in checkboxes. Default off when
           // caller didn't pass an explicit boolean (e.g. legacy admin form
           // before retrofit). Pricing config gates whether the option is

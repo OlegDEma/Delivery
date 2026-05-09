@@ -8,6 +8,7 @@ import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { ADMIN_ROLES } from '@/lib/constants/roles';
 import { parseBody, updateParcelSchema } from '@/lib/validators';
 import { buildPricingInput } from '@/lib/utils/pricing-input';
+import { toEur } from '@/lib/utils/currency';
 import { logger } from '@/lib/logger';
 import { writeAuditLog } from '@/lib/audit';
 import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transitions';
@@ -452,12 +453,16 @@ export async function PATCH(
           const collectionMethod = body.collectionMethod !== undefined
             ? body.collectionMethod
             : parcel.collectionMethod;
+          // Конвертуємо declaredValue в EUR коли вказана UAH (per fix —
+          // 2500 грн × 3% не повинні давати 75 EUR страхування).
+          const declaredCurrency = parcel.declaredValueCurrency || 'EUR';
+          const declaredValueEur = await toEur(Number(declaredValue) || 0, declaredCurrency);
           const breakdown = calculateParcelCost(
             buildPricingInput(pricing),
             {
               actualWeight: totalWeight,
               volumetricWeight: totalVolWeight,
-              declaredValue: Number(declaredValue) || 0,
+              declaredValue: declaredValueEur,
               insurance: !!insuranceApplied,
               needsPackaging: !!needsPackaging,
               isAddressDelivery,

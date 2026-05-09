@@ -982,6 +982,7 @@ export default function NewParcelPage() {
           actualWeight={totalWeight}
           volumetricWeight={totalVolWeight}
           declaredValue={Number(declaredValue) || 0}
+          declaredValueCurrency={declaredCurrency}
           insurance={insurance}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
           isAddressDelivery={receiver?.addresses[0]?.deliveryMethod === 'address'}

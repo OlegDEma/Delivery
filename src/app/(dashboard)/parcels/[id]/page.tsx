@@ -503,6 +503,7 @@ export default function ParcelDetailPage() {
         receiverCountry={parcel.receiverAddress?.country || null}
         receiverDeliveryMethod={parcel.receiverAddress?.deliveryMethod || null}
         declaredValue={parcel.declaredValue}
+        declaredValueCurrency={parcel.declaredValueCurrency}
         needsPackaging={parcel.needsPackaging}
         // Insurance opt-in: prefer the explicit boolean if the column was
         // backfilled (post-migration), fall back to deriving from cost > 0

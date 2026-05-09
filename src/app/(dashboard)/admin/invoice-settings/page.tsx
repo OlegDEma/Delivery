@@ -15,6 +15,7 @@ interface InvoiceSettings {
   accountHolder: string | null;
   swift: string | null;
   smsTemplate: string | null;
+  uahPerEur: string | number;
 }
 
 const PLACEHOLDERS_HELP = [
@@ -57,6 +58,7 @@ export default function InvoiceSettingsPage() {
         accountHolder: settings.accountHolder,
         swift: settings.swift,
         smsTemplate: settings.smsTemplate,
+        uahPerEur: Number(settings.uahPerEur) || 0,
       }),
     });
     setSaving(false);
@@ -122,6 +124,32 @@ export default function InvoiceSettingsPage() {
               placeholder="UA00 0000 0000 0000 0000 0000 0000 0"
               className="font-mono"
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-4">
+        <CardHeader className="py-3 px-4">
+          <CardTitle className="text-base">Курс обміну</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-4 pt-0 space-y-2">
+          <div>
+            <Label className="text-xs">Скільки гривень за 1 EUR</Label>
+            <Input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              value={String(settings.uahPerEur ?? '')}
+              onChange={(e) => update('uahPerEur', e.target.value)}
+              placeholder="42.00"
+              className="font-mono"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Використовується для конвертації оголошеної вартості з UAH в EUR
+              при розрахунку страхування. Без курсу 2500 грн × 1% дають
+              25 «EUR» страхування — система ведеться в EUR.
+            </p>
           </div>
         </CardContent>
       </Card>

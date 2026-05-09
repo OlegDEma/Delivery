@@ -2456,6 +2456,7 @@ export const InvoiceSettingsScalarFieldEnum = {
   accountHolder: 'accountHolder',
   swift: 'swift',
   smsTemplate: 'smsTemplate',
+  uahPerEur: 'uahPerEur',
   updatedAt: 'updatedAt'
 } as const
 

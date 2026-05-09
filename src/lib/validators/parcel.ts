@@ -165,6 +165,8 @@ export const calculateCostSchema = z.object({
   actualWeight: weightSchema.optional(),
   volumetricWeight: weightSchema.optional(),
   declaredValue: moneySchema.optional(),
+  /** Currency of declaredValue — EUR (default) or UAH. */
+  declaredValueCurrency: z.enum(['EUR', 'UAH']).optional(),
   /** Insurance opt-in checkbox state — drives whether insurance is added. */
   insurance: z.boolean().optional(),
   needsPackaging: z.boolean().optional(),

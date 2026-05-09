@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth/guards';
 import { calculateParcelCost } from '@/lib/utils/pricing';
 import { parseBody, calculateCostSchema } from '@/lib/validators';
 import { buildPricingInput } from '@/lib/utils/pricing-input';
+import { toEur } from '@/lib/utils/currency';
 import { logger } from '@/lib/logger';
 
 // POST /api/parcels/calculate — calculate parcel cost based on pricing config
@@ -31,12 +32,18 @@ export async function POST(request: NextRequest) {
   }
 
   const pricingInput = buildPricingInput(config);
+  // Конвертуємо declaredValue в EUR (per fix — UAH-вартість не множиться
+  // напряму на % страхування).
+  const declaredValueEur = await toEur(
+    body.declaredValue ?? 0,
+    body.declaredValueCurrency || 'EUR'
+  );
   const result = calculateParcelCost(
     pricingInput,
     {
       actualWeight: body.actualWeight ?? 0,
       volumetricWeight: body.volumetricWeight ?? 0,
-      declaredValue: body.declaredValue ?? 0,
+      declaredValue: declaredValueEur,
       insurance: body.insurance ?? false,
       needsPackaging: body.needsPackaging ?? false,
       isAddressDelivery: body.isAddressDelivery ?? false,

@@ -33,6 +33,8 @@ interface ParcelPlacesCardProps {
   receiverCountry?: string | null;
   receiverDeliveryMethod?: string | null;
   declaredValue?: number | null;
+  /** Currency of declaredValue (EUR | UAH). Default EUR. */
+  declaredValueCurrency?: 'EUR' | 'UAH' | string | null;
   needsPackaging?: boolean;
   /** Whether the parcel has insurance opted in (saved value > 0). */
   insuranceEnabled?: boolean;
@@ -78,6 +80,7 @@ export function ParcelPlacesCard({
   receiverCountry,
   receiverDeliveryMethod,
   declaredValue,
+  declaredValueCurrency,
   needsPackaging,
   insuranceEnabled,
   parcelMoneyAmount,
@@ -260,6 +263,7 @@ export function ParcelPlacesCard({
                 actualWeight={totalDraftWeight}
                 volumetricWeight={totalDraftVolWeight}
                 declaredValue={Number(declaredValue) || 0}
+                declaredValueCurrency={(declaredValueCurrency === 'UAH' ? 'UAH' : 'EUR') as 'EUR' | 'UAH'}
                 needsPackaging={!!needsPackaging}
                 isAddressDelivery={receiverDeliveryMethod === 'address'}
                 insurance={insuranceEnabled}
@@ -311,6 +315,7 @@ export function ParcelPlacesCard({
                   actualWeight={calcActualWeight}
                   volumetricWeight={calcVolWeight}
                   declaredValue={Number(declaredValue) || 0}
+                  declaredValueCurrency={(declaredValueCurrency === 'UAH' ? 'UAH' : 'EUR') as 'EUR' | 'UAH'}
                   needsPackaging={!!needsPackaging}
                   isAddressDelivery={receiverDeliveryMethod === 'address'}
                   insurance={insuranceEnabled}
