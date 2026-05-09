@@ -323,6 +323,18 @@ export default function NewParcelPage() {
       return;
     }
 
+    // Per ТЗ §5: при «Виклик кур'єра» оператор має відповісти «Одна посилка»
+    // / «Дві або більше посилок» — від цього залежить мінімальний тариф.
+    // Не даємо мовчки сабмітити з невибраною відповіддю.
+    if (
+      direction === 'eu_to_ua' &&
+      collection.method === 'courier_pickup' &&
+      collection.isMultiParcelPickup === null
+    ) {
+      setError('Оберіть «Одна посилка» або «Дві або більше посилок» у блоці «Спосіб прийому/видачі посилки»');
+      return;
+    }
+
     setSaving(true);
 
     const res = await fetch('/api/parcels', {
