@@ -7,7 +7,9 @@ import { getBillableWeight } from './volumetric';
  */
 export interface PricingConfigInput {
   pricePerKg: number;
-  weightType: 'actual' | 'volumetric' | 'average';
+  weightType: 'actual' | 'volumetric' | 'average' | 'custom';
+  /** Used only when weightType='custom'. Частка фактичної ваги (0..1). */
+  weightCustomFactualFraction?: number;
 
   /** Whether the «Страхування» option is offered for this direction. */
   insuranceEnabled: boolean;
@@ -131,7 +133,8 @@ export function calculateParcelCost(
   const billableWeight = getBillableWeight(
     parcel.actualWeight,
     parcel.volumetricWeight,
-    config.weightType
+    config.weightType,
+    config.weightCustomFactualFraction,
   );
   const baseDeliveryCost = roundMoney(billableWeight * config.pricePerKg);
 

@@ -147,6 +147,15 @@ export type InvoiceSettings = Prisma.InvoiceSettingsModel
  */
 export type SmsLog = Prisma.SmsLogModel
 /**
+ * Model ServiceCity
+ * *
+ *  * Per ТЗ §5: «Виклик кур'єра» доступний клієнту лише у країнах/містах,
+ *  * які ми реально обслуговуємо. У EU — будь-яка з обслуговуваних країн.
+ *  * В Україні — лише Львів. Список зберігається тут і конфігурується в
+ *  * адмініструванні (можна додати інші UA-міста коли з'явиться можливість).
+ */
+export type ServiceCity = Prisma.ServiceCityModel
+/**
  * Model DescriptionSuggestion
  * 
  */

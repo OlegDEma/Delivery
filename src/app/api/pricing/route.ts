@@ -32,7 +32,7 @@ export async function PATCH(request: NextRequest) {
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
   const {
     id,
-    pricePerKg, weightType,
+    pricePerKg, weightType, weightCustomFactualFraction,
     insuranceEnabled, insuranceRate, insuranceThreshold,
     packagingEnabled, packagingPer10kg,
     parcelMoneyPercent,
@@ -58,15 +58,16 @@ export async function PATCH(request: NextRequest) {
     return null;
   };
   const checks: Array<[unknown, number, number, string]> = [
-    [pricePerKg,           0, 1000,   'pricePerKg'],
-    [addressDeliveryPrice, 0, 1000,   'addressDeliveryPrice'],
-    [pickupPointPrice,     0, 1000,   'pickupPointPrice'],
-    [minMultiPerAddress,   0, 1000,   'minMultiPerAddress'],
-    [minBothDirections,    0, 1000,   'minBothDirections'],
-    [packagingPer10kg,     0, 1000,   'packagingPer10kg'],
-    [insuranceRate,        0, 1,      'insuranceRate (0..1)'],
-    [parcelMoneyPercent,   0, 100,    'parcelMoneyPercent'],
-    [insuranceThreshold,   0, 100000, 'insuranceThreshold'],
+    [pricePerKg,                  0, 1000,   'pricePerKg'],
+    [addressDeliveryPrice,        0, 1000,   'addressDeliveryPrice'],
+    [pickupPointPrice,            0, 1000,   'pickupPointPrice'],
+    [minMultiPerAddress,          0, 1000,   'minMultiPerAddress'],
+    [minBothDirections,           0, 1000,   'minBothDirections'],
+    [packagingPer10kg,            0, 1000,   'packagingPer10kg'],
+    [insuranceRate,               0, 1,      'insuranceRate (0..1)'],
+    [parcelMoneyPercent,          0, 100,    'parcelMoneyPercent'],
+    [insuranceThreshold,          0, 100000, 'insuranceThreshold'],
+    [weightCustomFactualFraction, 0, 1,      'weightCustomFactualFraction (0..1)'],
   ];
   for (const [v, min, max, label] of checks) {
     if (v !== undefined) {
@@ -74,8 +75,8 @@ export async function PATCH(request: NextRequest) {
       if (e) return NextResponse.json({ error: e }, { status: 400 });
     }
   }
-  if (weightType !== undefined && !['actual', 'volumetric', 'average'].includes(weightType)) {
-    return NextResponse.json({ error: 'weightType: actual/volumetric/average' }, { status: 400 });
+  if (weightType !== undefined && !['actual', 'volumetric', 'average', 'custom'].includes(weightType)) {
+    return NextResponse.json({ error: 'weightType: actual/volumetric/average/custom' }, { status: 400 });
   }
 
   // Numeric fields: only update when caller supplied a non-null value. `null`
@@ -86,8 +87,9 @@ export async function PATCH(request: NextRequest) {
   const updated = await prisma.pricingConfig.update({
     where: { id },
     data: {
-      ...(numIfPresent(pricePerKg)           !== undefined && { pricePerKg:           numIfPresent(pricePerKg)! }),
-      ...(weightType                         !== undefined && { weightType }),
+      ...(numIfPresent(pricePerKg)                  !== undefined && { pricePerKg:                  numIfPresent(pricePerKg)! }),
+      ...(weightType                                !== undefined && { weightType }),
+      ...(numIfPresent(weightCustomFactualFraction) !== undefined && { weightCustomFactualFraction: numIfPresent(weightCustomFactualFraction)! }),
       ...(insuranceEnabled                   !== undefined && { insuranceEnabled }),
       ...(numIfPresent(insuranceRate)        !== undefined && { insuranceRate:        numIfPresent(insuranceRate)! }),
       ...(numIfPresent(insuranceThreshold)   !== undefined && { insuranceThreshold:   numIfPresent(insuranceThreshold)! }),

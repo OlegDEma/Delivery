@@ -15,6 +15,7 @@ export function buildPricingInput(config: PricingConfig): PricingConfigInput {
   return {
     pricePerKg: Number(config.pricePerKg),
     weightType: config.weightType,
+    weightCustomFactualFraction: Number(config.weightCustomFactualFraction),
     insuranceEnabled: config.insuranceEnabled,
     // DB stores fraction (0..1, e.g. 0.01 = 1%). Calculator wants whole-percent.
     insurancePercent: Number(config.insuranceRate) * 100,

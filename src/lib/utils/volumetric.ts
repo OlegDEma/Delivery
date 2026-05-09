@@ -35,22 +35,45 @@ export function calculateVolume(
 
 /**
  * Get the billable weight depending on weight type.
+ *
+ * Per ТЗ §8: «Якщо фактична вага більша від об'ємної — як розрахункова
+ * завжди береться фактична вага». Тобто коли actual ≥ volumetric, повертаємо
+ * actual, незалежно від типу.
+ *
+ * Коли volumetric > actual — застосовуємо політику:
+ *   - actual: повертаємо volumetric (max — як було історично)
+ *   - volumetric: завжди volumetric (зберігаємо для зворотної сумісності)
+ *   - average: середнє (50/50)
+ *   - custom: ffrac × actual + (1−ffrac) × volumetric, де ffrac
+ *             конфігурується в тарифі (0..1)
+ *
  * No rounding here — caller rounds on display.
  */
 export function getBillableWeight(
   actualWeight: number,
   volumetricWeight: number,
-  weightType: 'actual' | 'volumetric' | 'average' = 'actual'
+  weightType: 'actual' | 'volumetric' | 'average' | 'custom' = 'actual',
+  /** Used only when weightType='custom'. Частка фактичної ваги (0..1). */
+  customFactualFraction?: number,
 ): number {
   const a = Number.isFinite(actualWeight) ? actualWeight : 0;
   const v = Number.isFinite(volumetricWeight) ? volumetricWeight : 0;
+
+  // Universal rule per ТЗ — фактична виграє коли вона більша.
+  if (a >= v) return a;
+
   switch (weightType) {
     case 'actual':
-      return Math.max(a, v);
+      return v;            // max — об'ємна виграла
     case 'volumetric':
       return v;
     case 'average':
       return (a + v) / 2;
+    case 'custom': {
+      // Clamp до [0,1] — оператор міг ввести 1.2 чи -0.5.
+      const ffrac = Math.min(1, Math.max(0, Number(customFactualFraction) || 0));
+      return ffrac * a + (1 - ffrac) * v;
+    }
   }
 }
 

@@ -313,6 +313,7 @@ export default function NewOrderPage() {
             <CardContent className="px-4 pb-4 pt-0">
               <CollectionBlock
                 senderCountry={senderCountry}
+                senderCity={senderCity}
                 value={{
                   method: (collectionMethod as 'pickup_point' | 'courier_pickup' | 'external_shipping' | 'direct_to_driver' | '') || '',
                   pointId: collectionPointId,

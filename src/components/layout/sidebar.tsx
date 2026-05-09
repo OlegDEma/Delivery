@@ -82,6 +82,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Користувачі', href: '/admin/users', icon: UserCog, roles: ['super_admin'] },
       { label: 'Тарифи', href: '/admin/pricing', icon: Tags },
+      { label: 'Міста обслуговування', href: '/admin/service-cities', icon: MapPin, roles: ['super_admin', 'admin'] },
       { label: 'Реквізити рахунка', href: '/admin/invoice-settings', icon: Receipt, roles: ['super_admin', 'admin'] },
       { label: 'Статуси', href: '/admin/statuses', icon: ListChecks, roles: ['super_admin', 'admin'] },
     ],

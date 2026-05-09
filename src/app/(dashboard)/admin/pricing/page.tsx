@@ -23,6 +23,8 @@ interface ConfigForm {
   direction: string;
   pricePerKg: string;
   weightType: string;
+  /** Per ТЗ §8 — частка фактичної ваги при weightType=custom (0..1). */
+  weightCustomFactualFraction: string;
   insuranceEnabled: boolean;
   insurancePercent: string;        // displayed as whole-percent (1 = 1%)
   packagingEnabled: boolean;
@@ -43,6 +45,7 @@ interface ApiPricingConfig {
   direction: string;
   pricePerKg: string | number;
   weightType: string;
+  weightCustomFactualFraction: string | number;
   insuranceEnabled: boolean;
   insuranceRate: string | number;
   packagingEnabled: boolean;
@@ -62,6 +65,7 @@ function toForm(c: ApiPricingConfig): ConfigForm {
     direction: c.direction,
     pricePerKg: String(c.pricePerKg ?? '0'),
     weightType: c.weightType,
+    weightCustomFactualFraction: String(c.weightCustomFactualFraction ?? '0.5'),
     insuranceEnabled: !!c.insuranceEnabled,
     // DB stores fraction (0..1), UI shows percent (0..100). Round to avoid
     // floating-point noise like 0.029999... → 2.9999999%.
@@ -124,14 +128,15 @@ export default function PricingPage() {
     // Validate. Negative or non-numeric values are rejected client-side so the
     // operator gets a clear message instead of a generic 400.
     const fields: Array<{ key: keyof ConfigForm; label: string; min: number; max: number }> = [
-      { key: 'pricePerKg',           label: 'Ціна за кг',                   min: 0, max: 1000 },
-      { key: 'addressDeliveryPrice', label: 'Адресна доставка',             min: 0, max: 1000 },
-      { key: 'pickupPointPrice',     label: 'Пункт збору',                  min: 0, max: 1000 },
-      { key: 'minMultiPerAddress',   label: '2+ посилок з локації (мін.)',  min: 0, max: 1000 },
-      { key: 'minBothDirections',    label: 'Туди-сюди з локації (мін.)',   min: 0, max: 1000 },
-      { key: 'packagingPer10kg',     label: 'Пакування (€/10кг)',           min: 0, max: 1000 },
-      { key: 'insurancePercent',     label: 'Страхування (%)',              min: 0, max: 100 },
-      { key: 'parcelMoneyPercent',   label: 'Пакет (%)',                    min: 0, max: 100 },
+      { key: 'pricePerKg',                  label: 'Ціна за кг',                   min: 0, max: 1000 },
+      { key: 'addressDeliveryPrice',        label: 'Адресна доставка',             min: 0, max: 1000 },
+      { key: 'pickupPointPrice',            label: 'Пункт збору',                  min: 0, max: 1000 },
+      { key: 'minMultiPerAddress',          label: '2+ посилок з локації (мін.)',  min: 0, max: 1000 },
+      { key: 'minBothDirections',           label: 'Туди-сюди з локації (мін.)',   min: 0, max: 1000 },
+      { key: 'packagingPer10kg',            label: 'Пакування (€/10кг)',           min: 0, max: 1000 },
+      { key: 'insurancePercent',            label: 'Страхування (%)',              min: 0, max: 100 },
+      { key: 'parcelMoneyPercent',          label: 'Пакет (%)',                    min: 0, max: 100 },
+      { key: 'weightCustomFactualFraction', label: 'Частка фактичної ваги',        min: 0, max: 1   },
     ];
     for (const f of fields) {
       const n = parseNum(c[f.key] as string);
@@ -145,8 +150,9 @@ export default function PricingPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id: c.id,
-        pricePerKg:           parseNum(c.pricePerKg),
-        weightType:           c.weightType,
+        pricePerKg:                  parseNum(c.pricePerKg),
+        weightType:                  c.weightType,
+        weightCustomFactualFraction: parseNum(c.weightCustomFactualFraction),
         addressDeliveryPrice: parseNum(c.addressDeliveryPrice),
         pickupPointPrice:     parseNum(c.pickupPointPrice),
         minMultiPerAddress:   parseNum(c.minMultiPerAddress),
@@ -174,7 +180,12 @@ export default function PricingPage() {
     }), 2500);
   }
 
-  const WEIGHT_TYPE_LABELS: Record<string, string> = { actual: 'Фактична (max)', volumetric: "Об'ємна", average: 'Середня' };
+  const WEIGHT_TYPE_LABELS: Record<string, string> = {
+    actual: 'Фактична (max)',
+    volumetric: "Об'ємна",
+    average: 'Середня',
+    custom: 'Власна частка',
+  };
 
   if (loading) return <div className="text-center py-12 text-gray-500">Завантаження...</div>;
 
@@ -297,7 +308,7 @@ export default function PricingPage() {
                 <div>
                   <Label className="text-xs">
                     Тип розрахункової ваги{' '}
-                    <FieldHint text="Як рахувати розрахункову вагу при оплаті: брати більшу (max), завжди об'ємну, чи середнє між ними." />
+                    <FieldHint text="Якщо фактична вага більша від об'ємної — завжди береться фактична (per ТЗ §8). Тип ваги визначає поведінку лише коли об'ємна > фактичної: брати більшу (max), об'ємну, середню чи власну частку." />
                   </Label>
                   <Select
                     value={config.weightType}
@@ -308,9 +319,28 @@ export default function PricingPage() {
                       <SelectItem value="actual">Фактична (max)</SelectItem>
                       <SelectItem value="volumetric">Об&apos;ємна</SelectItem>
                       <SelectItem value="average">Середня</SelectItem>
+                      <SelectItem value="custom">Власна частка</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+                {/* ТЗ §8: коли тип ваги = custom — показуємо поле для частки. */}
+                {config.weightType === 'custom' && (
+                  <div>
+                    <Label className="text-xs">
+                      Частка фактичної ваги (0..1){' '}
+                      <FieldHint text="Розрахункова вага = частка × фактична + (1 − частка) × об'ємна. Діє лише коли об'ємна > фактичної. 0 = тільки об'ємна, 1 = тільки фактична, 0.5 = середня." />
+                    </Label>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min="0"
+                      max="1"
+                      value={config.weightCustomFactualFraction}
+                      onChange={(e) => update(config.id, 'weightCustomFactualFraction', e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Послуги */}

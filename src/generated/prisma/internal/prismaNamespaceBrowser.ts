@@ -69,6 +69,7 @@ export const ModelName = {
   YearlySequence: 'YearlySequence',
   InvoiceSettings: 'InvoiceSettings',
   SmsLog: 'SmsLog',
+  ServiceCity: 'ServiceCity',
   DescriptionSuggestion: 'DescriptionSuggestion',
   AuditLog: 'AuditLog',
   Claim: 'Claim'
@@ -324,6 +325,7 @@ export const PricingConfigScalarFieldEnum = {
   direction: 'direction',
   pricePerKg: 'pricePerKg',
   weightType: 'weightType',
+  weightCustomFactualFraction: 'weightCustomFactualFraction',
   insuranceThreshold: 'insuranceThreshold',
   insuranceRate: 'insuranceRate',
   insuranceEnabled: 'insuranceEnabled',
@@ -473,6 +475,19 @@ export const SmsLogScalarFieldEnum = {
 } as const
 
 export type SmsLogScalarFieldEnum = (typeof SmsLogScalarFieldEnum)[keyof typeof SmsLogScalarFieldEnum]
+
+
+export const ServiceCityScalarFieldEnum = {
+  id: 'id',
+  country: 'country',
+  city: 'city',
+  acceptsCourierPickup: 'acceptsCourierPickup',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ServiceCityScalarFieldEnum = (typeof ServiceCityScalarFieldEnum)[keyof typeof ServiceCityScalarFieldEnum]
 
 
 export const DescriptionSuggestionScalarFieldEnum = {

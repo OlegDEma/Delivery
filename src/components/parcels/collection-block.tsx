@@ -50,10 +50,19 @@ export interface CollectionState {
 interface CollectionBlockProps {
   /** Country where the sender is — filters points. E.g. 'NL' */
   senderCountry: CountryCode | string | null;
+  /** Sender city — drives «Виклик кур'єра» availability when sender is in UA. */
+  senderCity?: string | null;
   value: CollectionState;
   onChange: (next: CollectionState) => void;
   /** If true, shows minimal client-portal UI. If false, full staff UI. */
   clientFacing?: boolean;
+}
+
+interface ServiceCity {
+  id: string;
+  country: string;
+  city: string;
+  acceptsCourierPickup: boolean;
 }
 
 // Per ТЗ: «Передати водію» приховано. Залишаються три способи.
@@ -63,9 +72,10 @@ const METHODS: CollectionMethod[] = [
   COLLECTION_METHODS.EXTERNAL_SHIPPING,
 ];
 
-export function CollectionBlock({ senderCountry, value, onChange, clientFacing = false }: CollectionBlockProps) {
+export function CollectionBlock({ senderCountry, senderCity, value, onChange, clientFacing = false }: CollectionBlockProps) {
   const [points, setPoints] = useState<CollectionPointOption[]>([]);
   const [loadingPoints, setLoadingPoints] = useState(true);
+  const [serviceCities, setServiceCities] = useState<ServiceCity[]>([]);
 
   // Initial fetch + refetch коли змінюється країна. setLoading(true) робимо
   // лише ASYNC після старту запиту, щоб уникнути sync-setState-in-effect.
@@ -87,6 +97,21 @@ export function CollectionBlock({ senderCountry, value, onChange, clientFacing =
     return () => { cancelled = true; };
   }, [senderCountry]);
 
+  // Fetch list of cities where courier_pickup is allowed (per ТЗ §5).
+  // Using forCourierPickup=1 server-side filter so we don't ship dormant rows.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch('/api/service-cities?forCourierPickup=1');
+        if (cancelled || !r.ok) return;
+        const list: ServiceCity[] = await r.json();
+        if (!cancelled) setServiceCities(list);
+      } catch { /* best-effort */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   function setMethod(m: CollectionMethod | '') {
     onChange({
       ...value,
@@ -98,14 +123,24 @@ export function CollectionBlock({ senderCountry, value, onChange, clientFacing =
     });
   }
 
-  // ТЗ: для клієнта courier_pickup доступний лише якщо адреса відправника
-  // у одній з обслуговуваних EU-країн. В Україні — лише Львів. На цьому
-  // рівні ми знаємо тільки країну; фактичну перевірку на «Львів» робимо
-  // нижче через workingHours кур'єрських пунктів.
-  // TODO: додати поле в Адмініструванні щоб конкретно вмикати ua-cities.
-  const courierPickupAvailableForClient =
-    !clientFacing ||
-    (senderCountry !== null && senderCountry !== 'UA');
+  // ТЗ §5: для клієнта courier_pickup доступний лише за прописаних правил.
+  //   - У EU (NL/AT/DE): дозволено в усіх містах (TODO: можна звузити списком).
+  //   - В UA: лише у місті(ах), які є у `service_cities` з
+  //          acceptsCourierPickup=true. За замовчуванням — лише Львів.
+  // На staff боці завжди доступно (clientFacing=false).
+  const courierPickupAvailableForClient = (() => {
+    if (!clientFacing) return true;
+    if (!senderCountry) return false;
+    if (senderCountry !== 'UA') return true;
+    // UA — звіряємо місто.
+    if (!senderCity) return false;
+    const normalized = senderCity.trim().toLowerCase();
+    return serviceCities.some(
+      sc => sc.country === 'UA' &&
+            sc.acceptsCourierPickup &&
+            sc.city.trim().toLowerCase() === normalized
+    );
+  })();
 
   // ТЗ: для клієнта external_shipping поки що неактивний.
   const externalShippingAvailableForClient = !clientFacing;

@@ -127,6 +127,9 @@ enum WeightType {
   actual
   volumetric
   average
+  /// Per ТЗ §8 — комбінація часток фактичної та об'ємної ваги, конфігурована
+  /// у тарифі через `weightCustomFactualFraction`.
+  custom
 }
 
 enum CreatedSource {
@@ -505,6 +508,13 @@ model PricingConfig {
   direction            Direction
   pricePerKg           Decimal     @map("price_per_kg") @db.Decimal(10, 2)
   weightType           WeightType  @default(actual) @map("weight_type")
+  /// Per ТЗ §8 — частка фактичної ваги при `weightType=custom`. 0..1.
+  /// Розрахункова вага коли об'ємна > фактичної:
+  ///   billable = factualFrac × фактична + (1 − factualFrac) × об'ємна
+  /// При factualFrac = 1.0 поведінка ідентична `actual` (max).
+  /// При factualFrac = 0.0 поведінка ідентична `volumetric` (max).
+  /// При factualFrac = 0.5 поведінка ідентична `average`.
+  weightCustomFactualFraction Decimal @default(0.5) @map("weight_custom_factual_fraction") @db.Decimal(4, 3)
   insuranceThreshold   Decimal     @default(25.00) @map("insurance_threshold") @db.Decimal(10, 2)
   insuranceRate        Decimal     @default(0.01) @map("insurance_rate") @db.Decimal(5, 4)
   insuranceEnabled     Boolean     @default(true) @map("insurance_enabled")
@@ -720,6 +730,28 @@ model SmsLog {
   @@index([parcelId])
   @@index([createdAt])
   @@map("sms_log")
+}
+
+/**
+ * Per ТЗ §5: «Виклик кур'єра» доступний клієнту лише у країнах/містах,
+ * які ми реально обслуговуємо. У EU — будь-яка з обслуговуваних країн.
+ * В Україні — лише Львів. Список зберігається тут і конфігурується в
+ * адмініструванні (можна додати інші UA-міста коли з'явиться можливість).
+ */
+model ServiceCity {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  country               Country
+  city                  String
+  /// True = клієнт може обрати «Виклик кур'єра» в цьому місті (per ТЗ).
+  acceptsCourierPickup  Boolean  @default(true) @map("accepts_courier_pickup")
+  /// Reserved for future expansion (e.g. delivery service zones).
+  notes                 String?
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([country, city])
+  @@index([country, acceptsCourierPickup])
+  @@map("service_cities")
 }
 
 model DescriptionSuggestion {

@@ -402,6 +402,7 @@ export const ModelName = {
   YearlySequence: 'YearlySequence',
   InvoiceSettings: 'InvoiceSettings',
   SmsLog: 'SmsLog',
+  ServiceCity: 'ServiceCity',
   DescriptionSuggestion: 'DescriptionSuggestion',
   AuditLog: 'AuditLog',
   Claim: 'Claim'
@@ -420,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "passenger" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "invoiceSettings" | "smsLog" | "descriptionSuggestion" | "auditLog" | "claim"
+    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "passenger" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "invoiceSettings" | "smsLog" | "serviceCity" | "descriptionSuggestion" | "auditLog" | "claim"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1756,6 +1757,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ServiceCity: {
+      payload: Prisma.$ServiceCityPayload<ExtArgs>
+      fields: Prisma.ServiceCityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ServiceCityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ServiceCityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload>
+        }
+        findFirst: {
+          args: Prisma.ServiceCityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ServiceCityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload>
+        }
+        findMany: {
+          args: Prisma.ServiceCityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload>[]
+        }
+        create: {
+          args: Prisma.ServiceCityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload>
+        }
+        createMany: {
+          args: Prisma.ServiceCityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ServiceCityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload>[]
+        }
+        delete: {
+          args: Prisma.ServiceCityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload>
+        }
+        update: {
+          args: Prisma.ServiceCityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload>
+        }
+        deleteMany: {
+          args: Prisma.ServiceCityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ServiceCityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ServiceCityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload>[]
+        }
+        upsert: {
+          args: Prisma.ServiceCityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCityPayload>
+        }
+        aggregate: {
+          args: Prisma.ServiceCityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateServiceCity>
+        }
+        groupBy: {
+          args: Prisma.ServiceCityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServiceCityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ServiceCityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServiceCityCountAggregateOutputType> | number
+        }
+      }
+    }
     DescriptionSuggestion: {
       payload: Prisma.$DescriptionSuggestionPayload<ExtArgs>
       fields: Prisma.DescriptionSuggestionFieldRefs
@@ -2251,6 +2326,7 @@ export const PricingConfigScalarFieldEnum = {
   direction: 'direction',
   pricePerKg: 'pricePerKg',
   weightType: 'weightType',
+  weightCustomFactualFraction: 'weightCustomFactualFraction',
   insuranceThreshold: 'insuranceThreshold',
   insuranceRate: 'insuranceRate',
   insuranceEnabled: 'insuranceEnabled',
@@ -2400,6 +2476,19 @@ export const SmsLogScalarFieldEnum = {
 } as const
 
 export type SmsLogScalarFieldEnum = (typeof SmsLogScalarFieldEnum)[keyof typeof SmsLogScalarFieldEnum]
+
+
+export const ServiceCityScalarFieldEnum = {
+  id: 'id',
+  country: 'country',
+  city: 'city',
+  acceptsCourierPickup: 'acceptsCourierPickup',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ServiceCityScalarFieldEnum = (typeof ServiceCityScalarFieldEnum)[keyof typeof ServiceCityScalarFieldEnum]
 
 
 export const DescriptionSuggestionScalarFieldEnum = {
@@ -2956,6 +3045,7 @@ export type GlobalOmitConfig = {
   yearlySequence?: Prisma.YearlySequenceOmit
   invoiceSettings?: Prisma.InvoiceSettingsOmit
   smsLog?: Prisma.SmsLogOmit
+  serviceCity?: Prisma.ServiceCityOmit
   descriptionSuggestion?: Prisma.DescriptionSuggestionOmit
   auditLog?: Prisma.AuditLogOmit
   claim?: Prisma.ClaimOmit

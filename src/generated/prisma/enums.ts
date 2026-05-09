@@ -168,7 +168,8 @@ export type CashPaymentType = (typeof CashPaymentType)[keyof typeof CashPaymentT
 export const WeightType = {
   actual: 'actual',
   volumetric: 'volumetric',
-  average: 'average'
+  average: 'average',
+  custom: 'custom'
 } as const
 
 export type WeightType = (typeof WeightType)[keyof typeof WeightType]

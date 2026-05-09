@@ -47,7 +47,15 @@ async function main() {
     console.log('SuperAdmin already exists, skipping...');
   }
 
-  // Create default pricing configs
+  // Create default pricing configs (per ТЗ §9–§10).
+  //
+  // NL: 2€/кг; min: адресна 30€, пункт збору 15€, multi-per-address 15€,
+  //     both-directions 15€.
+  // AT: 1.5€/кг; min: адресна 15€, пункт збору 10€, multi-per-address 10€,
+  //     both-directions 10€.
+  //
+  // packagingPer10kg / parcelMoneyPercent / insuranceRate — поки 0 за ТЗ
+  // (адмін вирішить точні значення; ТЗ зазначає що в Тарифах будуть).
   const existingPricing = await prisma.pricingConfig.findFirst();
   if (!existingPricing) {
     await prisma.pricingConfig.createMany({
@@ -55,38 +63,50 @@ async function main() {
         {
           country: 'NL',
           direction: 'eu_to_ua',
-          pricePerKg: 5.00,
+          pricePerKg: 2.00,
           weightType: 'actual',
           collectionDays: ['thursday', 'friday', 'saturday'],
           packagingPrices: { "10": 1, "20": 2, "30": 3, "30+": 5 },
-          addressDeliveryPrice: 5.00,
+          addressDeliveryPrice: 30.00,
+          pickupPointPrice: 15.00,
+          minMultiPerAddress: 15.00,
+          minBothDirections: 15.00,
         },
         {
           country: 'AT',
           direction: 'eu_to_ua',
-          pricePerKg: 5.00,
+          pricePerKg: 1.50,
           weightType: 'actual',
           collectionDays: ['friday', 'saturday', 'sunday'],
           packagingPrices: { "10": 1, "20": 2, "30": 3, "30+": 5 },
-          addressDeliveryPrice: 5.00,
+          addressDeliveryPrice: 15.00,
+          pickupPointPrice: 10.00,
+          minMultiPerAddress: 10.00,
+          minBothDirections: 10.00,
         },
         {
           country: 'NL',
           direction: 'ua_to_eu',
-          pricePerKg: 5.00,
+          pricePerKg: 2.00,
           weightType: 'actual',
           collectionDays: ['monday'],
           packagingPrices: { "10": 1, "20": 2, "30": 3, "30+": 5 },
-          addressDeliveryPrice: 5.00,
+          addressDeliveryPrice: 30.00,
+          pickupPointPrice: 15.00,
+          minMultiPerAddress: 15.00,
+          minBothDirections: 15.00,
         },
         {
           country: 'AT',
           direction: 'ua_to_eu',
-          pricePerKg: 5.00,
+          pricePerKg: 1.50,
           weightType: 'actual',
           collectionDays: ['monday'],
           packagingPrices: { "10": 1, "20": 2, "30": 3, "30+": 5 },
-          addressDeliveryPrice: 5.00,
+          addressDeliveryPrice: 15.00,
+          pickupPointPrice: 10.00,
+          minMultiPerAddress: 10.00,
+          minBothDirections: 10.00,
         },
       ],
     });

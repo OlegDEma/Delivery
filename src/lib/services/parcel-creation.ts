@@ -200,6 +200,18 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
     if (country && country !== 'UA') pricingCountry = country;
   }
 
+  // Per ТЗ §11: «При отриманні з України та передачі в Україну одномоментно
+  // з однієї локації — мінімальна вартість посилки 15€/10€». Ми це детектуємо
+  // тут: чи є інша посилка цього клієнта в протилежному напрямку, створена
+  // у вікні ±2 дні з тієї ж локації (collectionPointId або addresses).
+  const isBothDirections = await detectBothDirections({
+    senderId: input.senderId,
+    receiverId: input.receiverId,
+    direction: input.direction,
+    collectionPointId: input.collectionPointId ?? null,
+    senderAddressId: input.senderAddressId ?? null,
+  });
+
   let deliveryCost = 0;
   let packagingCost = 0;
   let insuranceCost = 0;
@@ -233,11 +245,7 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
             input.direction === 'eu_to_ua' && input.collectionMethod === 'courier_pickup',
           isMultiParcelPickup:
             input.collectionMethod === 'courier_pickup' && !!input.isMultiParcelPickup,
-          // Both-directions detection: на момент створення складно — лишаємо
-          // false. Можна буде включити при ручному редагуванні через PATCH
-          // або в окремій перевірці бекенда (TODO: scan інші посилки клієнта
-          // у вікні ±день з тієї ж локації).
-          isBothDirections: false,
+          isBothDirections,
           parcelMoneyAmount: input.parcelMoneyAmount ? Number(input.parcelMoneyAmount) : 0,
         }
       );
@@ -423,4 +431,48 @@ function counterBase(counterField: string): number {
     case 'shortNumberCounterEuUa': return 500;
     default: return 0;
   }
+}
+
+/**
+ * Per ТЗ §11: «При отриманні з України та передачі в Україну одномоментно
+ * з однієї локації — мінімальна вартість 15/10 €». Тобто коли клієнт
+ * одночасно і відправляє в UA, і отримує з UA з тієї ж локації — діє
+ * нижчий поріг.
+ *
+ * Детекція: шукаємо інші не-видалені посилки цього клієнта в ПРОТИЛЕЖНОМУ
+ * напрямку, створені у вікні ±2 дні, де клієнт виступає в дзеркальній ролі
+ * (sender↔receiver) — це означає що він і відправляє, і отримує. Локація
+ * звіряється через collectionPointId (для eu_to_ua) або через senderAddressId
+ * (як проксі — клієнт зазвичай користується тією ж адресою).
+ *
+ * Повертає true коли знайдено — тоді калькулятор застосує `minBothDirections`.
+ */
+async function detectBothDirections(args: {
+  senderId: string;
+  receiverId: string;
+  direction: Direction;
+  collectionPointId: string | null;
+  senderAddressId: string | null;
+}): Promise<boolean> {
+  const oppositeDirection: Direction = args.direction === 'eu_to_ua' ? 'ua_to_eu' : 'eu_to_ua';
+  const windowStart = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+  const windowEnd = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+
+  // Дзеркальна роль — той хто зараз sender, у протилежному напрямку має бути
+  // receiver (бо саме він і отримує посилку «назад»).
+  const mirrored = await prisma.parcel.findFirst({
+    where: {
+      deletedAt: null,
+      direction: oppositeDirection,
+      receiverId: args.senderId,
+      // Локація має збігатись — або та сама точка збору, або та сама адреса.
+      OR: [
+        ...(args.collectionPointId ? [{ collectionPointId: args.collectionPointId }] : []),
+        ...(args.senderAddressId ? [{ receiverAddressId: args.senderAddressId }] : []),
+      ],
+      createdAt: { gte: windowStart, lte: windowEnd },
+    },
+    select: { id: true },
+  });
+  return !!mirrored;
 }
