@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
+import { AddressInput } from '@/components/parcels/address-input';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { FieldHint } from '@/components/shared/field-hint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -362,7 +363,19 @@ export function ClientCreateForm({
       <div className="space-y-2">
         <div>
           <Label>Населений пункт *</Label>
-          <CapitalizeInput value={city} onChange={setCity} required />
+          {/* ТЗ: автокомпліт міста з історії — «Am» → «Amsterdam». Активний
+              лише коли вибрана країна, бо API звужує по country. */}
+          {country ? (
+            <AddressInput
+              field="city"
+              country={country}
+              value={city}
+              onChange={setCity}
+              required
+            />
+          ) : (
+            <CapitalizeInput value={city} onChange={setCity} required />
+          )}
         </div>
 
         {deliveryMethod === 'np_warehouse' && (
@@ -392,7 +405,17 @@ export function ClientCreateForm({
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label>Вулиця {strict && '*'}</Label>
-                <CapitalizeInput value={street} onChange={setStreet} required={strict} />
+                {country ? (
+                  <AddressInput
+                    field="street"
+                    country={country}
+                    value={street}
+                    onChange={setStreet}
+                    required={strict}
+                  />
+                ) : (
+                  <CapitalizeInput value={street} onChange={setStreet} required={strict} />
+                )}
               </div>
               <div>
                 <Label>Будинок {strict && '*'}</Label>
