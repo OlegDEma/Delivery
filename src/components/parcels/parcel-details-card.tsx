@@ -174,14 +174,20 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
           </div>
         )}
 
-        {/* Payment method */}
+        {/* Payment method.
+            Per ТЗ E12: «Форми оплати "Безготівка" відв'язати від Оплата в Україні.
+            Тобто і Отримувач і Відправник може оплатити в безготівковій формі
+            як в Україні так і в Європі. При відмічанні чекбокса "Оплата в
+            Україні" обов'язково встановлюється Безготівка. Готівка неможлива
+            у випадку оплати в Україні». */}
         {editing ? (
           <div>
             <Label className="text-xs text-gray-500">Форма оплати</Label>
             <Select value={paymentMethod} onValueChange={(v) => {
               const val = v ?? 'cash';
+              // Cash несумісна з «Оплата в Україні» — блокуємо.
+              if (val === 'cash' && paymentInUkraine) return;
               setPaymentMethod(val);
-              if (val === 'cashless') setPaymentInUkraine(true);
             }}>
               <SelectTrigger className="h-8"><SelectValue>{METHOD_LABELS[paymentMethod]}</SelectValue></SelectTrigger>
               <SelectContent>
@@ -200,7 +206,8 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
           </div>
         )}
 
-        {/* Payment in Ukraine */}
+        {/* Payment in Ukraine — тільки ця галочка примушує Безготівку,
+            не навпаки (per ТЗ E12). */}
         {editing && (
           <label className="flex items-center gap-2 text-sm py-1">
             <Checkbox
@@ -215,7 +222,10 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
           </label>
         )}
 
-        {/* Insurance — opt-in editable post-creation per ТЗ. */}
+        {/* Insurance — opt-in editable post-creation. Лишається в Деталях,
+            бо це єдине місце де користувач може передумати на створеній
+            посилці (per ТЗ §10 цей чекбокс живе у вкладці «Відправлення»
+            при створенні, але на детальній сторінці tab-структури немає). */}
         {editing ? (
           <label className="flex items-center gap-2 text-sm py-1">
             <Checkbox checked={insuranceApplied} onCheckedChange={(c) => setInsuranceApplied(c === true)} />
@@ -228,13 +238,11 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
           </div>
         )}
 
-        {/* Needs packaging */}
-        {editing ? (
-          <label className="flex items-center gap-2 text-sm py-1">
-            <Checkbox checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
-            Пакування
-          </label>
-        ) : parcel.needsPackaging && (
+        {/* Per ТЗ E11/E12: «Поле "Потребує пакування" забрати». Чекбокс
+            «Пакування» більше не редагується тут — тільки read-only-маркер
+            показу що послуга застосована. Toggle лишається у формі при
+            створенні (вкладка «Відправлення»). */}
+        {!editing && parcel.needsPackaging && (
           <div className="flex justify-between">
             <span className="text-gray-500">Пакування</span>
             <span>Так</span>

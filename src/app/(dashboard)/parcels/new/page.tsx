@@ -813,10 +813,8 @@ export default function NewParcelPage() {
                         </span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2">
-                      <Checkbox checked={place.needsPackaging} onCheckedChange={(checked) => updatePlace(i, 'needsPackaging', checked === true)} />
-                      <Label className="text-sm">Потребує пакування <FieldHint text="Відмітьте, якщо пакунок не є у коробці, не є паралелепіпедом, або не має плаского дна. Послуга платна." /></Label>
-                    </div>
+                    {/* Per ТЗ E11: «Поле "Потребує пакування" забрати». Опція
+                        живе на parcel-рівні у блоці «Відправлення» вище. */}
                   </div>
                 ))}
               </>

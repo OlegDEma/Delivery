@@ -529,33 +529,8 @@ export default function ParcelDetailPage() {
       {/* «Вікно доставки (4 години)» прибрано — за ТЗ це поле
           потрібне лише в Маршрутах, а не в тілі посилки. */}
 
-      {/* Спосіб прийому — компактний 1-row info (адмін має бачити як
-          фактично передається посилка від відправника). Per ТЗ повна картка
-          прибрана з detail, але сам факт способу + пункт/адреса/дата —
-          корисні для оператора. */}
-      {parcel.collectionMethod && (
-        <div className="text-sm py-1 border-y bg-amber-50/50 px-2 -mx-2 rounded">
-          <span className="text-gray-500">Спосіб прийому/видачі:</span>{' '}
-          <span className="font-medium">
-            {parcel.collectionMethod === 'pickup_point' && '🏢 Пункт збору'}
-            {parcel.collectionMethod === 'courier_pickup' && '🚐 Виклик кур\'єра'}
-            {parcel.collectionMethod === 'external_shipping' && '📦 Відправка поштою'}
-          </span>
-          {parcel.collectionPoint && (
-            <span className="text-gray-600 ml-2">
-              · {parcel.collectionPoint.name || `${parcel.collectionPoint.city}, ${parcel.collectionPoint.address}`}
-            </span>
-          )}
-          {parcel.collectionAddress && (
-            <span className="text-gray-600 ml-2">· {parcel.collectionAddress}</span>
-          )}
-          {parcel.collectionDate && (
-            <span className="text-gray-500 ml-2">
-              · {new Date(parcel.collectionDate).toLocaleDateString('uk-UA')}
-            </span>
-          )}
-        </div>
-      )}
+      {/* ТЗ E4: «Спосіб прийому посилки звідси забрати. Залишити лише для
+          створення Нової посилки». Блок раніше показувався тут — прибрано. */}
 
       {/* Рейс — показуємо лише дату фактичного рейсу + кур'єра без Card-wrapper'а. */}
       <div className="text-sm py-1 border-y">

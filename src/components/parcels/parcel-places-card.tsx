@@ -302,10 +302,9 @@ export function ParcelPlacesCard({
                 </div>
               ))}
             </div>
-            <div className="mt-2 pt-2 border-t flex justify-between text-sm font-medium">
-              <span>Загальна вага</span>
-              <span>{totalWeight ? formatWeight(Number(totalWeight)) : '—'}</span>
-            </div>
+            {/* ТЗ E4: «Слова 'Загальна вага' забрати». Сумарна вага видно
+                у блоці «Розрахунок вартості» нижче — окремий рядок
+                непотрібен. */}
             {canCalculate && calcActualWeight > 0 && (
               <div className="mt-2">
                 <CostCalculator
