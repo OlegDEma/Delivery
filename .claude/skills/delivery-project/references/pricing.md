@@ -1,0 +1,150 @@
+# Pricing calculator
+
+Single source of truth: `src/lib/utils/pricing.ts`. Helper: `src/lib/utils/pricing-input.ts` (maps `PricingConfig` row → `PricingConfigInput`).
+
+## High-level flow
+
+```
+declaredValue (in declaredValueCurrency) ───► toEur() ─────────┐
+                                                                │
+weight × pricePerKg ─────────► baseDeliveryCost                 ▼
+                                       │                  insuranceCost
+                                       ▼                        │
+              max(baseDeliveryCost, applicable_minimum) ─► deliveryCost
+                                       │                        │
+                                       ▼                  packagingCost
+                                  + parcelMoneyCost ◄─── parcelMoneyAmount × parcelMoneyPercent / 100
+                                       │
+                                       ▼
+                              ────► totalCost
+```
+
+## Inputs
+
+`PricingConfigInput` (from `PricingConfig` Prisma row via `buildPricingInput()`):
+
+| Field | Meaning |
+|---|---|
+| `pricePerKg` | EUR per kg of billable weight |
+| `weightType` | `actual` | `volumetric` | `average` | `custom` |
+| `weightCustomFactualFraction` | 0..1, used when type=`custom` |
+| `insuranceEnabled` | tariff-level toggle (is the option offered?) |
+| `insurancePercent` | WHOLE percent (1.0 = 1%, NOT 0.01); converted from `insuranceRate * 100` |
+| `packagingEnabled` | tariff-level toggle |
+| `packagingPer10kg` | EUR per (full or partial) 10kg block |
+| `packagingPrices` | LEGACY JSON `{"10":1,"20":2,"30+":5}` — fallback when `packagingPer10kg=0` |
+| `addressDeliveryPrice` | MIN-floor for single-parcel courier-pickup |
+| `pickupPointPrice` | MIN-floor for pickup-point hand-over |
+| `minMultiPerAddress` | MIN-floor per parcel when multi-parcel pickup |
+| `minBothDirections` | MIN-floor when sender both sends and receives same time |
+| `parcelMoneyPercent` | WHOLE percent applied to «Пакет» sum |
+
+`ParcelCostInput` per parcel:
+
+| Field | Meaning |
+|---|---|
+| `actualWeight` | sum of `place.weight` |
+| `volumetricWeight` | sum of `place.volumetricWeight` |
+| `declaredValue` | **already in EUR** (caller converts via `toEur()`) |
+| `insurance` | opt-in checkbox from form/saved `parcel.insuranceApplied` |
+| `needsPackaging` | opt-in checkbox |
+| `isAddressDelivery` | receiver chose «адреса» (vs Nova Poshta warehouse) |
+| `isPickupPoint` | collection method = pickup_point |
+| `isCourierPickup` | collection method = courier_pickup |
+| `isMultiParcelPickup` | operator answered «2+ parcels» on courier_pickup |
+| `isBothDirections` | sender both sends UA→EU and receives EU→UA from same location |
+| `parcelMoneyAmount` | the cash sum sender transfers |
+
+## How weight is computed
+
+`getBillableWeight(actual, volumetric, weightType, customFactualFraction)` in `src/lib/utils/volumetric.ts`:
+
+```
+if (actual >= volumetric) return actual;  // ТЗ rule 1: factual wins when bigger
+
+switch (weightType) {
+  case 'actual':    return volumetric;          // legacy «max» — DOES NOT MATCH ТЗ for v > a
+  case 'volumetric': return volumetric;
+  case 'average':   return (actual + volumetric) / 2;
+  case 'custom':    return ffrac × actual + (1 − ffrac) × volumetric;  // ТЗ-correct
+}
+```
+
+**Important:** default seed has `weightType='actual'`. For ТЗ-correct behaviour, admin must switch to `custom` per tariff. There's no migration in place that does this automatically.
+
+## How the minimum is picked
+
+Priority (in calculator):
+
+1. `isBothDirections` AND `minBothDirections > 0` → use `minBothDirections` (label «Туди-сюди з локації»)
+2. `isMultiParcelPickup` AND `minMultiPerAddress > 0` → use `minMultiPerAddress` (label «2+ посилок з локації»)
+3. `isCourierPickup` AND `addressDeliveryPrice > 0` → use `addressDeliveryPrice` (label «Адресна доставка»)
+4. `isPickupPoint` AND `pickupPointPrice > 0` → use `pickupPointPrice` (label «Пункт збору»)
+5. `isAddressDelivery` AND `addressDeliveryPrice > 0` → use `addressDeliveryPrice` (covers ua_to_eu where receiver picks address delivery)
+
+If `baseDeliveryCost >= minimumApplied`, the minimum is dropped (no floor needed).
+
+`deliveryCost = max(baseDeliveryCost, minimumApplied)`.
+
+## Insurance
+
+```
+if (insurance && tariff.insuranceEnabled && declaredValueEur > 0):
+   insuranceCost = declaredValueEur × insurancePercent / 100
+```
+
+`insurancePercent` is **whole percent** (1.0 = 1%). The DB column `insuranceRate` is the fraction (0.01); `buildPricingInput` multiplies by 100.
+
+**CRITICAL: declaredValueEur must be already converted from UAH if applicable.** Callers (parcel-creation, PATCH route, calculate route) all use `toEur(declaredValue, declaredValueCurrency)` before passing to the calculator.
+
+## Packaging
+
+```
+if (needsPackaging && tariff.packagingEnabled):
+  if (packagingPer10kg > 0):
+    blocks = max(1, ceil(actualWeight / 10))
+    packagingCost = blocks × packagingPer10kg
+  else if (packagingPrices):
+    packagingCost = getLegacyPackagingPrice(packagingPrices, actualWeight)
+```
+
+Legacy tier JSON: `{ "10": 1, "20": 2, "30+": 5 }` — find the lowest threshold ≥ weight; use «+» entry for over-max.
+
+## Parcel money («Пакет»)
+
+```
+if (parcelMoneyAmount > 0 && parcelMoneyPercent > 0):
+   parcelMoneyCost = parcelMoneyAmount × parcelMoneyPercent / 100
+```
+
+The amount itself is NOT in the delivery cost — only the % fee. The amount appears as `(1000)` on the printable receipt.
+
+## Total
+
+```
+totalCost = roundMoney(deliveryCost + insuranceCost + packagingCost + parcelMoneyCost)
+```
+
+`roundMoney` uses multiply-round-divide to avoid IEEE-754 display artifacts.
+
+## Where the calculator is invoked
+
+1. **POST `/api/parcels/calculate`** — live preview from the form's `<CostCalculator>` component. Fetches `PricingConfig` row, builds input, returns breakdown.
+2. **`createParcel()` in `src/lib/services/parcel-creation.ts`** — at parcel creation. Saves all cost components in the parcel row.
+3. **PATCH `/api/parcels/[id]`** in `src/app/api/parcels/[id]/route.ts` — runs when `costAffectingTouched` is true. Reads fresh values from `body` (with fallback to saved values), recalculates, writes updated cost fields to the same PATCH transaction.
+
+All three paths use `buildPricingInput()` + `calculateParcelCost()` — no duplication.
+
+## ТЗ-specific defaults (seed values for fresh DB)
+
+NL: `pricePerKg=2`, `addressDeliveryPrice=30`, `pickupPointPrice=15`, `minMultiPerAddress=15`, `minBothDirections=15`.
+AT: `pricePerKg=1.5`, `addressDeliveryPrice=15`, `pickupPointPrice=10`, `minMultiPerAddress=10`, `minBothDirections=10`.
+
+Existing prod DB has older values (5 €/kg) — admin needs to update via `/admin/pricing`.
+
+## Outstanding gaps (from `tz-audit.md`)
+
+- **Lviv exception**: NL→Lviv = 1.5 €/kg, AT→Lviv = 1.0 €/kg. Not implemented. Needs receiver-city check.
+- **Пакет% two-tier**: ТЗ §53 wants two rates (for sums ≤ 2000 and > 2000). Currently one rate.
+- **Weight default**: existing tariffs have `actual` (max behaviour). ТЗ expects `custom` (fraction).
+- **Per-shipment-type pricing**: tariffs don't distinguish documents / tires / parcels.
