@@ -162,6 +162,16 @@ export async function PATCH(
         { status: 400 }
       );
     }
+
+    // ТЗ §E55–E61: статус «Доставлено» можна присвоїти ЛИШЕ після оплати.
+    // Super_admin може обійти (виняткові ситуації), решта — ні.
+    const deliveredStatuses: ParcelStatus[] = ['delivered_ua', 'delivered_eu'];
+    if (deliveredStatuses.includes(body.status as ParcelStatus) && !parcel.isPaid && !isSuperAdmin) {
+      return NextResponse.json(
+        { error: 'Статус «Доставлено» можна присвоїти лише після прийняття оплати. Спершу прийміть оплату у блоці «Оплата».' },
+        { status: 409 }
+      );
+    }
     const statusUpdateData: Prisma.ParcelUpdateInput = {
       status: body.status as ParcelStatus,
       statusHistory: {
