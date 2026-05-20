@@ -324,6 +324,7 @@ export const PricingConfigScalarFieldEnum = {
   country: 'country',
   direction: 'direction',
   pricePerKg: 'pricePerKg',
+  lvivPricePerKg: 'lvivPricePerKg',
   weightType: 'weightType',
   weightCustomFactualFraction: 'weightCustomFactualFraction',
   insuranceThreshold: 'insuranceThreshold',

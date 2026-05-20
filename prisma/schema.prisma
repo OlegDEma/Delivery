@@ -507,6 +507,9 @@ model PricingConfig {
   country              Country
   direction            Direction
   pricePerKg           Decimal     @map("price_per_kg") @db.Decimal(10, 2)
+  /// Per ТЗ §49/§50 — знижена ціна за кг коли населений пункт Отримувача
+  /// = Львів. NULL = винятку немає, діє звичайний pricePerKg.
+  lvivPricePerKg       Decimal?    @map("lviv_price_per_kg") @db.Decimal(10, 2)
   weightType           WeightType  @default(custom) @map("weight_type")
   /// Per ТЗ §8 — частка фактичної ваги при `weightType=custom`. 0..1.
   /// Розрахункова вага коли об'ємна > фактичної:

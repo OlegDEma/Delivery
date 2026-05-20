@@ -14,6 +14,7 @@ import { parsePackagingPrices } from '@/lib/validators/common';
 export function buildPricingInput(config: PricingConfig): PricingConfigInput {
   return {
     pricePerKg: Number(config.pricePerKg),
+    lvivPricePerKg: config.lvivPricePerKg != null ? Number(config.lvivPricePerKg) : null,
     weightType: config.weightType,
     weightCustomFactualFraction: Number(config.weightCustomFactualFraction),
     insuranceEnabled: config.insuranceEnabled,

@@ -181,6 +181,8 @@ export const calculateCostSchema = z.object({
   isBothDirections: z.boolean().optional(),
   /** «Пакет» — amount of cash sender transfers. */
   parcelMoneyAmount: moneySchema.optional(),
+  /** Населений пункт Отримувача — для Львів-винятку §49/§50. */
+  receiverCity: z.string().trim().max(200).optional().nullable(),
 });
 
 /** POST /api/parcels/[id]/payment */

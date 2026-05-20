@@ -27,9 +27,13 @@ interface CostCalculatorProps {
   isBothDirections?: boolean;
   /** «Пакет» — money sender transfers (drives the % fee row). */
   parcelMoneyAmount?: number;
+  /** Населений пункт Отримувача — для Львів-винятку (§49/§50). */
+  receiverCity?: string | null;
 }
 
 interface CostBreakdown {
+  pricePerKgApplied: number;
+  lvivExceptionApplied: boolean;
   baseDeliveryCost: number;
   minimumApplied: number;
   minimumLabel: string | null;
@@ -102,6 +106,7 @@ export function CostCalculator(props: CostCalculatorProps) {
             isMultiParcelPickup: props.isMultiParcelPickup ?? false,
             isBothDirections: props.isBothDirections ?? false,
             parcelMoneyAmount: props.parcelMoneyAmount ?? 0,
+            receiverCity: props.receiverCity ?? null,
           }),
         });
         if (res.ok) {
@@ -129,7 +134,7 @@ export function CostCalculator(props: CostCalculatorProps) {
     props.declaredValueCurrency,
     props.insurance, props.needsPackaging, props.isAddressDelivery,
     props.isPickupPoint, props.isCourierPickup, props.isMultiParcelPickup,
-    props.isBothDirections, props.parcelMoneyAmount,
+    props.isBothDirections, props.parcelMoneyAmount, props.receiverCity,
   ]);
 
   // Inline error has priority over fetched state (UA / no country picked yet).
@@ -163,7 +168,12 @@ export function CostCalculator(props: CostCalculatorProps) {
         <span>{cost.billableWeight.toFixed(2)} кг</span>
       </div>
       <div className="flex justify-between">
-        <span className="text-gray-600">Доставка ({cost.pricePerKg} EUR/кг):</span>
+        <span className="text-gray-600">
+          Доставка ({cost.pricePerKg} EUR/кг
+          {cost.lvivExceptionApplied && (
+            <span className="text-green-700"> · Львів</span>
+          )}):
+        </span>
         <span>
           {formatCurrency(cost.deliveryCost, 'EUR')}
           {cost.minimumApplied > 0 && cost.minimumLabel && (

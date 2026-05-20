@@ -501,6 +501,7 @@ export default function ParcelDetailPage() {
           || null
         }
         receiverCountry={parcel.receiverAddress?.country || null}
+        receiverCity={parcel.receiverAddress?.city || null}
         receiverDeliveryMethod={parcel.receiverAddress?.deliveryMethod || null}
         declaredValue={parcel.declaredValue}
         declaredValueCurrency={parcel.declaredValueCurrency}

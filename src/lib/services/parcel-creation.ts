@@ -253,6 +253,8 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
             input.collectionMethod === 'courier_pickup' && !!input.isMultiParcelPickup,
           isBothDirections,
           parcelMoneyAmount: input.parcelMoneyAmount ? Number(input.parcelMoneyAmount) : 0,
+          // Per ТЗ §49/§50 — знижена ціна за кг коли Отримувач у Львові.
+          receiverCity: receiver?.addresses[0]?.city ?? null,
         }
       );
       deliveryCost = breakdown.deliveryCost;

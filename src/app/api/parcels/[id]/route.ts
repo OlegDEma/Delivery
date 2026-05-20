@@ -473,6 +473,8 @@ export async function PATCH(
               isMultiParcelPickup: !!parcel.isMultiParcelPickup,
               isBothDirections: false,
               parcelMoneyAmount: parcelMoneyAmount ? Number(parcelMoneyAmount) : 0,
+              // Per ТЗ §49/§50 — Львів-виняток на ціну за кг.
+              receiverCity: receiverAddr?.city ?? null,
             }
           );
           updateData.deliveryCost = breakdown.deliveryCost;

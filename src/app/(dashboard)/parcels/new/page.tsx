@@ -991,6 +991,7 @@ export default function NewParcelPage() {
           isCourierPickup={direction === 'eu_to_ua' && collection.method === 'courier_pickup'}
           isMultiParcelPickup={!!collection.isMultiParcelPickup}
           parcelMoneyAmount={parcelMoneyEnabled ? Number(parcelMoneyAmount) || 0 : 0}
+          receiverCity={recvCity}
         />
 
         {error && (

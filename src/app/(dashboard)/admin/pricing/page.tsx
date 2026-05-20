@@ -22,6 +22,8 @@ interface ConfigForm {
   country: string;
   direction: string;
   pricePerKg: string;
+  /** Per ТЗ §49/§50 — знижена ціна за кг коли населений пункт Отримувача = Львів. 0 = вимкнено. */
+  lvivPricePerKg: string;
   weightType: string;
   /** Per ТЗ §8 — частка фактичної ваги при weightType=custom (0..1). */
   weightCustomFactualFraction: string;
@@ -44,6 +46,7 @@ interface ApiPricingConfig {
   country: string;
   direction: string;
   pricePerKg: string | number;
+  lvivPricePerKg: string | number | null;
   weightType: string;
   weightCustomFactualFraction: string | number;
   insuranceEnabled: boolean;
@@ -64,6 +67,7 @@ function toForm(c: ApiPricingConfig): ConfigForm {
     country: c.country,
     direction: c.direction,
     pricePerKg: String(c.pricePerKg ?? '0'),
+    lvivPricePerKg: String(c.lvivPricePerKg ?? '0'),
     weightType: c.weightType,
     weightCustomFactualFraction: String(c.weightCustomFactualFraction ?? '0.5'),
     insuranceEnabled: !!c.insuranceEnabled,
@@ -129,6 +133,7 @@ export default function PricingPage() {
     // operator gets a clear message instead of a generic 400.
     const fields: Array<{ key: keyof ConfigForm; label: string; min: number; max: number }> = [
       { key: 'pricePerKg',                  label: 'Ціна за кг',                   min: 0, max: 1000 },
+      { key: 'lvivPricePerKg',              label: 'Ціна за кг (Львів)',           min: 0, max: 1000 },
       { key: 'addressDeliveryPrice',        label: 'Адресна доставка',             min: 0, max: 1000 },
       { key: 'pickupPointPrice',            label: 'Пункт збору',                  min: 0, max: 1000 },
       { key: 'minMultiPerAddress',          label: '2+ посилок з локації (мін.)',  min: 0, max: 1000 },
@@ -151,6 +156,7 @@ export default function PricingPage() {
       body: JSON.stringify({
         id: c.id,
         pricePerKg:                  parseNum(c.pricePerKg),
+        lvivPricePerKg:              parseNum(c.lvivPricePerKg),
         weightType:                  c.weightType,
         weightCustomFactualFraction: parseNum(c.weightCustomFactualFraction),
         addressDeliveryPrice: parseNum(c.addressDeliveryPrice),
@@ -247,6 +253,20 @@ export default function PricingPage() {
                     min="0"
                     value={config.pricePerKg}
                     onChange={(e) => update(config.id, 'pricePerKg', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">
+                    Ціна за кг — Львів (EUR){' '}
+                    <FieldHint text="Знижена ціна за кг, яка діє коли населений пункт Отримувача — Львів (ТЗ §49/§50). 0 — виняток вимкнено, діє звичайна ціна за кг." />
+                  </Label>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    value={config.lvivPricePerKg}
+                    onChange={(e) => update(config.id, 'lvivPricePerKg', e.target.value)}
                   />
                 </div>
                 <div>

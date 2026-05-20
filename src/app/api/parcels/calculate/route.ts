@@ -52,12 +52,14 @@ export async function POST(request: NextRequest) {
       isMultiParcelPickup: body.isMultiParcelPickup ?? false,
       isBothDirections: body.isBothDirections ?? false,
       parcelMoneyAmount: body.parcelMoneyAmount ?? 0,
+      receiverCity: body.receiverCity ?? null,
     }
   );
 
   return NextResponse.json({
     ...result,
-    pricePerKg: pricingInput.pricePerKg,
+    // pricePerKg — фактично застосована (з урахуванням Львів-винятку §49/§50).
+    pricePerKg: result.pricePerKgApplied,
     weightType: pricingInput.weightType,
     // Echo configured rates so the UI can render context-aware hints
     // (e.g. "Страхування: 1% від 100€ = 1€"). Optional client-side use.

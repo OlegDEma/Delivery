@@ -32,7 +32,7 @@ export async function PATCH(request: NextRequest) {
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
   const {
     id,
-    pricePerKg, weightType, weightCustomFactualFraction,
+    pricePerKg, lvivPricePerKg, weightType, weightCustomFactualFraction,
     insuranceEnabled, insuranceRate, insuranceThreshold,
     packagingEnabled, packagingPer10kg,
     parcelMoneyPercent,
@@ -59,6 +59,7 @@ export async function PATCH(request: NextRequest) {
   };
   const checks: Array<[unknown, number, number, string]> = [
     [pricePerKg,                  0, 1000,   'pricePerKg'],
+    [lvivPricePerKg,              0, 1000,   'lvivPricePerKg'],
     [addressDeliveryPrice,        0, 1000,   'addressDeliveryPrice'],
     [pickupPointPrice,            0, 1000,   'pickupPointPrice'],
     [minMultiPerAddress,          0, 1000,   'minMultiPerAddress'],
@@ -88,6 +89,7 @@ export async function PATCH(request: NextRequest) {
     where: { id },
     data: {
       ...(numIfPresent(pricePerKg)                  !== undefined && { pricePerKg:                  numIfPresent(pricePerKg)! }),
+      ...(numIfPresent(lvivPricePerKg)              !== undefined && { lvivPricePerKg:              numIfPresent(lvivPricePerKg)! }),
       ...(weightType                                !== undefined && { weightType }),
       ...(numIfPresent(weightCustomFactualFraction) !== undefined && { weightCustomFactualFraction: numIfPresent(weightCustomFactualFraction)! }),
       ...(insuranceEnabled                   !== undefined && { insuranceEnabled }),

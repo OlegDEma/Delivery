@@ -7,6 +7,11 @@ import { getBillableWeight } from './volumetric';
  */
 export interface PricingConfigInput {
   pricePerKg: number;
+  /**
+   * Per ТЗ §49/§50 — знижена ціна за кг коли Отримувач у Львові.
+   * null/undefined = винятку немає.
+   */
+  lvivPricePerKg?: number | null;
   weightType: 'actual' | 'volumetric' | 'average' | 'custom';
   /** Used only when weightType='custom'. Частка фактичної ваги (0..1). */
   weightCustomFactualFraction?: number;
@@ -87,9 +92,28 @@ export interface ParcelCostInput {
    * The amount itself is NOT a delivery cost — only the % fee from it is.
    */
   parcelMoneyAmount?: number;
+  /**
+   * Населений пункт Отримувача. Per ТЗ §49/§50 — якщо це Львів і в тарифі
+   * заданий `lvivPricePerKg`, застосовується знижена ціна за кг.
+   */
+  receiverCity?: string | null;
+}
+
+/**
+ * Чи місто Отримувача — Львів (для ТЗ-винятку §49/§50). Нормалізуємо до
+ * нижнього регістру + покриваємо латинку і поширені варіанти написання.
+ */
+export function isLvivCity(city: string | null | undefined): boolean {
+  if (!city) return false;
+  const n = city.trim().toLowerCase();
+  return n === 'львів' || n === 'lviv' || n === 'львов' || n === 'lwow' || n === 'lwów';
 }
 
 export interface CostBreakdown {
+  /** Фактична застосована ціна за кг (з урахуванням Львів-винятку §49/§50). */
+  pricePerKgApplied: number;
+  /** True коли спрацював Львів-виняток (знижена ціна за кг). */
+  lvivExceptionApplied: boolean;
   /** weight × pricePerKg (без застосування мінімуму). Лишається для прозорості. */
   baseDeliveryCost: number;
   /** Який тариф-мінімум був застосований (0 якщо не діяв). */
@@ -136,7 +160,10 @@ export function calculateParcelCost(
     config.weightType,
     config.weightCustomFactualFraction,
   );
-  const baseDeliveryCost = roundMoney(billableWeight * config.pricePerKg);
+  // Per ТЗ §49/§50: Отримувач у Львові → знижена ціна за кг (якщо задана).
+  const lvivException = isLvivCity(parcel.receiverCity) && !!config.lvivPricePerKg && config.lvivPricePerKg > 0;
+  const effectivePricePerKg = lvivException ? config.lvivPricePerKg! : config.pricePerKg;
+  const baseDeliveryCost = roundMoney(billableWeight * effectivePricePerKg);
 
   // 2. Визначаємо релевантний мінімум-поріг. ТЗ — пріоритети:
   //    1) «Туди-сюди» (одночасний UA→EU + EU→UA з однієї локації)
@@ -203,6 +230,8 @@ export function calculateParcelCost(
   );
 
   return {
+    pricePerKgApplied: effectivePricePerKg,
+    lvivExceptionApplied: lvivException,
     baseDeliveryCost,
     minimumApplied,
     minimumLabel,

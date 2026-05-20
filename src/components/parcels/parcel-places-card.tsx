@@ -31,6 +31,8 @@ interface ParcelPlacesCardProps {
   direction?: string;
   senderCountry?: string | null;
   receiverCountry?: string | null;
+  /** Населений пункт Отримувача — для Львів-винятку (§49/§50). */
+  receiverCity?: string | null;
   receiverDeliveryMethod?: string | null;
   declaredValue?: number | null;
   /** Currency of declaredValue (EUR | UAH). Default EUR. */
@@ -78,6 +80,7 @@ export function ParcelPlacesCard({
   direction,
   senderCountry,
   receiverCountry,
+  receiverCity,
   receiverDeliveryMethod,
   declaredValue,
   declaredValueCurrency,
@@ -271,6 +274,7 @@ export function ParcelPlacesCard({
                 isCourierPickup={!!isCourierPickup}
                 isMultiParcelPickup={!!isMultiParcelPickup}
                 parcelMoneyAmount={parcelMoneyAmount ? Number(parcelMoneyAmount) : 0}
+                receiverCity={receiverCity ?? null}
               />
             )}
           </div>
@@ -322,6 +326,7 @@ export function ParcelPlacesCard({
                   isCourierPickup={!!isCourierPickup}
                   isMultiParcelPickup={!!isMultiParcelPickup}
                   parcelMoneyAmount={parcelMoneyAmount ? Number(parcelMoneyAmount) : 0}
+                  receiverCity={receiverCity ?? null}
                 />
               </div>
             )}

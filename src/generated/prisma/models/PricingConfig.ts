@@ -28,6 +28,7 @@ export type AggregatePricingConfig = {
 
 export type PricingConfigAvgAggregateOutputType = {
   pricePerKg: runtime.Decimal | null
+  lvivPricePerKg: runtime.Decimal | null
   weightCustomFactualFraction: runtime.Decimal | null
   insuranceThreshold: runtime.Decimal | null
   insuranceRate: runtime.Decimal | null
@@ -41,6 +42,7 @@ export type PricingConfigAvgAggregateOutputType = {
 
 export type PricingConfigSumAggregateOutputType = {
   pricePerKg: runtime.Decimal | null
+  lvivPricePerKg: runtime.Decimal | null
   weightCustomFactualFraction: runtime.Decimal | null
   insuranceThreshold: runtime.Decimal | null
   insuranceRate: runtime.Decimal | null
@@ -57,6 +59,7 @@ export type PricingConfigMinAggregateOutputType = {
   country: $Enums.Country | null
   direction: $Enums.Direction | null
   pricePerKg: runtime.Decimal | null
+  lvivPricePerKg: runtime.Decimal | null
   weightType: $Enums.WeightType | null
   weightCustomFactualFraction: runtime.Decimal | null
   insuranceThreshold: runtime.Decimal | null
@@ -80,6 +83,7 @@ export type PricingConfigMaxAggregateOutputType = {
   country: $Enums.Country | null
   direction: $Enums.Direction | null
   pricePerKg: runtime.Decimal | null
+  lvivPricePerKg: runtime.Decimal | null
   weightType: $Enums.WeightType | null
   weightCustomFactualFraction: runtime.Decimal | null
   insuranceThreshold: runtime.Decimal | null
@@ -103,6 +107,7 @@ export type PricingConfigCountAggregateOutputType = {
   country: number
   direction: number
   pricePerKg: number
+  lvivPricePerKg: number
   weightType: number
   weightCustomFactualFraction: number
   insuranceThreshold: number
@@ -127,6 +132,7 @@ export type PricingConfigCountAggregateOutputType = {
 
 export type PricingConfigAvgAggregateInputType = {
   pricePerKg?: true
+  lvivPricePerKg?: true
   weightCustomFactualFraction?: true
   insuranceThreshold?: true
   insuranceRate?: true
@@ -140,6 +146,7 @@ export type PricingConfigAvgAggregateInputType = {
 
 export type PricingConfigSumAggregateInputType = {
   pricePerKg?: true
+  lvivPricePerKg?: true
   weightCustomFactualFraction?: true
   insuranceThreshold?: true
   insuranceRate?: true
@@ -156,6 +163,7 @@ export type PricingConfigMinAggregateInputType = {
   country?: true
   direction?: true
   pricePerKg?: true
+  lvivPricePerKg?: true
   weightType?: true
   weightCustomFactualFraction?: true
   insuranceThreshold?: true
@@ -179,6 +187,7 @@ export type PricingConfigMaxAggregateInputType = {
   country?: true
   direction?: true
   pricePerKg?: true
+  lvivPricePerKg?: true
   weightType?: true
   weightCustomFactualFraction?: true
   insuranceThreshold?: true
@@ -202,6 +211,7 @@ export type PricingConfigCountAggregateInputType = {
   country?: true
   direction?: true
   pricePerKg?: true
+  lvivPricePerKg?: true
   weightType?: true
   weightCustomFactualFraction?: true
   insuranceThreshold?: true
@@ -314,6 +324,7 @@ export type PricingConfigGroupByOutputType = {
   country: $Enums.Country
   direction: $Enums.Direction
   pricePerKg: runtime.Decimal
+  lvivPricePerKg: runtime.Decimal | null
   weightType: $Enums.WeightType
   weightCustomFactualFraction: runtime.Decimal
   insuranceThreshold: runtime.Decimal
@@ -362,6 +373,7 @@ export type PricingConfigWhereInput = {
   country?: Prisma.EnumCountryFilter<"PricingConfig"> | $Enums.Country
   direction?: Prisma.EnumDirectionFilter<"PricingConfig"> | $Enums.Direction
   pricePerKg?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.DecimalNullableFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeFilter<"PricingConfig"> | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -388,6 +400,7 @@ export type PricingConfigOrderByWithRelationInput = {
   country?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   pricePerKg?: Prisma.SortOrder
+  lvivPricePerKg?: Prisma.SortOrderInput | Prisma.SortOrder
   weightType?: Prisma.SortOrder
   weightCustomFactualFraction?: Prisma.SortOrder
   insuranceThreshold?: Prisma.SortOrder
@@ -417,6 +430,7 @@ export type PricingConfigWhereUniqueInput = Prisma.AtLeast<{
   country?: Prisma.EnumCountryFilter<"PricingConfig"> | $Enums.Country
   direction?: Prisma.EnumDirectionFilter<"PricingConfig"> | $Enums.Direction
   pricePerKg?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.DecimalNullableFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeFilter<"PricingConfig"> | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -443,6 +457,7 @@ export type PricingConfigOrderByWithAggregationInput = {
   country?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   pricePerKg?: Prisma.SortOrder
+  lvivPricePerKg?: Prisma.SortOrderInput | Prisma.SortOrder
   weightType?: Prisma.SortOrder
   weightCustomFactualFraction?: Prisma.SortOrder
   insuranceThreshold?: Prisma.SortOrder
@@ -476,6 +491,7 @@ export type PricingConfigScalarWhereWithAggregatesInput = {
   country?: Prisma.EnumCountryWithAggregatesFilter<"PricingConfig"> | $Enums.Country
   direction?: Prisma.EnumDirectionWithAggregatesFilter<"PricingConfig"> | $Enums.Direction
   pricePerKg?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.DecimalNullableWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeWithAggregatesFilter<"PricingConfig"> | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -501,6 +517,7 @@ export type PricingConfigCreateInput = {
   country: $Enums.Country
   direction: $Enums.Direction
   pricePerKg: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: $Enums.WeightType
   weightCustomFactualFraction?: runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -526,6 +543,7 @@ export type PricingConfigUncheckedCreateInput = {
   country: $Enums.Country
   direction: $Enums.Direction
   pricePerKg: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: $Enums.WeightType
   weightCustomFactualFraction?: runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -551,6 +569,7 @@ export type PricingConfigUpdateInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   pricePerKg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeFieldUpdateOperationsInput | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -576,6 +595,7 @@ export type PricingConfigUncheckedUpdateInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   pricePerKg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeFieldUpdateOperationsInput | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -601,6 +621,7 @@ export type PricingConfigCreateManyInput = {
   country: $Enums.Country
   direction: $Enums.Direction
   pricePerKg: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: $Enums.WeightType
   weightCustomFactualFraction?: runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -626,6 +647,7 @@ export type PricingConfigUpdateManyMutationInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   pricePerKg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeFieldUpdateOperationsInput | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -650,6 +672,7 @@ export type PricingConfigUncheckedUpdateManyInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   pricePerKg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeFieldUpdateOperationsInput | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -685,6 +708,7 @@ export type PricingConfigCountOrderByAggregateInput = {
   country?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   pricePerKg?: Prisma.SortOrder
+  lvivPricePerKg?: Prisma.SortOrder
   weightType?: Prisma.SortOrder
   weightCustomFactualFraction?: Prisma.SortOrder
   insuranceThreshold?: Prisma.SortOrder
@@ -707,6 +731,7 @@ export type PricingConfigCountOrderByAggregateInput = {
 
 export type PricingConfigAvgOrderByAggregateInput = {
   pricePerKg?: Prisma.SortOrder
+  lvivPricePerKg?: Prisma.SortOrder
   weightCustomFactualFraction?: Prisma.SortOrder
   insuranceThreshold?: Prisma.SortOrder
   insuranceRate?: Prisma.SortOrder
@@ -723,6 +748,7 @@ export type PricingConfigMaxOrderByAggregateInput = {
   country?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   pricePerKg?: Prisma.SortOrder
+  lvivPricePerKg?: Prisma.SortOrder
   weightType?: Prisma.SortOrder
   weightCustomFactualFraction?: Prisma.SortOrder
   insuranceThreshold?: Prisma.SortOrder
@@ -746,6 +772,7 @@ export type PricingConfigMinOrderByAggregateInput = {
   country?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   pricePerKg?: Prisma.SortOrder
+  lvivPricePerKg?: Prisma.SortOrder
   weightType?: Prisma.SortOrder
   weightCustomFactualFraction?: Prisma.SortOrder
   insuranceThreshold?: Prisma.SortOrder
@@ -766,6 +793,7 @@ export type PricingConfigMinOrderByAggregateInput = {
 
 export type PricingConfigSumOrderByAggregateInput = {
   pricePerKg?: Prisma.SortOrder
+  lvivPricePerKg?: Prisma.SortOrder
   weightCustomFactualFraction?: Prisma.SortOrder
   insuranceThreshold?: Prisma.SortOrder
   insuranceRate?: Prisma.SortOrder
@@ -845,6 +873,7 @@ export type PricingConfigCreateWithoutUpdatedByInput = {
   country: $Enums.Country
   direction: $Enums.Direction
   pricePerKg: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: $Enums.WeightType
   weightCustomFactualFraction?: runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -869,6 +898,7 @@ export type PricingConfigUncheckedCreateWithoutUpdatedByInput = {
   country: $Enums.Country
   direction: $Enums.Direction
   pricePerKg: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: $Enums.WeightType
   weightCustomFactualFraction?: runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -922,6 +952,7 @@ export type PricingConfigScalarWhereInput = {
   country?: Prisma.EnumCountryFilter<"PricingConfig"> | $Enums.Country
   direction?: Prisma.EnumDirectionFilter<"PricingConfig"> | $Enums.Direction
   pricePerKg?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.DecimalNullableFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeFilter<"PricingConfig"> | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -947,6 +978,7 @@ export type PricingConfigCreateManyUpdatedByInput = {
   country: $Enums.Country
   direction: $Enums.Direction
   pricePerKg: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: $Enums.WeightType
   weightCustomFactualFraction?: runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -971,6 +1003,7 @@ export type PricingConfigUpdateWithoutUpdatedByInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   pricePerKg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeFieldUpdateOperationsInput | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -995,6 +1028,7 @@ export type PricingConfigUncheckedUpdateWithoutUpdatedByInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   pricePerKg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeFieldUpdateOperationsInput | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1019,6 +1053,7 @@ export type PricingConfigUncheckedUpdateManyWithoutUpdatedByInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   pricePerKg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lvivPricePerKg?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   weightType?: Prisma.EnumWeightTypeFieldUpdateOperationsInput | $Enums.WeightType
   weightCustomFactualFraction?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   insuranceThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1045,6 +1080,7 @@ export type PricingConfigSelect<ExtArgs extends runtime.Types.Extensions.Interna
   country?: boolean
   direction?: boolean
   pricePerKg?: boolean
+  lvivPricePerKg?: boolean
   weightType?: boolean
   weightCustomFactualFraction?: boolean
   insuranceThreshold?: boolean
@@ -1071,6 +1107,7 @@ export type PricingConfigSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   country?: boolean
   direction?: boolean
   pricePerKg?: boolean
+  lvivPricePerKg?: boolean
   weightType?: boolean
   weightCustomFactualFraction?: boolean
   insuranceThreshold?: boolean
@@ -1097,6 +1134,7 @@ export type PricingConfigSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   country?: boolean
   direction?: boolean
   pricePerKg?: boolean
+  lvivPricePerKg?: boolean
   weightType?: boolean
   weightCustomFactualFraction?: boolean
   insuranceThreshold?: boolean
@@ -1123,6 +1161,7 @@ export type PricingConfigSelectScalar = {
   country?: boolean
   direction?: boolean
   pricePerKg?: boolean
+  lvivPricePerKg?: boolean
   weightType?: boolean
   weightCustomFactualFraction?: boolean
   insuranceThreshold?: boolean
@@ -1143,7 +1182,7 @@ export type PricingConfigSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PricingConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "direction" | "pricePerKg" | "weightType" | "weightCustomFactualFraction" | "insuranceThreshold" | "insuranceRate" | "insuranceEnabled" | "packagingEnabled" | "packagingPrices" | "packagingPer10kg" | "parcelMoneyPercent" | "pickupPointPrice" | "addressDeliveryPrice" | "minMultiPerAddress" | "minBothDirections" | "collectionDays" | "isActive" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["pricingConfig"]>
+export type PricingConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "direction" | "pricePerKg" | "lvivPricePerKg" | "weightType" | "weightCustomFactualFraction" | "insuranceThreshold" | "insuranceRate" | "insuranceEnabled" | "packagingEnabled" | "packagingPrices" | "packagingPer10kg" | "parcelMoneyPercent" | "pickupPointPrice" | "addressDeliveryPrice" | "minMultiPerAddress" | "minBothDirections" | "collectionDays" | "isActive" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["pricingConfig"]>
 export type PricingConfigInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   updatedBy?: boolean | Prisma.PricingConfig$updatedByArgs<ExtArgs>
 }
@@ -1164,6 +1203,11 @@ export type $PricingConfigPayload<ExtArgs extends runtime.Types.Extensions.Inter
     country: $Enums.Country
     direction: $Enums.Direction
     pricePerKg: runtime.Decimal
+    /**
+     * Per ТЗ §49/§50 — знижена ціна за кг коли населений пункт Отримувача
+     * = Львів. NULL = винятку немає, діє звичайний pricePerKg.
+     */
+    lvivPricePerKg: runtime.Decimal | null
     weightType: $Enums.WeightType
     /**
      * Per ТЗ §8 — частка фактичної ваги при `weightType=custom`. 0..1.
@@ -1646,6 +1690,7 @@ export interface PricingConfigFieldRefs {
   readonly country: Prisma.FieldRef<"PricingConfig", 'Country'>
   readonly direction: Prisma.FieldRef<"PricingConfig", 'Direction'>
   readonly pricePerKg: Prisma.FieldRef<"PricingConfig", 'Decimal'>
+  readonly lvivPricePerKg: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly weightType: Prisma.FieldRef<"PricingConfig", 'WeightType'>
   readonly weightCustomFactualFraction: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly insuranceThreshold: Prisma.FieldRef<"PricingConfig", 'Decimal'>
