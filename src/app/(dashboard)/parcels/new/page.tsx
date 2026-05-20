@@ -627,7 +627,7 @@ export default function NewParcelPage() {
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-3">
             <div>
-              <Label>Вид відправлення <FieldHint text="Виберіть тип: Посилки та вантажі, Документи, або Шини та диски. За замовчуванням — Посилки та вантажі." /></Label>
+              <Label>Вид відправлення <FieldHint text="Виберіть тип: Посилки та вантажі, Документи або Шини та диски." /></Label>
               <Select value={shipmentType} onValueChange={(v) => handleShipmentTypeChange(v ?? 'parcels_cargo')}>
                 <SelectTrigger><SelectValue>{SHIPMENT_LABELS[shipmentType]}</SelectValue></SelectTrigger>
                 <SelectContent>
@@ -639,7 +639,7 @@ export default function NewParcelPage() {
             </div>
             {shipmentType === 'parcels_cargo' && (
               <div>
-                <Label>Опис відправлення <FieldHint text="Опишіть що саме відправляється: побутові речі, продукти харчування, будівельні матеріали тощо. Почніть вводити — з'являться раніше використані описи." /></Label>
+                <Label>Опис відправлення <FieldHint text="Опишіть що саме відправляється: побутові речі, продукти харчування, будівельні матеріали тощо." /></Label>
                 <DescriptionAutocomplete
                   value={description}
                   onChange={setDescription}
@@ -650,7 +650,7 @@ export default function NewParcelPage() {
             <div>
               <Label>
                 Оголошена вартість ({declaredCurrencyLabel}){' '}
-                <FieldHint text="Загальна вартість відправлення, оголошена Відправником. Валюта залежить від країни Відправника: Україна → грн, ЄС → EUR. Використовується для розрахунку страхування." />
+                <FieldHint text="Загальна вартість відправлення, оголошена Відправником." />
               </Label>
               <Input
                 type="number"
@@ -672,7 +672,7 @@ export default function NewParcelPage() {
                 />
                 <Label htmlFor="insurance-cb" className="text-sm font-medium cursor-pointer">
                   Страхування{' '}
-                  <FieldHint text="При активації до вартості посилки додається % від оголошеної вартості. Розмір % береться з налаштувань тарифу для напрямку (Адміністрування → Тарифи)." />
+                  <FieldHint text="При активації до вартості посилки додається % від Оголошеної вартості." />
                 </Label>
               </div>
               <div className="mt-1 text-xs text-gray-500">
@@ -694,7 +694,7 @@ export default function NewParcelPage() {
                 />
                 <Label htmlFor="packaging-cb" className="text-sm font-medium cursor-pointer">
                   Пакування{' '}
-                  <FieldHint text="При активації до вартості посилки додається фікс. сума за кожні (повні і неповні) 10 кг. Сума за 10 кг береться з налаштувань тарифу для напрямку." />
+                  <FieldHint text="Відмітьте, якщо пакунок не є у коробці, не є паралелепіпедом." />
                 </Label>
               </div>
             </div>
@@ -712,13 +712,12 @@ export default function NewParcelPage() {
                   }}
                 />
                 <Label htmlFor="parcel-money-cb" className="text-sm font-medium cursor-pointer">
-                  Пакет (передача готівки){' '}
-                  <FieldHint text="Сума готівки, яку Відправник передає Отримувачу. До вартості посилки додається % від цієї суми (% задається в Адміністрування → Тарифи). У квитанції сума відображається окремим рядком у круглих дужках." />
+                  Пакет
                 </Label>
               </div>
               {parcelMoneyEnabled && (
                 <div>
-                  <Label className="text-xs">Сума передачі (EUR)</Label>
+                  {/* ТЗ §E10: слова «Сума передачі (EUR)» прибрано. */}
                   <Input
                     type="number"
                     inputMode="decimal"
@@ -726,7 +725,7 @@ export default function NewParcelPage() {
                     min="0"
                     value={parcelMoneyAmount}
                     onChange={(e) => setParcelMoneyAmount(e.target.value)}
-                    placeholder="1000"
+                    placeholder="Сума у віконці «Пакет»"
                   />
                 </div>
               )}

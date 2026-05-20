@@ -142,8 +142,10 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
     );
   })();
 
-  // ТЗ: для клієнта external_shipping поки що неактивний.
-  const externalShippingAvailableForClient = !clientFacing;
+  // ТЗ §E13: «Відправка поштою» доступна клієнту, якщо відправлення з України
+  // (клієнт надсилає посилку нам Новою поштою на склад у Львові — ФОП). Для
+  // відправлень з ЄС клієнт користується пунктом збору / викликом кур'єра.
+  const externalShippingAvailableForClient = !clientFacing || senderCountry === 'UA';
 
   const pointsForCountry = senderCountry
     ? points.filter(p => p.country === senderCountry)
@@ -366,8 +368,54 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
         </div>
       )}
 
-      {/* External shipping hint — лише для staff (для клієнта поле disabled). */}
-      {value.method === 'external_shipping' && !clientFacing && (
+      {/* External shipping. ТЗ §E13: якщо країна відправлення — Україна,
+          показуємо реквізити нашого складу (ФОП Добровольський + НП Львів).
+          Для інших країн — узагальнена підказка (лише staff). */}
+      {value.method === 'external_shipping' && senderCountry === 'UA' && (
+        <div className="border-t pt-3">
+          <div className="text-xs text-gray-700 bg-amber-50 border border-amber-200 rounded p-3 space-y-2 leading-snug">
+            <div className="font-medium text-amber-900">
+              Відправте Вашу посилку нам Новою поштою
+            </div>
+            <div className="space-y-0.5">
+              <div className="font-medium">Наша адреса:</div>
+              <div>Львів</div>
+              <div>Нова пошта, відділення №1</div>
+              <div className="text-red-700 font-medium">
+                ⚠️ ФОП Добровольський Андрій Ярославович
+              </div>
+              <div className="text-gray-500">
+                (відправляти лише на фізичну особу-підприємця — ФОП)
+              </div>
+              <div>
+                тел. <span className="font-medium">+380673320502</span>
+              </div>
+              <div className="text-red-700">
+                ⚠️ Лише на цей номер телефону (інакше посилку не видадуть на пошті)
+              </div>
+              <div>При потребі — ЄДРПОУ 2236117857</div>
+            </div>
+            <div className="space-y-0.5">
+              <div className="font-medium text-amber-900">ОБОВ&apos;ЯЗКОВО</div>
+              <div>
+                До посилки необхідно додати супровідний листок, у якому
+                продублювати усі дані кінцевого Отримувача, заповнені Вами
+                у формі на сайті:
+              </div>
+              <ul className="list-disc pl-4">
+                <li>країна отримання</li>
+                <li>місто отримання</li>
+                <li>прізвище та ім&apos;я українською мовою (виняток — іноземні прізвища)</li>
+                <li>актуальний номер телефону в Європі — ОБОВ&apos;ЯЗКОВО з кодом країни</li>
+              </ul>
+              <div className="text-gray-500">
+                Це може бути й український номер (але краще давати місцевий, якщо є).
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {value.method === 'external_shipping' && senderCountry !== 'UA' && !clientFacing && (
         <div className="border-t pt-3">
           <div className="text-xs text-gray-500 bg-gray-50 rounded p-2">
             Після створення замовлення ми надішлемо вам адресу нашого складу в{' '}

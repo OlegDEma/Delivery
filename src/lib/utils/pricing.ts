@@ -222,13 +222,15 @@ export function calculateParcelCost(
 
   // 4. Пакування — opt-in. € per (full or partial) 10 kg block.
   // Legacy fallback: tier table.
+  // ТЗ §E4/§E14: «Увага — до обрахунку брати Розрахункову вагу» — пакування
+  // рахується від billableWeight (розрахункової), НЕ від фактичної.
   let packagingCost = 0;
   if (parcel.needsPackaging && config.packagingEnabled) {
     if (config.packagingPer10kg > 0) {
-      const blocks = Math.max(1, Math.ceil(parcel.actualWeight / 10));
+      const blocks = Math.max(1, Math.ceil(billableWeight / 10));
       packagingCost = roundMoney(blocks * config.packagingPer10kg);
     } else if (config.packagingPrices) {
-      packagingCost = roundMoney(getLegacyPackagingPrice(config.packagingPrices, parcel.actualWeight));
+      packagingCost = roundMoney(getLegacyPackagingPrice(config.packagingPrices, billableWeight));
     }
   }
 

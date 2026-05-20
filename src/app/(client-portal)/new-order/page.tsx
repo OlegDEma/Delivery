@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { CollectionBlock } from '@/components/parcels/collection-block';
 import { AddressInput } from '@/components/parcels/address-input';
 import { PhoneInput } from '@/components/shared/phone-input';
+import { FieldHint } from '@/components/shared/field-hint';
 
 interface PlaceData {
   weight: string;
@@ -300,8 +301,10 @@ export default function NewOrderPage() {
           </CardContent>
         </Card>
 
-        {/* Collection method */}
-        {direction === 'eu_to_ua' && (
+        {/* Collection method — ТЗ §E13: показуємо клієнту для обох напрямків.
+            Для «З України в Європу» сюди потрапляє опція «Відправка поштою»
+            з реквізитами ФОП (відправлення Новою поштою на склад у Львові). */}
+        {!!direction && (
           <Card>
             <CardHeader className="py-3 px-4">
               <CardTitle className="text-base">Як ви передасте нам посилку?</CardTitle>
@@ -403,7 +406,7 @@ export default function NewOrderPage() {
           <CardHeader className="py-3 px-4"><CardTitle className="text-base">Відправлення</CardTitle></CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-2">
             <div>
-              <Label>Тип</Label>
+              <Label>Вид відправлення <FieldHint text="Виберіть тип відправлення з випадаючого списку: Посилки та вантажі, Документи або Шини та диски" /></Label>
               <Select value={shipmentType} onValueChange={(v) => setShipmentType(v ?? 'parcels_cargo')}>
                 <SelectTrigger><SelectValue>{SHIPMENT_TYPE_LABELS[shipmentType]}</SelectValue></SelectTrigger>
                 <SelectContent>
@@ -414,20 +417,20 @@ export default function NewOrderPage() {
               </Select>
             </div>
             {shipmentType === 'parcels_cargo' && (
-              <div><Label>Опис</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Побутові речі, продукти..." rows={2} /></div>
+              <div><Label>Опис відправлення <FieldHint text="Опишіть що саме відправляється: побутові речі, продукти харчування, будівельні матеріали тощо" /></Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Побутові речі, продукти..." rows={2} /></div>
             )}
-            <div><Label>Оголошена вартість (EUR)</Label><Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} /></div>
+            <div><Label>Оголошена вартість (EUR) <FieldHint text="Оцініть вартість своєї посилки" /></Label><Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} /></div>
 
             {/* Додаткові послуги — кожна вмикається чекбоксом, % і суми
-                визначаються тарифом для напрямку. */}
+                визначаються тарифом для напрямку. Тексти підказок — per ТЗ §E10. */}
             <div className="space-y-2 pt-2 border-t">
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox checked={insurance} onCheckedChange={(c) => setInsurance(c === true)} />
-                Страхування (% від оголошеної вартості — згідно тарифу)
+                Страхування <FieldHint text="У разі загибелі посилки відшкодовується лише сума страхування. Відмітьте чекбокс, якщо бажаєте застрахувати посилку згідно оголошеної вартості" />
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
-                Пакування (€ за кожні 10 кг — згідно тарифу)
+                Пакування <FieldHint text="Відмітьте, якщо пакунок не є у коробці" />
               </label>
               {/* Per ТЗ §E10: «Поле "Пакет" при заповненні Клієнтом
                   відсутнє». Опція з'являється лише коли посилку оформлює
