@@ -1,276 +1,192 @@
-# ТЗ Audit (state as of 2026-05-09)
+# ТЗ Audit — detailed, code-verified
 
-The client's spec lives at `C:\Users\olegd\Downloads\Загальна схема програми (1).xlsx`. Rows are numbered (E3, E4, ...). Green text = done; black = not done; column F sometimes has «Не зроблено» / «Чекаємо на Тарифи».
+Source: `C:\Users\olegd\Downloads\Загальна схема програми (2).xlsx`. Rows numbered E3…E61.
 
-Re-verify in the actual xlsx before trusting this audit — it's static. The client edits the file as work progresses.
+**v1 vs v2:** `(1).xlsx` and `(2).xlsx` are CONTENT-IDENTICAL. The client did not re-mark anything. The only green cell in both is `D3` («Загальна сторінка» — a section header, not a feature). Columns F7/F9 carry explicit `Не зроблено`, F12 `Чекаємо на Тарифи`.
 
-Notation:
-- ✅ Done in code AND verified by user (rare — most «done» items are unverified)
-- 🟢 Done in code, not verified in UI
-- 🟡 Partially done — listed sub-items missing
-- ❌ Not done
-- 📝 Code is there, but tariff data / settings need manual setup in `/admin/*`
+**What that means:** From the **client's** point of view, NOTHING below is validated as done. The `🟢` marks in this file are MY (Claude's) code-level reading — they mean «the code path exists», NOT «the client accepted it». When reporting to the user, never say «done» based on a `🟢`. Say «реалізовано в коді, не підтверджено клієнтом».
 
-## ROW-BY-ROW
+Legend:
+- 🟢 implemented in code, builds, NOT user-verified
+- 🟡 partially implemented — sub-items listed
+- ❌ not implemented
+- 📝 code exists, but needs data/settings configured in `/admin/*`
 
-### §E3 — Список посилок (general page)
+This audit was code-verified on 2026-05-19 (grep + file reads). Earlier versions of this file had false ❌/✅ — trust this one, but re-verify before claiming.
 
-❌ «Розгорнутий загальний список посилок забрати. Відображати лише ті, які ще не прив'язані до конкретного кур'єра.»
-- Status: 🟡 default filter is `COURIER_UNASSIGNED` (correct), but «розгорнутий» list still shows when user picks «Всі посилки». The «забрати» wording is ambiguous — clarify with user whether the «Всі посилки» option should be deleted entirely.
+---
 
-🟢 Filter by courier-who-accepted (`acceptedById` ↔ `parcel.collectedById`) — done in commit `330992f`.
+## §E3 — Список посилок (загальна сторінка)
 
-❌ «У фільтрі вибору по даті в мобільній версії має бути кнопка "Очистити"».
-- Status: mobile «Clear date filter» button not implemented. Desktop has it.
+| Item | State | Evidence |
+|---|---|---|
+| Фільтр по кур'єру який приймав | 🟢 | `parcels/page.tsx` — `acceptedById` ⇄ `parcel.collectedById`; default `COURIER_UNASSIGNED` |
+| «Розгорнутий список забрати, лише не-прив'язані» | 🟡 | default filter is unassigned; «Всі посилки» option still selectable. Ambiguous — confirm with user if «Всі» should be deleted |
+| Кнопка «Очистити» дати в мобільній | 🟢 | `parcels/page.tsx:295` — inline clear button on date filter |
+| Підсвічення активних фільтрів | 🟢 | `activeCls` / `isDateActive` highlight logic |
 
-🟢 «Має бути візуально зрозумілим, які з фільтрів зараз включені — підсвітити синім.»
-- Done with `activeCls` highlighting on `<SelectTrigger>` — verify visually.
+## §E4 — Тіло посилки (детальна сторінка)
 
-### §E4 — Тіло посилки (parcel detail page)
+| Item | State | Evidence |
+|---|---|---|
+| «Місця → Редагувати → повна форма» | ❌ | `ParcelPlacesCard` does inline edit, not the rich `parcels/new`-style form re-open |
+| «Загальна вага» прибрати | 🟢 | removed (commit 83cf920) |
+| Голубе поле «Розрахунок вартості» — структура (факт/об'ємна/розрахункова рядки) | ❌ | `cost-calculator.tsx` shows billableWeight + delivery + services. Does NOT show factual & volumetric as separate rows |
+| Вкладка «Деталі» без змін | 🟢 | left alone |
+| Вкладка «Оплата» — лише «До оплати» + сума | ❌ | `ParcelPaymentCard` still has full breakdown + history + payment dialog |
+| «Друк етикетки» / «Повторити» / «Поділитись» | 🟢 | all three exist |
+| «Поділитись» → Gmail/WhatsApp/Viber з контактом отримувача | 🟢 | `src/components/shared/share-button.tsx` — wa.me, viber://, mailto, navigator.share |
+| Відправник/Отримувач — зменшити поля | 🟡 | density not specifically reduced; verify visually |
+| Після прийняття — лише Суперадмін редагує вагу | 🟢 | `isEditLocked` logic in detail page |
+| «Спосіб прийому» прибрати з detail | 🟢 | removed (commit 83cf920) |
+| «Рейс Європа → Україна» → лише дата | ❌ | trip block still shows direction label |
+| «Нова Пошта» окремий блок прибрати, ТТН вверху | 🟢 | ITN+TTN in header (`page.tsx:284`), no separate NP card |
+| «Додати фото» → кнопка | 🟢 | `page.tsx:599` icon-button |
+| Камера на смартфоні | 🟢 | `<input capture="environment">` (`page.tsx:608`) |
+| «Додати нотатку» → кнопка | 🟢 | `page.tsx:633` button + `window.prompt` |
+| Нотатка на видному місці | 🟢 | `page.tsx:372` — latest note shown in yellow banner at top |
+| «Вікно доставки (4 год)» прибрати | 🟢 | removed earlier |
+| Доставлено → статус не змінюється | 🟡 | `STATUS_TRANSITIONS`: `delivered_ua: []`, `delivered_eu: []` (no exits). BUT super-admin can force any transition — ТЗ says «навіть програма не може». Verify super-admin path is also blocked for terminal. |
 
-🟡 «Місця → Редагувати» — must return to «previous form» (the rich create-form with all per-place rows).
-- Status: currently inline edit within `ParcelPlacesCard`. ТЗ wants full re-open of `parcels/new`-style form with prefilled values. Not done.
+## §E5 — Список: «Кому → Куди → Від → Звідки»
 
-🟢 «Слова "Загальна вага" забрати» — done in `parcel-places-card.tsx`.
+| Item | State |
+|---|---|
+| «Спочатку Кому:, потім Від:» | 🟢 done (commit 7114cfe) |
+| List card labels «Куди:» / «Звідки:» as explicit lines | 🟡 — verify `/parcels` list renders the 4 distinct labels exactly |
 
-🟡 Голубе поле «Розрахунок вартості» — структура:
-- ❌ Currently shows: «Доставка X EUR», «Страхування Y», «Пакування Z», «Всього».
-- ТЗ wants: фактична вага, об'ємна вага, розрахункова вага, потім доставка/страхування/пакування/пакет, потім Всього.
-- Status: needs restructure of `cost-calculator.tsx` to display weight rows.
+## §E6 — Нова посилка: напрямок-default
 
-🟢 «Вкладка "Деталі" — без змін» — leave alone.
+🟢 `parcels/new/page.tsx:137` — direction read from `localStorage.parcel:lastDirection`, persisted on change.
 
-❌ «Вкладка "Оплата" — залишити лише слова "До оплати" — і в кінці рядка суму. Решту забрати»
-- Status: `ParcelPaymentCard` currently has detailed cost breakdown, history, payment dialog. ТЗ wants minimal. Big change.
+## §E7 — Вкладка «Отримувач» — MAJOR REFACTOR
 
-🟢 «Друк етикетки» / «Повторити» / «Поділитись» — buttons exist.
+❌ Not started. ТЗ wants:
+- «Спосіб доставки» selector → 3 options («Адресна доставка» / «Пошта» / «Пункт видачі»)
+- Голубе підсумкове поле after fill; «Редагувати» button replacing «×»
+- «Пошук отримувача» label removed once filled
 
-❌ «Поділитись» — must default to Gmail / WhatsApp / Viber with receiver contact prefilled.
-- Status: native share API only. Custom-targeted share not built.
+🟢 Автокомпліт міста (Am → Amsterdam) — `AddressInput` works (commits bb3cad1, f63e35d).
 
-❌ «Відправник» / «Отримувач» — зменшити розмір поля.
-- Status: visual density change, not done.
+❌ **BUG, F7 explicitly «Не зроблено»**: editing ONLY the phone of an existing client → «Клієнт з таким номером вже існує». In `/api/clients/[id]/route.ts` the P2002 handler fires because the phone collides with the client's OWN row. Fix: exclude current client `id` from the uniqueness check.
 
-🟢 «Місця після прийняття — лише Суперадмін редагує вагу/розміри» — `isEditLocked` logic in detail page handles this.
+## §E8 — Вкладка «Новий клієнт» — MAJOR REFACTOR
 
-🟢 «Деталі після прийняття — лише Суперадмін» — same lock applies.
+❌ Not started. ТЗ wants:
+- «Метод доставки» → «Адреса» with 3 sub-options, «Пункт збору» new option
+- Index field before «Населений пункт»
+- Country dropdown depends on direction
+- **Phone split into country-code + number**, with flag icons. Codes: +43 AT, +31 NL, +380 UA, +49 DE. (`PhoneInput` component exists but does NOT split into two fields.)
 
-🟢 «Спосіб прийому посилки звідси забрати» — removed in commit `83cf920`.
+## §E9 — Вкладка «Відправник» — MAJOR REFACTOR
 
-❌ «Рейс Європа → Україна» — забрати, відображати лише дату фактичного рейсу.
-- Status: trip block currently shows direction. Need to hide direction, show just date + assigned courier.
+❌ Not started (F9 explicitly «Не зроблено»). Like §E7 but «Спосіб відправки» with «Виклик кур'єра» / «Пошта» / «Пункт збору».
 
-🟢 «Нова Пошта» — забрати з окремого блоку. ТТН поряд з ІТН вверху.
-- Done — ITN+TTN in header in commit `7809e03`. No separate Nova Poshta card.
+🟢 Multi-parcel question on courier_pickup — done (commit c584de5).
+🟢 «Адресна доставка» → «Адреса відправки» for sender — done (commit 3736ec2).
 
-❌ Кнопка «Додати фото» замість поля.
-- Status: still a field with upload UX. Need icon-button.
-
-❌ Camera capture on mobile («відкривати фотоапарат»).
-
-❌ Кнопка «Додати нотатку» замість поля.
-
-🟢 «Вікно доставки (4 години) забрати» — removed in earlier commit.
-
-❌ «Доставлено → блокувати зміну статусу».
-- Status: `STATUS_TRANSITIONS` map allows `delivered_ua` / `delivered_eu` to terminate, but the UI on detail page may still show the status dropdown. Verify.
-
-❌ «Нотатка має відображатись на видному місці зразу при вході в посилку».
-- Status: notes hidden behind «Note» field/button. Need prominent banner.
-
-### §E5 — Список посилок: відображення «Кому → Куди → Від → Звідки»
-
-🟢 «Спочатку Кому:, потім Від:» — done in commit `7114cfe`.
-
-🟡 List card structure:
-- ТЗ: Кому (отримувач) / Куди (адреса) / Від (відправник) / Звідки (адреса).
-- Current code shows: receiver name + phone, receiver address, sender name + phone, sender address. The labels say «Кому:» and «Від кого:» but ТЗ wants «Куди:» / «Звідки:» as separate explicit labels.
-- Status: verify in `/parcels` list rendering.
-
-### §E6 — Нова посилка (staff)
-
-❌ «Напрямок встановлений Працівником при вході залишається по замовчуванню.»
-- Status: form has `setDirection` from `localStorage.parcel:lastDirection`. Done but verify. Direction picker may default to empty for client portal per ТЗ §14.
-
-### §E7 — Вкладка «Отримувач» (uniform across staff + client)
-
-❌ MAJOR REFACTOR — not started:
-- «Спосіб доставки» selector with 3 options: «Адресна доставка», «Пошта», «Пункт видачі».
-- Голубе підсумкове поле after fill, «Редагувати» button replacing «×».
-- Currently: separate sender/receiver search + inline AddressEditor with edit modal.
-
-🟢 Автокомпліт міста (Am → Amsterdam) — done via `AddressInput` (commits `bb3cad1`, `f63e35d`).
-
-❌ BUG: «При спробі редагувати лише телефон створеного Отримувача видає "Клієнт з таким номером вже існує"».
-- Repro path: open existing client → edit only phone → save → 409 collision with self. Status: not fixed. Likely needs change in `/api/clients/[id]` PATCH to allow same-phone if it's the same client ID.
-
-❌ «Пункт видачі» list filtered by receiver country+city from `CollectionPoint` table.
-
-### §E8 — Новий клієнт (uniform staff + client)
-
-❌ MAJOR REFACTOR not started. New structure:
-- «Адреса» dropdown (replaces «Метод доставки»):
-  - «Адресна доставка» (был «Адреса»)
-  - «Відділення»
-  - «Пункт збору» (нове, з вільним текстом)
-- Індекс перед «Населений пункт».
-- Country dropdown depends on direction (для eu_to_ua receiver: тільки UA).
-- Phone split into country-code + number, with flag icons.
-- Phone codes hardcoded: +43 AT, +31 NL, +380 UA, +49 DE.
-- Info hints near each phone part.
-
-### §E9 — Вкладка «Відправник»
-
-❌ MAJOR REFACTOR like §E7:
-- «Спосіб відправки» selector with 3 options: «Виклик кур'єра», «Пошта», «Пункт збору».
-- 🟢 «Виклик кур'єра» multi-parcel question — done in commit `c584de5`.
-- Option visibility filtered by what's configured in `/logistics`.
-
-🟢 «Адресна доставка» → «Адреса відправки» (тільки для відправника) — done in commit `3736ec2`.
-
-### §E10 — Вкладка «Відправлення»
+## §E10 — Вкладка «Відправлення»
 
 🟢 Insurance/Packaging/Parcel-money checkboxes — done.
-
 🟢 «Безумовне +3% скасувати» — done.
+🟢 «(1000)» receipt line — done.
+🟢 BUG «оголошена вартість в Євро при грн» — fixed (commits d5ba582, ce1eabd).
+❌ FieldHint texts not customized per role (staff vs client different wording).
+❌ **«Поле Пакет при заповненні Клієнтом відсутнє»** — `new-order/page.tsx:445` still shows «Пакет (передача готівки отримувачу)» for the client. Must hide for client role.
+🟡 Опис відправлення autocomplete — `DescriptionAutocomplete` exists; verify it's wired in both forms.
 
-🟢 «(1000)» in receipt — done.
+## §E11 — Вкладка «Параметри відправлення»
 
-❌ FieldHint texts (info-«і» icons) — ТЗ wants specific text for staff vs client. Not customized per role.
+🟢 «Поле "Потребує пакування" забрати» — per-place checkbox removed (commit 83cf920).
+❌ **BUG «Невірно рахується Розрахункова вага! Бере більшу!»** — `prisma/schema.prisma:510` `weightType @default(actual)`. `actual` returns `max(a,v)`. ТЗ wants fraction-combination. `custom` type + `weightCustomFactualFraction` field exist but are not the default and existing tariffs use `actual`. **Unfixed.**
+❌ Окрема вкладка в Тарифах для правила ваги — currently one dropdown in the main pricing card.
 
-❌ «Поле Пакет при заповненні Клієнтом відсутнє» — currently visible for client. Hide.
+## §E12 — Вкладка «Оплата»
 
-🟢 BUG: «Оголошена вартість в Євро незважаючи на грн» — fixed in commits `d5ba582` + `ce1eabd` (added `uahPerEur` conversion + direction-based fallback for currency).
+🟢 «Відправити рахунок» + SMS pipeline — done (commit 4f81b13).
+🟢 Send-invoice buttons next to pencil — done.
+🟢 «Безготівка відв'язати від Оплата в Україні» — done (commits 4f81b13, 83cf920).
+🟢 «Потребує пакування» прибрати — done.
+📝 «Сума згідно Тарифів» — calculator does it; needs `/admin/pricing` filled.
 
-❌ Autocomplete на «Опис відправлення» — DescriptionAutocomplete exists, verify it actually triggers in the form. May need wiring.
+## §E13 — Вкладка «Спосіб прийому/видачі»
 
-### §E11 — Вкладка «Параметри відправлення»
+❌ **«1. Для Працівника — ця вкладка не відображається»** — `parcels/new/page.tsx:913` still renders the «Спосіб прийому/видачі посилки» card for staff. Must hide entirely for staff (the method choice should move into the §E9 «Спосіб відправки» selector — depends on E9 refactor).
+🟢 Client-side hint texts — done (commit bb3cad1).
+🟢 Виклик кур'єра UA-Lviv-only — `ServiceCity` table (commit 4341e4c).
+❌ «Відправка поштою» (UA) — ФОП Добровольський block: phone +380673320502, ЄДРПОУ 2236117857, full supporting-letter instructions. Static text not implemented.
 
-🟢 «Поле "Потребує пакування" забрати» — removed per-place checkbox in commit `83cf920`.
+## §E14 — Вкладка «Розрахунок вартості»
 
-❌ BUG: «Невірно рахується Розрахункова вага! Бере більшу замість рахувати згідно правил!»
-- Status: critical. Default `weightType='actual'` returns `max(a, v)` when `v > a`. ТЗ wants combination of fractions. Fix: migrate existing tariffs to `weightType='custom'` with `weightCustomFactualFraction=0.5`, or change `actual` semantics. Hasn't been done — risky data change.
+❌ Not a separate tab — `CostCalculator` is embedded near bottom of `parcels/new`. ТЗ wants dedicated section with full breakdown rows (факт/об'ємна/розрахункова/доставка/страх/пакування/пакет/Всього).
+🟡 Client direction picker — verify no auto-default for client (ТЗ: «Виберіть напрямок» with no last-used).
 
-❌ «Окрема вкладка в Тарифах для правила обрахунку Розрахункової ваги.»
-- Currently weight type is one dropdown + one field in the main pricing card. ТЗ wants a dedicated subsection. Cosmetic.
+## §E46 — Кур'єр (роль)
 
-### §E12 — Вкладка «Оплата»
+🟢 `/my-parcels` 3 buckets — done.
 
-🟢 «Відправити рахунок» чекбокс + SMS pipeline — done (`invoice-sms.ts`, commit `4f81b13`).
-
-🟢 «При входженні в уже створену посилку — кнопки Send Invoice праворуч від олівця» — done via `<SendInvoiceButton>` (commit `4f81b13`).
-
-🟢 «Безготівка відв'язати від Оплата в Україні» — done in commit `83cf920` (`/parcels/new` had this since `4f81b13`; `ParcelDetailsCard` fixed in `83cf920`).
-
-🟢 «Поле "Потребує пакування" забрати» — done.
-
-📝 «Сума оплати обраховується згідно правил Тарифів» — calculator does this; depends on tariff config being filled out in `/admin/pricing`.
-
-### §E13 — Вкладка «Спосіб прийому/видачі посилки»
-
-❌ «1. Для Працівника — ця вкладка НЕ відображається.»
-- Currently: `parcels/new` shows it. ТЗ wants it removed for staff entirely. The collection method would have to move into `Sender` block (§E9). Big refactor.
-
-🟢 «2. Для Клієнта — переписати тексти підказок» — done in commit `bb3cad1` (`COLLECTION_METHOD_HINTS_CLIENT`).
-
-🟢 «Виклик кур'єра» доступний у UA лише для Львова — done via `ServiceCity` table (commit `4341e4c`).
-
-❌ «При виборі Відправка поштою (UA) — показати реквізити ФОП Добровольський…»
-- Static text with phone +380673320502, ЄДРПОУ 2236117857, full instructions. Not implemented as a UI block. Move to `COLLECTION_METHOD_HINTS_CLIENT` or a dedicated component.
-
-### §E14 — Вкладка «Розрахунок вартості»
-
-❌ «Окрема вкладка перед кнопкою Створити замовлення».
-- Currently `CostCalculator` is embedded near the bottom of `parcels/new`. ТЗ wants it as a dedicated «section» with full breakdown (фактична / об'ємна / розрахункова / доставка / страхування / пакування / пакет / Всього). Mostly cosmetic.
-
-❌ «Поле "Напрямок" → "Виберіть напрямок". Без можливості залишити останній.»
-- For Client only. The Client form was given a no-default direction. Verify it doesn't auto-fill.
-
-### §E46 — Кур'єр (роль)
-
-🟢 Сторінка `/my-parcels` з 3 buckets — done.
-
-### §E47 — Клієнт (роль)
+## §E47 — Клієнт (роль)
 
 🟢 «Бачить лише свої посилки» — done.
+🟢 ITN assigned — done.
+🟢 ITN + ТТН поряд — done (commit 7809e03).
 
-🟢 «ITN присвоюється» — done.
+## §E48 — Тарифи: правила ваги
 
-🟢 «ITN + ТТН поряд» — done in commits `7809e03` + invoice display.
+🟢 Формула об'ємної ваги — `VOLUMETRIC_DIVISOR=4000`.
+🟡 «Комбінація часток» — `custom` type exists but not default. See §E11.
 
-### §E48 — Тарифи: правила ваги
+## §E49 — Тарифи Нідерланди
 
-🟢 Формула об'ємної ваги — `VOLUMETRIC_DIVISOR=4000` константа.
+🟡 «2 €/кг» — seed-default. Prod DB rows may still have 5 €/кг — admin fixes manually.
+❌ **«Виняток: Отримувач у Львові → 1.5 €/кг»** — not implemented. Calculator ignores receiver city.
+🟢 Мінімалки 30/15/15/15 — fields exist (`addressDeliveryPrice`/`pickupPointPrice`/`minMultiPerAddress`/`minBothDirections`).
 
-🟡 «Розрахункова — комбінація часток» — `weightType='custom'` + `weightCustomFactualFraction` field exist, but default is `actual` (max). Existing tariffs need migration.
+## §E50 — Тарифи Австрія
 
-### §E49 — Тарифи Нідерланди
-
-🟡 «2 €/кг» — seed-default. Existing DB rows have 5 €/кг — admin needs to fix manually.
-
-❌ «Виняток: якщо Отримувач у Львові — 1.5 €/кг»
-- Status: not implemented. Needs calculator to know receiver city.
-
-🟢 Мінімалки 30/15/15/15 — fields exist (`addressDeliveryPrice` / `pickupPointPrice` / `minMultiPerAddress` / `minBothDirections`). Seed-default set. Existing tariffs need manual fix.
-
-### §E50 — Тарифи Австрія
-
-🟡 «1.5 €/кг» — seed-default 1.5; existing DB may have 5.
-
-❌ «Виняток: 1.0 €/кг для Львова» — not implemented.
-
+🟡 «1.5 €/кг» — seed-default.
+❌ «Виняток: Львів → 1.0 €/кг» — not implemented.
 🟢 Мінімалки 15/10/10/10 — fields exist.
 
-### §E52/§E53 — Поля по напрямках / Алгоритми
+## §E52/§E53 — Поля по напрямках / Алгоритми
 
-🟢 Назва пари «Нідерланди → Україна» — done in commit `3736ec2`.
+🟢 Назва пари «Нідерланди → Україна» — done (commit 3736ec2).
+🟢 «Ціна за кг» / «Адресна доставка» баг «не стерти 0» — fixed (string-state).
+🟢 Поля «Пункт збору» / «Страхування %» / «Пакування €/10кг» / «Пакет %» — added.
+❌ **«Пакет% — ДВА віконця: ≤2000 і >2000»** — currently single `parcelMoneyPercent` field.
 
-🟢 «Ціна за кг» / «Адресна доставка» — баг «не стерти 0» виправлено — string-state in `admin/pricing`.
+## §E54 — Алгоритм розрахунку вартості
 
-🟢 Поля «Пункт збору» / «Страхування %» / «Пакування €/10кг» / «Пакет %» — додані.
+🟢 All 5 steps implemented in `calculateParcelCost()`.
 
-❌ ВАЖЛИВЕ: «У полі Пакет% зробити ДВА віконця: до 2000 і понад 2000» — two-tier рейт. Зараз одне поле.
+## §E55–E61 — Статуси
 
-### §E54 — Алгоритм розрахунку вартості
+🟡 Enum values exist (`draft`, `accepted_for_transport_*`, `in_transit_*`, `delivered_*`).
+❌ **Автоматичні переходи** «Прийнято → В дорозі з моменту початку рейсу» — needs cron. Not implemented.
+❌ «Доставлено присвоюється ПІСЛЯ оплати» — currently any staff can mark delivered, no payment coupling.
+🟡 «Доставлено → не змінюється» — transition map blocks it; super-admin override path not blocked.
+❌ «Створена → змінює лише Працівник» — verify client cannot PATCH own draft status.
 
-🟢 Алгоритм у калькуляторі реалізовано:
-1. Beregne фактична + об'ємна вага → розрахункова.
-2. × pricePerKg.
-3. `max(base, applicable_minimum)` де мінімум залежить від collectionMethod / isMultiParcelPickup / isBothDirections.
-4. + страхування (% від declaredValue в EUR).
-5. + пакування (€ / 10 кг).
-6. + пакет (% від суми).
-- Всі п'ять кроків присутні в `calculateParcelCost()` (src/lib/utils/pricing.ts).
+---
 
-### §E55–§E61 — Статуси
+## Honest summary for the user
 
-🟡 Статуси існують у `ParcelStatus` enum:
-- `draft` (≈ «Створена»)
-- `accepted_for_transport_to_ua` («ПдпУ»)
-- `accepted_for_transport_to_eu` («ПдпЄ»)
-- `in_transit_to_ua` («ВдУ»)
-- `in_transit_to_eu` («ВдЄ»)
-- `delivered_ua` / `delivered_eu`
+- **Big refactors NOT done:** §E7, §E8, §E9 (uniform receiver/sender/new-client forms), §E13 staff hide, §E14 separate tab, phone code+number split.
+- **Real bugs NOT fixed:** §E7 phone-edit collision, §E11 weight default, §E10 client sees «Пакет».
+- **Tariff gaps:** §E49/§E50 Lviv exception, §E53 two-tier Пакет%.
+- **Status automation:** §E55–E61 auto-transitions, payment-coupled delivery.
+- **Done in code (unverified by client):** filters, autocomplete, ITN+TTN, SMS-invoice, currency conversion, services checkboxes, share-button, camera capture, notes.
 
-❌ Автоматичні переходи (Прийнято → В дорозі з моменту початку рейсу) — потрібен cron / тригер, не зроблено.
+The client's file shows EVERYTHING black. Treat the project as «mostly not accepted» until the client re-marks green.
 
-❌ «Створена → змінювати може ТІЛЬКИ Працівник» — RBAC need verification.
+## Priority backlog (do in this order)
 
-❌ «Доставлено → присвоюється після оплати» — currently any staff can mark delivered. Not coupled to payment.
-
-❌ «Після Доставлено — статус неможливо змінити» — need to lock `delivered_*` as terminal.
-
-## Open backlog (deduplicated, prioritized)
-
-Сort by impact / risk (high first):
-
-1. **Weight calculator default broken** (§E11) — change `weightType` default to `custom` OR change `actual` semantics. Risky data change.
-2. **«Клієнт з таким номером вже існує» при редагуванні лише телефона** (§E7) — UX-breaking bug.
-3. **Виняток для Львова в тарифі** (§E49/§E50) — calculator must check receiver.city.
-4. **«Пакет%» 2 рейти (до/після 2000)** (§E53) — schema + UI + calculator change.
-5. **Статуси автоматичні переходи** (§E55–E61) — cron job for trips that start.
-6. **Великий refactor: §E7/§E8/§E9** — uniform receiver+sender forms with «Спосіб доставки» / «Спосіб відправки» selectors.
-7. **§E10 FieldHint texts** — different hints per role.
-8. **§E14 окрема вкладка** — visual restructure.
-9. **§E4 деталі посилки** — list of smaller items (camera capture, share dropdown, prominent note, lock terminal status).
-10. **Multi-location** (architectural, see `references/locations.md`).
+1. §E7 phone-edit collision bug — small, high-impact, blocks daily use.
+2. §E11 weight default — change `actual`→`custom` migration OR semantics.
+3. §E10 hide «Пакет» for client — small.
+4. §E13 hide collection tab for staff — small-ish (or fold into E9).
+5. §E49/§E50 Lviv exception — calculator + tariff fields.
+6. §E53 two-tier Пакет% — schema + UI + calc.
+7. §E4 payment card minimization + «Розрахунок вартості» row structure.
+8. §E55–E61 status automation (cron).
+9. §E7/§E8/§E9 big form refactor (the largest single chunk).

@@ -1,6 +1,6 @@
 ---
 name: delivery-project
-description: Codebase knowledge for Delivery — pro-bono parcel-logistics SaaS that moves parcels between EU (NL/AT/DE) and Ukraine through a Lviv hub + Nova Poshta. Next.js 16 + Supabase + Prisma + Tailwind/shadcn. Use this whenever working in `D:\Delivery` — the project has its own breaking-change Next.js, a domain-specific tariff calculator with five service kinds, a TZ document (`Загальна схема програми (1).xlsx` in the client's Downloads) that drives requirements, and a series of subtle traps (currency conversion for insurance, recalc must fire on cost-affecting fields, weight calculator semantics differ from `actual=max` default, Twilio fallback stub, etc.). Triggers when user is in this repo, mentions parcels / посилки / тарифи / клієнти / кур'єр / Львів in a coding context, asks about TZ sections (§E1–E14, §E48–E61), references `ТЗ`, asks about pricing/insurance/packaging/Пакет, or says «фікси» / «продовжуй» / «доведи до ладу» while in this codebase. Skip when the user is in another project or asking generic Next.js questions unrelated to this domain.
+description: Codebase knowledge for Delivery — pro-bono parcel-logistics SaaS that moves parcels between EU (NL/AT/DE) and Ukraine through a Lviv hub + Nova Poshta. Next.js 16 + Supabase + Prisma + Tailwind/shadcn. Use this whenever working in `D:\Delivery` — the project has its own breaking-change Next.js, a domain-specific tariff calculator with five service kinds, a TZ document (`Загальна схема програми (N).xlsx` in the client's Downloads, read the highest N) that drives requirements, and a series of subtle traps (currency conversion for insurance, recalc must fire on cost-affecting fields, weight calculator semantics differ from `actual=max` default, Twilio fallback stub, etc.). Triggers when user is in this repo, mentions parcels / посилки / тарифи / клієнти / кур'єр / Львів in a coding context, asks about TZ sections (§E1–E14, §E48–E61), references `ТЗ`, asks about pricing/insurance/packaging/Пакет, or says «фікси» / «продовжуй» / «доведи до ладу» while in this codebase. Skip when the user is in another project or asking generic Next.js questions unrelated to this domain.
 ---
 
 # Delivery project — operating handbook
@@ -160,9 +160,13 @@ Documented in `references/locations.md` and `references/tz-audit.md`. The big on
 
 ## When in doubt about ТЗ
 
-The TZ lives in `C:\Users\olegd\Downloads\Загальна схема програми (1).xlsx` on the user's machine. Read it via the `xlsx` skill — green cells (`fg=FF4EA72E`) are «done», black cells (`fg=1` or `fg=FF000000`) are «to do», `Не зроблено` in column F is an explicit «not done» tag from the client.
+The TZ lives in `C:\Users\olegd\Downloads\Загальна схема програми (N).xlsx` on the user's machine — the client periodically re-exports it with a higher `(N)`. As of the last check, `(1)` and `(2)` are CONTENT-IDENTICAL. Always read the highest-numbered file; if two have the same content, the client hasn't changed requirements.
 
-The audit at `references/tz-audit.md` is dated — re-verify before claiming anything is done. The ТЗ row numbers (E3, E4, E7, ...) are stable references both sides use in conversation.
+Read it via the `xlsx` skill — green cells (`fg=FF4EA72E`) are «done/accepted by client», black cells (`fg=1` or `fg=FF000000`) are «to do», `Не зроблено` in column F is an explicit «not done» tag.
+
+**Crucial:** the client's file currently marks EVERYTHING black except `D3` (a section header). That means the client has NOT accepted any feature as done. The `🟢` marks in `references/tz-audit.md` are MY code-level reading, not the client's sign-off. When you report status, say «реалізовано в коді, клієнт не підтвердив», never «готово».
+
+The audit at `references/tz-audit.md` was code-verified on 2026-05-19 — re-verify before claiming anything. The ТЗ row numbers (E3, E4, E7, ...) are stable references both sides use in conversation.
 
 ## When the user says «фікси» / «продовжуй»
 
