@@ -78,10 +78,9 @@ export default function NewOrderPage() {
   // Per ТЗ — opt-in services. Прихований 3% автоматичний бонус скасовано.
   const [insurance, setInsurance] = useState(false);
   const [needsPackaging, setNeedsPackaging] = useState(false);
-  // «Пакет» — sender's cash transfer to receiver. % від суми додається до
-  // вартості посилки (% задається в Тарифах).
-  const [parcelMoneyEnabled, setParcelMoneyEnabled] = useState(false);
-  const [parcelMoneyAmount, setParcelMoneyAmount] = useState('');
+  // ТЗ §E10: «Поле "Пакет" при заповненні Клієнтом відсутнє» — опція
+  // з'являється лише коли оформлює Працівник. У клієнтському порталі не
+  // показуємо і не відправляємо.
   const [places, setPlaces] = useState<PlaceData[]>([emptyPlace()]);
   const [payer, setPayer] = useState('sender');
   const [paymentMethod, setPaymentMethod] = useState('cash');
@@ -190,10 +189,7 @@ export default function NewOrderPage() {
         direction, shipmentType, description,
         declaredValue: declaredValue ? Number(declaredValue) : undefined,
         insurance, needsPackaging,
-        parcelMoneyAmount:
-          parcelMoneyEnabled && Number(parcelMoneyAmount) > 0
-            ? Number(parcelMoneyAmount)
-            : undefined,
+        // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
         payer, paymentMethod, paymentInUkraine,
         senderPhone, senderFirstName, senderLastName, senderCountry, senderCity,
         receiverPhone, receiverFirstName, receiverLastName, receiverCountry, receiverCity,
@@ -433,34 +429,10 @@ export default function NewOrderPage() {
                 <Checkbox checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
                 Пакування (€ за кожні 10 кг — згідно тарифу)
               </label>
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={parcelMoneyEnabled}
-                  onCheckedChange={(c) => {
-                    const enabled = c === true;
-                    setParcelMoneyEnabled(enabled);
-                    if (!enabled) setParcelMoneyAmount('');
-                  }}
-                />
-                Пакет (передача готівки отримувачу)
-              </label>
-              {parcelMoneyEnabled && (
-                <div>
-                  <Label className="text-xs">Сума передачі (EUR)</Label>
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    step="0.01"
-                    min="0"
-                    value={parcelMoneyAmount}
-                    onChange={(e) => setParcelMoneyAmount(e.target.value)}
-                    placeholder="1000"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    До вартості посилки додається % від цієї суми (% задається в тарифі).
-                  </p>
-                </div>
-              )}
+              {/* Per ТЗ §E10: «Поле "Пакет" при заповненні Клієнтом
+                  відсутнє». Опція з'являється лише коли посилку оформлює
+                  Працівник. Тому в клієнтському порталі чекбокс «Пакет»
+                  не рендеримо взагалі. */}
             </div>
           </CardContent>
         </Card>
