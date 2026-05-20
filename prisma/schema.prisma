@@ -507,7 +507,7 @@ model PricingConfig {
   country              Country
   direction            Direction
   pricePerKg           Decimal     @map("price_per_kg") @db.Decimal(10, 2)
-  weightType           WeightType  @default(actual) @map("weight_type")
+  weightType           WeightType  @default(custom) @map("weight_type")
   /// Per ТЗ §8 — частка фактичної ваги при `weightType=custom`. 0..1.
   /// Розрахункова вага коли об'ємна > фактичної:
   ///   billable = factualFrac × фактична + (1 − factualFrac) × об'ємна
