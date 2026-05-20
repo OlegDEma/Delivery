@@ -213,6 +213,20 @@ export default function NewParcelPage() {
     }
   }, [direction, selectedTripId, trips]);
 
+  // EU-країна для live-калькулятора вартості. Для eu_to_ua вона може бути
+  // визначена ОБРАНИМ РЕЙСОМ — навіть якщо в картці відправника країна ще
+  // не збережена (типово коли відправника створюють разом із посилкою).
+  // Без цього fallback'у блок «Розрахунок вартості» мовчки не показувався.
+  const calcSenderCountry =
+    sender?.country
+    || sender?.addresses[0]?.country
+    || (direction === 'eu_to_ua'
+        ? (() => {
+            const t = trips.find(tr => tr.id === selectedTripId);
+            return t?.country && t.country !== 'UA' ? t.country : null;
+          })()
+        : null);
+
   function addPlace() {
     if (places.length >= 10) return;
     setPlaces([...places, emptyPlace()]);
@@ -978,7 +992,7 @@ export default function NewParcelPage() {
         {/* Cost calculation */}
         <CostCalculator
           direction={direction}
-          senderCountry={sender?.country || sender?.addresses[0]?.country || null}
+          senderCountry={calcSenderCountry}
           receiverCountry={receiver?.addresses[0]?.country || null}
           actualWeight={totalWeight}
           volumetricWeight={totalVolWeight}
