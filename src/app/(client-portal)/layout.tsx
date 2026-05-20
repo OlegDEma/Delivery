@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -14,12 +14,21 @@ const NAV = [
 
 export default function ClientPortalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
 
-  async function handleLogout() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/login');
+  function handleLogout() {
+    // Відкликаємо сесію на сервері Supabase (best-effort, не блокуємось).
+    createClient().auth.signOut().catch(() => {});
+    // Гарантовано прибираємо supabase auth-cookie вручну: лише на
+    // `await signOut()` покладатись не можна — мережевий виклик інколи
+    // зависав, і користувач лишався в порталі (cookie не httpOnly).
+    for (const c of document.cookie.split(';')) {
+      const name = c.trim().split('=')[0];
+      if (name.startsWith('sb-')) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      }
+    }
+    // Жорстка навігація — сервер перевірить очищену сесію і віддасть /login.
+    window.location.href = '/login';
   }
 
   return (

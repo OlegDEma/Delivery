@@ -93,14 +93,20 @@ export default function NewOrderPage() {
   const [collectionDate, setCollectionDate] = useState('');
   const [collectionAddress, setCollectionAddress] = useState('');
 
-  // Автопідставляння країни отримувача за напрямком (виноситься в колбек,
-  // щоб не дзеркалити стейт у useEffect — react-hooks/set-state-in-effect).
+  // Автопідставляння країн за напрямком (ТЗ §E8). Виноситься в колбек,
+  // щоб не дзеркалити стейт у useEffect — react-hooks/set-state-in-effect.
+  // eu_to_ua: Відправник у ЄС, Отримувач в Україні.
+  // ua_to_eu: Відправник в Україні, Отримувач у ЄС.
   function handleDirectionChange(next: string) {
     setDirection(next);
-    if (next === 'eu_to_ua' && !receiverCountry) {
-      setReceiverCountry('UA');
-    } else if (next === 'ua_to_eu' && receiverCountry === 'UA') {
-      setReceiverCountry('');
+    if (next === 'eu_to_ua') {
+      if (!receiverCountry) setReceiverCountry('UA');
+      // Відправник у ЄС — повертаємо дефолт, якщо стояла Україна.
+      if (senderCountry === 'UA') setSenderCountry('NL');
+    } else if (next === 'ua_to_eu') {
+      if (receiverCountry === 'UA') setReceiverCountry('');
+      // Відправник в Україні — код телефону +380 підставиться автоматично.
+      setSenderCountry('UA');
     }
   }
 
