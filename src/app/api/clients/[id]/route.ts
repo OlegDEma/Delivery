@@ -171,16 +171,53 @@ export async function PATCH(
       country?: string | null;
       notes?: string | null;
     } = {};
-    if (phone !== undefined) { data.phone = phone; data.phoneNormalized = normalizePhone(phone); }
+
+    // Verify client exists before update.
+    const exists = await prisma.client.findFirst({
+      where: { id, deletedAt: null },
+      select: { id: true, phone: true, phoneNormalized: true },
+    });
+    if (!exists) return NextResponse.json({ error: 'Клієнта не знайдено' }, { status: 404 });
+
+    // Per ТЗ §E7: «При спробі редагувати лише телефон видає "Клієнт з таким
+    // номером вже існує" і не дозволяє зберегти». Корінь — PhoneInput при
+    // відкритті форми нормалізує відображення номера, тож `phone` приходить
+    // у канонічному форматі, відмінному від збереженого рядка, навіть коли
+    // оператор НІЧОГО не змінював. DB-unique на `phone` (raw) тоді бачить
+    // «новий» рядок. Якщо в базі є клієнт-дублікат з тим самим номером в
+    // іншому форматі — спрацьовує колізія.
+    //
+    // Фікс: явна перевірка по phoneNormalized, що ВИКЛЮЧАЄ самого клієнта.
+    //  - якщо нормалізований номер не змінився → це косметичний reformat,
+    //    жодної колізії бути не може;
+    //  - якщо номер належить ІНШОМУ клієнту → чітка помилка з його іменем;
+    //  - інакше зберігаємо канонічну (нормалізовану) форму в обидва поля.
+    if (phone !== undefined) {
+      const normalized = normalizePhone(phone);
+      if (normalized !== exists.phoneNormalized) {
+        const conflict = await prisma.client.findFirst({
+          where: {
+            id: { not: id },
+            deletedAt: null,
+            OR: [{ phone }, { phoneNormalized: normalized }],
+          },
+          select: { firstName: true, lastName: true },
+        });
+        if (conflict) {
+          return NextResponse.json(
+            { error: `Цей номер вже належить іншому клієнту: ${conflict.lastName} ${conflict.firstName}` },
+            { status: 409 },
+          );
+        }
+      }
+      data.phone = phone;
+      data.phoneNormalized = normalized;
+    }
     if (firstName !== undefined) data.firstName = capitalize(firstName);
     if (lastName !== undefined) data.lastName = capitalize(lastName);
     if (middleName !== undefined) data.middleName = middleName ? capitalize(middleName) : null;
     if (country !== undefined) data.country = country || null;
     if (notes !== undefined) data.notes = notes || null;
-
-    // Verify client exists before update.
-    const exists = await prisma.client.findFirst({ where: { id, deletedAt: null }, select: { id: true } });
-    if (!exists) return NextResponse.json({ error: 'Клієнта не знайдено' }, { status: 404 });
 
     try {
       const updated = await prisma.client.update({
@@ -189,9 +226,10 @@ export async function PATCH(
       });
       return NextResponse.json(updated);
     } catch (err) {
-      // P2002: phone uniqueness violated by another client.
+      // P2002 backstop: race against a concurrent edit. The explicit check
+      // above catches the normal case; this covers the narrow race window.
       if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002') {
-        return NextResponse.json({ error: 'Клієнт з таким номером вже існує' }, { status: 409 });
+        return NextResponse.json({ error: 'Цей номер щойно зайняв інший клієнт' }, { status: 409 });
       }
       throw err;
     }
