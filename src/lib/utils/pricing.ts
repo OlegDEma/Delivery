@@ -54,8 +54,21 @@ export interface PricingConfigInput {
    */
   minBothDirections: number;
 
-  /** Whole-percent rate applied to the «Пакет» amount. */
+  /**
+   * Whole-percent rate applied to the «Пакет» amount.
+   * Per ТЗ §53 — НИЖНІЙ tier: діє коли сума ≤ `parcelMoneyThreshold`.
+   */
   parcelMoneyPercent: number;
+  /**
+   * Per ТЗ §53 — ВЕРХНІЙ tier «Пакет%»: діє коли сума > `parcelMoneyThreshold`.
+   * 0/undefined → fallback на `parcelMoneyPercent` (один tier).
+   */
+  parcelMoneyPercentHigh?: number;
+  /**
+   * Per ТЗ §53 — межа (EUR) між нижнім і верхнім tier «Пакет%».
+   * undefined → 2000 (значення з ТЗ).
+   */
+  parcelMoneyThreshold?: number;
 }
 
 /** Per-parcel inputs for the cost calculation. All booleans are explicit. */
@@ -219,10 +232,23 @@ export function calculateParcelCost(
     }
   }
 
-  // 5. «Пакет» (money transfer) — % fee.
+  // 5. «Пакет» (money transfer) — % fee. Per ТЗ §53 — два tier-и:
+  //    сума ≤ поріг → parcelMoneyPercent; сума > поріг → parcelMoneyPercentHigh.
+  //    Якщо верхній tier не заданий (0) — діє один tier (нижній).
   let parcelMoneyCost = 0;
-  if (parcel.parcelMoneyAmount && parcel.parcelMoneyAmount > 0 && config.parcelMoneyPercent > 0) {
-    parcelMoneyCost = roundMoney(parcel.parcelMoneyAmount * (config.parcelMoneyPercent / 100));
+  if (parcel.parcelMoneyAmount && parcel.parcelMoneyAmount > 0) {
+    const threshold = config.parcelMoneyThreshold && config.parcelMoneyThreshold > 0
+      ? config.parcelMoneyThreshold
+      : 2000;
+    const highPercent = config.parcelMoneyPercentHigh && config.parcelMoneyPercentHigh > 0
+      ? config.parcelMoneyPercentHigh
+      : config.parcelMoneyPercent;
+    const appliedPercent = parcel.parcelMoneyAmount > threshold
+      ? highPercent
+      : config.parcelMoneyPercent;
+    if (appliedPercent > 0) {
+      parcelMoneyCost = roundMoney(parcel.parcelMoneyAmount * (appliedPercent / 100));
+    }
   }
 
   const totalCost = roundMoney(

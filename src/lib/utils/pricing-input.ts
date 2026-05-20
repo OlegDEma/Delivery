@@ -28,5 +28,7 @@ export function buildPricingInput(config: PricingConfig): PricingConfigInput {
     minMultiPerAddress: Number(config.minMultiPerAddress),
     minBothDirections: Number(config.minBothDirections),
     parcelMoneyPercent: Number(config.parcelMoneyPercent),
+    parcelMoneyPercentHigh: Number(config.parcelMoneyPercentHigh),
+    parcelMoneyThreshold: Number(config.parcelMoneyThreshold),
   };
 }

@@ -31,7 +31,12 @@ interface ConfigForm {
   insurancePercent: string;        // displayed as whole-percent (1 = 1%)
   packagingEnabled: boolean;
   packagingPer10kg: string;
+  /** Per ТЗ §53 — нижній tier «Пакет%» (сума ≤ порогу). */
   parcelMoneyPercent: string;
+  /** Per ТЗ §53 — верхній tier «Пакет%» (сума > порогу). */
+  parcelMoneyPercentHigh: string;
+  /** Per ТЗ §53 — межа (EUR) між нижнім і верхнім tier. */
+  parcelMoneyThreshold: string;
   pickupPointPrice: string;
   addressDeliveryPrice: string;
   /** Per ТЗ — мін. вартість при 2+ посилок з однієї локації на різні адреси. */
@@ -54,6 +59,8 @@ interface ApiPricingConfig {
   packagingEnabled: boolean;
   packagingPer10kg: string | number;
   parcelMoneyPercent: string | number;
+  parcelMoneyPercentHigh: string | number;
+  parcelMoneyThreshold: string | number;
   pickupPointPrice: string | number;
   addressDeliveryPrice: string | number;
   minMultiPerAddress: string | number;
@@ -77,6 +84,8 @@ function toForm(c: ApiPricingConfig): ConfigForm {
     packagingEnabled: !!c.packagingEnabled,
     packagingPer10kg: String(c.packagingPer10kg ?? '0'),
     parcelMoneyPercent: String(c.parcelMoneyPercent ?? '0'),
+    parcelMoneyPercentHigh: String(c.parcelMoneyPercentHigh ?? '0'),
+    parcelMoneyThreshold: String(c.parcelMoneyThreshold ?? '2000'),
     pickupPointPrice: String(c.pickupPointPrice ?? '0'),
     addressDeliveryPrice: String(c.addressDeliveryPrice ?? '0'),
     minMultiPerAddress: String(c.minMultiPerAddress ?? '0'),
@@ -140,7 +149,9 @@ export default function PricingPage() {
       { key: 'minBothDirections',           label: 'Туди-сюди з локації (мін.)',   min: 0, max: 1000 },
       { key: 'packagingPer10kg',            label: 'Пакування (€/10кг)',           min: 0, max: 1000 },
       { key: 'insurancePercent',            label: 'Страхування (%)',              min: 0, max: 100 },
-      { key: 'parcelMoneyPercent',          label: 'Пакет (%)',                    min: 0, max: 100 },
+      { key: 'parcelMoneyPercent',          label: 'Пакет % (≤ порогу)',           min: 0, max: 100 },
+      { key: 'parcelMoneyPercentHigh',      label: 'Пакет % (> порогу)',           min: 0, max: 100 },
+      { key: 'parcelMoneyThreshold',        label: 'Поріг суми Пакета (EUR)',      min: 0, max: 1000000 },
       { key: 'weightCustomFactualFraction', label: 'Частка фактичної ваги',        min: 0, max: 1   },
     ];
     for (const f of fields) {
@@ -168,7 +179,9 @@ export default function PricingPage() {
         insuranceRate:        (parseNum(c.insurancePercent) ?? 0) / 100,
         packagingEnabled:     c.packagingEnabled,
         packagingPer10kg:     parseNum(c.packagingPer10kg),
-        parcelMoneyPercent:   parseNum(c.parcelMoneyPercent),
+        parcelMoneyPercent:     parseNum(c.parcelMoneyPercent),
+        parcelMoneyPercentHigh: parseNum(c.parcelMoneyPercentHigh),
+        parcelMoneyThreshold:   parseNum(c.parcelMoneyThreshold),
       }),
     });
     setSaving(null);
@@ -420,23 +433,54 @@ export default function PricingPage() {
                   </div>
                 </div>
 
-                {/* Пакет */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
-                  <div className="text-sm">Пакет (передача готівки)</div>
-                  <div>
-                    <Label className="text-xs">
-                      % від суми Пакета{' '}
-                      <FieldHint text="Скільки % береться від числа, яке клієнт вводить у віконце 'Пакет' при оформленні посилки. 0 — опція вимкнена." />
-                    </Label>
-                    <Input
-                      type="number"
-                      inputMode="decimal"
-                      step="0.01"
-                      min="0"
-                      max="100"
-                      value={config.parcelMoneyPercent}
-                      onChange={(e) => update(config.id, 'parcelMoneyPercent', e.target.value)}
-                    />
+                {/* Пакет — ТЗ §53: два tier-и відсотка залежно від суми. */}
+                <div>
+                  <div className="text-sm mb-1">Пакет (передача готівки)</div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                    <div>
+                      <Label className="text-xs">
+                        Поріг суми (EUR){' '}
+                        <FieldHint text="Межа між двома ставками. Сума Пакета ≤ порогу — діє нижня ставка %, більше порогу — верхня. За ТЗ — 2000." />
+                      </Label>
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        step="1"
+                        min="0"
+                        value={config.parcelMoneyThreshold}
+                        onChange={(e) => update(config.id, 'parcelMoneyThreshold', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">
+                        % коли сума ≤ порогу{' '}
+                        <FieldHint text="Ставка, яка береться від суми Пакета коли вона не перевищує поріг. 0 — опція вимкнена." />
+                      </Label>
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={config.parcelMoneyPercent}
+                        onChange={(e) => update(config.id, 'parcelMoneyPercent', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">
+                        % коли сума {'>'} порогу{' '}
+                        <FieldHint text="Ставка, яка береться від суми Пакета коли вона перевищує поріг. 0 — діє нижня ставка (один tier)." />
+                      </Label>
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={config.parcelMoneyPercentHigh}
+                        onChange={(e) => update(config.id, 'parcelMoneyPercentHigh', e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

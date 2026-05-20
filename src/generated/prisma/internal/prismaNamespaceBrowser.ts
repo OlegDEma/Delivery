@@ -334,6 +334,8 @@ export const PricingConfigScalarFieldEnum = {
   packagingPrices: 'packagingPrices',
   packagingPer10kg: 'packagingPer10kg',
   parcelMoneyPercent: 'parcelMoneyPercent',
+  parcelMoneyPercentHigh: 'parcelMoneyPercentHigh',
+  parcelMoneyThreshold: 'parcelMoneyThreshold',
   pickupPointPrice: 'pickupPointPrice',
   addressDeliveryPrice: 'addressDeliveryPrice',
   minMultiPerAddress: 'minMultiPerAddress',

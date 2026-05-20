@@ -35,7 +35,7 @@ export async function PATCH(request: NextRequest) {
     pricePerKg, lvivPricePerKg, weightType, weightCustomFactualFraction,
     insuranceEnabled, insuranceRate, insuranceThreshold,
     packagingEnabled, packagingPer10kg,
-    parcelMoneyPercent,
+    parcelMoneyPercent, parcelMoneyPercentHigh, parcelMoneyThreshold,
     addressDeliveryPrice, pickupPointPrice,
     minMultiPerAddress, minBothDirections,
     collectionDays,
@@ -68,6 +68,8 @@ export async function PATCH(request: NextRequest) {
     [insuranceRate,               0, 1,      'insuranceRate (0..1)'],
     [parcelMoneyPercent,          0, 100,    'parcelMoneyPercent'],
     [insuranceThreshold,          0, 100000, 'insuranceThreshold'],
+    [parcelMoneyPercentHigh,      0, 100,    'parcelMoneyPercentHigh'],
+    [parcelMoneyThreshold,        0, 1000000,'parcelMoneyThreshold'],
     [weightCustomFactualFraction, 0, 1,      'weightCustomFactualFraction (0..1)'],
   ];
   for (const [v, min, max, label] of checks) {
@@ -97,7 +99,9 @@ export async function PATCH(request: NextRequest) {
       ...(numIfPresent(insuranceThreshold)   !== undefined && { insuranceThreshold:   numIfPresent(insuranceThreshold)! }),
       ...(packagingEnabled                   !== undefined && { packagingEnabled }),
       ...(numIfPresent(packagingPer10kg)     !== undefined && { packagingPer10kg:     numIfPresent(packagingPer10kg)! }),
-      ...(numIfPresent(parcelMoneyPercent)   !== undefined && { parcelMoneyPercent:   numIfPresent(parcelMoneyPercent)! }),
+      ...(numIfPresent(parcelMoneyPercent)     !== undefined && { parcelMoneyPercent:     numIfPresent(parcelMoneyPercent)! }),
+      ...(numIfPresent(parcelMoneyPercentHigh) !== undefined && { parcelMoneyPercentHigh: numIfPresent(parcelMoneyPercentHigh)! }),
+      ...(numIfPresent(parcelMoneyThreshold)   !== undefined && { parcelMoneyThreshold:   numIfPresent(parcelMoneyThreshold)! }),
       ...(numIfPresent(addressDeliveryPrice) !== undefined && { addressDeliveryPrice: numIfPresent(addressDeliveryPrice)! }),
       ...(numIfPresent(pickupPointPrice)     !== undefined && { pickupPointPrice:     numIfPresent(pickupPointPrice)! }),
       ...(numIfPresent(minMultiPerAddress)   !== undefined && { minMultiPerAddress:   numIfPresent(minMultiPerAddress)! }),

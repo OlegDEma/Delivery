@@ -527,8 +527,13 @@ model PricingConfig {
   /// Replaces the legacy tier JSON in `packagingPrices`.
   packagingPer10kg     Decimal     @default(0) @map("packaging_per_10kg") @db.Decimal(10, 2)
   /// Whole-percent rate applied to the "Пакет" amount (cash transferred by sender).
+  /// Per ТЗ §53 — це НИЖНІЙ tier: діє коли сума Пакета ≤ parcelMoneyThreshold.
   /// 0 disables the option.
   parcelMoneyPercent   Decimal     @default(0) @map("parcel_money_percent") @db.Decimal(5, 2)
+  /// Per ТЗ §53 — ВЕРХНІЙ tier «Пакет%»: діє коли сума Пакета > parcelMoneyThreshold.
+  parcelMoneyPercentHigh Decimal   @default(0) @map("parcel_money_percent_high") @db.Decimal(5, 2)
+  /// Per ТЗ §53 — межа (EUR) між нижнім і верхнім tier «Пакет%». ≤ поріг → low, > поріг → high.
+  parcelMoneyThreshold Decimal     @default(2000) @map("parcel_money_threshold") @db.Decimal(10, 2)
   /// Flat price for handing the parcel over at a collection point (per ТЗ).
   /// "Мінімальна вартість кожної посилки при самостійній доставці/отриманні
   /// клієнтом посилки на Пункті збору" — діє як поріг (max(weight×price, цей)).

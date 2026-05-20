@@ -34,6 +34,8 @@ export type PricingConfigAvgAggregateOutputType = {
   insuranceRate: runtime.Decimal | null
   packagingPer10kg: runtime.Decimal | null
   parcelMoneyPercent: runtime.Decimal | null
+  parcelMoneyPercentHigh: runtime.Decimal | null
+  parcelMoneyThreshold: runtime.Decimal | null
   pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
   minMultiPerAddress: runtime.Decimal | null
@@ -48,6 +50,8 @@ export type PricingConfigSumAggregateOutputType = {
   insuranceRate: runtime.Decimal | null
   packagingPer10kg: runtime.Decimal | null
   parcelMoneyPercent: runtime.Decimal | null
+  parcelMoneyPercentHigh: runtime.Decimal | null
+  parcelMoneyThreshold: runtime.Decimal | null
   pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
   minMultiPerAddress: runtime.Decimal | null
@@ -68,6 +72,8 @@ export type PricingConfigMinAggregateOutputType = {
   packagingEnabled: boolean | null
   packagingPer10kg: runtime.Decimal | null
   parcelMoneyPercent: runtime.Decimal | null
+  parcelMoneyPercentHigh: runtime.Decimal | null
+  parcelMoneyThreshold: runtime.Decimal | null
   pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
   minMultiPerAddress: runtime.Decimal | null
@@ -92,6 +98,8 @@ export type PricingConfigMaxAggregateOutputType = {
   packagingEnabled: boolean | null
   packagingPer10kg: runtime.Decimal | null
   parcelMoneyPercent: runtime.Decimal | null
+  parcelMoneyPercentHigh: runtime.Decimal | null
+  parcelMoneyThreshold: runtime.Decimal | null
   pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
   minMultiPerAddress: runtime.Decimal | null
@@ -117,6 +125,8 @@ export type PricingConfigCountAggregateOutputType = {
   packagingPrices: number
   packagingPer10kg: number
   parcelMoneyPercent: number
+  parcelMoneyPercentHigh: number
+  parcelMoneyThreshold: number
   pickupPointPrice: number
   addressDeliveryPrice: number
   minMultiPerAddress: number
@@ -138,6 +148,8 @@ export type PricingConfigAvgAggregateInputType = {
   insuranceRate?: true
   packagingPer10kg?: true
   parcelMoneyPercent?: true
+  parcelMoneyPercentHigh?: true
+  parcelMoneyThreshold?: true
   pickupPointPrice?: true
   addressDeliveryPrice?: true
   minMultiPerAddress?: true
@@ -152,6 +164,8 @@ export type PricingConfigSumAggregateInputType = {
   insuranceRate?: true
   packagingPer10kg?: true
   parcelMoneyPercent?: true
+  parcelMoneyPercentHigh?: true
+  parcelMoneyThreshold?: true
   pickupPointPrice?: true
   addressDeliveryPrice?: true
   minMultiPerAddress?: true
@@ -172,6 +186,8 @@ export type PricingConfigMinAggregateInputType = {
   packagingEnabled?: true
   packagingPer10kg?: true
   parcelMoneyPercent?: true
+  parcelMoneyPercentHigh?: true
+  parcelMoneyThreshold?: true
   pickupPointPrice?: true
   addressDeliveryPrice?: true
   minMultiPerAddress?: true
@@ -196,6 +212,8 @@ export type PricingConfigMaxAggregateInputType = {
   packagingEnabled?: true
   packagingPer10kg?: true
   parcelMoneyPercent?: true
+  parcelMoneyPercentHigh?: true
+  parcelMoneyThreshold?: true
   pickupPointPrice?: true
   addressDeliveryPrice?: true
   minMultiPerAddress?: true
@@ -221,6 +239,8 @@ export type PricingConfigCountAggregateInputType = {
   packagingPrices?: true
   packagingPer10kg?: true
   parcelMoneyPercent?: true
+  parcelMoneyPercentHigh?: true
+  parcelMoneyThreshold?: true
   pickupPointPrice?: true
   addressDeliveryPrice?: true
   minMultiPerAddress?: true
@@ -334,6 +354,8 @@ export type PricingConfigGroupByOutputType = {
   packagingPrices: runtime.JsonValue | null
   packagingPer10kg: runtime.Decimal
   parcelMoneyPercent: runtime.Decimal
+  parcelMoneyPercentHigh: runtime.Decimal
+  parcelMoneyThreshold: runtime.Decimal
   pickupPointPrice: runtime.Decimal
   addressDeliveryPrice: runtime.Decimal
   minMultiPerAddress: runtime.Decimal
@@ -383,6 +405,8 @@ export type PricingConfigWhereInput = {
   packagingPrices?: Prisma.JsonNullableFilter<"PricingConfig">
   packagingPer10kg?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -410,6 +434,8 @@ export type PricingConfigOrderByWithRelationInput = {
   packagingPrices?: Prisma.SortOrderInput | Prisma.SortOrder
   packagingPer10kg?: Prisma.SortOrder
   parcelMoneyPercent?: Prisma.SortOrder
+  parcelMoneyPercentHigh?: Prisma.SortOrder
+  parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
@@ -440,6 +466,8 @@ export type PricingConfigWhereUniqueInput = Prisma.AtLeast<{
   packagingPrices?: Prisma.JsonNullableFilter<"PricingConfig">
   packagingPer10kg?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -467,6 +495,8 @@ export type PricingConfigOrderByWithAggregationInput = {
   packagingPrices?: Prisma.SortOrderInput | Prisma.SortOrder
   packagingPer10kg?: Prisma.SortOrder
   parcelMoneyPercent?: Prisma.SortOrder
+  parcelMoneyPercentHigh?: Prisma.SortOrder
+  parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
@@ -501,6 +531,8 @@ export type PricingConfigScalarWhereWithAggregatesInput = {
   packagingPrices?: Prisma.JsonNullableWithAggregatesFilter<"PricingConfig">
   packagingPer10kg?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -527,6 +559,8 @@ export type PricingConfigCreateInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -553,6 +587,8 @@ export type PricingConfigUncheckedCreateInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -579,6 +615,8 @@ export type PricingConfigUpdateInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -605,6 +643,8 @@ export type PricingConfigUncheckedUpdateInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -631,6 +671,8 @@ export type PricingConfigCreateManyInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -657,6 +699,8 @@ export type PricingConfigUpdateManyMutationInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -682,6 +726,8 @@ export type PricingConfigUncheckedUpdateManyInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -718,6 +764,8 @@ export type PricingConfigCountOrderByAggregateInput = {
   packagingPrices?: Prisma.SortOrder
   packagingPer10kg?: Prisma.SortOrder
   parcelMoneyPercent?: Prisma.SortOrder
+  parcelMoneyPercentHigh?: Prisma.SortOrder
+  parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
@@ -737,6 +785,8 @@ export type PricingConfigAvgOrderByAggregateInput = {
   insuranceRate?: Prisma.SortOrder
   packagingPer10kg?: Prisma.SortOrder
   parcelMoneyPercent?: Prisma.SortOrder
+  parcelMoneyPercentHigh?: Prisma.SortOrder
+  parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
@@ -757,6 +807,8 @@ export type PricingConfigMaxOrderByAggregateInput = {
   packagingEnabled?: Prisma.SortOrder
   packagingPer10kg?: Prisma.SortOrder
   parcelMoneyPercent?: Prisma.SortOrder
+  parcelMoneyPercentHigh?: Prisma.SortOrder
+  parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
@@ -781,6 +833,8 @@ export type PricingConfigMinOrderByAggregateInput = {
   packagingEnabled?: Prisma.SortOrder
   packagingPer10kg?: Prisma.SortOrder
   parcelMoneyPercent?: Prisma.SortOrder
+  parcelMoneyPercentHigh?: Prisma.SortOrder
+  parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
@@ -799,6 +853,8 @@ export type PricingConfigSumOrderByAggregateInput = {
   insuranceRate?: Prisma.SortOrder
   packagingPer10kg?: Prisma.SortOrder
   parcelMoneyPercent?: Prisma.SortOrder
+  parcelMoneyPercentHigh?: Prisma.SortOrder
+  parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
@@ -883,6 +939,8 @@ export type PricingConfigCreateWithoutUpdatedByInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -908,6 +966,8 @@ export type PricingConfigUncheckedCreateWithoutUpdatedByInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -962,6 +1022,8 @@ export type PricingConfigScalarWhereInput = {
   packagingPrices?: Prisma.JsonNullableFilter<"PricingConfig">
   packagingPer10kg?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -988,6 +1050,8 @@ export type PricingConfigCreateManyUpdatedByInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1013,6 +1077,8 @@ export type PricingConfigUpdateWithoutUpdatedByInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1038,6 +1104,8 @@ export type PricingConfigUncheckedUpdateWithoutUpdatedByInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1063,6 +1131,8 @@ export type PricingConfigUncheckedUpdateManyWithoutUpdatedByInput = {
   packagingPrices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   packagingPer10kg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   parcelMoneyPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyPercentHigh?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1090,6 +1160,8 @@ export type PricingConfigSelect<ExtArgs extends runtime.Types.Extensions.Interna
   packagingPrices?: boolean
   packagingPer10kg?: boolean
   parcelMoneyPercent?: boolean
+  parcelMoneyPercentHigh?: boolean
+  parcelMoneyThreshold?: boolean
   pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
   minMultiPerAddress?: boolean
@@ -1117,6 +1189,8 @@ export type PricingConfigSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   packagingPrices?: boolean
   packagingPer10kg?: boolean
   parcelMoneyPercent?: boolean
+  parcelMoneyPercentHigh?: boolean
+  parcelMoneyThreshold?: boolean
   pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
   minMultiPerAddress?: boolean
@@ -1144,6 +1218,8 @@ export type PricingConfigSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   packagingPrices?: boolean
   packagingPer10kg?: boolean
   parcelMoneyPercent?: boolean
+  parcelMoneyPercentHigh?: boolean
+  parcelMoneyThreshold?: boolean
   pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
   minMultiPerAddress?: boolean
@@ -1171,6 +1247,8 @@ export type PricingConfigSelectScalar = {
   packagingPrices?: boolean
   packagingPer10kg?: boolean
   parcelMoneyPercent?: boolean
+  parcelMoneyPercentHigh?: boolean
+  parcelMoneyThreshold?: boolean
   pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
   minMultiPerAddress?: boolean
@@ -1182,7 +1260,7 @@ export type PricingConfigSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PricingConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "direction" | "pricePerKg" | "lvivPricePerKg" | "weightType" | "weightCustomFactualFraction" | "insuranceThreshold" | "insuranceRate" | "insuranceEnabled" | "packagingEnabled" | "packagingPrices" | "packagingPer10kg" | "parcelMoneyPercent" | "pickupPointPrice" | "addressDeliveryPrice" | "minMultiPerAddress" | "minBothDirections" | "collectionDays" | "isActive" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["pricingConfig"]>
+export type PricingConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "direction" | "pricePerKg" | "lvivPricePerKg" | "weightType" | "weightCustomFactualFraction" | "insuranceThreshold" | "insuranceRate" | "insuranceEnabled" | "packagingEnabled" | "packagingPrices" | "packagingPer10kg" | "parcelMoneyPercent" | "parcelMoneyPercentHigh" | "parcelMoneyThreshold" | "pickupPointPrice" | "addressDeliveryPrice" | "minMultiPerAddress" | "minBothDirections" | "collectionDays" | "isActive" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["pricingConfig"]>
 export type PricingConfigInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   updatedBy?: boolean | Prisma.PricingConfig$updatedByArgs<ExtArgs>
 }
@@ -1230,9 +1308,18 @@ export type $PricingConfigPayload<ExtArgs extends runtime.Types.Extensions.Inter
     packagingPer10kg: runtime.Decimal
     /**
      * Whole-percent rate applied to the "Пакет" amount (cash transferred by sender).
+     * Per ТЗ §53 — це НИЖНІЙ tier: діє коли сума Пакета ≤ parcelMoneyThreshold.
      * 0 disables the option.
      */
     parcelMoneyPercent: runtime.Decimal
+    /**
+     * Per ТЗ §53 — ВЕРХНІЙ tier «Пакет%»: діє коли сума Пакета > parcelMoneyThreshold.
+     */
+    parcelMoneyPercentHigh: runtime.Decimal
+    /**
+     * Per ТЗ §53 — межа (EUR) між нижнім і верхнім tier «Пакет%». ≤ поріг → low, > поріг → high.
+     */
+    parcelMoneyThreshold: runtime.Decimal
     /**
      * Flat price for handing the parcel over at a collection point (per ТЗ).
      * "Мінімальна вартість кожної посилки при самостійній доставці/отриманні
@@ -1700,6 +1787,8 @@ export interface PricingConfigFieldRefs {
   readonly packagingPrices: Prisma.FieldRef<"PricingConfig", 'Json'>
   readonly packagingPer10kg: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly parcelMoneyPercent: Prisma.FieldRef<"PricingConfig", 'Decimal'>
+  readonly parcelMoneyPercentHigh: Prisma.FieldRef<"PricingConfig", 'Decimal'>
+  readonly parcelMoneyThreshold: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly pickupPointPrice: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly addressDeliveryPrice: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly minMultiPerAddress: Prisma.FieldRef<"PricingConfig", 'Decimal'>
