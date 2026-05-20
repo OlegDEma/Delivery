@@ -145,35 +145,9 @@ export function ParcelPaymentCard({ parcel, onUpdate }: ParcelPaymentCardProps) 
             </span>
           </div>
 
-          {/* Розпис компонентів вартості — операторам зручніше бачити з чого
-              складається сума, особливо коли клієнт сперечається про ціну. */}
-          {(() => {
-            const cur = parcel.costCurrency || 'EUR';
-            const components: Array<{ label: string; value: number | null | undefined; suffix?: string }> = [
-              { label: 'Доставка', value: parcel.deliveryCost },
-              { label: 'Страхування', value: parcel.insuranceCost },
-              { label: 'Пакування', value: parcel.packagingCost },
-              { label: 'Адресна доставка', value: parcel.addressDeliveryCost },
-              { label: 'Пункт збору', value: parcel.pickupPointCost },
-              {
-                label: 'Пакет',
-                value: parcel.parcelMoneyCost,
-                suffix: parcel.parcelMoneyAmount ? ` (${Number(parcel.parcelMoneyAmount).toFixed(0)} ${cur})` : '',
-              },
-            ];
-            const visible = components.filter((c) => c.value && Number(c.value) > 0);
-            if (visible.length === 0) return null;
-            return (
-              <div className="text-xs text-gray-500 bg-gray-50 rounded p-1.5 space-y-0.5">
-                {visible.map((c) => (
-                  <div key={c.label} className="flex justify-between">
-                    <span>{c.label}{c.suffix ?? ''}</span>
-                    <span>{formatCurrency(Number(c.value), cur)}</span>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
+          {/* ТЗ §E4: вкладка «Оплата» — лише «До оплати» + сума. Детальний
+              розпис компонентів вартості перенесено у блок «Розрахунок
+              вартості» (голубе поле над «Місцями»). Тут — без дублювання. */}
 
           {!parcel.totalCost && !parcel.isPaid && (
             <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">

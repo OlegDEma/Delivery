@@ -163,9 +163,18 @@ export function CostCalculator(props: CostCalculatorProps) {
   return (
     <div className="bg-blue-50 rounded-lg p-3 text-sm space-y-1">
       <div className="font-medium text-blue-800 mb-1">Розрахунок вартості</div>
+      {/* ТЗ §E4: фактична / об'ємна / розрахункова — окремими рядками. */}
       <div className="flex justify-between">
+        <span className="text-gray-600">Фактична вага:</span>
+        <span>{props.actualWeight.toFixed(2)} кг</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-gray-600">Об&apos;ємна вага:</span>
+        <span>{props.volumetricWeight.toFixed(2)} кг</span>
+      </div>
+      <div className="flex justify-between border-t border-blue-200 pt-1">
         <span className="text-gray-600">Розрахункова вага ({WEIGHT_TYPE_LABELS[cost.weightType] || cost.weightType}):</span>
-        <span>{cost.billableWeight.toFixed(2)} кг</span>
+        <span className="font-medium">{cost.billableWeight.toFixed(2)} кг</span>
       </div>
       <div className="flex justify-between">
         <span className="text-gray-600">
