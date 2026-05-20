@@ -7,13 +7,13 @@ Single source of truth: `src/lib/utils/pricing.ts`. Helper: `src/lib/utils/prici
 ```
 declaredValue (in declaredValueCurrency) ───► toEur() ─────────┐
                                                                 │
-weight × pricePerKg ─────────► baseDeliveryCost                 ▼
-                                       │                  insuranceCost
-                                       ▼                        │
+weight × effectivePricePerKg ─► baseDeliveryCost                ▼
+   (Lviv exception → lvivPricePerKg)  │                   insuranceCost
+                                      ▼                         │
               max(baseDeliveryCost, applicable_minimum) ─► deliveryCost
                                        │                        │
                                        ▼                  packagingCost
-                                  + parcelMoneyCost ◄─── parcelMoneyAmount × parcelMoneyPercent / 100
+                                  + parcelMoneyCost ◄─── parcelMoneyAmount × tier-percent / 100
                                        │
                                        ▼
                               ────► totalCost
@@ -26,7 +26,8 @@ weight × pricePerKg ─────────► baseDeliveryCost            
 | Field | Meaning |
 |---|---|
 | `pricePerKg` | EUR per kg of billable weight |
-| `weightType` | `actual` | `volumetric` | `average` | `custom` |
+| `lvivPricePerKg` | ТЗ §49/§50 — reduced EUR/kg when receiver city is Lviv. `null`/`0` = no exception |
+| `weightType` | `actual` | `volumetric` | `average` | `custom` — DB default is `custom` |
 | `weightCustomFactualFraction` | 0..1, used when type=`custom` |
 | `insuranceEnabled` | tariff-level toggle (is the option offered?) |
 | `insurancePercent` | WHOLE percent (1.0 = 1%, NOT 0.01); converted from `insuranceRate * 100` |
@@ -37,7 +38,9 @@ weight × pricePerKg ─────────► baseDeliveryCost            
 | `pickupPointPrice` | MIN-floor for pickup-point hand-over |
 | `minMultiPerAddress` | MIN-floor per parcel when multi-parcel pickup |
 | `minBothDirections` | MIN-floor when sender both sends and receives same time |
-| `parcelMoneyPercent` | WHOLE percent applied to «Пакет» sum |
+| `parcelMoneyPercent` | WHOLE percent applied to «Пакет» sum — LOW tier (sum ≤ threshold) |
+| `parcelMoneyPercentHigh` | ТЗ §53 — HIGH tier percent (sum > threshold); `0` → fallback to low tier |
+| `parcelMoneyThreshold` | ТЗ §53 — EUR boundary between tiers; default 2000 |
 
 `ParcelCostInput` per parcel:
 
@@ -54,6 +57,7 @@ weight × pricePerKg ─────────► baseDeliveryCost            
 | `isMultiParcelPickup` | operator answered «2+ parcels» on courier_pickup |
 | `isBothDirections` | sender both sends UA→EU and receives EU→UA from same location |
 | `parcelMoneyAmount` | the cash sum sender transfers |
+| `receiverCity` | ТЗ §49/§50 — receiver settlement; when `isLvivCity()` matches and tariff has `lvivPricePerKg`, the reduced rate applies |
 
 ## How weight is computed
 
@@ -70,7 +74,17 @@ switch (weightType) {
 }
 ```
 
-**Important:** default seed has `weightType='actual'`. For ТЗ-correct behaviour, admin must switch to `custom` per tariff. There's no migration in place that does this automatically.
+**Important:** the DB default is now `weightType='custom'` (migration `20260519120000_weight_type_custom_default` converted existing `actual` rows). `custom` with `weightCustomFactualFraction` is the ТЗ-correct behaviour. The `actual` legacy branch (returns `max`) is kept only for back-compat.
+
+## Lviv exception (ТЗ §49/§50)
+
+```
+lvivException = isLvivCity(receiverCity) && tariff.lvivPricePerKg > 0
+effectivePricePerKg = lvivException ? lvivPricePerKg : pricePerKg
+baseDeliveryCost = billableWeight × effectivePricePerKg
+```
+
+`isLvivCity()` (in `pricing.ts`) matches `львів`/`lviv`/`львов`/`lwow`/`lwów` (lower-cased). The breakdown returns `pricePerKgApplied` + `lvivExceptionApplied`; `<CostCalculator>` shows a green «· Львів» hint. Configured per tariff in `/admin/pricing` («Ціна за кг — Львів», `0` disables).
 
 ## How the minimum is picked
 
@@ -110,14 +124,17 @@ if (needsPackaging && tariff.packagingEnabled):
 
 Legacy tier JSON: `{ "10": 1, "20": 2, "30+": 5 }` — find the lowest threshold ≥ weight; use «+» entry for over-max.
 
-## Parcel money («Пакет»)
+## Parcel money («Пакет») — two-tier (ТЗ §53)
 
 ```
-if (parcelMoneyAmount > 0 && parcelMoneyPercent > 0):
-   parcelMoneyCost = parcelMoneyAmount × parcelMoneyPercent / 100
+if (parcelMoneyAmount > 0):
+   threshold   = parcelMoneyThreshold > 0 ? parcelMoneyThreshold : 2000
+   highPercent = parcelMoneyPercentHigh > 0 ? parcelMoneyPercentHigh : parcelMoneyPercent
+   percent     = parcelMoneyAmount > threshold ? highPercent : parcelMoneyPercent
+   parcelMoneyCost = parcelMoneyAmount × percent / 100   // only when percent > 0
 ```
 
-The amount itself is NOT in the delivery cost — only the % fee. The amount appears as `(1000)` on the printable receipt.
+Two rates: sum ≤ threshold → `parcelMoneyPercent` (low); sum > threshold → `parcelMoneyPercentHigh` (high). If the high rate is left at `0`, the calculator falls back to the low rate (single-tier behaviour). The amount itself is NOT in the delivery cost — only the % fee. The amount appears as `(1000)` on the printable receipt.
 
 ## Total
 
@@ -137,14 +154,15 @@ All three paths use `buildPricingInput()` + `calculateParcelCost()` — no dupli
 
 ## ТЗ-specific defaults (seed values for fresh DB)
 
-NL: `pricePerKg=2`, `addressDeliveryPrice=30`, `pickupPointPrice=15`, `minMultiPerAddress=15`, `minBothDirections=15`.
-AT: `pricePerKg=1.5`, `addressDeliveryPrice=15`, `pickupPointPrice=10`, `minMultiPerAddress=10`, `minBothDirections=10`.
+NL eu_to_ua: `pricePerKg=2`, `lvivPricePerKg=1.5`, `addressDeliveryPrice=30`, `pickupPointPrice=15`, `minMultiPerAddress=15`, `minBothDirections=15`.
+AT eu_to_ua: `pricePerKg=1.5`, `lvivPricePerKg=1.0`, `addressDeliveryPrice=15`, `pickupPointPrice=10`, `minMultiPerAddress=10`, `minBothDirections=10`.
+All seed rows: `weightType='custom'`. `parcelMoneyThreshold` defaults to 2000, `parcelMoneyPercent`/`parcelMoneyPercentHigh` to 0 (option off until admin configures).
 
 Existing prod DB has older values (5 €/kg) — admin needs to update via `/admin/pricing`.
 
 ## Outstanding gaps (from `tz-audit.md`)
 
-- **Lviv exception**: NL→Lviv = 1.5 €/kg, AT→Lviv = 1.0 €/kg. Not implemented. Needs receiver-city check.
-- **Пакет% two-tier**: ТЗ §53 wants two rates (for sums ≤ 2000 and > 2000). Currently one rate.
-- **Weight default**: existing tariffs have `actual` (max behaviour). ТЗ expects `custom` (fraction).
-- **Per-shipment-type pricing**: tariffs don't distinguish documents / tires / parcels.
+- **Lviv exception** — DONE (commit 4abaf2c).
+- **Пакет% two-tier** — DONE (commit cb54577).
+- **Weight default** — DONE: `custom` is the default (commit ffbf6d7).
+- **Per-shipment-type pricing**: tariffs don't distinguish documents / tires / parcels. Still open.
