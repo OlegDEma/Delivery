@@ -158,10 +158,9 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
 
   return (
     <div className="space-y-3">
-      {/* Title — ТЗ для клієнта залишити, для staff прибрати. */}
-      {clientFacing && (
-        <Label className="text-xs text-gray-500 mb-1 block">Як Ви передасте нам посилку?</Label>
-      )}
+      {/* ТЗ §E13: фразу «Як Ви передасте нам посилку?» лишаємо ЛИШЕ вгорі
+          вкладки (це заголовок картки в new-order). Дублюючий дрібний підпис
+          тут — прибрано (ТЗ: «Ту ж фразу нижче дрібними буквами — видалити»). */}
 
       {/* Method cards */}
       <div>
