@@ -493,71 +493,11 @@ export default function NewParcelPage() {
                 if (receiver) setReceiver({ ...receiver, phone: p });
               }}
             />
-            {/* Editable address fields — auto-filled from last parcel, can be changed */}
-            {receiver && (
-              <div className="border-t pt-2 mt-2 space-y-2">
-                {receiver.addresses.length > 1 && (
-                  <div className="flex items-center justify-between">
-                    <Label className="text-xs text-gray-500 font-medium">Інша адреса з історії</Label>
-                    <Select value={receiverAddressId} onValueChange={(v) => {
-                      const addr = receiver.addresses.find(a => a.id === (v ?? '')) as
-                        (typeof receiver.addresses)[number] & { pickupPointText?: string | null } | undefined;
-                      if (addr) {
-                        setReceiverAddressId(addr.id);
-                        setRecvDeliveryMethod(addr.deliveryMethod || 'address');
-                        setRecvPostalCode(addr.postalCode || '');
-                        setRecvCity(addr.city || '');
-                        setRecvStreet(addr.street || '');
-                        setRecvBuilding(addr.building || '');
-                        setRecvNpWarehouse(addr.npWarehouseNum || '');
-                        setRecvLandmark(addr.landmark || '');
-                        setRecvPickupPointText(addr.pickupPointText || '');
-                      }
-                    }}>
-                      <SelectTrigger className="h-7 text-xs w-48">
-                        <SelectValue>{receiver.addresses.find(a => a.id === receiverAddressId)?.city || 'Інша адреса'}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent className="min-w-[20rem]">
-                        {receiver.addresses.map(a => (
-                          <SelectItem key={a.id} value={a.id}>
-                            {a.city}{a.npWarehouseNum ? ` НП ${a.npWarehouseNum}` : ''}{a.street ? `, ${a.street}` : ''}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                <AddressEditor
-                  cityPlaceholder="Львів"
-                  // ТЗ: автокомпліт міста/вулиці з історії + латиниця для EU.
-                  // Країна отримувача — або з обраної адреси, або UA для eu_to_ua.
-                  country={
-                    receiver?.addresses[0]?.country
-                    ?? (direction === 'eu_to_ua' ? 'UA' : null)
-                  }
-                  state={{
-                    deliveryMethod: recvDeliveryMethod,
-                    postalCode: recvPostalCode,
-                    city: recvCity,
-                    street: recvStreet,
-                    building: recvBuilding,
-                    landmark: recvLandmark,
-                    npWarehouseNum: recvNpWarehouse,
-                    pickupPointText: recvPickupPointText,
-                  }}
-                  onChange={(p) => {
-                    if (p.deliveryMethod !== undefined) setRecvDeliveryMethod(p.deliveryMethod);
-                    if (p.postalCode !== undefined) setRecvPostalCode(p.postalCode);
-                    if (p.city !== undefined) setRecvCity(p.city);
-                    if (p.street !== undefined) setRecvStreet(p.street);
-                    if (p.building !== undefined) setRecvBuilding(p.building);
-                    if (p.landmark !== undefined) setRecvLandmark(p.landmark);
-                    if (p.npWarehouseNum !== undefined) setRecvNpWarehouse(p.npWarehouseNum);
-                    if (p.pickupPointText !== undefined) setRecvPickupPointText(p.pickupPointText);
-                  }}
-                />
-              </div>
-            )}
+            {/* ТЗ §E7: «все решта — поле "Адреса" зі всіма даними — забрати.
+                В залишку лише назва вкладки та голубе поле». Інлайн-форму
+                адреси прибрано — адреса заповнюється/редагується через
+                діалог («Редагувати» на голубому полі). Стан адреси
+                (recvCity/recvStreet/…) наповнює handleReceiverSelect. */}
           </CardContent>
         </Card>
 
