@@ -193,3 +193,27 @@ The client's file shows EVERYTHING black. Treat the project as «mostly not acce
 2. §E10 FieldHint texts per role (staff vs client wording).
 3. §E14 separate «Розрахунок вартості» tab.
 4. §E7/§E8/§E9 big form refactor (the largest single chunk — uniform forms, phone split).
+
+---
+
+## v3 review (`Загальна схема програми (3).xlsx`, client-reviewed 2026-05)
+
+The client re-exported the ТЗ as `(3).xlsx` and reviewed it. Findings:
+- **Green (font `FF4EA72E`) = accepted:** only `D3` (parcels list page) and `E16` (Пасажири). Nothing else green.
+- **Column F «не зроблено» = client explicitly flags NOT done:** `E4`, `E7`, `E9`, `E11`, `E13`, `E14`.
+- ФОП block (E13) static text moved INTO the v3 spec verbatim — see `collection-block.tsx`.
+
+### What got done after the v3 review (verified)
+- **§E4/§E14** — cost rows cleaned: «Вартість доставки» (no `(X EUR/кг)`/`· Львів`/`(мін…)` parens), «Пакет» row shows once an amount is entered, no `(сума €)` (commit `fa6fb0e`).
+- **§E4/§E14** — packaging now computed from **billableWeight** not actualWeight (commit `84161cc`, ТЗ «до обрахунку брати Розрахункову вагу»).
+- **§E11** — `/admin/pricing` split into two tabs: «Тарифи» + «Правило розрахункової ваги» (weight-type/fraction moved into the weight tab). Client `new-order` card «Місця» renamed → «Параметри відправлення» (commit `60a54b7`). «Потребує пакування» already removed earlier; weight calc (`getBillableWeight`) is correct.
+- **§E13** — ФОП Добровольський postal block implemented; external_shipping enabled for UA-sender clients; collection block renders for client both directions (commit `84161cc`).
+- **§E7/§E9** — `ClientSearch` selected-state: «Пошук…» label removed when filled; «×» replaced with «Редагувати» button (re-opens the confirm/edit dialog) + small «Очистити» (commit `f19a5d1`). Works for both receiver (E7) and sender (E9) — shared component.
+- **§E8** — client `new-order`: country+phone-code auto-switch on direction change (commit `d08d64d`).
+
+### §E7/§E9 — still NOT done (the big part)
+- The inline `AddressEditor` block (under the blue summary in `parcels/new/page.tsx`) — ТЗ wants it removed («все решта — поле Адреса — забрати»). **NOT removed** — see pitfall below.
+- «Спосіб доставки»/«Спосіб відправки» 3-option selector replacing «Адреса».
+- Fully unifying the staff vs client receiver/sender forms.
+
+**⚠️ Pitfall blocking inline-AddressEditor removal:** the receiver/sender address (`recvCity`/`senderCity`/… state in `parcels/new/page.tsx`) is what the submit sends. It is populated by `handleReceiverSelect`/`handleSenderSelect` from `client.addresses[0]`. The confirm dialog (`ClientCreateForm`) — when an EXISTING client that had NO stored address gets a new address typed in the dialog — was observed NOT to PATCH (no network PATCH fired), so `onSelect` returned a client without the address and `senderCity` stayed empty. Before removing the inline `AddressEditor`, the dialog's new-address save path MUST be verified/fixed, otherwise parcels save with an empty address (silent data bug).
