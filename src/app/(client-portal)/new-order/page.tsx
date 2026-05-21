@@ -450,7 +450,9 @@ export default function NewOrderPage() {
         <Card>
           <CardHeader className="py-3 px-4">
             <div className="flex justify-between items-center">
-              <CardTitle className="text-base">Місця ({places.length})</CardTitle>
+              {/* ТЗ §E11: вкладка зветься «Параметри відправлення» (однаково
+                  для Працівника і Клієнта) та йде після «Відправлення». */}
+              <CardTitle className="text-base">Параметри відправлення ({places.length})</CardTitle>
               <Button type="button" variant="outline" size="sm" onClick={addPlace} disabled={places.length >= 10}>+</Button>
             </div>
           </CardHeader>

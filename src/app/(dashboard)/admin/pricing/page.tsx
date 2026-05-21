@@ -111,6 +111,8 @@ export default function PricingPage() {
   const [saving, setSaving] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
+  // ТЗ §E11: правило розрахункової ваги — окрема вкладка в Тарифах.
+  const [tab, setTab] = useState<'tariffs' | 'weight'>('tariffs');
 
   // Initial load. We deliberately avoid wrapping in a separate function that
   // calls setState synchronously in the effect body — the loading flag is
@@ -212,36 +214,122 @@ export default function PricingPage() {
     <div>
       <h1 className="text-2xl font-bold mb-4">Тарифи</h1>
 
-      {/* Правила розрахункової ваги (per ТЗ — окрема секція) */}
-      <Card className="mb-4 border-blue-200 bg-blue-50/30">
-        <CardHeader className="py-3 px-4">
-          <CardTitle className="text-base text-blue-900">Правила розрахункової ваги</CardTitle>
-        </CardHeader>
-        <CardContent className="px-4 pb-4 pt-0 text-sm text-gray-700 space-y-2">
-          <p>
-            <span className="font-semibold">Об&apos;ємна вага</span>{' '}
-            = (Довжина × Ширина × Висота) ÷ <span className="font-mono">{VOLUMETRIC_DIVISOR}</span>{' '}
-            (у см → кг). Або: об&apos;єм (м³) × 250.
-          </p>
-          <p>
-            <span className="font-semibold">Розрахункова вага</span> — обирається типом ваги нижче для кожної країни:
-          </p>
-          <ul className="list-disc pl-5 space-y-0.5 text-gray-600">
-            <li><span className="font-medium">Фактична (max)</span> — береться більша з фактичної та об&apos;ємної (рекомендовано).</li>
-            <li><span className="font-medium">Об&apos;ємна</span> — завжди об&apos;ємна, незалежно від фактичної.</li>
-            <li><span className="font-medium">Середня</span> — (фактична + об&apos;ємна) ÷ 2.</li>
-          </ul>
-          <p className="text-xs text-amber-700 pt-1">
-            Дільник 4000 та коефіцієнт 250 — глобальні константи (`src/lib/utils/volumetric.ts`).
-            Зміна потребує деплою. Тип ваги (нижче) — налаштовується вільно для кожної країни/напрямку.
-          </p>
-        </CardContent>
-      </Card>
+      {/* ТЗ §E11: дві вкладки — «Тарифи» і «Правило розрахункової ваги». */}
+      <div className="flex gap-1 mb-4 border-b">
+        {([['tariffs', 'Тарифи'], ['weight', 'Правило розрахункової ваги']] as const).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setTab(key)}
+            className={
+              'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ' +
+              (tab === key
+                ? 'border-blue-600 text-blue-700'
+                : 'border-transparent text-gray-500 hover:text-gray-700')
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
       {error && (
         <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">{error}</div>
       )}
 
+      {/* ── Вкладка «Правило розрахункової ваги» ───────────────────── */}
+      {tab === 'weight' && (
+        <div className="space-y-4">
+          <Card className="border-blue-200 bg-blue-50/30">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-base text-blue-900">Як рахується розрахункова вага</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 pt-0 text-sm text-gray-700 space-y-2">
+              <p>
+                <span className="font-semibold">Об&apos;ємна вага</span>{' '}
+                = (Довжина × Ширина × Висота) ÷ <span className="font-mono">{VOLUMETRIC_DIVISOR}</span>{' '}
+                (у см → кг). Або: об&apos;єм (м³) × 250.
+              </p>
+              <p>
+                <span className="font-semibold">Розрахункова вага</span> — це вага, за якою рахується вартість.
+                Якщо фактична вага більша за об&apos;ємну — завжди береться фактична. Інакше — за типом нижче:
+              </p>
+              <ul className="list-disc pl-5 space-y-0.5 text-gray-600">
+                <li><span className="font-medium">Фактична (max)</span> — береться більша з фактичної та об&apos;ємної.</li>
+                <li><span className="font-medium">Об&apos;ємна</span> — завжди об&apos;ємна, незалежно від фактичної.</li>
+                <li><span className="font-medium">Середня</span> — (фактична + об&apos;ємна) ÷ 2.</li>
+                <li><span className="font-medium">Власна частка</span> — частка × фактична + (1 − частка) × об&apos;ємна.</li>
+              </ul>
+              <p className="text-xs text-amber-700 pt-1">
+                Дільник 4000 та коефіцієнт 250 — глобальні константи. Тип ваги — налаштовується нижче
+                для кожної країни/напрямку.
+              </p>
+            </CardContent>
+          </Card>
+
+          {configs.map(config => (
+            <Card key={config.id}>
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-base">
+                  {config.direction === 'eu_to_ua'
+                    ? `${COUNTRY_LABELS[config.country as CountryCode] || config.country} → Україна`
+                    : `Україна → ${COUNTRY_LABELS[config.country as CountryCode] || config.country}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 pt-0 space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">
+                      Тип розрахункової ваги{' '}
+                      <FieldHint text="Якщо фактична вага більша від об'ємної — завжди береться фактична (per ТЗ §8). Тип ваги визначає поведінку лише коли об'ємна > фактичної: брати більшу (max), об'ємну, середню чи власну частку." />
+                    </Label>
+                    <Select
+                      value={config.weightType}
+                      onValueChange={(v) => update(config.id, 'weightType', v ?? 'actual')}
+                    >
+                      <SelectTrigger><SelectValue>{WEIGHT_TYPE_LABELS[config.weightType]}</SelectValue></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="actual">Фактична (max)</SelectItem>
+                        <SelectItem value="volumetric">Об&apos;ємна</SelectItem>
+                        <SelectItem value="average">Середня</SelectItem>
+                        <SelectItem value="custom">Власна частка</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {config.weightType === 'custom' && (
+                    <div>
+                      <Label className="text-xs">
+                        Частка фактичної ваги (0..1){' '}
+                        <FieldHint text="Розрахункова вага = частка × фактична + (1 − частка) × об'ємна. Діє лише коли об'ємна > фактичної. 0 = тільки об'ємна, 1 = тільки фактична, 0.5 = середня." />
+                      </Label>
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        min="0"
+                        max="1"
+                        value={config.weightCustomFactualFraction}
+                        onChange={(e) => update(config.id, 'weightCustomFactualFraction', e.target.value)}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button size="sm" onClick={() => handleSave(config)} disabled={saving === config.id}>
+                    {saving === config.id ? 'Збереження...' : 'Зберегти'}
+                  </Button>
+                  {savedAt[config.id] && (
+                    <span className="text-xs text-green-600">Збережено</span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* ── Вкладка «Тарифи» ───────────────────────────────────────── */}
+      {tab === 'tariffs' && (
       <div className="space-y-4">
         {configs.map(config => (
           <Card key={config.id}>
@@ -338,42 +426,9 @@ export default function PricingPage() {
                     onChange={(e) => update(config.id, 'minBothDirections', e.target.value)}
                   />
                 </div>
-                <div>
-                  <Label className="text-xs">
-                    Тип розрахункової ваги{' '}
-                    <FieldHint text="Якщо фактична вага більша від об'ємної — завжди береться фактична (per ТЗ §8). Тип ваги визначає поведінку лише коли об'ємна > фактичної: брати більшу (max), об'ємну, середню чи власну частку." />
-                  </Label>
-                  <Select
-                    value={config.weightType}
-                    onValueChange={(v) => update(config.id, 'weightType', v ?? 'actual')}
-                  >
-                    <SelectTrigger><SelectValue>{WEIGHT_TYPE_LABELS[config.weightType]}</SelectValue></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="actual">Фактична (max)</SelectItem>
-                      <SelectItem value="volumetric">Об&apos;ємна</SelectItem>
-                      <SelectItem value="average">Середня</SelectItem>
-                      <SelectItem value="custom">Власна частка</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {/* ТЗ §8: коли тип ваги = custom — показуємо поле для частки. */}
-                {config.weightType === 'custom' && (
-                  <div>
-                    <Label className="text-xs">
-                      Частка фактичної ваги (0..1){' '}
-                      <FieldHint text="Розрахункова вага = частка × фактична + (1 − частка) × об'ємна. Діє лише коли об'ємна > фактичної. 0 = тільки об'ємна, 1 = тільки фактична, 0.5 = середня." />
-                    </Label>
-                    <Input
-                      type="number"
-                      inputMode="decimal"
-                      step="0.01"
-                      min="0"
-                      max="1"
-                      value={config.weightCustomFactualFraction}
-                      onChange={(e) => update(config.id, 'weightCustomFactualFraction', e.target.value)}
-                    />
-                  </div>
-                )}
+                {/* ТЗ §E11: «Тип розрахункової ваги» / «Частка фактичної
+                    ваги» винесено в окрему вкладку «Правило розрахункової
+                    ваги» (перемикач угорі сторінки). */}
               </div>
 
               {/* Послуги */}
@@ -505,6 +560,7 @@ export default function PricingPage() {
           </Card>
         ))}
       </div>
+      )}
     </div>
   );
 }
