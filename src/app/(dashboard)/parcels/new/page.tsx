@@ -347,7 +347,7 @@ export default function NewParcelPage() {
       collection.method === 'courier_pickup' &&
       collection.isMultiParcelPickup === null
     ) {
-      setError('Оберіть «Одна посилка» або «Дві або більше посилок» у блоці «Спосіб прийому/видачі посилки»');
+      setError('Оберіть «Одна посилка» або «Дві або більше посилок» у блоці «Спосіб відправки» (вкладка «Відправник»)');
       return;
     }
 
@@ -525,6 +525,24 @@ export default function NewParcelPage() {
                 адреси прибрано — заповнюється/редагується через діалог
                 («Редагувати» на голубому полі). Стан адреси наповнює
                 handleSenderSelect. */}
+
+            {/* ТЗ §E9/§E13: «Спосіб відправки» — три опції (Виклик кур'єра /
+                Пошта / Пункт збору). Для Працівника спосіб прийому/видачі
+                посилки живе ТУТ, у вкладці «Відправник». Окрема вкладка
+                «Спосіб прийому/видачі посилки» Працівнику не показується
+                (ТЗ §E13 п.1: «Для Працівника — ця вкладка не відображається»).
+                Стан `collection` далі живить розрахунок мінімального тарифу
+                (isPickupPoint / isCourierPickup / isMultiParcelPickup). */}
+            {direction === 'eu_to_ua' && (
+              <div className="pt-2 mt-1 border-t">
+                <Label className="text-sm font-medium mb-1.5 block">Спосіб відправки</Label>
+                <CollectionBlock
+                  senderCountry={sender?.country || sender?.addresses[0]?.country || null}
+                  value={collection}
+                  onChange={setCollection}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -827,21 +845,9 @@ export default function NewParcelPage() {
           </CardContent>
         </Card>
 
-        {/* Collection method — EU→UA only */}
-        {direction === 'eu_to_ua' && (
-          <Card>
-            <CardHeader className="py-3 px-4">
-              <CardTitle className="text-base">Спосіб прийому/видачі посилки</CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 pb-4 pt-0">
-              <CollectionBlock
-                senderCountry={sender?.country || sender?.addresses[0]?.country || null}
-                value={collection}
-                onChange={setCollection}
-              />
-            </CardContent>
-          </Card>
-        )}
+        {/* ТЗ §E13 п.1: «Для Працівника — ця вкладка не відображається».
+            Окремий блок «Спосіб прийому/видачі посилки» прибрано — вибір
+            способу перенесено у вкладку «Відправник» («Спосіб відправки»). */}
 
         {/* Trip selection */}
         <Card>

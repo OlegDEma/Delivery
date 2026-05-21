@@ -337,6 +337,10 @@ export async function POST(request: NextRequest) {
       paymentMethod: parsed.paymentMethod,
       paymentInUkraine: parsed.paymentInUkraine,
       needsPackaging: parsed.needsPackaging,
+      // ТЗ §E4: «Пакет, якщо він був відмічений — має бути відображений
+      // у створеній посилці». Раніше `parcelMoneyAmount` парсився зі схеми,
+      // але НЕ передавався в createParcel — посилка зберігалась без Пакета.
+      parcelMoneyAmount: parsed.parcelMoneyAmount ?? null,
       sendInvoice: parsed.sendInvoice,
       places: parsed.places,
       createdById: userId,

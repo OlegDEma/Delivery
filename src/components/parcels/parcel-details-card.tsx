@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useImperativeHandle, useState, type Ref } from 'react';
 import { toast } from 'sonner';
+import type { ParcelEditHandle } from './parcel-places-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,9 +12,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ParcelDetailsCardProps {
+  /** Imperative-handle — детальна сторінка відкриває редагування з шапки. */
+  ref?: Ref<ParcelEditHandle>;
   parcel: {
     id: string;
     direction: string;
+    shipmentType: string;
     description: string | null;
     declaredValue: number | null;
     declaredValueCurrency?: string | null;
@@ -35,10 +39,11 @@ interface ParcelDetailsCardProps {
   readOnly?: boolean;
 }
 
-export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: ParcelDetailsCardProps) {
+export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: ParcelDetailsCardProps) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const [shipmentType, setShipmentType] = useState(parcel.shipmentType || 'parcels_cargo');
   const [description, setDescription] = useState(parcel.description || '');
   const [declaredValue, setDeclaredValue] = useState(parcel.declaredValue ? String(parcel.declaredValue) : '');
   const [payer, setPayer] = useState(parcel.payer);
@@ -54,8 +59,12 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
 
   const PAYER_LABELS: Record<string, string> = { sender: 'Відправник', receiver: 'Отримувач' };
   const METHOD_LABELS: Record<string, string> = { cash: 'Готівка', cashless: 'Безготівка' };
+  const SHIPMENT_LABELS: Record<string, string> = {
+    parcels_cargo: 'Посилки та вантажі', documents: 'Документи', tires_wheels: 'Шини та диски',
+  };
 
   function startEdit() {
+    setShipmentType(parcel.shipmentType || 'parcels_cargo');
     setDescription(parcel.description || '');
     setDeclaredValue(parcel.declaredValue ? String(parcel.declaredValue) : '');
     setPayer(parcel.payer);
@@ -67,6 +76,11 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
     setEditing(true);
   }
 
+  // ТЗ §E4: редагування відкривається ЄДИНОЮ кнопкою «Редагувати» у шапці.
+  useImperativeHandle(ref, () => ({
+    startEdit: () => { if (!readOnly) startEdit(); },
+  }));
+
   async function handleSave() {
     setSaving(true);
     try {
@@ -74,6 +88,7 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          shipmentType,
           description: description || null,
           declaredValue: declaredValue ? Number(declaredValue) : 0,
           payer,
@@ -102,13 +117,9 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
     <Card>
       <CardHeader className="py-2 px-3 flex flex-row items-center justify-between">
         <CardTitle className="text-sm">Деталі</CardTitle>
-        {!editing ? (
-          !readOnly && (
-            <Button variant="ghost" size="sm" onClick={startEdit} className="text-xs h-7">
-              ✏️ Редагувати
-            </Button>
-          )
-        ) : (
+        {/* ТЗ §E4: редагування відкривається ЄДИНОЮ кнопкою «Редагувати» у
+            шапці посилки. На картці лишаються тільки «Зберегти»/«Скасувати». */}
+        {editing && (
           <div className="flex gap-1">
             <Button variant="ghost" size="sm" onClick={() => setEditing(false)} className="text-xs h-7" disabled={saving}>
               Скасувати
@@ -124,6 +135,23 @@ export function ParcelDetailsCard({ parcel, onUpdate, readOnly = false }: Parcel
           <span className="text-gray-500">Напрямок</span>
           <span>{parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}</span>
         </div>
+
+        {/* Вид відправлення — ТЗ §E4: при редагуванні повертаємось до полів
+            вкладки «Відправлення». У read-режимі рядок не показуємо, щоб не
+            міняти звичний вигляд картки «Деталі». */}
+        {editing ? (
+          <div>
+            <Label className="text-xs text-gray-500">Вид відправлення</Label>
+            <Select value={shipmentType} onValueChange={(v) => setShipmentType(v ?? 'parcels_cargo')}>
+              <SelectTrigger className="h-8"><SelectValue>{SHIPMENT_LABELS[shipmentType]}</SelectValue></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="parcels_cargo">Посилки та вантажі</SelectItem>
+                <SelectItem value="documents">Документи</SelectItem>
+                <SelectItem value="tires_wheels">Шини та диски</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
 
         {/* Description */}
         {editing ? (

@@ -29,7 +29,8 @@ This audit was code-verified on 2026-05-19 (grep + file reads) and updated 2026-
 
 | Item | State | Evidence |
 |---|---|---|
-| «Місця → Редагувати → повна форма» | ❌ | `ParcelPlacesCard` does inline edit, not the rich `parcels/new`-style form re-open |
+| «Місця → Редагувати → повна форма» | 🟢 | ЄДИНА кнопка «Редагувати» у шапці `parcels/[id]` відкриває обидві картки («Параметри відправлення» + «Деталі») у режимі редагування через `useImperativeHandle` (`ParcelEditHandle`). «Місця» перейменовано → «Параметри відправлення». Додано редагування виду відправлення (commit нижче) |
+| «Пакет — чому не відображається у створеній посилці» (F4) | 🟢 | BUG: `POST /api/parcels` не передавав `parcelMoneyAmount` у `createParcel` — посилка зберігалась без Пакета. Виправлено — тепер Пакет видно і в «Розрахунку вартості», і в «Деталях», і в сумі |
 | «Загальна вага» прибрати | 🟢 | removed (commit 83cf920) |
 | Голубе поле «Розрахунок вартості» — структура (факт/об'ємна/розрахункова рядки) | 🟢 | `cost-calculator.tsx` — окремі рядки «Фактична вага» / «Об'ємна вага» / «Розрахункова вага» (commit 5bf5303) |
 | Вкладка «Деталі» без змін | 🟢 | left alone |
@@ -111,7 +112,7 @@ This audit was code-verified on 2026-05-19 (grep + file reads) and updated 2026-
 
 ## §E13 — Вкладка «Спосіб прийому/видачі»
 
-❌ **«1. Для Працівника — ця вкладка не відображається»** — `parcels/new/page.tsx:913` still renders the «Спосіб прийому/видачі посилки» card for staff. Must hide entirely for staff (the method choice should move into the §E9 «Спосіб відправки» selector — depends on E9 refactor).
+🟢 **«1. Для Працівника — ця вкладка не відображається»** — окремий блок «Спосіб прийому/видачі посилки» на `parcels/new` прибрано. `CollectionBlock` перенесено всередину картки «Відправник» як «Спосіб відправки» (§E9-сумісно): стан `collection` далі живить мінімальний тариф (isPickupPoint/isCourierPickup/isMultiParcelPickup). Лишається `eu_to_ua`-only — поведінка `ua_to_eu` незмінна.
 🟢 Client-side hint texts — done (commit bb3cad1).
 🟢 Виклик кур'єра UA-Lviv-only — `ServiceCity` table (commit 4341e4c).
 ❌ «Відправка поштою» (UA) — ФОП Добровольський block: phone +380673320502, ЄДРПОУ 2236117857, full supporting-letter instructions. Static text not implemented.
@@ -210,6 +211,11 @@ The client re-exported the ТЗ as `(3).xlsx` and reviewed it. Findings:
 - **§E13** — ФОП Добровольський postal block implemented; external_shipping enabled for UA-sender clients; collection block renders for client both directions (commit `84161cc`).
 - **§E7/§E9** — `ClientSearch` selected-state: «Пошук…» label removed when filled; «×» replaced with «Редагувати» button (re-opens the confirm/edit dialog) + small «Очистити» (commit `f19a5d1`). Works for both receiver (E7) and sender (E9) — shared component.
 - **§E8** — client `new-order`: country+phone-code auto-switch on direction change (commit `d08d64d`).
+- **§E13** — staff hide: окрема вкладка «Спосіб прийому/видачі посилки» прибрана з `parcels/new`. `CollectionBlock` перенесено в картку «Відправник» як «Спосіб відправки» (3 опції). Стан `collection` далі живить тариф. UI-перевірено в реальному браузері.
+- **§E4 (Пакет, F-flag «Стосовно Пакета — не зроблено»)** — BUG fixed: `POST /api/parcels` не передавав `parcelMoneyAmount` у `createParcel`. Тепер Пакет зберігається і відображається у «Розрахунку вартості» (рядок + сума) та «Деталях» «(N)». UI-перевірено: створено посилку з Пакетом 500 → Пакет 15 EUR у переліку, Всього 45 EUR.
+- **§E4 (Редагувати, F-flag «Редагувати — не зроблено»)** — ЄДИНА кнопка «Редагувати» у шапці `parcels/[id]` відкриває обидві картки одночасно (`useImperativeHandle`). Власні кнопки «✏️ Редагувати» на картках прибрані. «Місця»→«Параметри відправлення». Додано Select «Вид відправлення» у режимі редагування «Деталей». UI-перевірено: збереження працює, recalc спрацьовує.
+
+⚠️ **Judgment call (§E4):** ТЗ хоче «вертаємось до вкладок 'Відправлення' і 'Параметри відправлення'». На детальній сторінці структура карток — «Параметри відправлення» + «Деталі» (не окрема «Відправлення»). Поля вкладки «Відправлення» (вид/опис/варт./страх./пак./пакет) живуть у «Деталях». Це збережено як є; «Деталі» не розщеплено, щоб не ризикувати рештою. Якщо клієнт хоче саме окрему картку «Відправлення» — це наступний крок.
 
 ### §E7/§E9 — still NOT done (the big part)
 - The inline `AddressEditor` block (under the blue summary in `parcels/new/page.tsx`) — ТЗ wants it removed («все решта — поле Адреса — забрати»). **NOT removed** — see pitfall below.

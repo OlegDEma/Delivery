@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ import { AddressLink } from '@/components/shared/address-link';
 import { ShareButton } from '@/components/shared/share-button';
 import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
 import { ParcelPaymentCard } from '@/components/parcels/parcel-payment-card';
-import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
+import { ParcelPlacesCard, type ParcelEditHandle } from '@/components/parcels/parcel-places-card';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { toast } from 'sonner';
 
@@ -141,6 +141,10 @@ export default function ParcelDetailPage() {
   const [saving, setSaving] = useState(false);
   const [trips, setTrips] = useState<TripOption[]>([]);
   const [couriers, setCouriers] = useState<{ id: string; fullName: string }[]>([]);
+  // ТЗ §E4: єдина кнопка «Редагувати» у шапці відкриває обидві форми —
+  // «Відправлення»/«Деталі» та «Параметри відправлення» — одним кліком.
+  const placesEditRef = useRef<ParcelEditHandle>(null);
+  const detailsEditRef = useRef<ParcelEditHandle>(null);
   // Bumped after a successful send-invoice click — triggers <InvoiceHistory>
   // refetch without depending on the parent fetchParcel call.
   const [invoiceRefreshKey, setInvoiceRefreshKey] = useState(0);
@@ -339,6 +343,22 @@ export default function ParcelDetailPage() {
         )}
 
         <div className="flex gap-2 mt-2 flex-wrap">
+          {/* ТЗ §E4: «При натисканні кнопки "Редагувати" вертаємось до
+              вкладок "Відправлення" і "Параметри відправлення" з введеними
+              раніше даними». Одна кнопка відкриває редагування обох карток.
+              Прихована коли посилку заблоковано (accepted, не Суперадмін). */}
+          {!isEditLocked && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                detailsEditRef.current?.startEdit();
+                placesEditRef.current?.startEdit();
+              }}
+            >
+              <Pencil className="w-3.5 h-3.5 mr-1" /> Редагувати
+            </Button>
+          )}
           <Link href={`/parcels/${parcel.id}/print`}>
             <Button variant="outline" size="sm">Друк етикетки</Button>
           </Link>
@@ -483,8 +503,9 @@ export default function ParcelDetailPage() {
         </div>
       </div>
 
-      {/* Places (editable) */}
+      {/* Параметри відправлення (editable) */}
       <ParcelPlacesCard
+        ref={placesEditRef}
         parcelId={parcel.id}
         places={parcel.places}
         totalWeight={parcel.totalWeight}
@@ -519,7 +540,7 @@ export default function ParcelDetailPage() {
       />
 
       {/* Details — після accepted редагування заборонено всім крім super_admin */}
-      <ParcelDetailsCard parcel={parcel} onUpdate={fetchParcel} readOnly={isEditLocked} />
+      <ParcelDetailsCard ref={detailsEditRef} parcel={parcel} onUpdate={fetchParcel} readOnly={isEditLocked} />
 
       {/* Payment card */}
       <ParcelPaymentCard parcel={parcel} onUpdate={fetchParcel} />

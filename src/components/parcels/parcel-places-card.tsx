@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useImperativeHandle, useState, type Ref } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +23,17 @@ interface Place {
   itnPlace: string | null;
 }
 
+/**
+ * Imperative handle — дозволяє детальній сторінці відкрити редагування
+ * однією кнопкою «Редагувати» (ТЗ §E4: «При натисканні кнопки 'Редагувати'
+ * вертаємось до вкладок 'Відправлення' і 'Параметри відправлення'»).
+ */
+export interface ParcelEditHandle {
+  startEdit: () => void;
+}
+
 interface ParcelPlacesCardProps {
+  ref?: Ref<ParcelEditHandle>;
   parcelId: string;
   places: Place[];
   totalWeight: number | null;
@@ -74,6 +84,7 @@ function volWeight(l: string, w: string, h: string): number {
 }
 
 export function ParcelPlacesCard({
+  ref,
   parcelId,
   places,
   totalWeight,
@@ -113,6 +124,13 @@ export function ParcelPlacesCard({
     );
     setEditing(true);
   }
+
+  // ТЗ §E4: детальна сторінка відкриває редагування однією кнопкою.
+  // Imperative-handle лишає внутрішній стан картки незмінним — батьківська
+  // сторінка лише запускає startEdit(). readOnly блокує (locked-посилки).
+  useImperativeHandle(ref, () => ({
+    startEdit: () => { if (!readOnly) startEdit(); },
+  }));
 
   function updateDraft(i: number, patch: Partial<PlaceDraft>) {
     setDrafts(prev => prev.map((d, idx) => (idx === i ? { ...d, ...patch } : d)));
@@ -166,14 +184,12 @@ export function ParcelPlacesCard({
   return (
     <Card>
       <CardHeader className="py-2 px-3 flex flex-row items-center justify-between">
-        <CardTitle className="text-sm">Місця ({places.length})</CardTitle>
-        {!editing ? (
-          !readOnly && (
-            <Button variant="ghost" size="sm" onClick={startEdit} className="text-xs h-7">
-              ✏️ Редагувати
-            </Button>
-          )
-        ) : (
+        {/* ТЗ §E11/§E4: вкладка зветься «Параметри відправлення». */}
+        <CardTitle className="text-sm">Параметри відправлення ({places.length})</CardTitle>
+        {/* ТЗ §E4: редагування відкривається ЄДИНОЮ кнопкою «Редагувати»
+            у шапці посилки — окрема кнопка на картці прибрана. Тут лишаються
+            тільки «Зберегти»/«Скасувати», коли картка вже в режимі редагування. */}
+        {editing && (
           <div className="flex gap-1">
             <Button variant="ghost" size="sm" onClick={() => setEditing(false)} className="text-xs h-7" disabled={saving}>
               Скасувати
