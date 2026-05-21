@@ -303,6 +303,19 @@ export function ClientCreateForm({
     <p className="text-sm font-bold text-blue-700 underline underline-offset-4 mb-2">{children}</p>
   );
 
+  // ТЗ §E7/§E9: замість «Адреса» — «Спосіб доставки» (Отримувач) /
+  // «Спосіб відправки» (Відправник), з трьома названими опціями.
+  // Значення enum (address/np_warehouse/pickup_point) незмінні —
+  // міняються лише підписи залежно від ролі.
+  const methodSectionTitle =
+    role === 'sender' ? 'Спосіб відправки'
+    : role === 'receiver' ? 'Спосіб доставки'
+    : 'Адреса';
+  const methodLabels: Record<'address' | 'np_warehouse' | 'pickup_point', string> =
+    role === 'sender'
+      ? { address: 'Виклик кур\'єра', np_warehouse: 'Пошта', pickup_point: 'Пункт збору' }
+      : { address: 'Адресна доставка', np_warehouse: 'Пошта', pickup_point: 'Пункт видачі' };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <PhoneInput
@@ -358,20 +371,18 @@ export function ClientCreateForm({
           уже показує вибране. */}
       <div className="border-t pt-3 grid grid-cols-[1fr_9rem] gap-2 items-end">
         <div>
-          <SectionTitle>Адреса</SectionTitle>
+          <SectionTitle>{methodSectionTitle}</SectionTitle>
           <Select
             value={deliveryMethod}
             onValueChange={(v) => setDeliveryMethod((v ?? 'address') as 'address' | 'np_warehouse' | 'pickup_point')}
           >
             <SelectTrigger>
-              <SelectValue>
-                {deliveryMethod === 'np_warehouse' ? 'Відділення' : deliveryMethod === 'pickup_point' ? 'Пункт збору' : 'Адресна доставка'}
-              </SelectValue>
+              <SelectValue>{methodLabels[deliveryMethod]}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="address">Адресна доставка</SelectItem>
-              <SelectItem value="np_warehouse">Відділення</SelectItem>
-              <SelectItem value="pickup_point">Пункт збору</SelectItem>
+              <SelectItem value="address">{methodLabels.address}</SelectItem>
+              <SelectItem value="np_warehouse">{methodLabels.np_warehouse}</SelectItem>
+              <SelectItem value="pickup_point">{methodLabels.pickup_point}</SelectItem>
             </SelectContent>
           </Select>
         </div>
