@@ -167,84 +167,97 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
     return undefined;
   }
 
-  if (selected) {
+  // ── Голубе підсумкове поле обраного клієнта (ТЗ §E7/§E9) ──────────
+  // Після вибору: лише голубе поле з підсумком + кнопка «Редагувати»
+  // (хрестик-очищення лишаємо дрібним). Лейбл «Пошук...» — прибрано.
+  const selectedCard = selected ? (() => {
     const addr = selected.addresses[0];
     const country = addr?.country || selected.country;
     return (
-      <div className="space-y-1">
-        <Label className="text-xs text-gray-500">{label}</Label>
-        <div className="flex items-start justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-          <div>
-            {/* Per ТЗ: «у даних Відправника та Отримувача забрати дублюючі надписи
-                (статус клієнта Відправник та Отримувач)» — роль вже є в заголовку картки. */}
-            <div className="font-medium text-sm">
-              {selected.lastName} {selected.firstName}
-              {selected.middleName ? ` ${selected.middleName}` : ''}
-            </div>
-            {editingPhone && onPhoneEdit ? (
-              <div className="flex items-center gap-1 mt-1">
-                <div className="flex-1">
-                  <PhoneInput
-                    value={phoneDraft}
-                    onChange={setPhoneDraft}
-                    defaultCountry={(selected.country as CountryCode) || 'UA'}
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="text-xs text-green-700 hover:text-green-800 font-medium px-1"
-                  onClick={() => { onPhoneEdit(phoneDraft); setEditingPhone(false); }}
-                >✓</button>
-                <button
-                  type="button"
-                  className="text-xs text-gray-400 hover:text-gray-700 px-1"
-                  onClick={() => setEditingPhone(false)}
-                >×</button>
-              </div>
-            ) : (
-              <div className="text-xs text-gray-600 flex items-center gap-2">
-                <span>{selected.phone}</span>
-                {onPhoneEdit && (
-                  <button
-                    type="button"
-                    className="text-[10px] text-blue-600 hover:underline"
-                    onClick={() => { setPhoneDraft(selected.phone); setEditingPhone(true); }}
-                    title="Змінити номер"
-                  >
-                    ред.
-                  </button>
-                )}
-              </div>
-            )}
-            {country && (
-              <div className="text-xs text-gray-500 mt-0.5">
-                <span className="font-medium">Країна:</span> {country}
-              </div>
-            )}
-            {addr && (
-              <div className="text-xs text-gray-500">
-                <span className="font-medium">Адреса:</span>{' '}
-                {addr.city}
-                {addr.street ? `, ${addr.street}` : ''}
-                {addr.building ? ` ${addr.building}` : ''}
-                {addr.npWarehouseNum ? ` | НП №${addr.npWarehouseNum}` : ''}
-              </div>
-            )}
+      <div className="flex items-start justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+        <div>
+          <div className="font-medium text-sm">
+            {selected.lastName} {selected.firstName}
+            {selected.middleName ? ` ${selected.middleName}` : ''}
           </div>
+          {editingPhone && onPhoneEdit ? (
+            <div className="flex items-center gap-1 mt-1">
+              <div className="flex-1">
+                <PhoneInput
+                  value={phoneDraft}
+                  onChange={setPhoneDraft}
+                  defaultCountry={(selected.country as CountryCode) || 'UA'}
+                />
+              </div>
+              <button
+                type="button"
+                className="text-xs text-green-700 hover:text-green-800 font-medium px-1"
+                onClick={() => { onPhoneEdit(phoneDraft); setEditingPhone(false); }}
+              >✓</button>
+              <button
+                type="button"
+                className="text-xs text-gray-400 hover:text-gray-700 px-1"
+                onClick={() => setEditingPhone(false)}
+              >×</button>
+            </div>
+          ) : (
+            <div className="text-xs text-gray-600 flex items-center gap-2">
+              <span>{selected.phone}</span>
+              {onPhoneEdit && (
+                <button
+                  type="button"
+                  className="text-[10px] text-blue-600 hover:underline"
+                  onClick={() => { setPhoneDraft(selected.phone); setEditingPhone(true); }}
+                  title="Змінити номер"
+                >
+                  ред.
+                </button>
+              )}
+            </div>
+          )}
+          {country && (
+            <div className="text-xs text-gray-500 mt-0.5">
+              <span className="font-medium">Країна:</span> {country}
+            </div>
+          )}
+          {addr && (
+            <div className="text-xs text-gray-500">
+              <span className="font-medium">Адреса:</span>{' '}
+              {addr.city}
+              {addr.street ? `, ${addr.street}` : ''}
+              {addr.building ? ` ${addr.building}` : ''}
+              {addr.npWarehouseNum ? ` | НП №${addr.npWarehouseNum}` : ''}
+            </div>
+          )}
+        </div>
+        {/* ТЗ §E7/§E9: хрестик замінено на кнопку «Редагувати» (відкриває
+            ту саму форму). Очищення лишаємо окремим дрібним посиланням. */}
+        <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setEditCandidate(selected)}
+            className="text-xs font-medium text-blue-600 hover:text-blue-800"
+          >
+            Редагувати
+          </button>
           <button
             type="button"
             onClick={onClear}
-            className="text-gray-400 hover:text-red-500 ml-2 text-lg"
+            className="text-[10px] text-gray-400 hover:text-red-500"
           >
-            &times;
+            Очистити
           </button>
         </div>
       </div>
     );
-  }
+  })() : null;
 
   return (
     <div ref={wrapperRef} className="relative space-y-1">
+      {selected ? (
+        selectedCard
+      ) : (
+      <>
       <Label className="text-xs text-gray-500">{label}</Label>
       <div className="flex gap-1">
         <Input
@@ -325,6 +338,8 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
             </>
           )}
         </div>
+      )}
+      </>
       )}
 
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
