@@ -212,6 +212,7 @@ export function ClientCreateForm({
         }
 
         if (initialAddr?.id) {
+          // Наявна адреса — оновлюємо.
           const r = await fetch(`/api/clients/${initialData.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -233,6 +234,32 @@ export function ClientCreateForm({
           if (!r.ok) {
             const d = await r.json().catch(() => ({}));
             throw new Error(d.error || 'Помилка оновлення адреси');
+          }
+        } else {
+          // У клієнта не було збереженої адреси — створюємо нову.
+          // Без цього раніше нова адреса з діалогу мовчки втрачалась
+          // (PATCH не відправлявся) — посилка зберігалась без адреси.
+          const r = await fetch(`/api/clients/${initialData.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'addAddress',
+              address: {
+                country,
+                deliveryMethod,
+                postalCode: postalCode || null,
+                city,
+                street: street || null,
+                building: building || null,
+                landmark: landmark || null,
+                npWarehouseNum: deliveryMethod === 'np_warehouse' ? (npWarehouseNum || null) : null,
+                pickupPointText: deliveryMethod === 'pickup_point' ? (pickupPointText || null) : null,
+              },
+            }),
+          });
+          if (!r.ok) {
+            const d = await r.json().catch(() => ({}));
+            throw new Error(d.error || 'Помилка збереження адреси');
           }
         }
 
