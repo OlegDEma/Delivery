@@ -18,7 +18,6 @@ import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { cn } from '@/lib/utils';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { CollectionBlock, type CollectionState } from '@/components/parcels/collection-block';
-import { AddressEditor } from '@/components/parcels/address-editor';
 import { PhoneInput } from '@/components/shared/phone-input';
 
 interface SelectedClient {
@@ -521,42 +520,11 @@ export default function NewParcelPage() {
                 if (sender) setSender({ ...sender, phone: p });
               }}
             />
-            {sender && (
-              <div className="border-t pt-2 mt-2 space-y-2">
-                <AddressEditor
-                  title="Адреса відправника"
-                  cityPlaceholder="Амстердам"
-                  // ТЗ: для відправника опція address = «Адреса відправки».
-                  role="sender"
-                  // ТЗ: автокомпліт + латиниця для EU. Країна відправника —
-                  // з обраної адреси клієнта, або UA для ua_to_eu.
-                  country={
-                    sender?.addresses[0]?.country
-                    ?? (direction === 'ua_to_eu' ? 'UA' : null)
-                  }
-                  state={{
-                    deliveryMethod: senderDeliveryMethod,
-                    postalCode: senderPostalCode,
-                    city: senderCity,
-                    street: senderStreet,
-                    building: senderBuilding,
-                    landmark: senderLandmark,
-                    npWarehouseNum: senderNpWarehouse,
-                    pickupPointText: senderPickupPointText,
-                  }}
-                  onChange={(p) => {
-                    if (p.deliveryMethod !== undefined) setSenderDeliveryMethod(p.deliveryMethod);
-                    if (p.postalCode !== undefined) setSenderPostalCode(p.postalCode);
-                    if (p.city !== undefined) setSenderCity(p.city);
-                    if (p.street !== undefined) setSenderStreet(p.street);
-                    if (p.building !== undefined) setSenderBuilding(p.building);
-                    if (p.landmark !== undefined) setSenderLandmark(p.landmark);
-                    if (p.npWarehouseNum !== undefined) setSenderNpWarehouse(p.npWarehouseNum);
-                    if (p.pickupPointText !== undefined) setSenderPickupPointText(p.pickupPointText);
-                  }}
-                />
-              </div>
-            )}
+            {/* ТЗ §E9: «все решта — поле "Адреса" — забрати. В залишку
+                лише назва вкладки "Відправник" та голубе поле». Інлайн-форму
+                адреси прибрано — заповнюється/редагується через діалог
+                («Редагувати» на голубому полі). Стан адреси наповнює
+                handleSenderSelect. */}
           </CardContent>
         </Card>
 
