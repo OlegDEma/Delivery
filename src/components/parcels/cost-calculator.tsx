@@ -176,21 +176,11 @@ export function CostCalculator(props: CostCalculatorProps) {
         <span className="text-gray-600">Розрахункова вага ({WEIGHT_TYPE_LABELS[cost.weightType] || cost.weightType}):</span>
         <span className="font-medium">{cost.billableWeight.toFixed(2)} кг</span>
       </div>
+      {/* ТЗ §E4/§E14: «вартість доставки (слова в дужках забрати)» —
+          лейбл і значення без жодних дужкових приміток. */}
       <div className="flex justify-between">
-        <span className="text-gray-600">
-          Доставка ({cost.pricePerKg} EUR/кг
-          {cost.lvivExceptionApplied && (
-            <span className="text-green-700"> · Львів</span>
-          )}):
-        </span>
-        <span>
-          {formatCurrency(cost.deliveryCost, 'EUR')}
-          {cost.minimumApplied > 0 && cost.minimumLabel && (
-            <span className="ml-1 text-[10px] text-amber-700" title={`Базова ${cost.baseDeliveryCost} EUR замінена мінімумом «${cost.minimumLabel}» = ${cost.minimumApplied} EUR`}>
-              (мін. {cost.minimumLabel})
-            </span>
-          )}
-        </span>
+        <span className="text-gray-600">Вартість доставки:</span>
+        <span>{formatCurrency(cost.deliveryCost, 'EUR')}</span>
       </div>
       {cost.insuranceCost > 0 && (
         <div className="flex justify-between">
@@ -204,9 +194,13 @@ export function CostCalculator(props: CostCalculatorProps) {
           <span>{formatCurrency(cost.packagingCost, 'EUR')}</span>
         </div>
       )}
-      {cost.parcelMoneyCost > 0 && (
+      {/* ТЗ §E4: «пакет, якщо він був відмічений — має бути відображений
+          і у переліку і у сумуванні». Показуємо рядок щойно введено суму
+          Пакета (а не лише коли є ненульова комісія). «Слова в дужках» —
+          прибрано (ТЗ §E4/§E14). */}
+      {(props.parcelMoneyAmount ?? 0) > 0 && (
         <div className="flex justify-between">
-          <span className="text-gray-600">Пакет ({props.parcelMoneyAmount} €):</span>
+          <span className="text-gray-600">Пакет:</span>
           <span>{formatCurrency(cost.parcelMoneyCost, 'EUR')}</span>
         </div>
       )}
