@@ -150,6 +150,9 @@ export const updateParcelSchema = z.object({
   collectionPointId: uuidSchema.nullable().optional(),
   collectionDate: z.string().nullable().optional(),
   collectionAddress: z.string().trim().max(300).nullable().optional(),
+  /** Per ТЗ-docx 03.06.2026: «всі поля редаговані» — multi-parcel answer
+      теж має оновлюватись при редагуванні (раніше брали лише з створення). */
+  isMultiParcelPickup: z.boolean().nullable().optional(),
   routeTaskStatus: z.string().trim().max(50).nullable().optional(),
   routeTaskFailReason: z.string().trim().max(500).nullable().optional(),
   routeTaskReschedDate: z.string().nullable().optional(),

@@ -345,6 +345,7 @@ export async function PATCH(
     updateData.collectionDate = body.collectionDate ? new Date(body.collectionDate) : null;
   }
   if (body.collectionAddress !== undefined) updateData.collectionAddress = body.collectionAddress || null;
+  if (body.isMultiParcelPickup !== undefined) updateData.isMultiParcelPickup = body.isMultiParcelPickup;
   if (body.routeTaskStatus !== undefined) updateData.routeTaskStatus = body.routeTaskStatus || null;
   if (body.routeTaskFailReason !== undefined) updateData.routeTaskFailReason = body.routeTaskFailReason || null;
   if (body.routeTaskReschedDate !== undefined) {
@@ -411,7 +412,8 @@ export async function PATCH(
     body.needsPackaging !== undefined ||
     body.parcelMoneyAmount !== undefined ||
     body.collectionMethod !== undefined ||
-    body.collectionPointId !== undefined;
+    body.collectionPointId !== undefined ||
+    body.isMultiParcelPickup !== undefined;
 
   if (costAffectingTouched) {
     try {
@@ -480,7 +482,9 @@ export async function PATCH(
                 parcel.direction === 'eu_to_ua' && collectionMethod === 'pickup_point',
               isCourierPickup:
                 parcel.direction === 'eu_to_ua' && collectionMethod === 'courier_pickup',
-              isMultiParcelPickup: !!parcel.isMultiParcelPickup,
+              isMultiParcelPickup: body.isMultiParcelPickup !== undefined
+                ? !!body.isMultiParcelPickup
+                : !!parcel.isMultiParcelPickup,
               isBothDirections: false,
               parcelMoneyAmount: parcelMoneyAmount ? Number(parcelMoneyAmount) : 0,
               // Per ТЗ §49/§50 — Львів-виняток на ціну за кг.

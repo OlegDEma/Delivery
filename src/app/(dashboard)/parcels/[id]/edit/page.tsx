@@ -316,6 +316,8 @@ export default function EditParcelPage() {
         collectionPointId: collection.method === 'pickup_point' ? collection.pointId || null : null,
         collectionDate: collection.date || null,
         collectionAddress: collection.method === 'courier_pickup' ? collection.address || null : null,
+        isMultiParcelPickup:
+          collection.method === 'courier_pickup' ? !!collection.isMultiParcelPickup : null,
         places: placesPayload,
       }),
     });
