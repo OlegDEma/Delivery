@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getBillableWeight } from '@/lib/utils/volumetric';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -189,6 +190,16 @@ export default function NewParcelPage() {
   const [tripDateMode, setTripDateMode] = useState<string>('trip'); // 'trip' | 'custom'
   const [trips, setTrips] = useState<TripOption[]>([]);
   const [selectedTripId, setSelectedTripId] = useState('');
+
+  // ТЗ §E11 (Bug 5 з docx 03.06.2026): «Розрахункова вага» у блоці підсумків
+  // має рахуватись СВОЇМ правилом (custom 0.5/0.5 за замовч.), а НЕ
+  // Math.max(факт, об'ємна). Підтягуємо тариф для напрямку+країни, щоб
+  // локальний preview збігся з канонічним розрахунком CostCalculator.
+  type PricingRule = { country: string; direction: string; weightType: 'actual'|'volumetric'|'average'|'custom'; weightCustomFactualFraction?: number };
+  const [pricingConfigs, setPricingConfigs] = useState<PricingRule[]>([]);
+  useEffect(() => {
+    fetch('/api/pricing').then(r => r.ok ? r.json() : []).then(setPricingConfigs);
+  }, []);
 
   // Collection (EU→UA only): how we receive the parcel
   const [collection, setCollection] = useState<CollectionState>({
@@ -759,23 +770,33 @@ export default function NewParcelPage() {
               </>
             )}
 
-            {/* Totals */}
-            <div className="bg-gray-50 rounded-lg p-3 text-sm">
-              <div className="flex justify-between">
-                <span>Фактична вага:</span>
-                <span className="font-medium">{totalWeight.toFixed(2)} кг</span>
-              </div>
-              {totalVolWeight > 0 && (
-                <div className="flex justify-between">
-                  <span>Об&apos;ємна вага:</span>
-                  <span className="font-medium">{totalVolWeight.toFixed(2)} кг</span>
+            {/* Totals — Розрахункова вага по правилу тарифу (Bug 5 docx). */}
+            {(() => {
+              const cfg = pricingConfigs.find(
+                c => c.country === calcSenderCountry && c.direction === direction
+              );
+              const weightType = (cfg?.weightType || 'custom') as 'actual'|'volumetric'|'average'|'custom';
+              const ffrac = cfg?.weightCustomFactualFraction ?? 0.5;
+              const billable = getBillableWeight(totalWeight, totalVolWeight, weightType, ffrac);
+              return (
+                <div className="bg-gray-50 rounded-lg p-3 text-sm">
+                  <div className="flex justify-between">
+                    <span>Фактична вага:</span>
+                    <span className="font-medium">{totalWeight.toFixed(2)} кг</span>
+                  </div>
+                  {totalVolWeight > 0 && (
+                    <div className="flex justify-between">
+                      <span>Об&apos;ємна вага:</span>
+                      <span className="font-medium">{totalVolWeight.toFixed(2)} кг</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-medium border-t mt-1 pt-1">
+                    <span>Розрахункова вага:</span>
+                    <span>{billable.toFixed(2)} кг</span>
+                  </div>
                 </div>
-              )}
-              <div className="flex justify-between font-medium border-t mt-1 pt-1">
-                <span>Розрахункова вага:</span>
-                <span>{Math.max(totalWeight, totalVolWeight).toFixed(2)} кг</span>
-              </div>
-            </div>
+              );
+            })()}
           </CardContent>
         </Card>
 

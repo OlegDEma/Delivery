@@ -47,8 +47,14 @@ export default function MyOrdersPage() {
         <div className="text-center py-12 text-gray-500">Завантаження...</div>
       ) : (
         <div className="bg-white rounded-lg border divide-y">
+          {/* Фікс багу docx 03.06.2026: «Посилки створені клієнтом не клікабельні».
+              Кожна посилка тепер — посилання на /my-orders/[id]. */}
           {orders.map(o => (
-            <div key={o.id} className="p-4">
+            <Link
+              key={o.id}
+              href={`/my-orders/${o.id}`}
+              className="block p-4 hover:bg-gray-50 transition-colors"
+            >
               <div className="flex items-start justify-between mb-1">
                 <div>
                   <div className="font-mono text-sm font-medium">{o.internalNumber}</div>
@@ -84,7 +90,7 @@ export default function MyOrdersPage() {
                 {o.totalWeight && <span>{Number(o.totalWeight).toFixed(1)} кг</span>}
                 <span>{o.direction === 'eu_to_ua' ? 'EU→UA' : 'UA→EU'}</span>
               </div>
-            </div>
+            </Link>
           ))}
           {orders.length === 0 && (
             <div className="text-center py-12 text-gray-500">
