@@ -508,26 +508,20 @@ export default function EditParcelPage() {
           </CardContent>
         </Card>
 
-        {/* Places. */}
+        {/* Places. У РЕЖИМІ РЕДАГУВАННЯ:
+            — «+ Додати місце» приховане (PATCH-роут не створює нові місця);
+            — «Загальні параметри» приховані (стирання ID існуючих місць
+              викликало б їх видалення на бекенді).
+            Якщо потрібна реструктуризація місць — створюється нова посилка. */}
         <Card>
           <CardHeader className="py-3 px-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">
-                Параметри відправлення <FieldHint text="Введіть загальні параметри або детально по кожному місцю." />
+                Параметри відправлення <FieldHint text="Редагуйте вагу та розміри існуючих місць. Для реструктуризації створіть нову посилку." />
               </CardTitle>
-              {!useGeneralParams && (
-                <Button type="button" variant="outline" size="sm" onClick={addPlace} disabled={places.length >= 10}>
-                  + Додати місце
-                </Button>
-              )}
             </div>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-3">
-            <div className="flex items-center gap-2">
-              <Checkbox checked={useGeneralParams} onCheckedChange={(c) => setUseGeneralParams(c === true)} />
-              <Label className="text-sm">Загальні параметри</Label>
-            </div>
-
             {useGeneralParams ? (
               <div className="border rounded-lg p-3 space-y-2">
                 <div className="grid grid-cols-3 gap-2">
