@@ -18,7 +18,7 @@ import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { cn } from '@/lib/utils';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
-import { CollectionBlock, type CollectionState } from '@/components/parcels/collection-block';
+import { type CollectionState } from '@/components/parcels/collection-block';
 import { PhoneInput } from '@/components/shared/phone-input';
 
 interface SelectedClient {
@@ -294,8 +294,27 @@ export default function NewParcelPage() {
       setSenderNpWarehouse(addr.npWarehouseNum || '');
       setSenderLandmark(addr.landmark || '');
       setSenderPickupPointText(addr.pickupPointText || '');
+      // ТЗ (docx 13.06.26 §5a): спосіб відправки тепер вибирається у формі
+      // Відправника (його адреса), а не окремими прямокутниками. Виводимо
+      // collectionMethod з deliveryMethod адреси — він драйвить мінімальний
+      // тариф (isCourierPickup/isPickupPoint), тож ціни лишаються коректні:
+      //   Виклик кур'єра (address) → courier_pickup
+      //   Пошта (np_warehouse)      → external_shipping
+      //   Пункт збору (pickup_point)→ pickup_point
+      const dm = addr.deliveryMethod || 'address';
+      const method: CollectionState['method'] =
+        dm === 'np_warehouse' ? 'external_shipping'
+        : dm === 'pickup_point' ? 'pickup_point'
+        : 'courier_pickup';
+      setCollection({
+        method, pointId: '', date: '', address: '',
+        // courier — оператор має свідомо обрати кількість посилок (впливає
+        // на тариф); решта методів не потребують відповіді.
+        isMultiParcelPickup: null,
+      });
     } else {
       setSenderPostalCode(''); setSenderCity(''); setSenderStreet(''); setSenderBuilding(''); setSenderNpWarehouse(''); setSenderLandmark(''); setSenderPickupPointText('');
+      setCollection({ method: '', pointId: '', date: '', address: '', isMultiParcelPickup: null });
     }
   }
 
@@ -556,21 +575,47 @@ export default function NewParcelPage() {
                 («Редагувати» на голубому полі). Стан адреси наповнює
                 handleSenderSelect. */}
 
-            {/* ТЗ §E9/§E13: «Спосіб відправки» — три опції (Виклик кур'єра /
-                Пошта / Пункт збору). Для Працівника спосіб прийому/видачі
-                посилки живе ТУТ, у вкладці «Відправник». Окрема вкладка
-                «Спосіб прийому/видачі посилки» Працівнику не показується
-                (ТЗ §E13 п.1: «Для Працівника — ця вкладка не відображається»).
-                Стан `collection` далі живить розрахунок мінімального тарифу
-                (isPickupPoint / isCourierPickup / isMultiParcelPickup). */}
-            {direction === 'eu_to_ua' && (
-              <div className="pt-2 mt-1 border-t">
-                <Label className="text-sm font-medium mb-1.5 block">Спосіб відправки</Label>
-                <CollectionBlock
-                  senderCountry={sender?.country || sender?.addresses[0]?.country || null}
-                  value={collection}
-                  onChange={setCollection}
-                />
+            {/* ТЗ (docx 13.06.26 §5a): окремі прямокутники «Спосіб відправки»
+                ПРИБРАНО — клієнт перекреслив їх. Спосіб тепер вибирається у
+                формі Відправника («Виклик кур'єра / Пошта / Пункт збору»),
+                а тут показується підсумком ПІСЛЯ адреси. collection.method
+                виводиться з deliveryMethod адреси (handleSenderSelect) і далі
+                драйвить мінімальний тариф. Для «Виклик кур'єра» оператор має
+                відповісти про кількість посилок (впливає на тариф). */}
+            {direction === 'eu_to_ua' && sender && collection.method && (
+              <div className="pt-2 mt-1 border-t text-sm">
+                <span className="text-gray-500">Спосіб відправки:</span>{' '}
+                <span className="font-medium">
+                  {collection.method === 'courier_pickup' ? 'Виклик кур\'єра'
+                    : collection.method === 'external_shipping' ? 'Пошта'
+                    : 'Пункт збору'}
+                </span>
+                {collection.method === 'courier_pickup' && (
+                  <div className="mt-2 bg-amber-50 border border-amber-200 rounded p-2 space-y-1.5">
+                    <div className="text-xs font-medium text-amber-900">
+                      Це буде єдина посилка від цього Відправника?
+                    </div>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <Checkbox
+                        checked={collection.isMultiParcelPickup === false}
+                        onCheckedChange={(c) => c === true && setCollection({ ...collection, isMultiParcelPickup: false })}
+                      />
+                      Одна посилка
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <Checkbox
+                        checked={collection.isMultiParcelPickup === true}
+                        onCheckedChange={(c) => c === true && setCollection({ ...collection, isMultiParcelPickup: true })}
+                      />
+                      Дві або більше посилок
+                    </label>
+                    {(collection.isMultiParcelPickup === null || collection.isMultiParcelPickup === undefined) && (
+                      <div className="text-[11px] text-amber-700">
+                        Відповідь обов&apos;язкова — від неї залежить мінімальна вартість посилки.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
