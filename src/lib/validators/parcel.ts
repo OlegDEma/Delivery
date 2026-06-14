@@ -103,6 +103,8 @@ export const clientOrderSchema = z.object({
   // Sender address (client is always the sender — enforced in route)
   senderCity: text(100).optional(),
   senderStreet: z.string().trim().max(300).optional().nullable(),
+  /** Індекс (поштовий код) відправника — ТЗ §5b. */
+  senderPostalCode: z.string().trim().max(20).optional().nullable(),
   senderCountry: countrySchema.optional().nullable(),
   senderFirstName: z.string().trim().max(100).optional(),
   senderLastName: z.string().trim().max(100).optional(),
@@ -112,6 +114,8 @@ export const clientOrderSchema = z.object({
   receiverLastName: text(100),
   receiverCity: text(100).optional(),
   receiverStreet: z.string().trim().max(300).optional().nullable(),
+  /** Індекс (поштовий код) отримувача — ТЗ §4. */
+  receiverPostalCode: z.string().trim().max(20).optional().nullable(),
   receiverCountry: countrySchema.optional().nullable(),
   receiverNpWarehouse: z.string().trim().max(50).optional().nullable(),
   receiverDeliveryMethod: deliveryMethodSchema.optional(),

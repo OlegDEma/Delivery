@@ -61,6 +61,7 @@ export default function NewOrderPage() {
   const [senderLastName, setSenderLastName] = useState('');
   const [senderCountry, setSenderCountry] = useState('NL');
   const [senderCity, setSenderCity] = useState('');
+  const [senderPostalCode, setSenderPostalCode] = useState('');
 
   // Receiver
   const [receiverPhone, setReceiverPhone] = useState('+');
@@ -68,6 +69,7 @@ export default function NewOrderPage() {
   const [receiverLastName, setReceiverLastName] = useState('');
   const [receiverCountry, setReceiverCountry] = useState('');
   const [receiverCity, setReceiverCity] = useState('');
+  const [receiverPostalCode, setReceiverPostalCode] = useState('');
   const [receiverStreet, setReceiverStreet] = useState('');
   const [receiverDeliveryMethod, setReceiverDeliveryMethod] = useState('address');
   const [receiverNpWarehouse, setReceiverNpWarehouse] = useState('');
@@ -187,6 +189,22 @@ export default function NewOrderPage() {
         return;
       }
     }
+    // ТЗ (docx 13.06.26 §1): «об'ємна вага не може бути нульовою — у будь-якому
+    // вікні має бути внесено розміри». У клієнт-порталі немає поля «об'єм», тож
+    // для кожного місця з вагою вимагаємо Д/Ш/В.
+    {
+      const badPlace = places.findIndex(p => {
+        if (Number(p.weight) <= 0) return false;
+        return !(Number(p.length) > 0 && Number(p.width) > 0 && Number(p.height) > 0);
+      });
+      if (badPlace !== -1) {
+        setError(`Місце ${badPlace + 1}: вкажіть довжину, ширину та висоту — об'ємна вага не може бути нульовою`);
+        return;
+      }
+      if (!places.some(p => Number(p.weight) > 0)) {
+        setError('Вкажіть вагу хоча б одного місця'); return;
+      }
+    }
     setSaving(true);
 
     const res = await fetch('/api/client-portal/orders', {
@@ -198,8 +216,8 @@ export default function NewOrderPage() {
         insurance, needsPackaging,
         // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
         payer, paymentMethod, paymentInUkraine,
-        senderPhone, senderFirstName, senderLastName, senderCountry, senderCity,
-        receiverPhone, receiverFirstName, receiverLastName, receiverCountry, receiverCity,
+        senderPhone, senderFirstName, senderLastName, senderCountry, senderCity, senderPostalCode,
+        receiverPhone, receiverFirstName, receiverLastName, receiverCountry, receiverCity, receiverPostalCode,
         receiverStreet, receiverDeliveryMethod, receiverNpWarehouse,
         places: places.map(p => ({
           weight: Number(p.weight) || 0,
@@ -347,6 +365,11 @@ export default function NewOrderPage() {
                 onChange={(v) => setSenderCity(v ? v.charAt(0).toUpperCase() + v.slice(1) : v)}
               />
             </div>
+            {/* ТЗ §5b: поле «Індекс» після Населеного пункту. */}
+            <div>
+              <Label>Індекс</Label>
+              <Input value={senderPostalCode} onChange={(e) => setSenderPostalCode(e.target.value)} placeholder="00-000" />
+            </div>
             {/* ТЗ §5b: умовні поля за обраним способом передачі. «Виклик
                 кур'єра» → адреса забору; «Пошта» → номер складу; «Пункт
                 збору» → перелік точок (у картці «Як ви передасте» вище). */}
@@ -407,6 +430,11 @@ export default function NewOrderPage() {
                 onChange={(v) => setReceiverCity(v ? v.charAt(0).toUpperCase() + v.slice(1) : v)}
                 required
               />
+            </div>
+            {/* ТЗ §4: поле «Індекс» після Населеного пункту. */}
+            <div>
+              <Label>Індекс</Label>
+              <Input value={receiverPostalCode} onChange={(e) => setReceiverPostalCode(e.target.value)} placeholder="00-000" />
             </div>
             {receiverCountry === 'UA' && (
               <div>

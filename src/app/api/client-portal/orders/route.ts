@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
           country: senderCountry,
           city: body.senderCity,
           street: body.senderStreet || null,
+          postalCode: body.senderPostalCode || null,
         },
       });
       senderAddressId = addr.id;
@@ -156,6 +157,7 @@ export async function POST(request: NextRequest) {
           country: receiverCountry,
           city: body.receiverCity,
           street: body.receiverStreet || null,
+          postalCode: body.receiverPostalCode || null,
           npWarehouseNum: body.receiverNpWarehouse || null,
           deliveryMethod: body.receiverDeliveryMethod || 'address',
         },

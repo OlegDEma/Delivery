@@ -12,6 +12,7 @@ import { PhoneInput } from '@/components/shared/phone-input';
 import { FieldHint } from '@/components/shared/field-hint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { isLvivCity } from '@/lib/utils/pricing';
 
 interface ClientCreateFormProps {
   onSuccess: (client: {
@@ -152,6 +153,13 @@ export function ClientCreateForm({
   const cityPoints = cityNorm ? points.filter(p => p.city.trim().toLowerCase() === cityNorm) : [];
   const pointsToShow = cityPoints.length > 0 ? cityPoints : points;
   const hasAnyPoints = points.length > 0;
+
+  // ТЗ §5a/§13: «Виклик кур'єра» (для відправника = опція address) в Україні
+  // можливий ЛИШЕ у Львові. Для ЄС — доступний. Ховаємо опцію коли недоступна
+  // (але лишаємо, якщо вже вибрана — щоб не зникала з-під користувача).
+  const courierAvailable =
+    role !== 'sender' ? true
+    : (country !== 'UA' || isLvivCity(city));
 
   // ТЗ (docx 13.06.26): «Назва міста автоматично починається з великої
   // букви». Капіталізуємо лише першу літеру, решту лишаємо як ввели (щоб не
@@ -429,7 +437,12 @@ export function ClientCreateForm({
               <SelectValue>{methodLabels[deliveryMethod]}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="address">{methodLabels.address}</SelectItem>
+              {/* ТЗ §5a: «Виклик кур'єра» (sender=address) ховаємо коли
+                  недоступний (UA поза Львовом). Для отримувача «Адресна
+                  доставка» завжди доступна. */}
+              {(courierAvailable || deliveryMethod === 'address') && (
+                <SelectItem value="address">{methodLabels.address}</SelectItem>
+              )}
               <SelectItem value="np_warehouse">{methodLabels.np_warehouse}</SelectItem>
               {/* ТЗ §4: «Пункт» показуємо лише якщо для країни/міста є точки в
                   Логістиці (або якщо він уже вибраний — щоб не зник). */}
