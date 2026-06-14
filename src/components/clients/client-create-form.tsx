@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -127,6 +128,30 @@ export function ClientCreateForm({
   const [pickupPointText, setPickupPointText] = useState(initialAddr?.pickupPointText || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // ТЗ (docx 13.06.26 §4/§5): «Пункт видачі/збору» — це вибір зі СПИСКУ
+  // реальних точок з розділу Логістика для країни/міста, а не вільний текст.
+  // Якщо для країни/міста точок немає — опція ховається.
+  const [points, setPoints] = useState<{ id: string; name: string | null; country: string; city: string; address: string }[]>([]);
+  const [selectedPointId, setSelectedPointId] = useState<string>('');
+
+  useEffect(() => {
+    if (!country) { setPoints([]); return; }
+    let cancelled = false;
+    fetch(`/api/collection-points?country=${encodeURIComponent(country)}`)
+      .then(r => (r.ok ? r.json() : []))
+      .then((list: { id: string; name: string | null; country: string; city: string; address: string }[]) => {
+        if (!cancelled) setPoints(Array.isArray(list) ? list : []);
+      })
+      .catch(() => { if (!cancelled) setPoints([]); });
+    return () => { cancelled = true; };
+  }, [country]);
+
+  // Точки для поточної локації: спершу за містом, інакше — усі по країні.
+  const cityNorm = city.trim().toLowerCase();
+  const cityPoints = cityNorm ? points.filter(p => p.city.trim().toLowerCase() === cityNorm) : [];
+  const pointsToShow = cityPoints.length > 0 ? cityPoints : points;
+  const hasAnyPoints = points.length > 0;
 
   // ТЗ (docx 13.06.26): «Назва міста автоматично починається з великої
   // букви». Капіталізуємо лише першу літеру, решту лишаємо як ввели (щоб не
@@ -406,7 +431,11 @@ export function ClientCreateForm({
             <SelectContent>
               <SelectItem value="address">{methodLabels.address}</SelectItem>
               <SelectItem value="np_warehouse">{methodLabels.np_warehouse}</SelectItem>
-              <SelectItem value="pickup_point">{methodLabels.pickup_point}</SelectItem>
+              {/* ТЗ §4: «Пункт» показуємо лише якщо для країни/міста є точки в
+                  Логістиці (або якщо він уже вибраний — щоб не зник). */}
+              {(hasAnyPoints || deliveryMethod === 'pickup_point') && (
+                <SelectItem value="pickup_point">{methodLabels.pickup_point}</SelectItem>
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -432,13 +461,34 @@ export function ClientCreateForm({
 
         {deliveryMethod === 'pickup_point' && (
           <div>
-            <Label>Опис пункту збору *</Label>
-            <Input
-              value={pickupPointText}
-              onChange={(e) => setPickupPointText(e.target.value)}
-              placeholder="Назва, орієнтир, контакт..."
-              required
-            />
+            <Label>{role === 'sender' ? 'Пункт збору' : 'Пункт видачі'} *</Label>
+            {/* ТЗ §4/§5: список реальних точок з Логістики для країни/міста. */}
+            {pointsToShow.length > 0 ? (
+              <div className="space-y-1.5">
+                {pointsToShow.map((p) => {
+                  const label = p.name || `${p.city}, ${p.address}`;
+                  const sel = selectedPointId === p.id || pickupPointText === label;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => { setSelectedPointId(p.id); setPickupPointText(label); }}
+                      className={cn(
+                        'w-full text-left border rounded-lg p-2 text-sm transition-all',
+                        sel ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 hover:bg-gray-50'
+                      )}
+                    >
+                      <div className="font-medium">{label}</div>
+                      {p.name && <div className="text-xs text-gray-500">{p.city}, {p.address}</div>}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+                Для «{city || 'цього міста'}» немає пунктів у розділі Логістика. Виберіть інший спосіб.
+              </div>
+            )}
           </div>
         )}
 
