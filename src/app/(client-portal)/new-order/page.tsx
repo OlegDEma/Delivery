@@ -271,45 +271,9 @@ export default function NewOrderPage() {
           </CardContent>
         </Card>
 
-        {/* Sender */}
-        <Card>
-          <CardHeader className="py-3 px-4">
-            <CardTitle className="text-base text-green-600">Відправник (ваші дані)</CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 space-y-2">
-            <PhoneInput
-              label="Телефон"
-              required
-              value={senderPhone}
-              onChange={setSenderPhone}
-              defaultCountry={(senderCountry as 'UA' | 'NL' | 'AT' | 'DE') || 'UA'}
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <div><Label>Прізвище *</Label><Input value={senderLastName} onChange={(e) => setSenderLastName(e.target.value)} required /></div>
-              <div><Label>Ім&apos;я *</Label><Input value={senderFirstName} onChange={(e) => setSenderFirstName(e.target.value)} required /></div>
-            </div>
-            <div>
-              <Label>Країна</Label>
-              <Select value={senderCountry} onValueChange={(v) => setSenderCountry(v ?? 'NL')}>
-                <SelectTrigger><SelectValue>{COUNTRY_LABELS[senderCountry]}</SelectValue></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="NL">Нідерланди</SelectItem>
-                  <SelectItem value="AT">Австрія</SelectItem>
-                  <SelectItem value="DE">Німеччина</SelectItem>
-                  <SelectItem value="UA">Україна</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Місто</Label>
-              <AddressInput field="city" country={senderCountry} value={senderCity} onChange={setSenderCity} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Collection method — ТЗ §E13: показуємо клієнту для обох напрямків.
-            Для «З України в Європу» сюди потрапляє опція «Відправка поштою»
-            з реквізитами ФОП (відправлення Новою поштою на склад у Львові). */}
+        {/* ТЗ (docx 13.06.26 §5b): «Як ви передасте нам посилку» іде ЗРАЗУ
+            після вибору напрямку, ПЕРЕД карткою «Відправник». Для «З України
+            в Європу» сюди потрапляє «Відправка поштою» з реквізитами ФОП. */}
         {!!direction && (
           <Card>
             <CardHeader className="py-3 px-4">
@@ -344,6 +308,55 @@ export default function NewOrderPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Sender — ТЗ §5b: одразу після «Як ви передасте». */}
+        <Card>
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-base text-green-600">Відправник (ваші дані)</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 pt-0 space-y-2">
+            <PhoneInput
+              label="Телефон"
+              required
+              value={senderPhone}
+              onChange={setSenderPhone}
+              defaultCountry={(senderCountry as 'UA' | 'NL' | 'AT' | 'DE') || 'UA'}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <div><Label>Прізвище *</Label><Input value={senderLastName} onChange={(e) => setSenderLastName(e.target.value)} required /></div>
+              <div><Label>Ім&apos;я *</Label><Input value={senderFirstName} onChange={(e) => setSenderFirstName(e.target.value)} required /></div>
+            </div>
+            <div>
+              <Label>Країна</Label>
+              <Select value={senderCountry} onValueChange={(v) => setSenderCountry(v ?? 'NL')}>
+                <SelectTrigger><SelectValue>{COUNTRY_LABELS[senderCountry]}</SelectValue></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NL">Нідерланди</SelectItem>
+                  <SelectItem value="AT">Австрія</SelectItem>
+                  <SelectItem value="DE">Німеччина</SelectItem>
+                  <SelectItem value="UA">Україна</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Населений пункт *</Label>
+              <AddressInput field="city" country={senderCountry} value={senderCity} onChange={setSenderCity} />
+            </div>
+            {/* ТЗ §5b: умовні поля за обраним способом передачі. «Виклик
+                кур'єра» → адреса забору; «Пошта» → номер складу; «Пункт
+                збору» → перелік точок (у картці «Як ви передасте» вище). */}
+            {collectionMethod === 'courier_pickup' && (
+              <div>
+                <Label>Адреса забору (вулиця, будинок, орієнтир)</Label>
+                <Input
+                  value={collectionAddress}
+                  onChange={(e) => setCollectionAddress(e.target.value)}
+                  placeholder="Вулиця, дім, квартира, орієнтир"
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Receiver */}
         <Card>
