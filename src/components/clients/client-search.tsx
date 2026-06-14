@@ -47,9 +47,14 @@ interface ClientSearchProps {
    * If parent passes onPhoneEdit, an edit-pencil appears on the selected card.
    */
   onPhoneEdit?: (newPhone: string) => void;
+  /**
+   * ТЗ (docx §5a): «після адреси додати відомості про місце і спосіб забору
+   * посилки». Рендериться ВСЕРЕДИНІ голубого поля, відразу після рядка адреси.
+   */
+  summaryFooter?: React.ReactNode;
 }
 
-export function ClientSearch({ label, onSelect, onClear, selected, direction, role, onPhoneEdit }: ClientSearchProps) {
+export function ClientSearch({ label, onSelect, onClear, selected, direction, role, onPhoneEdit, summaryFooter }: ClientSearchProps) {
   const [editingPhone, setEditingPhone] = useState(false);
   const [phoneDraft, setPhoneDraft] = useState('');
   const [query, setQuery] = useState('');
@@ -228,6 +233,10 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
               {addr.building ? ` ${addr.building}` : ''}
               {addr.npWarehouseNum ? ` | НП №${addr.npWarehouseNum}` : ''}
             </div>
+          )}
+          {/* ТЗ §5a: спосіб забору — всередині голубого поля, після адреси. */}
+          {summaryFooter && (
+            <div className="text-xs text-gray-500">{summaryFooter}</div>
           )}
         </div>
         {/* ТЗ §E7/§E9: хрестик замінено на кнопку «Редагувати» (відкриває

@@ -568,6 +568,16 @@ export default function NewParcelPage() {
                 setSenderPhoneOverride(p);
                 if (sender) setSender({ ...sender, phone: p });
               }}
+              summaryFooter={
+                direction === 'eu_to_ua' && collection.method ? (
+                  <>
+                    <span className="font-medium">Спосіб забору:</span>{' '}
+                    {collection.method === 'courier_pickup' ? 'Виклик кур\'єра'
+                      : collection.method === 'external_shipping' ? 'Пошта'
+                      : 'Пункт збору'}
+                  </>
+                ) : undefined
+              }
             />
             {/* ТЗ §E9: «все решта — поле "Адреса" — забрати. В залишку
                 лише назва вкладки "Відправник" та голубе поле». Інлайн-форму
@@ -575,45 +585,33 @@ export default function NewParcelPage() {
                 («Редагувати» на голубому полі). Стан адреси наповнює
                 handleSenderSelect. */}
 
-            {/* ТЗ (docx 13.06.26 §5a): окремі прямокутники «Спосіб відправки»
-                ПРИБРАНО — клієнт перекреслив їх. Спосіб тепер вибирається у
-                формі Відправника («Виклик кур'єра / Пошта / Пункт збору»),
-                а тут показується підсумком ПІСЛЯ адреси. collection.method
-                виводиться з deliveryMethod адреси (handleSenderSelect) і далі
-                драйвить мінімальний тариф. Для «Виклик кур'єра» оператор має
-                відповісти про кількість посилок (впливає на тариф). */}
-            {direction === 'eu_to_ua' && sender && collection.method && (
-              <div className="pt-2 mt-1 border-t text-sm">
-                <span className="text-gray-500">Спосіб відправки:</span>{' '}
-                <span className="font-medium">
-                  {collection.method === 'courier_pickup' ? 'Виклик кур\'єра'
-                    : collection.method === 'external_shipping' ? 'Пошта'
-                    : 'Пункт збору'}
-                </span>
-                {collection.method === 'courier_pickup' && (
-                  <div className="mt-2 bg-amber-50 border border-amber-200 rounded p-2 space-y-1.5">
-                    <div className="text-xs font-medium text-amber-900">
-                      Це буде єдина посилка від цього Відправника?
-                    </div>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <Checkbox
-                        checked={collection.isMultiParcelPickup === false}
-                        onCheckedChange={(c) => c === true && setCollection({ ...collection, isMultiParcelPickup: false })}
-                      />
-                      Одна посилка
-                    </label>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <Checkbox
-                        checked={collection.isMultiParcelPickup === true}
-                        onCheckedChange={(c) => c === true && setCollection({ ...collection, isMultiParcelPickup: true })}
-                      />
-                      Дві або більше посилок
-                    </label>
-                    {(collection.isMultiParcelPickup === null || collection.isMultiParcelPickup === undefined) && (
-                      <div className="text-[11px] text-amber-700">
-                        Відповідь обов&apos;язкова — від неї залежить мінімальна вартість посилки.
-                      </div>
-                    )}
+            {/* ТЗ (docx §5a): спосіб забору показано ВСЕРЕДИНІ голубого поля
+                (summaryFooter вище, після адреси). Прямокутники прибрано. Тут
+                лишається ЛИШЕ питання про кількість посилок для «Виклик
+                кур'єра» — воно інтерактивне (впливає на тариф), тож не може
+                жити в read-only голубому полі. */}
+            {direction === 'eu_to_ua' && sender && collection.method === 'courier_pickup' && (
+              <div className="mt-1 bg-amber-50 border border-amber-200 rounded p-2 space-y-1.5">
+                <div className="text-xs font-medium text-amber-900">
+                  Це буде єдина посилка від цього Відправника?
+                </div>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <Checkbox
+                    checked={collection.isMultiParcelPickup === false}
+                    onCheckedChange={(c) => c === true && setCollection({ ...collection, isMultiParcelPickup: false })}
+                  />
+                  Одна посилка
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <Checkbox
+                    checked={collection.isMultiParcelPickup === true}
+                    onCheckedChange={(c) => c === true && setCollection({ ...collection, isMultiParcelPickup: true })}
+                  />
+                  Дві або більше посилок
+                </label>
+                {(collection.isMultiParcelPickup === null || collection.isMultiParcelPickup === undefined) && (
+                  <div className="text-[11px] text-amber-700">
+                    Відповідь обов&apos;язкова — від неї залежить мінімальна вартість посилки.
                   </div>
                 )}
               </div>
