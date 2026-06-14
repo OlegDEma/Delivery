@@ -340,7 +340,12 @@ export default function NewOrderPage() {
             </div>
             <div>
               <Label>Населений пункт *</Label>
-              <AddressInput field="city" country={senderCountry} value={senderCity} onChange={setSenderCity} />
+              <AddressInput
+                field="city"
+                country={senderCountry}
+                value={senderCity}
+                onChange={(v) => setSenderCity(v ? v.charAt(0).toUpperCase() + v.slice(1) : v)}
+              />
             </div>
             {/* ТЗ §5b: умовні поля за обраним способом передачі. «Виклик
                 кур'єра» → адреса забору; «Пошта» → номер складу; «Пункт
@@ -392,8 +397,16 @@ export default function NewOrderPage() {
               </Select>
             </div>
             <div>
-              <Label>Місто *</Label>
-              <AddressInput field="city" country={receiverCountry} value={receiverCity} onChange={setReceiverCity} required />
+              {/* ТЗ §4: «Населений пункт» (як у формі Працівника) + авто-велика
+                  перша буква. */}
+              <Label>Населений пункт *</Label>
+              <AddressInput
+                field="city"
+                country={receiverCountry}
+                value={receiverCity}
+                onChange={(v) => setReceiverCity(v ? v.charAt(0).toUpperCase() + v.slice(1) : v)}
+                required
+              />
             </div>
             {receiverCountry === 'UA' && (
               <div>
