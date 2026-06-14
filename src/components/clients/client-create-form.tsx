@@ -128,6 +128,12 @@ export function ClientCreateForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  // ТЗ (docx 13.06.26): «Назва міста автоматично починається з великої
+  // букви». Капіталізуємо лише першу літеру, решту лишаємо як ввели (щоб не
+  // ламати назви типу "San Marino"). Працює і для ручного вводу, і для
+  // вибору з автокомпліту.
+  const capCity = (v: string) => (v ? v.charAt(0).toUpperCase() + v.slice(1) : v);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -365,10 +371,28 @@ export function ClientCreateForm({
         </Select>
       </div>
 
-      {/* Per ТЗ: «надпис "Індекс" поставити справа від надрису "Адреса", а поле
-          "Індекс" поставити справа від випадаючого списку "Адреса"». Дубль назви
-          методу нижче (Адресна доставка/Відділення/Пункт збору) прибрано — селектор
-          уже показує вибране. */}
+      {/* ТЗ (docx 13.06.26 §4/§5): «Після поля Країна іде поле Населений
+          пункт (обов'язкове)». Місто йде ЗРАЗУ після країни, а вже потім —
+          «Спосіб» + «Індекс». Місто авто-капіталізується (перша буква). */}
+      <div>
+        <Label>Населений пункт *</Label>
+        {/* Автокомпліт міста з історії — «Am» → «Amsterdam». Активний лише
+            коли вибрана країна, бо API звужує по country. */}
+        {country ? (
+          <AddressInput
+            field="city"
+            country={country}
+            value={city}
+            onChange={(v) => setCity(capCity(v))}
+            required
+          />
+        ) : (
+          <CapitalizeInput value={city} onChange={setCity} required />
+        )}
+      </div>
+
+      {/* «Спосіб» + «Індекс» — після Населеного пункту. Дубль назви методу
+          нижче прибрано — селектор уже показує вибране. */}
       <div className="border-t pt-3 grid grid-cols-[1fr_9rem] gap-2 items-end">
         <div>
           <SectionTitle>{methodSectionTitle}</SectionTitle>
@@ -399,23 +423,6 @@ export function ClientCreateForm({
       </div>
 
       <div className="space-y-2">
-        <div>
-          <Label>Населений пункт *</Label>
-          {/* ТЗ: автокомпліт міста з історії — «Am» → «Amsterdam». Активний
-              лише коли вибрана країна, бо API звужує по country. */}
-          {country ? (
-            <AddressInput
-              field="city"
-              country={country}
-              value={city}
-              onChange={setCity}
-              required
-            />
-          ) : (
-            <CapitalizeInput value={city} onChange={setCity} required />
-          )}
-        </div>
-
         {deliveryMethod === 'np_warehouse' && (
           <div>
             <Label>Номер складу/поштомату *</Label>
