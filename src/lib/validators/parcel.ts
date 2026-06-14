@@ -122,6 +122,8 @@ export const clientOrderSchema = z.object({
   receiverPostalCode: z.string().trim().max(20).optional().nullable(),
   receiverCountry: countrySchema.optional().nullable(),
   receiverNpWarehouse: z.string().trim().max(50).optional().nullable(),
+  /** Назва обраного «Пункту видачі» — ТЗ §4. */
+  receiverPickupPointText: z.string().trim().max(500).optional().nullable(),
   receiverDeliveryMethod: deliveryMethodSchema.optional(),
   // Places
   places: z.array(placeInputSchema).min(1).max(20),

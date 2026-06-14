@@ -77,6 +77,9 @@ export default function NewOrderPage() {
   const [receiverCountry, setReceiverCountry] = useState('');
   const [receiverCity, setReceiverCity] = useState('');
   const [receiverPostalCode, setReceiverPostalCode] = useState('');
+  // ТЗ §4: «Пункт видачі» — вибір зі списку реальних точок для отримувача.
+  const [receiverPickupPointText, setReceiverPickupPointText] = useState('');
+  const [receiverPoints, setReceiverPoints] = useState<{ id: string; name: string | null; country: string; city: string; address: string }[]>([]);
   const [receiverStreet, setReceiverStreet] = useState('');
   const [receiverDeliveryMethod, setReceiverDeliveryMethod] = useState('address');
   const [receiverNpWarehouse, setReceiverNpWarehouse] = useState('');
@@ -137,6 +140,17 @@ export default function NewOrderPage() {
     });
   }, []);
 
+  // ТЗ §4: точки видачі для країни отримувача — для опції «Пункт видачі».
+  useEffect(() => {
+    if (!receiverCountry) { setReceiverPoints([]); return; }
+    let cancelled = false;
+    fetch(`/api/collection-points?country=${encodeURIComponent(receiverCountry)}`)
+      .then(r => (r.ok ? r.json() : []))
+      .then((list) => { if (!cancelled) setReceiverPoints(Array.isArray(list) ? list : []); })
+      .catch(() => { if (!cancelled) setReceiverPoints([]); });
+    return () => { cancelled = true; };
+  }, [receiverCountry]);
+
   function validateCollectionDate(dateStr: string) {
     if (!dateStr) { setCollectionDayWarning(''); return; }
     const config = pricingConfigs.find(c => c.country === senderCountry && c.direction === direction);
@@ -187,12 +201,15 @@ export default function NewOrderPage() {
     if (!receiverPhone || !receiverFirstName || !receiverLastName || !receiverCountry || !receiverCity) {
       setError('Заповніть обов\'язкові дані отримувача: телефон, прізвище, ім\'я, країна, населений пункт'); return;
     }
-    // Для отримувачів в Україні — вулиця/будинок або номер складу НП обов'язкові.
+    // Для отримувачів в Україні — потрібен хоч один валідний спосіб доставки:
+    // адреса (вулиця), склад НП, поштомат, або вибраний пункт видачі.
     if (receiverCountry === 'UA') {
       const hasStreet = receiverStreet.trim().length > 0;
       const hasNpWarehouse = receiverDeliveryMethod === 'np_warehouse' && receiverNpWarehouse.trim().length > 0;
-      if (!hasStreet && !hasNpWarehouse) {
-        setError('Для отримувача в Україні вкажіть вулицю + номер дому АБО номер складу Нової Пошти');
+      const hasPoshtamat = receiverDeliveryMethod === 'np_poshtamat';
+      const hasPickupPoint = receiverDeliveryMethod === 'pickup_point' && receiverPickupPointText.trim().length > 0;
+      if (!hasStreet && !hasNpWarehouse && !hasPoshtamat && !hasPickupPoint) {
+        setError('Для отримувача в Україні вкажіть адресу, склад/поштомат Нової Пошти або пункт видачі');
         return;
       }
     }
@@ -226,7 +243,7 @@ export default function NewOrderPage() {
         payer, paymentMethod, paymentInUkraine,
         senderPhone, senderFirstName, senderLastName, senderMiddleName, senderCountry, senderCity, senderPostalCode,
         receiverPhone, receiverFirstName, receiverLastName, receiverMiddleName, receiverCountry, receiverCity, receiverPostalCode,
-        receiverStreet, receiverDeliveryMethod, receiverNpWarehouse,
+        receiverStreet, receiverDeliveryMethod, receiverNpWarehouse, receiverPickupPointText,
         places: places.map(p => ({
           weight: Number(p.weight) || 0,
           length: Number(p.length) || undefined,
@@ -253,7 +270,13 @@ export default function NewOrderPage() {
   const DIRECTION_LABELS: Record<string, string> = { eu_to_ua: 'З Європи в Україну', ua_to_eu: 'З України в Європу' };
   const COUNTRY_LABELS: Record<string, string> = { NL: 'Нідерланди', AT: 'Австрія', DE: 'Німеччина', UA: 'Україна' };
   const COLLECTION_METHOD_LABELS: Record<string, string> = { collection_point: 'Пункт збору', courier_pickup: "Виклик кур'єра" };
-  const DELIVERY_METHOD_LABELS: Record<string, string> = { address: 'Адресна доставка', np_warehouse: 'Склад Нової Пошти', np_poshtamat: 'Поштомат' };
+  const DELIVERY_METHOD_LABELS: Record<string, string> = { address: 'Адресна доставка', np_warehouse: 'Склад Нової Пошти', np_poshtamat: 'Поштомат', pickup_point: 'Пункт видачі' };
+
+  // Точки видачі для локації отримувача (за містом, інакше всі по країні).
+  const recvCityNorm = receiverCity.trim().toLowerCase();
+  const recvCityPoints = recvCityNorm ? receiverPoints.filter(p => p.city.trim().toLowerCase() === recvCityNorm) : [];
+  const recvPointsToShow = recvCityPoints.length > 0 ? recvCityPoints : receiverPoints;
+  const recvHasPoints = receiverPoints.length > 0;
   const SHIPMENT_TYPE_LABELS: Record<string, string> = { parcels_cargo: 'Посилки та вантажі', documents: 'Документи', tires_wheels: 'Шини та диски' };
   const PAYER_LABELS: Record<string, string> = { sender: 'Відправник', receiver: 'Отримувач' };
   const PAYMENT_METHOD_LABELS: Record<string, string> = { cash: 'Готівка', cashless: 'Безготівка' };
@@ -447,15 +470,21 @@ export default function NewOrderPage() {
               <Label>Індекс</Label>
               <Input value={receiverPostalCode} onChange={(e) => setReceiverPostalCode(e.target.value)} placeholder="00-000" />
             </div>
-            {receiverCountry === 'UA' && (
+            {/* ТЗ §4: «Спосіб доставки» — як у Працівника. Адресна доставка
+                завжди; Склад НП / Поштомат — лише UA; «Пункт видачі» — лише
+                якщо для країни/міста є точки в Логістиці. */}
+            {receiverCountry && (
               <div>
                 <Label>Спосіб доставки</Label>
                 <Select value={receiverDeliveryMethod} onValueChange={(v) => setReceiverDeliveryMethod(v ?? 'address')}>
                   <SelectTrigger><SelectValue>{DELIVERY_METHOD_LABELS[receiverDeliveryMethod]}</SelectValue></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="address">Адресна доставка</SelectItem>
-                    <SelectItem value="np_warehouse">Склад Нової Пошти</SelectItem>
-                    <SelectItem value="np_poshtamat">Поштомат</SelectItem>
+                    {receiverCountry === 'UA' && <SelectItem value="np_warehouse">Склад Нової Пошти</SelectItem>}
+                    {receiverCountry === 'UA' && <SelectItem value="np_poshtamat">Поштомат</SelectItem>}
+                    {(recvHasPoints || receiverDeliveryMethod === 'pickup_point') && (
+                      <SelectItem value="pickup_point">Пункт видачі</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -463,7 +492,35 @@ export default function NewOrderPage() {
             {receiverDeliveryMethod === 'np_warehouse' && (
               <div><Label>Номер складу НП</Label><Input value={receiverNpWarehouse} onChange={(e) => setReceiverNpWarehouse(e.target.value)} placeholder="1" /></div>
             )}
-            {(receiverDeliveryMethod === 'address' || receiverCountry !== 'UA') && (
+            {receiverDeliveryMethod === 'pickup_point' && (
+              <div>
+                <Label>Пункт видачі *</Label>
+                {recvPointsToShow.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {recvPointsToShow.map((p) => {
+                      const label = p.name || `${p.city}, ${p.address}`;
+                      const sel = receiverPickupPointText === label;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setReceiverPickupPointText(label)}
+                          className={`w-full text-left border rounded-lg p-2 text-sm transition-all ${sel ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 hover:bg-gray-50'}`}
+                        >
+                          <div className="font-medium">{label}</div>
+                          {p.name && <div className="text-xs text-gray-500">{p.city}, {p.address}</div>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+                    Для «{receiverCity || 'цього міста'}» немає пунктів видачі. Виберіть інший спосіб.
+                  </div>
+                )}
+              </div>
+            )}
+            {(receiverDeliveryMethod === 'address') && (
               <div>
                 <Label>Вулиця, будинок{receiverCountry === 'UA' && ' *'}</Label>
                 <AddressInput field="street" country={receiverCountry} value={receiverStreet} onChange={setReceiverStreet} />

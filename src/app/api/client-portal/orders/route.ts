@@ -161,6 +161,7 @@ export async function POST(request: NextRequest) {
           street: body.receiverStreet || null,
           postalCode: body.receiverPostalCode || null,
           npWarehouseNum: body.receiverNpWarehouse || null,
+          pickupPointText: body.receiverPickupPointText || null,
           deliveryMethod: body.receiverDeliveryMethod || 'address',
         },
       });
