@@ -104,6 +104,13 @@ export default function NewOrderPage() {
   const [collectionPointId, setCollectionPointId] = useState('');
   const [collectionDate, setCollectionDate] = useState('');
   const [collectionAddress, setCollectionAddress] = useState('');
+  // ТЗ (docx 14.05.26 §b): умовні поля «Як ви передасте». Кур'єр →
+  // Вулиця/Будинок/Орієнтир; Пошта → Номер складу. На submit складаємо їх в
+  // єдиний рядок collectionAddress (бекенд приймає один рядок).
+  const [collectionStreet, setCollectionStreet] = useState('');
+  const [collectionBuilding, setCollectionBuilding] = useState('');
+  const [collectionLandmark, setCollectionLandmark] = useState('');
+  const [collectionWarehouse, setCollectionWarehouse] = useState('');
 
   // Автопідставляння країн за напрямком (ТЗ §E8). Виноситься в колбек,
   // щоб не дзеркалити стейт у useEffect — react-hooks/set-state-in-effect.
@@ -201,17 +208,19 @@ export default function NewOrderPage() {
     if (!receiverPhone || !receiverFirstName || !receiverLastName || !receiverCountry || !receiverCity) {
       setError('Заповніть обов\'язкові дані отримувача: телефон, прізвище, ім\'я, країна, населений пункт'); return;
     }
-    // Для отримувачів в Україні — потрібен хоч один валідний спосіб доставки:
-    // адреса (вулиця), склад НП, поштомат, або вибраний пункт видачі.
-    if (receiverCountry === 'UA') {
-      const hasStreet = receiverStreet.trim().length > 0;
-      const hasNpWarehouse = receiverDeliveryMethod === 'np_warehouse' && receiverNpWarehouse.trim().length > 0;
-      const hasPoshtamat = receiverDeliveryMethod === 'np_poshtamat';
-      const hasPickupPoint = receiverDeliveryMethod === 'pickup_point' && receiverPickupPointText.trim().length > 0;
-      if (!hasStreet && !hasNpWarehouse && !hasPoshtamat && !hasPickupPoint) {
-        setError('Для отримувача в Україні вкажіть адресу, склад/поштомат Нової Пошти або пункт видачі');
-        return;
+    // ТЗ §b: валідація за обраним способом доставки (як у Працівника).
+    // «Пошта» → Номер складу/поштомату обов'язковий; «Пункт видачі» → точка
+    // обрана; «Адресна доставка» → вулиця обов'язкова лише для UA.
+    if (receiverDeliveryMethod === 'np_warehouse') {
+      if (!receiverNpWarehouse.trim()) {
+        setError('Вкажіть номер складу/поштомату'); return;
       }
+    } else if (receiverDeliveryMethod === 'pickup_point') {
+      if (!receiverPickupPointText.trim()) {
+        setError('Виберіть пункт видачі зі списку'); return;
+      }
+    } else if (receiverCountry === 'UA' && !receiverStreet.trim()) {
+      setError('Для отримувача в Україні вкажіть вулицю та будинок'); return;
     }
     // ТЗ (docx 13.06.26 §1): «об'ємна вага не може бути нульовою — має бути
     // внесено АБО довжина/ширина/висота, АБО об'єм у м³». Для кожного місця.
@@ -232,6 +241,25 @@ export default function NewOrderPage() {
     }
     setSaving(true);
 
+    // ТЗ §b: умовні поля «Як ви передасте» складаємо в єдиний рядок
+    // collectionAddress (бекенд приймає одне текстове поле). Кур'єр →
+    // «Вулиця, буд. N (Орієнтир)»; Пошта → «Склад №N».
+    let composedCollectionAddress = collectionAddress;
+    if (collectionMethod === 'courier_pickup') {
+      const parts = [
+        collectionStreet.trim(),
+        collectionBuilding.trim() ? `буд. ${collectionBuilding.trim()}` : '',
+      ].filter(Boolean);
+      composedCollectionAddress = parts.join(', ');
+      if (collectionLandmark.trim()) {
+        composedCollectionAddress = composedCollectionAddress
+          ? `${composedCollectionAddress} (${collectionLandmark.trim()})`
+          : `(${collectionLandmark.trim()})`;
+      }
+    } else if (collectionMethod === 'external_shipping') {
+      composedCollectionAddress = collectionWarehouse.trim() ? `Склад №${collectionWarehouse.trim()}` : '';
+    }
+
     const res = await fetch('/api/client-portal/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -251,7 +279,8 @@ export default function NewOrderPage() {
           height: Number(p.height) || undefined,
           volume: Number(p.volume) || undefined,
         })),
-        collectionMethod, collectionPointId, collectionDate, collectionAddress,
+        collectionMethod, collectionPointId, collectionDate,
+        collectionAddress: composedCollectionAddress,
       }),
     });
 
@@ -270,13 +299,16 @@ export default function NewOrderPage() {
   const DIRECTION_LABELS: Record<string, string> = { eu_to_ua: 'З Європи в Україну', ua_to_eu: 'З України в Європу' };
   const COUNTRY_LABELS: Record<string, string> = { NL: 'Нідерланди', AT: 'Австрія', DE: 'Німеччина', UA: 'Україна' };
   const COLLECTION_METHOD_LABELS: Record<string, string> = { collection_point: 'Пункт збору', courier_pickup: "Виклик кур'єра" };
-  const DELIVERY_METHOD_LABELS: Record<string, string> = { address: 'Адресна доставка', np_warehouse: 'Склад Нової Пошти', np_poshtamat: 'Поштомат', pickup_point: 'Пункт видачі' };
+  // ТЗ (docx 14.05.26 §b): «Спосіб доставки» Отримувача = рівно 3 опції як у
+  // Працівника: Адресна доставка / Пошта / Пункт видачі (без «Поштомату»).
+  const DELIVERY_METHOD_LABELS: Record<string, string> = { address: 'Адресна доставка', np_warehouse: 'Пошта', pickup_point: 'Пункт видачі' };
 
-  // Точки видачі для локації отримувача (за містом, інакше всі по країні).
+  // ТЗ §b: Пункти видачі — САМЕ для вибраної країни ТА населеного пункту, без
+  // fallback на всю країну. Якщо для міста точок немає — опція ховається.
   const recvCityNorm = receiverCity.trim().toLowerCase();
   const recvCityPoints = recvCityNorm ? receiverPoints.filter(p => p.city.trim().toLowerCase() === recvCityNorm) : [];
-  const recvPointsToShow = recvCityPoints.length > 0 ? recvCityPoints : receiverPoints;
-  const recvHasPoints = receiverPoints.length > 0;
+  const recvPointsToShow = recvCityPoints;
+  const recvHasPoints = recvCityPoints.length > 0;
   const SHIPMENT_TYPE_LABELS: Record<string, string> = { parcels_cargo: 'Посилки та вантажі', documents: 'Документи', tires_wheels: 'Шини та диски' };
   const PAYER_LABELS: Record<string, string> = { sender: 'Відправник', receiver: 'Отримувач' };
   const PAYMENT_METHOD_LABELS: Record<string, string> = { cash: 'Готівка', cashless: 'Безготівка' };
@@ -321,105 +353,8 @@ export default function NewOrderPage() {
           </CardContent>
         </Card>
 
-        {/* ТЗ (docx 13.06.26 §5b): «Як ви передасте нам посилку» іде ЗРАЗУ
-            після вибору напрямку, ПЕРЕД карткою «Відправник». Для «З України
-            в Європу» сюди потрапляє «Відправка поштою» з реквізитами ФОП. */}
-        {!!direction && (
-          <Card>
-            <CardHeader className="py-3 px-4">
-              <CardTitle className="text-base">Як ви передасте нам посилку?</CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 pb-4 pt-0">
-              <CollectionBlock
-                senderCountry={senderCountry}
-                senderCity={senderCity}
-                value={{
-                  method: (collectionMethod as 'pickup_point' | 'courier_pickup' | 'external_shipping' | 'direct_to_driver' | '') || '',
-                  pointId: collectionPointId,
-                  date: collectionDate,
-                  address: collectionAddress,
-                }}
-                onChange={(next) => {
-                  setCollectionMethod(next.method);
-                  setCollectionPointId(next.pointId);
-                  setCollectionDate(next.date);
-                  setCollectionAddress(next.address);
-                  if (next.method === 'courier_pickup' && next.date) {
-                    validateCollectionDate(next.date);
-                  } else {
-                    setCollectionDayWarning('');
-                  }
-                }}
-                clientFacing
-              />
-              {collectionDayWarning && (
-                <p className="text-xs text-amber-600 mt-2">{collectionDayWarning}</p>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Sender — ТЗ §5b: одразу після «Як ви передасте». */}
-        <Card>
-          <CardHeader className="py-3 px-4">
-            <CardTitle className="text-base text-green-600">Відправник (ваші дані)</CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 space-y-2">
-            <PhoneInput
-              label="Телефон"
-              required
-              value={senderPhone}
-              onChange={setSenderPhone}
-              defaultCountry={(senderCountry as 'UA' | 'NL' | 'AT' | 'DE') || 'UA'}
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <div><Label>Прізвище *</Label><CapitalizeInput value={senderLastName} onChange={setSenderLastName} required /></div>
-              <div><Label>Ім&apos;я *</Label><CapitalizeInput value={senderFirstName} onChange={setSenderFirstName} required /></div>
-            </div>
-            <div><Label>По батькові</Label><CapitalizeInput value={senderMiddleName} onChange={setSenderMiddleName} /></div>
-            <div>
-              <Label>Країна</Label>
-              <Select value={senderCountry} onValueChange={(v) => setSenderCountry(v ?? 'NL')}>
-                <SelectTrigger><SelectValue>{COUNTRY_LABELS[senderCountry]}</SelectValue></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="NL">Нідерланди</SelectItem>
-                  <SelectItem value="AT">Австрія</SelectItem>
-                  <SelectItem value="DE">Німеччина</SelectItem>
-                  <SelectItem value="UA">Україна</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Населений пункт *</Label>
-              <AddressInput
-                field="city"
-                country={senderCountry}
-                value={senderCity}
-                onChange={(v) => setSenderCity(v ? v.charAt(0).toUpperCase() + v.slice(1) : v)}
-              />
-            </div>
-            {/* ТЗ §5b: поле «Індекс» після Населеного пункту. */}
-            <div>
-              <Label>Індекс</Label>
-              <Input value={senderPostalCode} onChange={(e) => setSenderPostalCode(e.target.value)} placeholder="00-000" />
-            </div>
-            {/* ТЗ §5b: умовні поля за обраним способом передачі. «Виклик
-                кур'єра» → адреса забору; «Пошта» → номер складу; «Пункт
-                збору» → перелік точок (у картці «Як ви передасте» вище). */}
-            {collectionMethod === 'courier_pickup' && (
-              <div>
-                <Label>Адреса забору (вулиця, будинок, орієнтир)</Label>
-                <Input
-                  value={collectionAddress}
-                  onChange={(e) => setCollectionAddress(e.target.value)}
-                  placeholder="Вулиця, дім, квартира, орієнтир"
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Receiver */}
+        {/* Receiver — ТЗ (docx 14.05.26 §b): порядок став
+            напрямок → Отримувач → Відправник → «Як ви передасте». */}
         <Card>
           <CardHeader className="py-3 px-4">
             <CardTitle className="text-base text-blue-600">Отримувач</CardTitle>
@@ -470,9 +405,9 @@ export default function NewOrderPage() {
               <Label>Індекс</Label>
               <Input value={receiverPostalCode} onChange={(e) => setReceiverPostalCode(e.target.value)} placeholder="00-000" />
             </div>
-            {/* ТЗ §4: «Спосіб доставки» — як у Працівника. Адресна доставка
-                завжди; Склад НП / Поштомат — лише UA; «Пункт видачі» — лише
-                якщо для країни/міста є точки в Логістиці. */}
+            {/* ТЗ §b: «Спосіб доставки» = рівно 3 опції як у Працівника:
+                Адресна доставка / Пошта / Пункт видачі. «Пункт видачі» — лише
+                якщо для країни/міста є точки в Логістиці (інакше ховаємо). */}
             {receiverCountry && (
               <div>
                 <Label>Спосіб доставки</Label>
@@ -480,8 +415,7 @@ export default function NewOrderPage() {
                   <SelectTrigger><SelectValue>{DELIVERY_METHOD_LABELS[receiverDeliveryMethod]}</SelectValue></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="address">Адресна доставка</SelectItem>
-                    {receiverCountry === 'UA' && <SelectItem value="np_warehouse">Склад Нової Пошти</SelectItem>}
-                    {receiverCountry === 'UA' && <SelectItem value="np_poshtamat">Поштомат</SelectItem>}
+                    <SelectItem value="np_warehouse">Пошта</SelectItem>
                     {(recvHasPoints || receiverDeliveryMethod === 'pickup_point') && (
                       <SelectItem value="pickup_point">Пункт видачі</SelectItem>
                     )}
@@ -490,7 +424,7 @@ export default function NewOrderPage() {
               </div>
             )}
             {receiverDeliveryMethod === 'np_warehouse' && (
-              <div><Label>Номер складу НП</Label><Input value={receiverNpWarehouse} onChange={(e) => setReceiverNpWarehouse(e.target.value)} placeholder="1" /></div>
+              <div><Label>Номер складу/поштомату *</Label><Input value={receiverNpWarehouse} onChange={(e) => setReceiverNpWarehouse(e.target.value)} placeholder="1" /></div>
             )}
             {receiverDeliveryMethod === 'pickup_point' && (
               <div>
@@ -528,6 +462,102 @@ export default function NewOrderPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Sender — ТЗ §b: після «Отримувач», перед «Як ви передасте». */}
+        <Card>
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-base text-green-600">Відправник (ваші дані)</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 pt-0 space-y-2">
+            <PhoneInput
+              label="Телефон"
+              required
+              value={senderPhone}
+              onChange={setSenderPhone}
+              defaultCountry={(senderCountry as 'UA' | 'NL' | 'AT' | 'DE') || 'UA'}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <div><Label>Прізвище *</Label><CapitalizeInput value={senderLastName} onChange={setSenderLastName} required /></div>
+              <div><Label>Ім&apos;я *</Label><CapitalizeInput value={senderFirstName} onChange={setSenderFirstName} required /></div>
+            </div>
+            <div><Label>По батькові</Label><CapitalizeInput value={senderMiddleName} onChange={setSenderMiddleName} /></div>
+            <div>
+              <Label>Країна</Label>
+              <Select value={senderCountry} onValueChange={(v) => setSenderCountry(v ?? 'NL')}>
+                <SelectTrigger><SelectValue>{COUNTRY_LABELS[senderCountry]}</SelectValue></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NL">Нідерланди</SelectItem>
+                  <SelectItem value="AT">Австрія</SelectItem>
+                  <SelectItem value="DE">Німеччина</SelectItem>
+                  <SelectItem value="UA">Україна</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Населений пункт *</Label>
+              <AddressInput
+                field="city"
+                country={senderCountry}
+                value={senderCity}
+                onChange={(v) => setSenderCity(v ? v.charAt(0).toUpperCase() + v.slice(1) : v)}
+              />
+            </div>
+            {/* ТЗ §b: поле «Індекс» після Населеного пункту. Умовні поля
+                способу передачі (Вулиця/Будинок/Орієнтир, Номер складу) тепер
+                живуть у картці «Як ви передасте» нижче. */}
+            <div>
+              <Label>Індекс</Label>
+              <Input value={senderPostalCode} onChange={(e) => setSenderPostalCode(e.target.value)} placeholder="00-000" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ТЗ (docx 14.05.26 §b): «Як ви передасте нам посилку?» — остання з
+            трьох карток (після «Відправник»). Має бути РОЗГОРНУТА (усі способи
+            видно). Умовні поля: Виклик кур'єра → Вулиця/Будинок/Орієнтир;
+            Пошта → Номер складу; Пункт збору → перелік для країни/міста. */}
+        {!!direction && (
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-base">Як ви передасте нам посилку?</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 pt-0">
+              <CollectionBlock
+                senderCountry={senderCountry}
+                senderCity={senderCity}
+                value={{
+                  method: (collectionMethod as 'pickup_point' | 'courier_pickup' | 'external_shipping' | 'direct_to_driver' | '') || '',
+                  pointId: collectionPointId,
+                  date: collectionDate,
+                  address: collectionAddress,
+                  street: collectionStreet,
+                  building: collectionBuilding,
+                  landmark: collectionLandmark,
+                  warehouseNum: collectionWarehouse,
+                }}
+                onChange={(next) => {
+                  setCollectionMethod(next.method);
+                  setCollectionPointId(next.pointId);
+                  setCollectionDate(next.date);
+                  setCollectionAddress(next.address);
+                  setCollectionStreet(next.street ?? '');
+                  setCollectionBuilding(next.building ?? '');
+                  setCollectionLandmark(next.landmark ?? '');
+                  setCollectionWarehouse(next.warehouseNum ?? '');
+                  if (next.method === 'courier_pickup' && next.date) {
+                    validateCollectionDate(next.date);
+                  } else {
+                    setCollectionDayWarning('');
+                  }
+                }}
+                clientFacing
+              />
+              {collectionDayWarning && (
+                <p className="text-xs text-amber-600 mt-2">{collectionDayWarning}</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Parcel */}
         <Card>

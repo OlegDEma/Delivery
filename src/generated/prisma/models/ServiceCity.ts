@@ -33,6 +33,7 @@ export type ServiceCityMinAggregateOutputType = {
   country: $Enums.Country | null
   city: string | null
   acceptsCourierPickup: boolean | null
+  acceptsPostal: boolean | null
   notes: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -43,6 +44,7 @@ export type ServiceCityMaxAggregateOutputType = {
   country: $Enums.Country | null
   city: string | null
   acceptsCourierPickup: boolean | null
+  acceptsPostal: boolean | null
   notes: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -53,6 +55,7 @@ export type ServiceCityCountAggregateOutputType = {
   country: number
   city: number
   acceptsCourierPickup: number
+  acceptsPostal: number
   notes: number
   createdAt: number
   updatedAt: number
@@ -65,6 +68,7 @@ export type ServiceCityMinAggregateInputType = {
   country?: true
   city?: true
   acceptsCourierPickup?: true
+  acceptsPostal?: true
   notes?: true
   createdAt?: true
   updatedAt?: true
@@ -75,6 +79,7 @@ export type ServiceCityMaxAggregateInputType = {
   country?: true
   city?: true
   acceptsCourierPickup?: true
+  acceptsPostal?: true
   notes?: true
   createdAt?: true
   updatedAt?: true
@@ -85,6 +90,7 @@ export type ServiceCityCountAggregateInputType = {
   country?: true
   city?: true
   acceptsCourierPickup?: true
+  acceptsPostal?: true
   notes?: true
   createdAt?: true
   updatedAt?: true
@@ -168,6 +174,7 @@ export type ServiceCityGroupByOutputType = {
   country: $Enums.Country
   city: string
   acceptsCourierPickup: boolean
+  acceptsPostal: boolean
   notes: string | null
   createdAt: Date
   updatedAt: Date
@@ -199,6 +206,7 @@ export type ServiceCityWhereInput = {
   country?: Prisma.EnumCountryFilter<"ServiceCity"> | $Enums.Country
   city?: Prisma.StringFilter<"ServiceCity"> | string
   acceptsCourierPickup?: Prisma.BoolFilter<"ServiceCity"> | boolean
+  acceptsPostal?: Prisma.BoolFilter<"ServiceCity"> | boolean
   notes?: Prisma.StringNullableFilter<"ServiceCity"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ServiceCity"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ServiceCity"> | Date | string
@@ -209,6 +217,7 @@ export type ServiceCityOrderByWithRelationInput = {
   country?: Prisma.SortOrder
   city?: Prisma.SortOrder
   acceptsCourierPickup?: Prisma.SortOrder
+  acceptsPostal?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -223,6 +232,7 @@ export type ServiceCityWhereUniqueInput = Prisma.AtLeast<{
   country?: Prisma.EnumCountryFilter<"ServiceCity"> | $Enums.Country
   city?: Prisma.StringFilter<"ServiceCity"> | string
   acceptsCourierPickup?: Prisma.BoolFilter<"ServiceCity"> | boolean
+  acceptsPostal?: Prisma.BoolFilter<"ServiceCity"> | boolean
   notes?: Prisma.StringNullableFilter<"ServiceCity"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ServiceCity"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ServiceCity"> | Date | string
@@ -233,6 +243,7 @@ export type ServiceCityOrderByWithAggregationInput = {
   country?: Prisma.SortOrder
   city?: Prisma.SortOrder
   acceptsCourierPickup?: Prisma.SortOrder
+  acceptsPostal?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -249,6 +260,7 @@ export type ServiceCityScalarWhereWithAggregatesInput = {
   country?: Prisma.EnumCountryWithAggregatesFilter<"ServiceCity"> | $Enums.Country
   city?: Prisma.StringWithAggregatesFilter<"ServiceCity"> | string
   acceptsCourierPickup?: Prisma.BoolWithAggregatesFilter<"ServiceCity"> | boolean
+  acceptsPostal?: Prisma.BoolWithAggregatesFilter<"ServiceCity"> | boolean
   notes?: Prisma.StringNullableWithAggregatesFilter<"ServiceCity"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ServiceCity"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ServiceCity"> | Date | string
@@ -259,6 +271,7 @@ export type ServiceCityCreateInput = {
   country: $Enums.Country
   city: string
   acceptsCourierPickup?: boolean
+  acceptsPostal?: boolean
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -269,6 +282,7 @@ export type ServiceCityUncheckedCreateInput = {
   country: $Enums.Country
   city: string
   acceptsCourierPickup?: boolean
+  acceptsPostal?: boolean
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -279,6 +293,7 @@ export type ServiceCityUpdateInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   city?: Prisma.StringFieldUpdateOperationsInput | string
   acceptsCourierPickup?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  acceptsPostal?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -289,6 +304,7 @@ export type ServiceCityUncheckedUpdateInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   city?: Prisma.StringFieldUpdateOperationsInput | string
   acceptsCourierPickup?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  acceptsPostal?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -299,6 +315,7 @@ export type ServiceCityCreateManyInput = {
   country: $Enums.Country
   city: string
   acceptsCourierPickup?: boolean
+  acceptsPostal?: boolean
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -309,6 +326,7 @@ export type ServiceCityUpdateManyMutationInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   city?: Prisma.StringFieldUpdateOperationsInput | string
   acceptsCourierPickup?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  acceptsPostal?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -319,6 +337,7 @@ export type ServiceCityUncheckedUpdateManyInput = {
   country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
   city?: Prisma.StringFieldUpdateOperationsInput | string
   acceptsCourierPickup?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  acceptsPostal?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -334,6 +353,7 @@ export type ServiceCityCountOrderByAggregateInput = {
   country?: Prisma.SortOrder
   city?: Prisma.SortOrder
   acceptsCourierPickup?: Prisma.SortOrder
+  acceptsPostal?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -344,6 +364,7 @@ export type ServiceCityMaxOrderByAggregateInput = {
   country?: Prisma.SortOrder
   city?: Prisma.SortOrder
   acceptsCourierPickup?: Prisma.SortOrder
+  acceptsPostal?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -354,6 +375,7 @@ export type ServiceCityMinOrderByAggregateInput = {
   country?: Prisma.SortOrder
   city?: Prisma.SortOrder
   acceptsCourierPickup?: Prisma.SortOrder
+  acceptsPostal?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -366,6 +388,7 @@ export type ServiceCitySelect<ExtArgs extends runtime.Types.Extensions.InternalA
   country?: boolean
   city?: boolean
   acceptsCourierPickup?: boolean
+  acceptsPostal?: boolean
   notes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -376,6 +399,7 @@ export type ServiceCitySelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   country?: boolean
   city?: boolean
   acceptsCourierPickup?: boolean
+  acceptsPostal?: boolean
   notes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -386,6 +410,7 @@ export type ServiceCitySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   country?: boolean
   city?: boolean
   acceptsCourierPickup?: boolean
+  acceptsPostal?: boolean
   notes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -396,12 +421,13 @@ export type ServiceCitySelectScalar = {
   country?: boolean
   city?: boolean
   acceptsCourierPickup?: boolean
+  acceptsPostal?: boolean
   notes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ServiceCityOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "city" | "acceptsCourierPickup" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["serviceCity"]>
+export type ServiceCityOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "city" | "acceptsCourierPickup" | "acceptsPostal" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["serviceCity"]>
 
 export type $ServiceCityPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ServiceCity"
@@ -414,6 +440,12 @@ export type $ServiceCityPayload<ExtArgs extends runtime.Types.Extensions.Interna
      * True = клієнт може обрати «Виклик кур'єра» в цьому місті (per ТЗ).
      */
     acceptsCourierPickup: boolean
+    /**
+     * True = у цій країні дозволена «Пошта» (відправка нам поштою) — ТЗ
+     * docx 14.05.26: опція «Пошта» доступна, лише якщо в Логістиці її
+     * передбачено для країни. Зберігається по місту, агрегується по країні.
+     */
+    acceptsPostal: boolean
     /**
      * Reserved for future expansion (e.g. delivery service zones).
      */
@@ -847,6 +879,7 @@ export interface ServiceCityFieldRefs {
   readonly country: Prisma.FieldRef<"ServiceCity", 'Country'>
   readonly city: Prisma.FieldRef<"ServiceCity", 'String'>
   readonly acceptsCourierPickup: Prisma.FieldRef<"ServiceCity", 'Boolean'>
+  readonly acceptsPostal: Prisma.FieldRef<"ServiceCity", 'Boolean'>
   readonly notes: Prisma.FieldRef<"ServiceCity", 'String'>
   readonly createdAt: Prisma.FieldRef<"ServiceCity", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ServiceCity", 'DateTime'>

@@ -45,6 +45,15 @@ export interface CollectionState {
    * Null коли method ≠ courier_pickup або відповідь ще не надана.
    */
   isMultiParcelPickup?: boolean | null;
+  /**
+   * ТЗ (docx 14.05.26 §b): для клієнтського «Як ви передасте» умовні поля.
+   * «Виклик кур'єра» → Вулиця/Будинок/Орієнтир; «Пошта» → Номер складу.
+   * Staff-варіант їх не використовує (там одне поле «Адреса забору»).
+   */
+  street?: string;
+  building?: string;
+  landmark?: string;
+  warehouseNum?: string;
 }
 
 interface CollectionBlockProps {
@@ -63,6 +72,7 @@ interface ServiceCity {
   country: string;
   city: string;
   acceptsCourierPickup: boolean;
+  acceptsPostal: boolean;
 }
 
 // Per ТЗ: «Передати водію» приховано. Залишаються три способи.
@@ -97,13 +107,14 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
     return () => { cancelled = true; };
   }, [senderCountry]);
 
-  // Fetch list of cities where courier_pickup is allowed (per ТЗ §5).
-  // Using forCourierPickup=1 server-side filter so we don't ship dormant rows.
+  // Fetch ВСІ міста обслуговування (ТЗ docx 14.05.26): потрібні обидва
+  // прапорці — acceptsCourierPickup (кур'єр по місту) та acceptsPostal
+  // (пошта по країні), тож фільтр forCourierPickup тут не застосовуємо.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const r = await fetch('/api/service-cities?forCourierPickup=1');
+        const r = await fetch('/api/service-cities');
         if (cancelled || !r.ok) return;
         const list: ServiceCity[] = await r.json();
         if (!cancelled) setServiceCities(list);
@@ -118,42 +129,50 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
       method: m,
       pointId: m === 'pickup_point' ? value.pointId : '',
       address: m === 'courier_pickup' ? value.address : '',
+      // Умовні поля чистимо, коли метод їх не використовує.
+      street: m === 'courier_pickup' ? value.street : '',
+      building: m === 'courier_pickup' ? value.building : '',
+      landmark: m === 'courier_pickup' ? value.landmark : '',
+      warehouseNum: m === 'external_shipping' ? value.warehouseNum : '',
       // Reset multi-parcel flag коли вибір не courier_pickup.
       isMultiParcelPickup: m === 'courier_pickup' ? value.isMultiParcelPickup ?? null : null,
     });
   }
 
-  // ТЗ §5: для клієнта courier_pickup доступний лише за прописаних правил.
-  //   - У EU (NL/AT/DE): дозволено в усіх містах (TODO: можна звузити списком).
-  //   - В UA: лише у місті(ах), які є у `service_cities` з
-  //          acceptsCourierPickup=true. За замовчуванням — лише Львів.
-  // На staff боці завжди доступно (clientFacing=false).
+  // ТЗ (docx 14.05.26): «Виклик кур'єра» доступний, ЛИШЕ якщо в Логістиці
+  // (ServiceCity) для обраного НАСЕЛЕНОГО ПУНКТУ ввімкнено acceptsCourierPickup
+  // — для всіх країн однаково (раніше EU був хардкодом «завжди»). На staff боці
+  // CollectionBlock не рендериться (спосіб гейтиться у формі Відправника).
   const courierPickupAvailableForClient = (() => {
     if (!clientFacing) return true;
-    if (!senderCountry) return false;
-    if (senderCountry !== 'UA') return true;
-    // UA — звіряємо місто.
-    if (!senderCity) return false;
+    if (!senderCountry || !senderCity) return false;
     const normalized = senderCity.trim().toLowerCase();
     return serviceCities.some(
-      sc => sc.country === 'UA' &&
+      sc => sc.country === senderCountry &&
             sc.acceptsCourierPickup &&
             sc.city.trim().toLowerCase() === normalized
     );
   })();
 
-  // ТЗ §E13: «Відправка поштою» доступна клієнту, якщо відправлення з України
-  // (клієнт надсилає посилку нам Новою поштою на склад у Львові — ФОП). Для
-  // відправлень з ЄС клієнт користується пунктом збору / викликом кур'єра.
-  const externalShippingAvailableForClient = !clientFacing || senderCountry === 'UA';
+  // ТЗ (docx 14.05.26): «Пошта» (відправка нам поштою) доступна, ЛИШЕ якщо в
+  // Логістиці для КРАЇНИ є хоча б одне місто з acceptsPostal=true (раніше було
+  // хардкодом «лише UA»). Для UA це Львів (ФОП); EU вмикається адміном.
+  const externalShippingAvailableForClient = !clientFacing
+    || (!!senderCountry && serviceCities.some(sc => sc.country === senderCountry && sc.acceptsPostal));
 
-  const pointsForCountry = senderCountry
-    ? points.filter(p => p.country === senderCountry)
-    : points;
+  // ТЗ (docx 14.05.26): перелік Пунктів збору — САМЕ для вибраного
+  // населеного пункту (приклад Венло: точка є в Amsterdam, але не у Венло →
+  // список порожній). Якщо місто ще не введено — показуємо всі по країні.
+  const senderCityNorm = (senderCity || '').trim().toLowerCase();
+  const pointsForCountry = points.filter(p =>
+    (!senderCountry || p.country === senderCountry) &&
+    (!senderCityNorm || p.city.trim().toLowerCase() === senderCityNorm)
+  );
 
   // ТЗ Staff: «При виборі одного з трьох полів два інших зникають».
-  // ТЗ Client: те саме.
-  const hideOthers = !!value.method;
+  // ТЗ Client (docx 14.05.26): навпаки — «Як Ви передасте нам посилку?» має
+  // лишатись РОЗГОРНУТИМ (усі три картки видно). Тож згортаємо лише для staff.
+  const hideOthers = !clientFacing && !!value.method;
   const visibleMethods = hideOthers ? METHODS.filter(m => m === value.method) : METHODS;
 
   return (
@@ -194,8 +213,8 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
                     {COLLECTION_METHOD_HINTS_CLIENT[m]}
                     {disabled && m === COLLECTION_METHODS.COURIER_PICKUP && (
                       <div className="mt-1 text-amber-700">
-                        Доступно лише якщо адреса відправника у країні, яку ми обслуговуємо
-                        (для України — тільки Львів).
+                        Доступно лише в населених пунктах, де ми надаємо цю послугу
+                        (налаштовується в розділі «Логістика»).
                       </div>
                     )}
                     {disabled && m === COLLECTION_METHODS.EXTERNAL_SHIPPING && (
@@ -232,7 +251,9 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
             <div className="text-sm text-gray-400">Завантаження пунктів…</div>
           ) : pointsForCountry.length === 0 ? (
             <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
-              Поки що немає пунктів збору в цій країні. Виберіть інший спосіб передачі.
+              {senderCity
+                ? `Для «${senderCity}» немає пунктів збору. Виберіть інший спосіб передачі.`
+                : 'Поки що немає пунктів збору. Виберіть інший спосіб передачі.'}
             </div>
           ) : (
             <div className="space-y-2">
@@ -364,14 +385,63 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
               </div>
             </div>
           )}
+
+          {/* ТЗ (docx 14.05.26 §b): для клієнта при «Виклик кур'єра» — окремі
+              віконця Вулиця / Будинок / Орієнтир (замість одного «Адреса
+              забору»). Населений пункт та Індекс беруться з картки «Відправник»
+              вище. */}
+          {clientFacing && (
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs text-gray-500">Вулиця</Label>
+                  <Input
+                    value={value.street ?? ''}
+                    onChange={(e) => onChange({ ...value, street: e.target.value })}
+                    placeholder="Вулиця"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">Будинок</Label>
+                  <Input
+                    value={value.building ?? ''}
+                    onChange={(e) => onChange({ ...value, building: e.target.value })}
+                    placeholder="№"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs text-gray-500">Орієнтир</Label>
+                <Input
+                  value={value.landmark ?? ''}
+                  onChange={(e) => onChange({ ...value, landmark: e.target.value })}
+                  placeholder="Біля магазину..."
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* External shipping. ТЗ §E13: якщо країна відправлення — Україна,
-          показуємо реквізити нашого складу (ФОП Добровольський + НП Львів).
-          Для інших країн — узагальнена підказка (лише staff). */}
+      {/* External shipping. ТЗ §E13/docx 14.05.26: при «Пошта» у клієнта —
+          віконце «Номер складу» (для будь-якої країни з увімкненою поштою).
+          Для UA додатково показуємо реквізити нашого складу (ФОП Добровольський
+          + НП Львів); для EU-клієнта — узагальнена підказка; для staff EU —
+          окрема підказка нижче. */}
       {value.method === 'external_shipping' && senderCountry === 'UA' && (
-        <div className="border-t pt-3">
+        <div className="border-t pt-3 space-y-3">
+          {/* ТЗ (docx 14.05.26 §b): при «Пошта» у клієнта з'являється віконце
+              «Номер складу» (склад Нової пошти, з якого клієнт відправляє). */}
+          {clientFacing && (
+            <div>
+              <Label className="text-xs text-gray-500">Номер складу</Label>
+              <Input
+                value={value.warehouseNum ?? ''}
+                onChange={(e) => onChange({ ...value, warehouseNum: e.target.value })}
+                placeholder="Напр. 5"
+              />
+            </div>
+          )}
           <div className="text-xs text-gray-700 bg-amber-50 border border-amber-200 rounded p-3 space-y-2 leading-snug">
             <div className="font-medium text-amber-900">
               Відправте Вашу посилку нам Новою поштою
@@ -414,8 +484,20 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
           </div>
         </div>
       )}
-      {value.method === 'external_shipping' && senderCountry !== 'UA' && !clientFacing && (
-        <div className="border-t pt-3">
+      {value.method === 'external_shipping' && senderCountry !== 'UA' && (
+        <div className="border-t pt-3 space-y-3">
+          {/* ТЗ (docx 14.05.26 §b): «Номер складу» для клієнта — і коли пошта
+              увімкнена для EU-країни (інакше ця гілка не покажеться). */}
+          {clientFacing && (
+            <div>
+              <Label className="text-xs text-gray-500">Номер складу</Label>
+              <Input
+                value={value.warehouseNum ?? ''}
+                onChange={(e) => onChange({ ...value, warehouseNum: e.target.value })}
+                placeholder="Напр. 5"
+              />
+            </div>
+          )}
           <div className="text-xs text-gray-500 bg-gray-50 rounded p-2">
             Після створення замовлення ми надішлемо вам адресу нашого складу в{' '}
             {senderCountry ? COUNTRY_LABELS[senderCountry as CountryCode] : 'Європі'},

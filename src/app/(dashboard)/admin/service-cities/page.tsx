@@ -15,6 +15,7 @@ interface ServiceCity {
   country: string;
   city: string;
   acceptsCourierPickup: boolean;
+  acceptsPostal: boolean;
   notes: string | null;
 }
 
@@ -29,6 +30,7 @@ export default function ServiceCitiesPage() {
   const [country, setCountry] = useState<string>('UA');
   const [city, setCity] = useState('');
   const [accepts, setAccepts] = useState(true);
+  const [postal, setPostal] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -57,13 +59,14 @@ export default function ServiceCitiesPage() {
     const res = await fetch('/api/service-cities', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ country, city: city.trim(), acceptsCourierPickup: accepts }),
+      body: JSON.stringify({ country, city: city.trim(), acceptsCourierPickup: accepts, acceptsPostal: postal }),
     });
     setSaving(false);
     if (res.ok) {
       toast.success('Збережено');
       setCity('');
       setAccepts(true);
+      setPostal(false);
       await refresh();
     } else {
       const body = await res.json().catch(() => ({}));
@@ -115,10 +118,18 @@ export default function ServiceCitiesPage() {
                 placeholder="Львів"
               />
             </div>
-            <label className="flex items-center gap-2 text-sm h-9">
-              <Checkbox checked={accepts} onCheckedChange={(c) => setAccepts(c === true)} />
-              «Виклик кур&apos;єра» доступний
-            </label>
+            {/* ТЗ docx 14.05.26: два прапорці — «Виклик кур'єра» (по місту) та
+                «Пошта» (агрегується по країні). Керують показом опцій у формах. */}
+            <div className="flex flex-col gap-1">
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox checked={accepts} onCheckedChange={(c) => setAccepts(c === true)} />
+                «Виклик кур&apos;єра» доступний
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox checked={postal} onCheckedChange={(c) => setPostal(c === true)} />
+                «Пошта» доступна (по країні)
+              </label>
+            </div>
             <Button type="submit" disabled={saving || !city.trim()}>
               {saving ? '...' : 'Зберегти'}
             </Button>
@@ -148,6 +159,15 @@ export default function ServiceCitiesPage() {
                     ) : (
                       <span className="ml-2 text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                         Виклик кур&apos;єра вимкнено
+                      </span>
+                    )}
+                    {r.acceptsPostal ? (
+                      <span className="ml-1 text-[10px] text-green-700 bg-green-50 px-1.5 py-0.5 rounded">
+                        Пошта ✓
+                      </span>
+                    ) : (
+                      <span className="ml-1 text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                        Пошта вимкнено
                       </span>
                     )}
                   </div>

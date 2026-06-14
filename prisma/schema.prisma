@@ -756,6 +756,10 @@ model ServiceCity {
   city                  String
   /// True = клієнт може обрати «Виклик кур'єра» в цьому місті (per ТЗ).
   acceptsCourierPickup  Boolean  @default(true) @map("accepts_courier_pickup")
+  /// True = у цій країні дозволена «Пошта» (відправка нам поштою) — ТЗ
+  /// docx 14.05.26: опція «Пошта» доступна, лише якщо в Логістиці її
+  /// передбачено для країни. Зберігається по місту, агрегується по країні.
+  acceptsPostal         Boolean  @default(false) @map("accepts_postal")
   /// Reserved for future expansion (e.g. delivery service zones).
   notes                 String?
   createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz

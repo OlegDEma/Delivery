@@ -12,7 +12,16 @@ import { PhoneInput } from '@/components/shared/phone-input';
 import { FieldHint } from '@/components/shared/field-hint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
-import { isLvivCity } from '@/lib/utils/pricing';
+
+/**
+ * ТЗ (docx 14.05.26 §a): при «Виклик кур'єра» у формі Відправника оператор
+ * відповідає «Це буде єдина посилка?». Відповідь — per-посилка (впливає на
+ * мінімальний тариф), тож повертаємо її окремим meta-аргументом разом із
+ * клієнтом, а батьківська форма /parcels/new кладе її у collection-стан.
+ */
+export interface ClientCreateMeta {
+  isMultiParcelPickup?: boolean | null;
+}
 
 interface ClientCreateFormProps {
   onSuccess: (client: {
@@ -36,7 +45,7 @@ interface ClientCreateFormProps {
       deliveryMethod: string;
       usageCount: number;
     }[];
-  }) => void;
+  }, meta?: ClientCreateMeta) => void;
   onCancel?: () => void;
   initialPhone?: string;
   /** Direction of the parcel — drives default country and phone code. */
@@ -127,14 +136,24 @@ export function ClientCreateForm({
   const [landmark, setLandmark] = useState(initialAddr?.landmark || '');
   const [npWarehouseNum, setNpWarehouseNum] = useState(initialAddr?.npWarehouseNum || '');
   const [pickupPointText, setPickupPointText] = useState(initialAddr?.pickupPointText || '');
+  // ТЗ §a: «Це буде єдина посилка?» — лише для Відправника при «Виклик
+  // кур'єра» (deliveryMethod='address'). null = ще не відповіли.
+  const [isMultiParcelPickup, setIsMultiParcelPickup] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // Чи показувати питання про кількість посилок: відправник + «Виклик
+  // кур'єра» (для нього address = виклик кур'єра, а не адресна доставка).
+  const showMultiParcelQuestion = role === 'sender' && deliveryMethod === 'address';
 
   // ТЗ (docx 13.06.26 §4/§5): «Пункт видачі/збору» — це вибір зі СПИСКУ
   // реальних точок з розділу Логістика для країни/міста, а не вільний текст.
   // Якщо для країни/міста точок немає — опція ховається.
   const [points, setPoints] = useState<{ id: string; name: string | null; country: string; city: string; address: string }[]>([]);
   const [selectedPointId, setSelectedPointId] = useState<string>('');
+  // ТЗ (docx 14.05.26 §a): доступність «Виклик кур'єра»/«Пошта» для Відправника
+  // визначається Логістикою (ServiceCity), а не хардкодом.
+  const [serviceCities, setServiceCities] = useState<{ country: string; city: string; acceptsCourierPickup: boolean; acceptsPostal: boolean }[]>([]);
 
   useEffect(() => {
     if (!country) { setPoints([]); return; }
@@ -148,18 +167,61 @@ export function ClientCreateForm({
     return () => { cancelled = true; };
   }, [country]);
 
-  // Точки для поточної локації: спершу за містом, інакше — усі по країні.
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/service-cities')
+      .then(r => (r.ok ? r.json() : []))
+      .then((list: { country: string; city: string; acceptsCourierPickup: boolean; acceptsPostal: boolean }[]) => {
+        if (!cancelled) setServiceCities(Array.isArray(list) ? list : []);
+      })
+      .catch(() => { if (!cancelled) setServiceCities([]); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // ТЗ (docx 14.05.26 §a): Пункти збору/видачі — САМЕ для вибраного
+  // населеного пункту, без fallback на всю країну. Приклад: Венло (Venlo) —
+  // у NL є точка в Amsterdam, але не у Венло, тож опція «Пункт збору» для
+  // Венло НЕДОСТУПНА (список порожній → опцію ховаємо).
   const cityNorm = city.trim().toLowerCase();
   const cityPoints = cityNorm ? points.filter(p => p.city.trim().toLowerCase() === cityNorm) : [];
-  const pointsToShow = cityPoints.length > 0 ? cityPoints : points;
-  const hasAnyPoints = points.length > 0;
+  const pointsToShow = cityPoints;
+  const hasAnyPoints = cityPoints.length > 0;
 
-  // ТЗ §5a/§13: «Виклик кур'єра» (для відправника = опція address) в Україні
-  // можливий ЛИШЕ у Львові. Для ЄС — доступний. Ховаємо опцію коли недоступна
-  // (але лишаємо, якщо вже вибрана — щоб не зникала з-під користувача).
+  // ТЗ (docx 14.05.26 §a): «Виклик кур'єра» (для відправника = опція address)
+  // доступний, ЛИШЕ якщо в Логістиці (ServiceCity) для обраного НАСЕЛЕНОГО
+  // ПУНКТУ ввімкнено acceptsCourierPickup — для всіх країн однаково. Для
+  // отримувача address = «Адресна доставка», тож завжди доступно.
   const courierAvailable =
     role !== 'sender' ? true
-    : (country !== 'UA' || isLvivCity(city));
+    : serviceCities.some(sc => sc.country === country && sc.acceptsCourierPickup && sc.city.trim().toLowerCase() === cityNorm);
+
+  // ТЗ (docx 14.05.26 §a): «Пошта» (np_warehouse) для Відправника доступна,
+  // ЛИШЕ якщо в Логістиці для КРАЇНИ є місто з acceptsPostal=true. Для
+  // отримувача «Пошта» = доставка Новою поштою — завжди доступна.
+  const postalAvailable =
+    role !== 'sender' ? true
+    : serviceCities.some(sc => sc.country === country && sc.acceptsPostal);
+
+  // Авто-корекція способу для Відправника: якщо поточний спосіб став
+  // недоступним у Логістиці (зміна міста/країни), перемикаємось на перший
+  // доступний — щоб дефолтний «Виклик кур'єра» не «залипав» у недоступному
+  // місті. Якщо доступних способів немає — лишаємо як є (нижче покажемо
+  // підказку «місто не обслуговується»).
+  useEffect(() => {
+    if (role !== 'sender') return;
+    const avail = ([
+      courierAvailable ? 'address' : null,
+      postalAvailable ? 'np_warehouse' : null,
+      hasAnyPoints ? 'pickup_point' : null,
+    ].filter(Boolean)) as ('address' | 'np_warehouse' | 'pickup_point')[];
+    if (avail.length > 0 && !avail.includes(deliveryMethod)) {
+      setDeliveryMethod(avail[0]);
+    }
+  }, [role, courierAvailable, postalAvailable, hasAnyPoints, deliveryMethod]);
+
+  // Чи є для Відправника хоч один доступний спосіб (інакше місто не
+  // обслуговується — треба додати його в Логістику).
+  const senderHasNoMethod = role === 'sender' && !courierAvailable && !postalAvailable && !hasAnyPoints;
 
   // ТЗ (docx 13.06.26): «Назва міста автоматично починається з великої
   // букви». Капіталізуємо лише першу літеру, решту лишаємо як ввели (щоб не
@@ -206,6 +268,18 @@ export function ClientCreateForm({
         return;
       }
     }
+
+    // ТЗ §a: «Вибір одного з чекбоксів обов'язковий» — при «Виклик кур'єра».
+    if (showMultiParcelQuestion && isMultiParcelPickup === null) {
+      setError('Оберіть «Одна посилка» або «Дві або більше посилок на різні адреси»');
+      setSaving(false);
+      return;
+    }
+
+    // Meta з відповіддю про кількість посилок — лише коли питання показували.
+    const meta: ClientCreateMeta | undefined = showMultiParcelQuestion
+      ? { isMultiParcelPickup }
+      : undefined;
 
     try {
       const baseAddress = {
@@ -305,7 +379,7 @@ export function ClientCreateForm({
         toast.success('Дані підтверджено');
         // Re-fetch the updated client so caller has fresh data.
         const fresh = await fetch(`/api/clients/${initialData.id}`).then(r => r.ok ? r.json() : null);
-        onSuccess(fresh || initialData);
+        onSuccess(fresh || initialData, meta);
         return;
       }
 
@@ -325,7 +399,7 @@ export function ClientCreateForm({
       if (res.ok) {
         const data = await res.json();
         toast.success('Клієнта створено');
-        onSuccess(data);
+        onSuccess(data, meta);
       } else {
         const data = await res.json();
         setError(data.error || 'Помилка створення клієнта');
@@ -437,13 +511,18 @@ export function ClientCreateForm({
               <SelectValue>{methodLabels[deliveryMethod]}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {/* ТЗ §5a: «Виклик кур'єра» (sender=address) ховаємо коли
-                  недоступний (UA поза Львовом). Для отримувача «Адресна
-                  доставка» завжди доступна. */}
-              {(courierAvailable || deliveryMethod === 'address') && (
+              {/* ТЗ docx 14.05.26 §a: «Виклик кур'єра» (sender=address) ховаємо,
+                  якщо в Логістиці для міста немає кур'єра. Для отримувача
+                  courierAvailable=true (роль), тож «Адресна доставка» завжди є. */}
+              {courierAvailable && (
                 <SelectItem value="address">{methodLabels.address}</SelectItem>
               )}
-              <SelectItem value="np_warehouse">{methodLabels.np_warehouse}</SelectItem>
+              {/* ТЗ docx 14.05.26 §a: «Пошта» (sender=np_warehouse) ховаємо,
+                  якщо в Логістиці для країни пошта не передбачена. Для
+                  отримувача postalAvailable=true (роль) — «Пошта» завжди є. */}
+              {postalAvailable && (
+                <SelectItem value="np_warehouse">{methodLabels.np_warehouse}</SelectItem>
+              )}
               {/* ТЗ §4: «Пункт» показуємо лише якщо для країни/міста є точки в
                   Логістиці (або якщо він уже вибраний — щоб не зник). */}
               {(hasAnyPoints || deliveryMethod === 'pickup_point') && (
@@ -463,6 +542,16 @@ export function ClientCreateForm({
           />
         </div>
       </div>
+
+      {/* ТЗ docx 14.05.26 §a: якщо для обраного міста Відправника в Логістиці
+          немає жодного способу (ні кур'єра, ні пошти, ні пункту збору) —
+          місто не обслуговується. Підказуємо додати його в Логістику. */}
+      {senderHasNoMethod && (
+        <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+          Для «{city || 'цього міста'}» немає доступних способів відправки.
+          Додайте місто в розділі «Логістика → Міста обслуговування / Пункти збору».
+        </div>
+      )}
 
       <div className="space-y-2">
         {deliveryMethod === 'np_warehouse' && (
@@ -534,6 +623,39 @@ export function ClientCreateForm({
               <Label>Орієнтир</Label>
               <Input value={landmark} onChange={(e) => setLandmark(e.target.value)} placeholder="Біля магазину..." />
             </div>
+
+            {/* ТЗ §a: «Виклик кур'єра» → «Це буде єдина посилка?». Вибір
+                обов'язковий — впливає на мінімальний тариф за кожну посилку. */}
+            {showMultiParcelQuestion && (
+              <div className="bg-amber-50 border border-amber-200 rounded p-2 space-y-1.5">
+                <div className="text-xs font-medium text-amber-900">
+                  Це буде єдина посилка?
+                </div>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4"
+                    checked={isMultiParcelPickup === false}
+                    onChange={() => setIsMultiParcelPickup(false)}
+                  />
+                  Одна посилка
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4"
+                    checked={isMultiParcelPickup === true}
+                    onChange={() => setIsMultiParcelPickup(true)}
+                  />
+                  Дві або більше посилок на різні адреси
+                </label>
+                {isMultiParcelPickup === null && (
+                  <div className="text-[11px] text-amber-700">
+                    Відповідь обов&apos;язкова — від неї залежить мінімальна вартість посилки.
+                  </div>
+                )}
+              </div>
+            )}
             </>
           );
         })()}

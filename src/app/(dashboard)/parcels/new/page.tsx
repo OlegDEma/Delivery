@@ -278,7 +278,7 @@ export default function NewParcelPage() {
     }
   }
 
-  function handleSenderSelect(client: SelectedClient) {
+  function handleSenderSelect(client: SelectedClient, meta?: { isMultiParcelPickup?: boolean | null }) {
     setSender(client);
     // Якщо валідація залишила помилку «Виберіть відправника» з попереднього
     // натискання Submit — миттєво ховаємо її, бо причину усунули.
@@ -308,9 +308,9 @@ export default function NewParcelPage() {
         : 'courier_pickup';
       setCollection({
         method, pointId: '', date: '', address: '',
-        // courier — оператор має свідомо обрати кількість посилок (впливає
-        // на тариф); решта методів не потребують відповіді.
-        isMultiParcelPickup: null,
+        // ТЗ §a: відповідь «Одна/Дві посилки» тепер дає форма Відправника
+        // (meta). Для не-courier методів вона не застосовна → null.
+        isMultiParcelPickup: method === 'courier_pickup' ? (meta?.isMultiParcelPickup ?? null) : null,
       });
     } else {
       setSenderPostalCode(''); setSenderCity(''); setSenderStreet(''); setSenderBuilding(''); setSenderNpWarehouse(''); setSenderLandmark(''); setSenderPickupPointText('');
@@ -575,6 +575,11 @@ export default function NewParcelPage() {
                     {collection.method === 'courier_pickup' ? 'Виклик кур\'єра'
                       : collection.method === 'external_shipping' ? 'Пошта'
                       : 'Пункт збору'}
+                    {/* ТЗ §a: відповідь «Одна/Дві посилки» дається у формі
+                        Відправника; тут показуємо обраний варіант для контролю. */}
+                    {collection.method === 'courier_pickup' && collection.isMultiParcelPickup !== null && collection.isMultiParcelPickup !== undefined && (
+                      <> · {collection.isMultiParcelPickup ? 'Дві або більше посилок' : 'Одна посилка'}</>
+                    )}
                   </>
                 ) : undefined
               }
@@ -583,39 +588,12 @@ export default function NewParcelPage() {
                 лише назва вкладки "Відправник" та голубе поле». Інлайн-форму
                 адреси прибрано — заповнюється/редагується через діалог
                 («Редагувати» на голубому полі). Стан адреси наповнює
-                handleSenderSelect. */}
+                handleSenderSelect.
 
-            {/* ТЗ (docx §5a): спосіб забору показано ВСЕРЕДИНІ голубого поля
-                (summaryFooter вище, після адреси). Прямокутники прибрано. Тут
-                лишається ЛИШЕ питання про кількість посилок для «Виклик
-                кур'єра» — воно інтерактивне (впливає на тариф), тож не може
-                жити в read-only голубому полі. */}
-            {direction === 'eu_to_ua' && sender && collection.method === 'courier_pickup' && (
-              <div className="mt-1 bg-amber-50 border border-amber-200 rounded p-2 space-y-1.5">
-                <div className="text-xs font-medium text-amber-900">
-                  Це буде єдина посилка від цього Відправника?
-                </div>
-                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                  <Checkbox
-                    checked={collection.isMultiParcelPickup === false}
-                    onCheckedChange={(c) => c === true && setCollection({ ...collection, isMultiParcelPickup: false })}
-                  />
-                  Одна посилка
-                </label>
-                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                  <Checkbox
-                    checked={collection.isMultiParcelPickup === true}
-                    onCheckedChange={(c) => c === true && setCollection({ ...collection, isMultiParcelPickup: true })}
-                  />
-                  Дві або більше посилок
-                </label>
-                {(collection.isMultiParcelPickup === null || collection.isMultiParcelPickup === undefined) && (
-                  <div className="text-[11px] text-amber-700">
-                    Відповідь обов&apos;язкова — від неї залежить мінімальна вартість посилки.
-                  </div>
-                )}
-              </div>
-            )}
+                ТЗ (docx 14.05.26 §a): питання «Це буде єдина посилка?» тепер
+                ЖИВЕ У ФОРМІ Відправника (ClientCreateForm), а відповідь
+                приходить сюди через meta → collection.isMultiParcelPickup.
+                Тому окремий інлайн-блок із цим питанням тут прибрано. */}
           </CardContent>
         </Card>
 

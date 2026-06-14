@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ClientCreateForm } from './client-create-form';
+import { ClientCreateForm, type ClientCreateMeta } from './client-create-form';
 import { PhoneInput } from '@/components/shared/phone-input';
 import type { CountryCode } from '@/lib/constants/countries';
 
@@ -34,7 +34,9 @@ interface ClientResult {
 
 interface ClientSearchProps {
   label: string;
-  onSelect: (client: ClientResult) => void;
+  /** meta несе відповідь «Це буде єдина посилка?» (docx 14.05.26 §a) для
+   *  відправника при «Виклик кур'єра» — батько кладе її у collection-стан. */
+  onSelect: (client: ClientResult, meta?: ClientCreateMeta) => void;
   onClear: () => void;
   selected?: ClientResult | null;
   /** Direction of the parcel (drives default country/phone code in "New client"). */
@@ -148,9 +150,9 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
     setEditCandidate(client);
   }
 
-  function handleEditConfirmed(client: ClientResult) {
+  function handleEditConfirmed(client: ClientResult, meta?: ClientCreateMeta) {
     setEditCandidate(null);
-    onSelect(client);
+    onSelect(client, meta);
   }
 
   function handleOpenCreate() {
@@ -158,10 +160,10 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
     setShowCreateDialog(true);
   }
 
-  function handleClientCreated(client: ClientResult) {
+  function handleClientCreated(client: ClientResult, meta?: ClientCreateMeta) {
     setShowCreateDialog(false);
     setQuery('');
-    onSelect(client);
+    onSelect(client, meta);
   }
 
   // Визначаємо, чи запит схожий на телефон
