@@ -250,7 +250,7 @@ export default function ParcelDetailPage() {
     (parcel.createdSource === 'client_web' || parcel.createdSource === 'client_telegram');
 
   return (
-    <div className="max-w-2xl space-y-4">
+    <div className="max-w-7xl space-y-4">
       <Breadcrumbs items={[
         { label: 'Посилки', href: '/parcels' },
         { label: parcel.internalNumber },
@@ -495,6 +495,12 @@ export default function ParcelDetailPage() {
         </div>
       </div>
 
+      {/* UX: двоколонкова розкладка на десктопі — зліва те, що частіше
+          переглядають/редагують (Параметри + Деталі), справа — Оплата, Рейс,
+          фото та історія. Мобільна (< lg) лишається в одну колонку.
+          items-start — щоб колонки не тягнулись по висоті одна за одною. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className="space-y-4">
       {/* Параметри відправлення — read-only. Редагування через /edit. */}
       <ParcelPlacesCard
         parcelId={parcel.id}
@@ -532,7 +538,9 @@ export default function ParcelDetailPage() {
 
       {/* Details — read-only. Редагування через /edit. */}
       <ParcelDetailsCard parcel={parcel} onUpdate={fetchParcel} readOnly={isEditLocked} />
+      </div>{/* /ліва колонка */}
 
+      <div className="space-y-4">
       {/* Payment card */}
       <ParcelPaymentCard parcel={parcel} onUpdate={fetchParcel} />
 
@@ -719,6 +727,8 @@ export default function ParcelDetailPage() {
           </CardContent>
         </Card>
       )}
+      </div>{/* /права колонка */}
+      </div>{/* /grid */}
     </div>
   );
 }
