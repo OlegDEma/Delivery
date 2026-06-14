@@ -11,8 +11,13 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
       <MobileNav />
+      {/* Контейнер БЕЗ глобального max-width — списки й таблиці займають усю
+          ширину екрана (раніше max-w-7xl лишав ~порожнечу праворуч на широких
+          моніторах). Форми та детальні сторінки звужують себе власним
+          max-w-2xl/3xl, тож вони лишаються компактними. Розумний верхній кеп
+          2xl:max-w-[1800px] — щоб на ультра-широких не розтягувалось безмежно. */}
       <main className="md:ml-64 print:ml-0">
-        <div className="p-4 md:p-6 max-w-7xl print:p-0 print:max-w-none">
+        <div className="p-4 md:p-6 2xl:max-w-[1800px] print:p-0 print:max-w-none">
           {children}
         </div>
       </main>
