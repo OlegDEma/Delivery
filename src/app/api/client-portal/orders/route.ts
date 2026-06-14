@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
         phoneNormalized: normalizePhone(profile.phone),
         firstName: capitalize(body.senderFirstName || profileNameParts[1] || profileNameParts[0] || 'Клієнт'),
         lastName: capitalize(body.senderLastName || profileNameParts[0] || 'Клієнт'),
+        middleName: body.senderMiddleName ? capitalize(body.senderMiddleName) : null,
         country: (body.senderCountry ?? null) as Country | null,
       },
     });
@@ -130,6 +131,7 @@ export async function POST(request: NextRequest) {
         phoneNormalized: normalizePhone(canonicalReceiverPhone),
         firstName: capitalize(body.receiverFirstName),
         lastName: capitalize(body.receiverLastName),
+        middleName: body.receiverMiddleName ? capitalize(body.receiverMiddleName) : null,
         country: (body.receiverCountry ?? null) as Country | null,
       },
     });

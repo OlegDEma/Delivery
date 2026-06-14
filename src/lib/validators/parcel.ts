@@ -108,10 +108,14 @@ export const clientOrderSchema = z.object({
   senderCountry: countrySchema.optional().nullable(),
   senderFirstName: z.string().trim().max(100).optional(),
   senderLastName: z.string().trim().max(100).optional(),
+  /** По батькові відправника — уніфікація форми зі staff (ТЗ §4). */
+  senderMiddleName: z.string().trim().max(100).optional().nullable(),
   // Receiver
   receiverPhone: phoneSchema,
   receiverFirstName: text(100),
   receiverLastName: text(100),
+  /** По батькові отримувача — уніфікація форми зі staff (ТЗ §4). */
+  receiverMiddleName: z.string().trim().max(100).optional().nullable(),
   receiverCity: text(100).optional(),
   receiverStreet: z.string().trim().max(300).optional().nullable(),
   /** Індекс (поштовий код) отримувача — ТЗ §4. */

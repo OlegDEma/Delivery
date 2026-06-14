@@ -59,6 +59,7 @@ export default function NewOrderPage() {
   const [senderPhone, setSenderPhone] = useState('+');
   const [senderFirstName, setSenderFirstName] = useState('');
   const [senderLastName, setSenderLastName] = useState('');
+  const [senderMiddleName, setSenderMiddleName] = useState('');
   const [senderCountry, setSenderCountry] = useState('NL');
   const [senderCity, setSenderCity] = useState('');
   const [senderPostalCode, setSenderPostalCode] = useState('');
@@ -67,6 +68,7 @@ export default function NewOrderPage() {
   const [receiverPhone, setReceiverPhone] = useState('+');
   const [receiverFirstName, setReceiverFirstName] = useState('');
   const [receiverLastName, setReceiverLastName] = useState('');
+  const [receiverMiddleName, setReceiverMiddleName] = useState('');
   const [receiverCountry, setReceiverCountry] = useState('');
   const [receiverCity, setReceiverCity] = useState('');
   const [receiverPostalCode, setReceiverPostalCode] = useState('');
@@ -216,8 +218,8 @@ export default function NewOrderPage() {
         insurance, needsPackaging,
         // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
         payer, paymentMethod, paymentInUkraine,
-        senderPhone, senderFirstName, senderLastName, senderCountry, senderCity, senderPostalCode,
-        receiverPhone, receiverFirstName, receiverLastName, receiverCountry, receiverCity, receiverPostalCode,
+        senderPhone, senderFirstName, senderLastName, senderMiddleName, senderCountry, senderCity, senderPostalCode,
+        receiverPhone, receiverFirstName, receiverLastName, receiverMiddleName, receiverCountry, receiverCity, receiverPostalCode,
         receiverStreet, receiverDeliveryMethod, receiverNpWarehouse,
         places: places.map(p => ({
           weight: Number(p.weight) || 0,
@@ -344,6 +346,7 @@ export default function NewOrderPage() {
               <div><Label>Прізвище *</Label><Input value={senderLastName} onChange={(e) => setSenderLastName(e.target.value)} required /></div>
               <div><Label>Ім&apos;я *</Label><Input value={senderFirstName} onChange={(e) => setSenderFirstName(e.target.value)} required /></div>
             </div>
+            <div><Label>По батькові</Label><Input value={senderMiddleName} onChange={(e) => setSenderMiddleName(e.target.value)} /></div>
             <div>
               <Label>Країна</Label>
               <Select value={senderCountry} onValueChange={(v) => setSenderCountry(v ?? 'NL')}>
@@ -403,6 +406,7 @@ export default function NewOrderPage() {
               <div><Label>Прізвище *</Label><Input value={receiverLastName} onChange={(e) => setReceiverLastName(e.target.value)} required /></div>
               <div><Label>Ім&apos;я *</Label><Input value={receiverFirstName} onChange={(e) => setReceiverFirstName(e.target.value)} required /></div>
             </div>
+            <div><Label>По батькові</Label><Input value={receiverMiddleName} onChange={(e) => setReceiverMiddleName(e.target.value)} /></div>
             <div>
               <Label>Країна *</Label>
               <Select value={receiverCountry} onValueChange={(v) => setReceiverCountry(v ?? '')}>
