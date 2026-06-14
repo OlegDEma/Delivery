@@ -13,6 +13,7 @@ import {
   dimensionSchema,
   phoneSchema,
   uuidSchema,
+  optionalUuidSchema,
   text,
 } from './common';
 
@@ -77,7 +78,7 @@ export const createParcelSchema = z.object({
   places: z.array(placeInputSchema).min(1, 'Додайте хоча б одне місце').max(20),
   tripId: uuidSchema.optional().nullable(),
   collectionMethod: collectionMethodSchema.optional().nullable(),
-  collectionPointId: uuidSchema.optional().nullable(),
+  collectionPointId: optionalUuidSchema,
   collectionDate: z.string().optional().nullable(),
   collectionAddress: z.string().trim().max(300).optional().nullable(),
   /** Per ТЗ: при courier_pickup — true якщо 2+ посилок з цієї локації. */
@@ -118,7 +119,7 @@ export const clientOrderSchema = z.object({
   places: z.array(placeInputSchema).min(1).max(20),
   // Collection
   collectionMethod: collectionMethodSchema.optional().nullable(),
-  collectionPointId: uuidSchema.optional().nullable(),
+  collectionPointId: optionalUuidSchema,
   collectionDate: z.string().optional().nullable(),
   collectionAddress: z.string().trim().max(300).optional().nullable(),
 });
@@ -147,7 +148,7 @@ export const updateParcelSchema = z.object({
   paymentInUkraine: z.boolean().optional(),
   shipmentType: shipmentTypeSchema.optional(),
   collectionMethod: collectionMethodSchema.nullable().optional(),
-  collectionPointId: uuidSchema.nullable().optional(),
+  collectionPointId: optionalUuidSchema,
   collectionDate: z.string().nullable().optional(),
   collectionAddress: z.string().trim().max(300).nullable().optional(),
   /** Per ТЗ-docx 03.06.2026: «всі поля редаговані» — multi-parcel answer

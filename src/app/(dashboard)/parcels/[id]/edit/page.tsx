@@ -258,9 +258,23 @@ export default function EditParcelPage() {
 
     if (useGeneralParams) {
       if (!generalWeight || Number(generalWeight) <= 0) { setError('Вкажіть загальну вагу'); return; }
+      if (!generalVolume || Number(generalVolume) <= 0) {
+        setError('Вкажіть загальний об\'єм (м³) — об\'ємна вага не може бути нульовою'); return;
+      }
     } else {
       if (!places.some(p => Number(p.weight) > 0)) {
         setError('Вкажіть вагу хоча б одного місця'); return;
+      }
+      // ТЗ (docx 13.06.26): кожне місце з вагою має мати Д/Ш/В АБО об'єм.
+      const badPlace = places.findIndex(p => {
+        if (Number(p.weight) <= 0) return false;
+        const hasDims = Number(p.length) > 0 && Number(p.width) > 0 && Number(p.height) > 0;
+        const hasVolume = Number(p.volume) > 0;
+        return !hasDims && !hasVolume;
+      });
+      if (badPlace !== -1) {
+        setError(`Місце ${badPlace + 1}: вкажіть довжину/ширину/висоту АБО об'єм (м³) — об'ємна вага не може бути нульовою`);
+        return;
       }
     }
     if (!declaredValue || Number(declaredValue) <= 0) {

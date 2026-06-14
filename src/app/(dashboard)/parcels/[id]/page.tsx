@@ -436,7 +436,7 @@ export default function ParcelDetailPage() {
           після lock на вагу/розміри). Label-color відрізняє сторони. */}
       <div className="text-sm space-y-1.5 py-2 border-y">
         <div className="flex items-baseline gap-2">
-          <span className="text-blue-600 font-medium shrink-0 w-16">Кому:</span>
+          <span className="text-blue-600 font-bold shrink-0 w-24 text-xs uppercase tracking-wide">Отримувач</span>
           <div className="min-w-0 flex-1">
             <span className="font-medium">{parcel.receiver.lastName} {parcel.receiver.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
@@ -467,7 +467,7 @@ export default function ParcelDetailPage() {
           </div>
         </div>
         <div className="flex items-baseline gap-2">
-          <span className="text-green-600 font-medium shrink-0 w-16">Від:</span>
+          <span className="text-green-600 font-bold shrink-0 w-24 text-xs uppercase tracking-wide">Відправник</span>
           <div className="min-w-0 flex-1">
             <span className="font-medium">{parcel.sender.lastName} {parcel.sender.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>

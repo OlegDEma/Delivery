@@ -21,6 +21,21 @@ export function calculateVolumetricWeight(
 }
 
 /**
+ * Об'ємна вага (кг) безпосередньо з об'єму в м³.
+ *
+ * Per ТЗ: «об'єм (м³) × 250». Походить з того ж дільника 4000: 1 м³ =
+ * 1 000 000 см³, тож 1 000 000 / 4000 = 250. Тримаємо як єдине джерело,
+ * щоб фронт-калькулятор і бекенд рахували однаково.
+ *
+ * Використовується коли користувач увів ТІЛЬКИ об'єм (без Д/Ш/В): без цього
+ * бекенд лишав об'ємну вагу 0 → на детальній «Об'ємна вага: 0.00 кг».
+ */
+export function volumetricWeightFromVolume(volumeM3: number): number {
+  if (!Number.isFinite(volumeM3) || volumeM3 <= 0) return 0;
+  return (volumeM3 * 1_000_000) / VOLUMETRIC_DIVISOR;
+}
+
+/**
  * Calculate volume in cubic meters from dimensions in centimeters.
  */
 export function calculateVolume(

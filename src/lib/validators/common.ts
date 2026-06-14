@@ -55,6 +55,19 @@ export const userRoleSchema = z.enum([
 /** UUID v4-ish (Prisma generates v4). Use z.string().uuid() for strict. */
 export const uuidSchema = z.string().uuid();
 
+/**
+ * Опційний UUID, що трактує порожній рядок '' як «не задано» (→ null).
+ *
+ * Без цього форми, які шлють `collectionPointId: ''` для невибраного
+ * посилання, валились із «collectionPointId: Invalid UUID» і не давали
+ * зберегти (баг з docx 13.06.26 — Test client). Препроцес перетворює '' на
+ * null ДО перевірки формату.
+ */
+export const optionalUuidSchema = z.preprocess(
+  (v) => (v === '' ? null : v),
+  z.string().uuid().nullable().optional(),
+);
+
 /** Cheap regex for raw UUID checks in route handlers (no Zod parsing). */
 export const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 export function isUuid(s: string): boolean { return UUID_RE.test(s); }

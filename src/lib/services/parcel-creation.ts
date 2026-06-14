@@ -13,7 +13,7 @@
 
 import type { Country, Direction, ShipmentType, Payer, PaymentMethod, CreatedSource, ParcelStatus, CollectionMethod, DeliveryMethod } from '@/generated/prisma/enums';
 import { prisma } from '@/lib/prisma';
-import { calculateVolumetricWeight, roundWeight } from '@/lib/utils/volumetric';
+import { calculateVolumetricWeight, volumetricWeightFromVolume, roundWeight } from '@/lib/utils/volumetric';
 import { calculateParcelCost } from '@/lib/utils/pricing';
 import { buildPricingInput } from '@/lib/utils/pricing-input';
 import { toEur } from '@/lib/utils/currency';
@@ -97,9 +97,15 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
   let totalVolWeight = 0;
   const placeBlueprints = input.places.map((p, i) => {
     const w = Number(p.weight) || 0;
+    // ТЗ (docx 13.06.26): об'ємна вага НІКОЛИ не нульова. Беремо Д×Ш×В коли є
+    // розміри, інакше — з прямо введеного об'єму (м³ × 250). Раніше при
+    // введенні лише об'єму volW лишалась 0 → на детальній «0.00 кг» і
+    // занижена вартість доставки.
     const volW = p.length && p.width && p.height
       ? calculateVolumetricWeight(Number(p.length), Number(p.width), Number(p.height))
-      : 0;
+      : p.volume
+        ? volumetricWeightFromVolume(Number(p.volume))
+        : 0;
     totalWeight += w;
     totalVolWeight += volW;
     return {

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import type { ParcelStatus } from '@/generated/prisma/enums';
 import type { Prisma } from '@/generated/prisma/client';
 import { calculateParcelCost } from '@/lib/utils/pricing';
-import { calculateVolumetricWeight, roundWeight } from '@/lib/utils/volumetric';
+import { calculateVolumetricWeight, volumetricWeightFromVolume, roundWeight } from '@/lib/utils/volumetric';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { ADMIN_ROLES } from '@/lib/constants/roles';
 import { parseBody, updateParcelSchema } from '@/lib/validators';
@@ -377,7 +377,16 @@ export async function PATCH(
         const l = p.length != null ? Number(p.length) : null;
         const wd = p.width != null ? Number(p.width) : null;
         const h = p.height != null ? Number(p.height) : null;
-        const volW = l && wd && h ? calculateVolumetricWeight(l, wd, h) : 0;
+        const vol = p.volume != null ? Number(p.volume) : null;
+        // ТЗ (docx 13.06.26): при переході від Д/Ш/В до загального об'єму
+        // береться ОСТАННЄ введене. Розміри мають пріоритет; коли їх стерли —
+        // рахуємо з об'єму (× 250). Об'ємна вага ніколи не нульова коли є хоч
+        // одне джерело.
+        const volW = l && wd && h
+          ? calculateVolumetricWeight(l, wd, h)
+          : vol
+            ? volumetricWeightFromVolume(vol)
+            : 0;
         tw += w;
         tv += volW;
         return {
@@ -387,6 +396,7 @@ export async function PATCH(
             length: l,
             width: wd,
             height: h,
+            volume: vol,
             volumetricWeight: volW > 0 ? roundWeight(volW) : null,
             ...(p.needsPackaging !== undefined ? { needsPackaging: p.needsPackaging } : {}),
           },
