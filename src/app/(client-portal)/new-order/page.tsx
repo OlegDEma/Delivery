@@ -13,19 +13,24 @@ import { CollectionBlock } from '@/components/parcels/collection-block';
 import { AddressInput } from '@/components/parcels/address-input';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { FieldHint } from '@/components/shared/field-hint';
+import { CapitalizeInput } from '@/components/shared/capitalize-input';
 
 interface PlaceData {
   weight: string;
   length: string;
   width: string;
   height: string;
+  volume: string;
 }
 
-const emptyPlace = (): PlaceData => ({ weight: '', length: '', width: '', height: '' });
+const emptyPlace = (): PlaceData => ({ weight: '', length: '', width: '', height: '', volume: '' });
 
 function volWeight(p: PlaceData): number {
   const l = Number(p.length) || 0, w = Number(p.width) || 0, h = Number(p.height) || 0;
-  return l > 0 && w > 0 && h > 0 ? Number(((l * w * h) / 4000).toFixed(2)) : 0;
+  if (l > 0 && w > 0 && h > 0) return Number(((l * w * h) / 4000).toFixed(2));
+  // ТЗ §1: коли розмірів немає — об'ємна вага з прямого об'єму (× 250).
+  const v = Number(p.volume) || 0;
+  return v > 0 ? Number((v * 250).toFixed(2)) : 0;
 }
 
 interface PricingConfig {
@@ -191,16 +196,17 @@ export default function NewOrderPage() {
         return;
       }
     }
-    // ТЗ (docx 13.06.26 §1): «об'ємна вага не може бути нульовою — у будь-якому
-    // вікні має бути внесено розміри». У клієнт-порталі немає поля «об'єм», тож
-    // для кожного місця з вагою вимагаємо Д/Ш/В.
+    // ТЗ (docx 13.06.26 §1): «об'ємна вага не може бути нульовою — має бути
+    // внесено АБО довжина/ширина/висота, АБО об'єм у м³». Для кожного місця.
     {
       const badPlace = places.findIndex(p => {
         if (Number(p.weight) <= 0) return false;
-        return !(Number(p.length) > 0 && Number(p.width) > 0 && Number(p.height) > 0);
+        const hasDims = Number(p.length) > 0 && Number(p.width) > 0 && Number(p.height) > 0;
+        const hasVolume = Number(p.volume) > 0;
+        return !hasDims && !hasVolume;
       });
       if (badPlace !== -1) {
-        setError(`Місце ${badPlace + 1}: вкажіть довжину, ширину та висоту — об'ємна вага не може бути нульовою`);
+        setError(`Місце ${badPlace + 1}: вкажіть довжину/ширину/висоту АБО об'єм (м³) — об'ємна вага не може бути нульовою`);
         return;
       }
       if (!places.some(p => Number(p.weight) > 0)) {
@@ -226,6 +232,7 @@ export default function NewOrderPage() {
           length: Number(p.length) || undefined,
           width: Number(p.width) || undefined,
           height: Number(p.height) || undefined,
+          volume: Number(p.volume) || undefined,
         })),
         collectionMethod, collectionPointId, collectionDate, collectionAddress,
       }),
@@ -343,10 +350,10 @@ export default function NewOrderPage() {
               defaultCountry={(senderCountry as 'UA' | 'NL' | 'AT' | 'DE') || 'UA'}
             />
             <div className="grid grid-cols-2 gap-2">
-              <div><Label>Прізвище *</Label><Input value={senderLastName} onChange={(e) => setSenderLastName(e.target.value)} required /></div>
-              <div><Label>Ім&apos;я *</Label><Input value={senderFirstName} onChange={(e) => setSenderFirstName(e.target.value)} required /></div>
+              <div><Label>Прізвище *</Label><CapitalizeInput value={senderLastName} onChange={setSenderLastName} required /></div>
+              <div><Label>Ім&apos;я *</Label><CapitalizeInput value={senderFirstName} onChange={setSenderFirstName} required /></div>
             </div>
-            <div><Label>По батькові</Label><Input value={senderMiddleName} onChange={(e) => setSenderMiddleName(e.target.value)} /></div>
+            <div><Label>По батькові</Label><CapitalizeInput value={senderMiddleName} onChange={setSenderMiddleName} /></div>
             <div>
               <Label>Країна</Label>
               <Select value={senderCountry} onValueChange={(v) => setSenderCountry(v ?? 'NL')}>
@@ -403,10 +410,10 @@ export default function NewOrderPage() {
               defaultCountry={(receiverCountry as 'UA' | 'NL' | 'AT' | 'DE') || 'UA'}
             />
             <div className="grid grid-cols-2 gap-2">
-              <div><Label>Прізвище *</Label><Input value={receiverLastName} onChange={(e) => setReceiverLastName(e.target.value)} required /></div>
-              <div><Label>Ім&apos;я *</Label><Input value={receiverFirstName} onChange={(e) => setReceiverFirstName(e.target.value)} required /></div>
+              <div><Label>Прізвище *</Label><CapitalizeInput value={receiverLastName} onChange={setReceiverLastName} required /></div>
+              <div><Label>Ім&apos;я *</Label><CapitalizeInput value={receiverFirstName} onChange={setReceiverFirstName} required /></div>
             </div>
-            <div><Label>По батькові</Label><Input value={receiverMiddleName} onChange={(e) => setReceiverMiddleName(e.target.value)} /></div>
+            <div><Label>По батькові</Label><CapitalizeInput value={receiverMiddleName} onChange={setReceiverMiddleName} /></div>
             <div>
               <Label>Країна *</Label>
               <Select value={receiverCountry} onValueChange={(v) => setReceiverCountry(v ?? '')}>
@@ -528,6 +535,8 @@ export default function NewOrderPage() {
                   <div><Label className="text-xs">Ширина (см)</Label><Input type="number" value={p.width} onChange={(e) => updatePlace(i, 'width', e.target.value)} /></div>
                   <div><Label className="text-xs">Висота (см)</Label><Input type="number" value={p.height} onChange={(e) => updatePlace(i, 'height', e.target.value)} /></div>
                 </div>
+                {/* ТЗ §1: альтернатива розмірам — прямий об'єм (м³). */}
+                <div><Label className="text-xs">Або об&apos;єм (м³)</Label><Input type="number" step="0.001" value={p.volume} onChange={(e) => updatePlace(i, 'volume', e.target.value)} className="w-40" /></div>
                 {volWeight(p) > 0 && <div className="text-xs text-gray-500">Об&apos;ємна вага: {volWeight(p)} кг</div>}
               </div>
             ))}
