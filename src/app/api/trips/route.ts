@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { LOGISTICS_ROLES } from '@/lib/constants/roles';
+import { autoAdvanceTrips } from '@/lib/services/trip-status';
 
 // GET /api/trips — staff can view
 export async function GET(request: NextRequest) {
   const guard = await requireStaff();
   if (!guard.ok) return guard.response;
+
+  // ТЗ L3e: ліниво авто-переводимо статуси рейсів за датою перед видачею списку.
+  await autoAdvanceTrips();
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');

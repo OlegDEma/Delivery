@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { LOGISTICS_ROLES } from '@/lib/constants/roles';
 import { isUuid } from '@/lib/validators/common';
+import { applyTripStatusCascade } from '@/lib/services/trip-status';
 
 // GET /api/trips/[id] — staff only
 export async function GET(
@@ -59,65 +60,13 @@ export async function PATCH(
   const data: any = {};
   if (body.status !== undefined) {
     data.status = body.status;
-
-    // When trip starts moving — update all linked parcels
-    if (body.status === 'in_progress') {
-      const trip = await prisma.trip.findUnique({ where: { id }, select: { direction: true } });
-      if (trip) {
-        const newParcelStatus = trip.direction === 'eu_to_ua' ? 'in_transit_to_ua' : 'in_transit_to_eu';
-        const parcels = await prisma.parcel.findMany({
-          where: { tripId: id, status: { notIn: [newParcelStatus, 'delivered_ua', 'delivered_eu', 'not_received', 'refused', 'returned'] } },
-          select: { id: true, collectedAt: true, collectionMethod: true, direction: true },
-        });
-        for (const p of parcels) {
-          // For EU→UA parcels that never went through a pickup point (e.g.
-          // direct_to_driver / courier_pickup / external_shipping), stamp
-          // collectedAt now so receipt time is always recorded.
-          const shouldStampCollected =
-            p.direction === 'eu_to_ua' && !p.collectedAt && !!p.collectionMethod;
-
-          await prisma.parcel.update({
-            where: { id: p.id },
-            data: {
-              status: newParcelStatus as import('@/generated/prisma/client').ParcelStatus,
-              ...(shouldStampCollected ? { collectedAt: new Date(), collectedById: user.id } : {}),
-              statusHistory: {
-                create: {
-                  status: newParcelStatus as import('@/generated/prisma/client').ParcelStatus,
-                  changedById: user.id,
-                  notes: 'Рейс розпочав рух',
-                },
-              },
-            },
-          });
-        }
-      }
-    }
-
-    // When trip completed (EU→UA) — parcels arrive at warehouse
-    if (body.status === 'completed') {
-      const trip = await prisma.trip.findUnique({ where: { id }, select: { direction: true } });
-      if (trip && trip.direction === 'eu_to_ua') {
-        const parcels = await prisma.parcel.findMany({
-          where: { tripId: id, status: 'in_transit_to_ua' },
-          select: { id: true },
-        });
-        for (const p of parcels) {
-          await prisma.parcel.update({
-            where: { id: p.id },
-            data: {
-              status: 'at_lviv_warehouse',
-              statusHistory: {
-                create: {
-                  status: 'at_lviv_warehouse',
-                  changedById: user.id,
-                  notes: 'Рейс завершено, посилка на складі',
-                },
-              },
-            },
-          });
-        }
-      }
+    // Каскад статусу рейсу на посилки — спільна логіка (та сама, що й для
+    // авто-переходу за датою, ТЗ L3e). Ручна зміна — будь-який статус.
+    if (body.status === 'in_progress' || body.status === 'completed') {
+      const note = body.status === 'in_progress'
+        ? 'Рейс розпочав рух'
+        : 'Рейс завершено, посилка на складі';
+      await applyTripStatusCascade(id, body.status, user.id, note);
     }
   }
   // Validate courier IDs exist before assigning to avoid Prisma FK 500.

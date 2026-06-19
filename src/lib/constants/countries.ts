@@ -14,12 +14,21 @@ export const COUNTRY_LABELS: Record<CountryCode, string> = {
   DE: 'Німеччина',
 };
 
-/** Родовий відмінок (до кого/чого?) — для підстановки в «В дорозі до …». */
+/** Родовий відмінок (до кого/чого?) — для підстановки в «В дорозі до …»
+ *  та «Виїзд з …» (ТЗ docx 14.05.26). */
 export const COUNTRY_LABELS_GENITIVE: Record<CountryCode, string> = {
   UA: 'України',
   NL: 'Нідерландів',
   AT: 'Австрії',
   DE: 'Німеччини',
+};
+
+/** Знахідний відмінок (в кого/що?) — для «Приїзд в …» (ТЗ docx 14.05.26). */
+export const COUNTRY_LABELS_ACCUSATIVE: Record<CountryCode, string> = {
+  UA: 'Україну',
+  NL: 'Нідерланди',
+  AT: 'Австрію',
+  DE: 'Німеччину',
 };
 
 export const COUNTRY_PHONE_CODES: Record<CountryCode, string> = {

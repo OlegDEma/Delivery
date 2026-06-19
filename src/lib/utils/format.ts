@@ -11,6 +11,21 @@ export function formatDate(date: Date | string): string {
 }
 
 /**
+ * ТЗ (docx 14.05.26 «Логістика/Поїздки»): підсумок поїздки/рейсу має
+ * включати день тижня і дату. Напр. «Пн, 01.07.2026».
+ */
+export function formatDateWithWeekday(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const s = d.toLocaleDateString('uk-UA', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
  * Format date with time
  */
 export function formatDateTime(date: Date | string): string {
