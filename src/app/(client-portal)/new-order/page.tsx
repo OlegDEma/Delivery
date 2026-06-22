@@ -81,6 +81,10 @@ export default function NewOrderPage() {
   const [receiverPickupPointText, setReceiverPickupPointText] = useState('');
   const [receiverPoints, setReceiverPoints] = useState<{ id: string; name: string | null; country: string; city: string; address: string }[]>([]);
   const [receiverStreet, setReceiverStreet] = useState('');
+  // ТЗ (docx 20.06.26 §19): «Адресна доставка» Отримувача = Вулиця + Будинок +
+  // Орієнтир (ідентично формі Працівника).
+  const [receiverBuilding, setReceiverBuilding] = useState('');
+  const [receiverLandmark, setReceiverLandmark] = useState('');
   const [receiverDeliveryMethod, setReceiverDeliveryMethod] = useState('address');
   const [receiverNpWarehouse, setReceiverNpWarehouse] = useState('');
 
@@ -219,7 +223,7 @@ export default function NewOrderPage() {
       if (!receiverPickupPointText.trim()) {
         setError('Виберіть пункт видачі зі списку'); return;
       }
-    } else if (receiverCountry === 'UA' && !receiverStreet.trim()) {
+    } else if (receiverCountry === 'UA' && (!receiverStreet.trim() || !receiverBuilding.trim())) {
       setError('Для отримувача в Україні вкажіть вулицю та будинок'); return;
     }
     // ТЗ (docx 13.06.26 §1): «об'ємна вага не може бути нульовою — має бути
@@ -271,7 +275,7 @@ export default function NewOrderPage() {
         payer, paymentMethod, paymentInUkraine,
         senderPhone, senderFirstName, senderLastName, senderMiddleName, senderCountry, senderCity, senderPostalCode,
         receiverPhone, receiverFirstName, receiverLastName, receiverMiddleName, receiverCountry, receiverCity, receiverPostalCode,
-        receiverStreet, receiverDeliveryMethod, receiverNpWarehouse, receiverPickupPointText,
+        receiverStreet, receiverBuilding, receiverLandmark, receiverDeliveryMethod, receiverNpWarehouse, receiverPickupPointText,
         places: places.map(p => ({
           weight: Number(p.weight) || 0,
           length: Number(p.length) || undefined,
@@ -319,7 +323,7 @@ export default function NewOrderPage() {
         <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-bold text-green-800 mb-2">Замовлення створено</h2>
           <p className="text-green-700">
-            Попереднє відправлення N{successNumber} сформовано. Кур&apos;єр перевірить ваші дані.
+            Попереднє відправлення N{successNumber} сформовано. Кур&apos;єр перевірить Ваші дані.
           </p>
         </div>
         <Button onClick={() => router.push('/my-orders')} className="w-full h-12 text-base">
@@ -454,11 +458,24 @@ export default function NewOrderPage() {
                 )}
               </div>
             )}
+            {/* ТЗ §19: «Адресна доставка» = Вулиця / Будинок / Орієнтир (як у Працівника). */}
             {(receiverDeliveryMethod === 'address') && (
-              <div>
-                <Label>Вулиця, будинок{receiverCountry === 'UA' && ' *'}</Label>
-                <AddressInput field="street" country={receiverCountry} value={receiverStreet} onChange={setReceiverStreet} />
-              </div>
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label>Вулиця{receiverCountry === 'UA' && ' *'}</Label>
+                    <AddressInput field="street" country={receiverCountry} value={receiverStreet} onChange={setReceiverStreet} />
+                  </div>
+                  <div>
+                    <Label>Будинок{receiverCountry === 'UA' && ' *'}</Label>
+                    <Input value={receiverBuilding} onChange={(e) => setReceiverBuilding(e.target.value)} />
+                  </div>
+                </div>
+                <div>
+                  <Label>Орієнтир</Label>
+                  <Input value={receiverLandmark} onChange={(e) => setReceiverLandmark(e.target.value)} placeholder="Біля магазину..." />
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -466,7 +483,7 @@ export default function NewOrderPage() {
         {/* Sender — ТЗ §b: після «Отримувач», перед «Як ви передасте». */}
         <Card>
           <CardHeader className="py-3 px-4">
-            <CardTitle className="text-base text-green-600">Відправник (ваші дані)</CardTitle>
+            <CardTitle className="text-base text-green-600">Відправник (Ваші дані)</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-2">
             <PhoneInput
@@ -519,7 +536,7 @@ export default function NewOrderPage() {
         {!!direction && (
           <Card>
             <CardHeader className="py-3 px-4">
-              <CardTitle className="text-base">Як ви передасте нам посилку?</CardTitle>
+              <CardTitle className="text-base">Як Ви передасте нам посилку?</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4 pt-0">
               <CollectionBlock
@@ -663,7 +680,7 @@ export default function NewOrderPage() {
         </Button>
 
         <p className="text-xs text-gray-400 text-center">
-          Після створення замовлення кур&apos;єр перевірить ваші дані та підтвердить відправлення.
+          Після створення замовлення кур&apos;єр перевірить Ваші дані та підтвердить відправлення.
         </p>
       </form>
     </div>

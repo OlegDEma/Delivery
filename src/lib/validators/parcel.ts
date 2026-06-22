@@ -118,6 +118,9 @@ export const clientOrderSchema = z.object({
   receiverMiddleName: z.string().trim().max(100).optional().nullable(),
   receiverCity: text(100).optional(),
   receiverStreet: z.string().trim().max(300).optional().nullable(),
+  /** Будинок + Орієнтир Отримувача — ТЗ docx 20.06.26 §19 (як у Працівника). */
+  receiverBuilding: z.string().trim().max(50).optional().nullable(),
+  receiverLandmark: z.string().trim().max(300).optional().nullable(),
   /** Індекс (поштовий код) отримувача — ТЗ §4. */
   receiverPostalCode: z.string().trim().max(20).optional().nullable(),
   receiverCountry: countrySchema.optional().nullable(),

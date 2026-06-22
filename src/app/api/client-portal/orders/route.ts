@@ -159,6 +159,9 @@ export async function POST(request: NextRequest) {
           country: receiverCountry,
           city: body.receiverCity,
           street: body.receiverStreet || null,
+          // ТЗ docx 20.06.26 §19: Будинок + Орієнтир Отримувача.
+          building: body.receiverBuilding || null,
+          landmark: body.receiverLandmark || null,
           postalCode: body.receiverPostalCode || null,
           npWarehouseNum: body.receiverNpWarehouse || null,
           pickupPointText: body.receiverPickupPointText || null,

@@ -553,7 +553,9 @@ export function ClientCreateForm({
       <div className="space-y-2">
         {deliveryMethod === 'np_warehouse' && (
           <div>
-            <Label>Номер складу/поштомату *</Label>
+            {/* ТЗ docx 20.06.26: Відправник «Пошта» → «Номер складу» (§10);
+                Отримувач «Пошта» → «Номер складу/поштомату» (§20). */}
+            <Label>{role === 'sender' ? 'Номер складу' : 'Номер складу/поштомату'} *</Label>
             <Input value={npWarehouseNum} onChange={(e) => setNpWarehouseNum(e.target.value)} required />
           </div>
         )}
