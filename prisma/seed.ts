@@ -124,22 +124,9 @@ async function main() {
   });
   console.log(`Yearly sequence initialized for ${currentYear}`);
 
-  // Дефолтні міста обслуговування (ТЗ docx 14.05.26): доступність «Виклик
-  // кур'єра» (по місту) та «Пошта» (по країні) керується саме Логістикою.
-  // Львів — кур'єр + пошта (ФОП у Львові); Amsterdam/Rotterdam — кур'єр.
-  const serviceCityDefaults: { country: 'UA' | 'NL' | 'AT' | 'DE'; city: string; courier: boolean; postal: boolean }[] = [
-    { country: 'UA', city: 'Львів', courier: true, postal: true },
-    { country: 'NL', city: 'Amsterdam', courier: true, postal: false },
-    { country: 'NL', city: 'Rotterdam', courier: true, postal: false },
-  ];
-  for (const sc of serviceCityDefaults) {
-    await prisma.serviceCity.upsert({
-      where: { country_city: { country: sc.country, city: sc.city } },
-      update: { acceptsCourierPickup: sc.courier, acceptsPostal: sc.postal },
-      create: { country: sc.country, city: sc.city, acceptsCourierPickup: sc.courier, acceptsPostal: sc.postal },
-    });
-  }
-  console.log('Default service cities seeded');
+  // ТЗ (docx 20.06.26): «Виклик кур'єра» та «Пошта» доступні за замовчуванням
+  // усюди — НЕ сідимо ServiceCity. Рядки додаються лише як ЗАБОРОНИ через
+  // адмінку «Обмеження доступності способів».
 }
 
 main()

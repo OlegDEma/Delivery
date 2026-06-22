@@ -12,6 +12,7 @@ import { PhoneInput } from '@/components/shared/phone-input';
 import { FieldHint } from '@/components/shared/field-hint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { isCourierAllowed, isPostalAllowed } from '@/lib/utils/logistics-availability';
 
 /**
  * ТЗ (docx 14.05.26 §a): при «Виклик кур'єра» у формі Відправника оператор
@@ -187,20 +188,16 @@ export function ClientCreateForm({
   const pointsToShow = cityPoints;
   const hasAnyPoints = cityPoints.length > 0;
 
-  // ТЗ (docx 14.05.26 §a): «Виклик кур'єра» (для відправника = опція address)
-  // доступний, ЛИШЕ якщо в Логістиці (ServiceCity) для обраного НАСЕЛЕНОГО
-  // ПУНКТУ ввімкнено acceptsCourierPickup — для всіх країн однаково. Для
-  // отримувача address = «Адресна доставка», тож завжди доступно.
+  // ТЗ (docx 20.06.26): «Виклик кур'єра» доступний ЗА ЗАМОВЧУВАННЯМ усюди;
+  // заборонити можна для міста/країни в Логістиці (ServiceCity). Для
+  // отримувача address = «Адресна доставка» — завжди доступно.
   const courierAvailable =
-    role !== 'sender' ? true
-    : serviceCities.some(sc => sc.country === country && sc.acceptsCourierPickup && sc.city.trim().toLowerCase() === cityNorm);
+    role !== 'sender' ? true : isCourierAllowed(serviceCities, country, city);
 
-  // ТЗ (docx 14.05.26 §a): «Пошта» (np_warehouse) для Відправника доступна,
-  // ЛИШЕ якщо в Логістиці для КРАЇНИ є місто з acceptsPostal=true. Для
-  // отримувача «Пошта» = доставка Новою поштою — завжди доступна.
+  // ТЗ (docx 20.06.26): «Пошта» (np_warehouse) для Відправника — теж default
+  // available; заборона через Логістику. Для отримувача — завжди доступна.
   const postalAvailable =
-    role !== 'sender' ? true
-    : serviceCities.some(sc => sc.country === country && sc.acceptsPostal);
+    role !== 'sender' ? true : isPostalAllowed(serviceCities, country, city);
 
   // Авто-корекція способу для Відправника: якщо поточний спосіб став
   // недоступним у Логістиці (зміна міста/країни), перемикаємось на перший

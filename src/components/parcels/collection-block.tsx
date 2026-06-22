@@ -19,6 +19,7 @@ import {
   type Weekday,
 } from '@/lib/constants/collection';
 import { formatDate } from '@/lib/utils/format';
+import { isCourierAllowed, isPostalAllowed } from '@/lib/utils/logistics-availability';
 
 export interface CollectionPointOption {
   id: string;
@@ -139,26 +140,16 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
     });
   }
 
-  // ТЗ (docx 14.05.26): «Виклик кур'єра» доступний, ЛИШЕ якщо в Логістиці
-  // (ServiceCity) для обраного НАСЕЛЕНОГО ПУНКТУ ввімкнено acceptsCourierPickup
-  // — для всіх країн однаково (раніше EU був хардкодом «завжди»). На staff боці
-  // CollectionBlock не рендериться (спосіб гейтиться у формі Відправника).
-  const courierPickupAvailableForClient = (() => {
-    if (!clientFacing) return true;
-    if (!senderCountry || !senderCity) return false;
-    const normalized = senderCity.trim().toLowerCase();
-    return serviceCities.some(
-      sc => sc.country === senderCountry &&
-            sc.acceptsCourierPickup &&
-            sc.city.trim().toLowerCase() === normalized
-    );
-  })();
+  // ТЗ (docx 20.06.26): «Виклик кур'єра» доступний ЗА ЗАМОВЧУВАННЯМ усюди;
+  // заборонити можна для міста/країни в Логістиці. На staff боці CollectionBlock
+  // не рендериться (спосіб гейтиться у формі Відправника).
+  const courierPickupAvailableForClient =
+    !clientFacing || isCourierAllowed(serviceCities, senderCountry, senderCity);
 
-  // ТЗ (docx 14.05.26): «Пошта» (відправка нам поштою) доступна, ЛИШЕ якщо в
-  // Логістиці для КРАЇНИ є хоча б одне місто з acceptsPostal=true (раніше було
-  // хардкодом «лише UA»). Для UA це Львів (ФОП); EU вмикається адміном.
-  const externalShippingAvailableForClient = !clientFacing
-    || (!!senderCountry && serviceCities.some(sc => sc.country === senderCountry && sc.acceptsPostal));
+  // ТЗ (docx 20.06.26): «Пошта» (відправка нам поштою) — теж default available;
+  // заборона через Логістику (місто/країна).
+  const externalShippingAvailableForClient =
+    !clientFacing || isPostalAllowed(serviceCities, senderCountry, senderCity);
 
   // ТЗ (docx 14.05.26): перелік Пунктів збору — САМЕ для вибраного
   // населеного пункту (приклад Венло: точка є в Amsterdam, але не у Венло →

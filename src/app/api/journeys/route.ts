@@ -197,3 +197,36 @@ export async function PATCH(request: NextRequest) {
 
   return NextResponse.json(updated);
 }
+
+// DELETE /api/journeys?id=xxx — ТЗ docx 20.06.26: видалити поїздку разом з
+// усіма прив'язаними рейсами. Посилки НЕ видаляємо — лише відв'язуємо від
+// рейсів (tripId=null), щоб не втратити дані. RouteTask/Passenger рейсу
+// (обов'язковий FK) видаляються разом з рейсами.
+export async function DELETE(request: NextRequest) {
+  const guard = await requireRole(LOGISTICS_ROLES);
+  if (!guard.ok) return guard.response;
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'id обов\'язковий' }, { status: 400 });
+
+  const journey = await prisma.journey.findUnique({ where: { id }, select: { id: true } });
+  if (!journey) return NextResponse.json({ error: 'Поїздку не знайдено' }, { status: 404 });
+
+  const trips = await prisma.trip.findMany({ where: { journeyId: id }, select: { id: true } });
+  const tripIds = trips.map(t => t.id);
+
+  await prisma.$transaction(async (tx) => {
+    if (tripIds.length > 0) {
+      // Посилки — зберігаємо, лише відв'язуємо.
+      await tx.parcel.updateMany({ where: { tripId: { in: tripIds } }, data: { tripId: null } });
+      // Дочірні сутності рейсу з обов'язковим tripId — видаляємо.
+      await tx.routeTask.deleteMany({ where: { tripId: { in: tripIds } } });
+      await tx.passenger.deleteMany({ where: { tripId: { in: tripIds } } });
+      await tx.trip.deleteMany({ where: { journeyId: id } });
+    }
+    await tx.journey.delete({ where: { id } });
+  });
+
+  return NextResponse.json({ success: true });
+}

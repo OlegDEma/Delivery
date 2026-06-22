@@ -185,6 +185,20 @@ export default function JourneysPage() {
     }
   }
 
+  // ТЗ docx 20.06.26: видалення поїздки (з усіма рейсами). Посилки лише
+  // відв'язуються від рейсів (бекенд), самі поїздка+рейси зникають.
+  async function handleDeleteJourney(j: Journey) {
+    if (!confirm('Видалити поїздку разом з усіма її рейсами? Прив\'язані посилки буде відв\'язано (не видалено).')) return;
+    const res = await fetch(`/api/journeys?id=${j.id}`, { method: 'DELETE' });
+    if (res.ok) {
+      toast.success('Поїздку видалено');
+      fetchJourneys();
+    } else {
+      const d = await res.json().catch(() => ({}));
+      toast.error(d.error || 'Помилка видалення');
+    }
+  }
+
   // Підпис напрямку рейсу з КОНКРЕТНОЮ країною (ТЗ L2 — замість «EU»).
   function tripLabel(direction: string, c: string) {
     return direction === 'ua_to_eu' ? `➡️ UA → ${c}` : `⬅️ ${c} → UA`;
@@ -349,13 +363,23 @@ export default function JourneysPage() {
                   {j.vehicleInfo && <div className="text-xs text-gray-500 mt-0.5">🚛 {j.vehicleInfo}</div>}
                   {j.notes && <div className="text-xs text-gray-400 italic mt-0.5">{j.notes}</div>}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => openEdit(j)}
-                  className="text-xs font-medium text-blue-600 hover:text-blue-800 shrink-0"
-                >
-                  Редагувати
-                </button>
+                {/* ТЗ docx 20.06.26: «Видалити» під «Редагувати». */}
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => openEdit(j)}
+                    className="text-xs font-medium text-blue-600 hover:text-blue-800"
+                  >
+                    Редагувати
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteJourney(j)}
+                    className="text-xs font-medium text-red-600 hover:text-red-800"
+                  >
+                    Видалити
+                  </button>
+                </div>
               </div>
 
               {/* Child trips */}
