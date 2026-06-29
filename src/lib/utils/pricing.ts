@@ -43,6 +43,15 @@ export interface PricingConfigInput {
   pickupPointPrice: number;
 
   /**
+   * ТЗ docx 29.06.26 «Тарифи»: додаткова послуга «Доставка до порога будинку».
+   * doorstepEnabled — чи пропонується для напрямку; doorstepPrice — сума, що
+   * АДИТИВНО додається до вартості посилки при адресній доставці Отримувачу
+   * (на відміну від addressDeliveryPrice, який діє як поріг).
+   */
+  doorstepEnabled?: boolean;
+  doorstepPrice?: number;
+
+  /**
    * Мінімум коли від ОДНОГО відправника забираємо 2+ посилок на РІЗНІ адреси
    * одержувачів. Діє як підлога per parcel.
    */
@@ -140,6 +149,8 @@ export interface CostBreakdown {
   deliveryCost: number;
   insuranceCost: number;
   packagingCost: number;
+  /** ТЗ docx 29.06.26 «Тарифи»: надбавка «Доставка до порога будинку» (адитивна). */
+  doorstepCost: number;
   /** @deprecated тепер вкладено в deliveryCost (мінімум). Завжди 0. */
   addressDeliveryCost: number;
   /** @deprecated тепер вкладено в deliveryCost (мінімум). Завжди 0. */
@@ -253,8 +264,17 @@ export function calculateParcelCost(
     }
   }
 
+  // 6. ТЗ docx 29.06.26 «Тарифи»: «Доставка до порога будинку» — АДИТИВНА
+  //    надбавка при адресній доставці Отримувачу (до порога). Налаштовується
+  //    в тарифі напрямку (NL-UA, AT-UA). На відміну від addressDeliveryPrice
+  //    (поріг) — додається зверху до вартості.
+  let doorstepCost = 0;
+  if (parcel.isAddressDelivery && config.doorstepEnabled && (config.doorstepPrice ?? 0) > 0) {
+    doorstepCost = roundMoney(config.doorstepPrice!);
+  }
+
   const totalCost = roundMoney(
-    deliveryCost + insuranceCost + packagingCost + parcelMoneyCost
+    deliveryCost + insuranceCost + packagingCost + parcelMoneyCost + doorstepCost
   );
 
   return {
@@ -266,6 +286,7 @@ export function calculateParcelCost(
     deliveryCost,
     insuranceCost,
     packagingCost,
+    doorstepCost,
     // Lagacy: ці компоненти більше не нараховуються окремо — вони стали
     // мінімумом. Лишаємо у відповіді як 0, щоб не зламати legacy споживачів.
     addressDeliveryCost: 0,

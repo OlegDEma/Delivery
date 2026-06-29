@@ -108,6 +108,15 @@ enum CollectionMethod {
   direct_to_driver    // Client hands directly to the driver on trip day
 }
 
+/// ТЗ docx 29.06.26: обмеження доступності способів можна задати окремо для
+/// Відправника та Отримувача (напр. Австрія: Отримувач може отримати поштою,
+/// а Відправник з Австрії — ні). both = обмеження діє на обидві сторони.
+enum ServiceTarget {
+  sender
+  receiver
+  both
+}
+
 enum RouteTaskStatus {
   pending
   address_confirmed
@@ -541,6 +550,13 @@ model PricingConfig {
   /// "Адресна доставка" — мінімальна вартість посилки при заїзді кур'єра
   /// на адресу (одна посилка від відправника). Діє як поріг.
   addressDeliveryPrice Decimal     @default(0) @map("address_delivery_price") @db.Decimal(10, 2)
+  /// ТЗ docx 29.06.26 «Тарифи»: окрема додаткова послуга «Доставка до порога
+  /// будинку». doorstepEnabled — чи пропонується для цього напрямку;
+  /// doorstepPrice — фіксована сума, яка АДИТИВНО додається до вартості
+  /// посилки коли Отримувач обрав адресну доставку (до порога). На відміну
+  /// від addressDeliveryPrice (поріг) — це надбавка зверху.
+  doorstepEnabled      Boolean     @default(false) @map("doorstep_enabled")
+  doorstepPrice        Decimal     @default(0) @map("doorstep_price") @db.Decimal(10, 2)
   /// Per ТЗ: «При передачі двох і більше посилок з однієї локації на різні
   /// адреси — мінімальна вартість посилки на кожну одну адресу». Поріг
   /// діє коли в формі обрано "Дві або більше посилок" для courier_pickup.
@@ -760,12 +776,16 @@ model ServiceCity {
   /// docx 14.05.26: опція «Пошта» доступна, лише якщо в Логістиці її
   /// передбачено для країни. Зберігається по місту, агрегується по країні.
   acceptsPostal         Boolean  @default(false) @map("accepts_postal")
+  /// ТЗ docx 29.06.26: на кого поширюється обмеження — Відправника, Отримувача
+  /// чи обох. Дозволяє, напр., заборонити «Пошту» лише Відправнику з Австрії,
+  /// лишивши її доступною Отримувачу. both = діє на обидві сторони.
+  target                ServiceTarget @default(both) @map("target")
   /// Reserved for future expansion (e.g. delivery service zones).
   notes                 String?
   createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
-  @@unique([country, city])
+  @@unique([country, city, target])
   @@index([country, acceptsCourierPickup])
   @@map("service_cities")
 }

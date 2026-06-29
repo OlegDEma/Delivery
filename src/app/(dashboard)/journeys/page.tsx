@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  COUNTRY_LABELS, COUNTRY_LABELS_ACCUSATIVE, COUNTRY_LABELS_GENITIVE, type CountryCode,
+  COUNTRY_LABELS, COUNTRY_LABELS_ACCUSATIVE, COUNTRY_LABELS_GENITIVE, tripRouteLabel, type CountryCode,
 } from '@/lib/constants/countries';
 import { WEEKDAYS, WEEKDAY_LABELS_FULL } from '@/lib/constants/collection';
 import { formatDateWithWeekday } from '@/lib/utils/format';
@@ -200,8 +200,9 @@ export default function JourneysPage() {
   }
 
   // Підпис напрямку рейсу з КОНКРЕТНОЮ країною (ТЗ L2 — замість «EU»).
+  // ТЗ docx 29.06.26 «Рейси»: країна виїзду першою, стрілка завжди вправо (→).
   function tripLabel(direction: string, c: string) {
-    return direction === 'ua_to_eu' ? `➡️ UA → ${c}` : `⬅️ ${c} → UA`;
+    return tripRouteLabel(c, direction);
   }
 
   return (

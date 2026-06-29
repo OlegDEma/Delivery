@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  let body: { country?: string; city?: string; acceptsCourierPickup?: boolean; acceptsPostal?: boolean; notes?: string };
+  let body: { country?: string; city?: string; acceptsCourierPickup?: boolean; acceptsPostal?: boolean; target?: string; notes?: string };
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
@@ -53,10 +53,18 @@ export async function POST(request: NextRequest) {
   const city = String(body.city ?? '').trim();
   if (!city) return NextResponse.json({ error: 'city: required' }, { status: 400 });
 
-  // Upsert — якщо вже є, оновлюємо прапорці; інакше створюємо. ТЗ docx
-  // 14.05.26: acceptsPostal керує доступністю «Пошти» для країни.
+  // ТЗ docx 29.06.26: обмеження можна задати окремо для Відправника/Отримувача.
+  const target = (body.target ?? 'both') as 'sender' | 'receiver' | 'both';
+  if (!['sender', 'receiver', 'both'].includes(target)) {
+    return NextResponse.json({ error: 'target: sender/receiver/both' }, { status: 400 });
+  }
+
+  // Upsert — якщо вже є правило для (країна, місто, сторона), оновлюємо
+  // прапорці; інакше створюємо.
   const row = await prisma.serviceCity.upsert({
-    where: { country_city: { country: body.country as 'UA'|'NL'|'AT'|'DE', city } },
+    where: {
+      country_city_target: { country: body.country as 'UA'|'NL'|'AT'|'DE', city, target },
+    },
     update: {
       acceptsCourierPickup: body.acceptsCourierPickup ?? true,
       acceptsPostal: body.acceptsPostal ?? false,
@@ -65,6 +73,7 @@ export async function POST(request: NextRequest) {
     create: {
       country: body.country as 'UA'|'NL'|'AT'|'DE',
       city,
+      target,
       acceptsCourierPickup: body.acceptsCourierPickup ?? true,
       acceptsPostal: body.acceptsPostal ?? false,
       notes: body.notes ?? null,

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClientSearch } from '@/components/clients/client-search';
+import { type ClientCreateMeta } from '@/components/clients/client-create-form';
 import { DescriptionAutocomplete } from '@/components/parcels/description-autocomplete';
 import { CostCalculator } from '@/components/parcels/cost-calculator';
 import { FieldHint } from '@/components/shared/field-hint';
@@ -127,6 +128,8 @@ export default function NewParcelPage() {
   const [senderNpWarehouse, setSenderNpWarehouse] = useState('');
   const [senderLandmark, setSenderLandmark] = useState('');
   const [senderPickupPointText, setSenderPickupPointText] = useState('');
+  // ТЗ docx 29.06.26 §1: обраний пункт збору (з адресою) — для підсумку Відправника.
+  const [senderPickupPoint, setSenderPickupPoint] = useState<ClientCreateMeta['pickupPoint'] | null>(null);
   const [senderPhoneOverride, setSenderPhoneOverride] = useState('');
 
   // Parcel details — last selected direction is persisted per-browser (per ТЗ).
@@ -278,8 +281,11 @@ export default function NewParcelPage() {
     }
   }
 
-  function handleSenderSelect(client: SelectedClient, meta?: { isMultiParcelPickup?: boolean | null }) {
+  function handleSenderSelect(client: SelectedClient, meta?: ClientCreateMeta) {
     setSender(client);
+    // ТЗ docx 29.06.26 §1: запам'ятовуємо обраний пункт збору (з адресою) для
+    // показу в підсумку Відправника.
+    setSenderPickupPoint(meta?.pickupPoint ?? null);
     // Якщо валідація залишила помилку «Виберіть відправника» з попереднього
     // натискання Submit — миттєво ховаємо її, бо причину усунули.
     setError('');
@@ -307,13 +313,16 @@ export default function NewParcelPage() {
         : dm === 'pickup_point' ? 'pickup_point'
         : 'courier_pickup';
       setCollection({
-        method, pointId: '', date: '', address: '',
+        // ТЗ docx 29.06.26 §1: прив'язуємо id обраного пункту (раніше завжди '')
+        // — потрібно для збереження collectionPointId у посилці.
+        method, pointId: method === 'pickup_point' ? (meta?.pickupPoint?.id ?? '') : '', date: '', address: '',
         // ТЗ §a: відповідь «Одна/Дві посилки» тепер дає форма Відправника
         // (meta). Для не-courier методів вона не застосовна → null.
         isMultiParcelPickup: method === 'courier_pickup' ? (meta?.isMultiParcelPickup ?? null) : null,
       });
     } else {
       setSenderPostalCode(''); setSenderCity(''); setSenderStreet(''); setSenderBuilding(''); setSenderNpWarehouse(''); setSenderLandmark(''); setSenderPickupPointText('');
+      setSenderPickupPoint(null);
       setCollection({ method: '', pointId: '', date: '', address: '', isMultiParcelPickup: null });
     }
   }
@@ -574,7 +583,13 @@ export default function NewParcelPage() {
                     <span className="font-medium">Спосіб забору:</span>{' '}
                     {collection.method === 'courier_pickup' ? 'Виклик кур\'єра'
                       : collection.method === 'external_shipping' ? 'Пошта'
-                      : 'Пункт збору'}
+                      // ТЗ docx 29.06.26 §1: для «Пункт збору» показуємо КОНКРЕТНУ
+                      // адресу обраного пункту (а не лише фразу «Пункт збору»).
+                      : senderPickupPoint
+                        ? `Пункт збору — ${senderPickupPoint.name ? `${senderPickupPoint.name} (${senderPickupPoint.city}, ${senderPickupPoint.address})` : `${senderPickupPoint.city}, ${senderPickupPoint.address}`}`
+                        : senderPickupPointText
+                          ? `Пункт збору — ${senderPickupPointText}`
+                          : 'Пункт збору'}
                     {/* ТЗ §a: відповідь «Одна/Дві посилки» дається у формі
                         Відправника; тут показуємо обраний варіант для контролю. */}
                     {collection.method === 'courier_pickup' && collection.isMultiParcelPickup !== null && collection.isMultiParcelPickup !== undefined && (

@@ -14,6 +14,8 @@ import { AddressInput } from '@/components/parcels/address-input';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { FieldHint } from '@/components/shared/field-hint';
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
+import { normalizeCityForMatch } from '@/lib/utils/transliterate';
+import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 
 interface PlaceData {
   weight: string;
@@ -79,7 +81,7 @@ export default function NewOrderPage() {
   const [receiverPostalCode, setReceiverPostalCode] = useState('');
   // ТЗ §4: «Пункт видачі» — вибір зі списку реальних точок для отримувача.
   const [receiverPickupPointText, setReceiverPickupPointText] = useState('');
-  const [receiverPoints, setReceiverPoints] = useState<{ id: string; name: string | null; country: string; city: string; address: string }[]>([]);
+  const [receiverPoints, setReceiverPoints] = useState<{ id: string; name: string | null; country: string; city: string; address: string; postalCode: string | null; workingHours: string | null; workingDays: Weekday[] }[]>([]);
   const [receiverStreet, setReceiverStreet] = useState('');
   // ТЗ (docx 20.06.26 §19): «Адресна доставка» Отримувача = Вулиця + Будинок +
   // Орієнтир (ідентично формі Працівника).
@@ -309,7 +311,8 @@ export default function NewOrderPage() {
 
   // ТЗ §b: Пункти видачі — САМЕ для вибраної країни ТА населеного пункту, без
   // fallback на всю країну. Якщо для міста точок немає — опція ховається.
-  const recvCityNorm = receiverCity.trim().toLowerCase();
+  // ТЗ docx 29.06.26 §3: порівнюємо за латинізованою назвою (Відень→Wien).
+  const recvCityNorm = normalizeCityForMatch(receiverCity, receiverCountry);
   const recvCityPoints = recvCityNorm ? receiverPoints.filter(p => p.city.trim().toLowerCase() === recvCityNorm) : [];
   const recvPointsToShow = recvCityPoints;
   const recvHasPoints = recvCityPoints.length > 0;
@@ -442,11 +445,23 @@ export default function NewOrderPage() {
                         <button
                           key={p.id}
                           type="button"
-                          onClick={() => setReceiverPickupPointText(label)}
+                          // ТЗ docx 29.06.26 §2: при виборі пункту його індекс
+                          // авто-вставляється в «Індекс» Отримувача.
+                          onClick={() => {
+                            setReceiverPickupPointText(label);
+                            if (p.postalCode) setReceiverPostalCode(p.postalCode);
+                          }}
                           className={`w-full text-left border rounded-lg p-2 text-sm transition-all ${sel ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 hover:bg-gray-50'}`}
                         >
                           <div className="font-medium">{label}</div>
                           {p.name && <div className="text-xs text-gray-500">{p.city}, {p.address}</div>}
+                          {/* ТЗ docx 29.06.26 §2: години роботи. */}
+                          {p.workingDays?.length > 0 && (
+                            <div className="text-xs text-gray-500">
+                              📅 {formatWorkingDays(p.workingDays)}{p.workingHours ? ` · ${p.workingHours}` : ''}
+                            </div>
+                          )}
+                          {p.postalCode && <div className="text-xs text-gray-400">Індекс: {p.postalCode}</div>}
                         </button>
                       );
                     })}
@@ -561,6 +576,11 @@ export default function NewOrderPage() {
                   setCollectionBuilding(next.building ?? '');
                   setCollectionLandmark(next.landmark ?? '');
                   setCollectionWarehouse(next.warehouseNum ?? '');
+                  // ТЗ docx 29.06.26 §2: при виборі пункту збору його поштовий
+                  // код авто-вставляється в «Індекс» Відправника.
+                  if (next.method === 'pickup_point' && next.postalCode) {
+                    setSenderPostalCode(next.postalCode);
+                  }
                   if (next.method === 'courier_pickup' && next.date) {
                     validateCollectionDate(next.date);
                   } else {

@@ -144,6 +144,15 @@ export const CollectionMethod = {
 export type CollectionMethod = (typeof CollectionMethod)[keyof typeof CollectionMethod]
 
 
+export const ServiceTarget = {
+  sender: 'sender',
+  receiver: 'receiver',
+  both: 'both'
+} as const
+
+export type ServiceTarget = (typeof ServiceTarget)[keyof typeof ServiceTarget]
+
+
 export const RouteTaskStatus = {
   pending: 'pending',
   address_confirmed: 'address_confirmed',

@@ -13,6 +13,8 @@ import { FieldHint } from '@/components/shared/field-hint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { isCourierAllowed, isPostalAllowed } from '@/lib/utils/logistics-availability';
+import { transliterateCity, normalizeCityForMatch } from '@/lib/utils/transliterate';
+import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 
 /**
  * ТЗ (docx 14.05.26 §a): при «Виклик кур'єра» у формі Відправника оператор
@@ -22,6 +24,19 @@ import { isCourierAllowed, isPostalAllowed } from '@/lib/utils/logistics-availab
  */
 export interface ClientCreateMeta {
   isMultiParcelPickup?: boolean | null;
+  /**
+   * ТЗ docx 29.06.26 §1: обраний пункт збору/видачі — щоб у підсумку
+   * Відправника показати КОНКРЕТНУ адресу пункту, а не лише фразу «Пункт збору».
+   */
+  pickupPoint?: {
+    id: string;
+    name: string | null;
+    city: string;
+    address: string;
+    postalCode: string | null;
+    workingHours: string | null;
+    workingDays: Weekday[];
+  } | null;
 }
 
 interface ClientCreateFormProps {
@@ -150,18 +165,18 @@ export function ClientCreateForm({
   // ТЗ (docx 13.06.26 §4/§5): «Пункт видачі/збору» — це вибір зі СПИСКУ
   // реальних точок з розділу Логістика для країни/міста, а не вільний текст.
   // Якщо для країни/міста точок немає — опція ховається.
-  const [points, setPoints] = useState<{ id: string; name: string | null; country: string; city: string; address: string }[]>([]);
+  const [points, setPoints] = useState<{ id: string; name: string | null; country: string; city: string; address: string; postalCode: string | null; workingHours: string | null; workingDays: Weekday[] }[]>([]);
   const [selectedPointId, setSelectedPointId] = useState<string>('');
   // ТЗ (docx 14.05.26 §a): доступність «Виклик кур'єра»/«Пошта» для Відправника
   // визначається Логістикою (ServiceCity), а не хардкодом.
-  const [serviceCities, setServiceCities] = useState<{ country: string; city: string; acceptsCourierPickup: boolean; acceptsPostal: boolean }[]>([]);
+  const [serviceCities, setServiceCities] = useState<{ country: string; city: string; acceptsCourierPickup: boolean; acceptsPostal: boolean; target?: 'sender' | 'receiver' | 'both' }[]>([]);
 
   useEffect(() => {
     if (!country) { setPoints([]); return; }
     let cancelled = false;
     fetch(`/api/collection-points?country=${encodeURIComponent(country)}`)
       .then(r => (r.ok ? r.json() : []))
-      .then((list: { id: string; name: string | null; country: string; city: string; address: string }[]) => {
+      .then((list: { id: string; name: string | null; country: string; city: string; address: string; postalCode: string | null; workingHours: string | null; workingDays: Weekday[] }[]) => {
         if (!cancelled) setPoints(Array.isArray(list) ? list : []);
       })
       .catch(() => { if (!cancelled) setPoints([]); });
@@ -172,7 +187,7 @@ export function ClientCreateForm({
     let cancelled = false;
     fetch('/api/service-cities')
       .then(r => (r.ok ? r.json() : []))
-      .then((list: { country: string; city: string; acceptsCourierPickup: boolean; acceptsPostal: boolean }[]) => {
+      .then((list: { country: string; city: string; acceptsCourierPickup: boolean; acceptsPostal: boolean; target?: 'sender' | 'receiver' | 'both' }[]) => {
         if (!cancelled) setServiceCities(Array.isArray(list) ? list : []);
       })
       .catch(() => { if (!cancelled) setServiceCities([]); });
@@ -183,29 +198,26 @@ export function ClientCreateForm({
   // населеного пункту, без fallback на всю країну. Приклад: Венло (Venlo) —
   // у NL є точка в Amsterdam, але не у Венло, тож опція «Пункт збору» для
   // Венло НЕДОСТУПНА (список порожній → опцію ховаємо).
-  const cityNorm = city.trim().toLowerCase();
+  // ТЗ docx 29.06.26 §3: для EU-країн порівнюємо за латинізованою назвою —
+  // «Відень» (кирилицею) має співпасти з Логістикою, де записано «Wien».
+  const cityMatch = transliterateCity(city, country);
+  const cityNorm = normalizeCityForMatch(city, country);
   const cityPoints = cityNorm ? points.filter(p => p.city.trim().toLowerCase() === cityNorm) : [];
   const pointsToShow = cityPoints;
   const hasAnyPoints = cityPoints.length > 0;
 
-  // ТЗ (docx 20.06.26): «Виклик кур'єра» доступний ЗА ЗАМОВЧУВАННЯМ усюди;
-  // заборонити можна для міста/країни в Логістиці (ServiceCity). Для
-  // отримувача address = «Адресна доставка» — завжди доступно.
-  const courierAvailable =
-    role !== 'sender' ? true : isCourierAllowed(serviceCities, country, city);
+  // ТЗ docx 29.06.26: обмеження можна задати ОКРЕМО для Відправника й Отримувача.
+  // Тож і для отримувача консультуємо Логістику (default — доступно), а сторона
+  // визначається роллю (Австрія: отримувач=пошта дозволено, відправник=ні).
+  const side: 'sender' | 'receiver' = role === 'sender' ? 'sender' : 'receiver';
+  const courierAvailable = isCourierAllowed(serviceCities, country, cityMatch, side);
+  const postalAvailable = isPostalAllowed(serviceCities, country, cityMatch, side);
 
-  // ТЗ (docx 20.06.26): «Пошта» (np_warehouse) для Відправника — теж default
-  // available; заборона через Логістику. Для отримувача — завжди доступна.
-  const postalAvailable =
-    role !== 'sender' ? true : isPostalAllowed(serviceCities, country, city);
-
-  // Авто-корекція способу для Відправника: якщо поточний спосіб став
-  // недоступним у Логістиці (зміна міста/країни), перемикаємось на перший
-  // доступний — щоб дефолтний «Виклик кур'єра» не «залипав» у недоступному
-  // місті. Якщо доступних способів немає — лишаємо як є (нижче покажемо
-  // підказку «місто не обслуговується»).
+  // Авто-корекція способу: якщо поточний спосіб став недоступним у Логістиці
+  // (зміна міста/країни/сторони), перемикаємось на перший доступний — щоб
+  // спосіб не «залипав» у недоступному місті. ТЗ docx 29.06.26 — стосується і
+  // Відправника, і Отримувача (обмеження тепер по стороні).
   useEffect(() => {
-    if (role !== 'sender') return;
     const avail = ([
       courierAvailable ? 'address' : null,
       postalAvailable ? 'np_warehouse' : null,
@@ -273,10 +285,28 @@ export function ClientCreateForm({
       return;
     }
 
-    // Meta з відповіддю про кількість посилок — лише коли питання показували.
-    const meta: ClientCreateMeta | undefined = showMultiParcelQuestion
-      ? { isMultiParcelPickup }
-      : undefined;
+    // Meta: відповідь про кількість посилок + обраний пункт збору/видачі
+    // (ТЗ docx 29.06.26 §1 — щоб у підсумку показати адресу пункту).
+    const selectedPoint = deliveryMethod === 'pickup_point'
+      ? (points.find(p => p.id === selectedPointId) ?? null)
+      : null;
+    const meta: ClientCreateMeta | undefined =
+      (showMultiParcelQuestion || selectedPoint)
+        ? {
+            isMultiParcelPickup: showMultiParcelQuestion ? isMultiParcelPickup : undefined,
+            pickupPoint: selectedPoint
+              ? {
+                  id: selectedPoint.id,
+                  name: selectedPoint.name,
+                  city: selectedPoint.city,
+                  address: selectedPoint.address,
+                  postalCode: selectedPoint.postalCode,
+                  workingHours: selectedPoint.workingHours,
+                  workingDays: selectedPoint.workingDays,
+                }
+              : null,
+          }
+        : undefined;
 
     try {
       const baseAddress = {
@@ -573,7 +603,13 @@ export function ClientCreateForm({
                     <button
                       key={p.id}
                       type="button"
-                      onClick={() => { setSelectedPointId(p.id); setPickupPointText(label); }}
+                      // ТЗ docx 29.06.26 §2: при виборі пункту його поштовий код
+                      // авто-вставляється в поле «Індекс».
+                      onClick={() => {
+                        setSelectedPointId(p.id);
+                        setPickupPointText(label);
+                        if (p.postalCode) setPostalCode(p.postalCode);
+                      }}
                       className={cn(
                         'w-full text-left border rounded-lg p-2 text-sm transition-all',
                         sel ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 hover:bg-gray-50'
@@ -581,6 +617,13 @@ export function ClientCreateForm({
                     >
                       <div className="font-medium">{label}</div>
                       {p.name && <div className="text-xs text-gray-500">{p.city}, {p.address}</div>}
+                      {/* ТЗ docx 29.06.26 §2: години роботи — щоб полегшити вибір. */}
+                      {p.workingDays?.length > 0 && (
+                        <div className="text-xs text-gray-500">
+                          📅 {formatWorkingDays(p.workingDays)}{p.workingHours ? ` · ${p.workingHours}` : ''}
+                        </div>
+                      )}
+                      {p.postalCode && <div className="text-xs text-gray-400">Індекс: {p.postalCode}</div>}
                     </button>
                   );
                 })}

@@ -17,8 +17,16 @@ interface ServiceCity {
   city: string;
   acceptsCourierPickup: boolean;
   acceptsPostal: boolean;
+  target?: 'sender' | 'receiver' | 'both';
   notes: string | null;
 }
+
+// ТЗ docx 29.06.26: на кого поширюється обмеження.
+const TARGET_LABELS: Record<string, string> = {
+  both: 'Обидві сторони',
+  sender: 'Відправник',
+  receiver: 'Отримувач',
+};
 
 /**
  * ТЗ (docx 20.06.26): «Виклик кур'єра» та «Пошта» доступні за замовчуванням
@@ -33,6 +41,8 @@ export default function ServiceCitiesPage() {
   const [wholeCountry, setWholeCountry] = useState(false);
   const [forbidCourier, setForbidCourier] = useState(false);
   const [forbidPostal, setForbidPostal] = useState(false);
+  // ТЗ docx 29.06.26: сторона, на яку діє обмеження.
+  const [target, setTarget] = useState<'sender' | 'receiver' | 'both'>('both');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -70,6 +80,7 @@ export default function ServiceCitiesPage() {
       body: JSON.stringify({
         country,
         city: cityValue,
+        target,
         acceptsCourierPickup: !forbidCourier,
         acceptsPostal: !forbidPostal,
       }),
@@ -81,6 +92,7 @@ export default function ServiceCitiesPage() {
       setWholeCountry(false);
       setForbidCourier(false);
       setForbidPostal(false);
+      setTarget('both');
       await refresh();
     } else {
       const body = await res.json().catch(() => ({}));
@@ -115,7 +127,7 @@ export default function ServiceCitiesPage() {
           <CardTitle className="text-base">Додати обмеження</CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-0">
-          <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-[8rem_1fr_auto_auto] gap-2 items-end">
+          <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-[8rem_1fr_10rem_auto_auto] gap-2 items-end">
             <div>
               <Label className="text-xs">Країна</Label>
               <Select value={country} onValueChange={(v) => setCountry(v ?? 'UA')}>
@@ -140,6 +152,18 @@ export default function ServiceCitiesPage() {
                 <Checkbox checked={wholeCountry} onCheckedChange={(c) => setWholeCountry(c === true)} />
                 Вся країна (всі міста)
               </label>
+            </div>
+            {/* ТЗ docx 29.06.26: на кого діє обмеження. */}
+            <div>
+              <Label className="text-xs">Кого стосується</Label>
+              <Select value={target} onValueChange={(v) => setTarget((v ?? 'both') as 'sender' | 'receiver' | 'both')}>
+                <SelectTrigger><SelectValue>{TARGET_LABELS[target]}</SelectValue></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="both">Обидві сторони</SelectItem>
+                  <SelectItem value="sender">Відправник</SelectItem>
+                  <SelectItem value="receiver">Отримувач</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex flex-col gap-1">
               <label className="flex items-center gap-2 text-sm">
@@ -175,6 +199,11 @@ export default function ServiceCitiesPage() {
                     <span className="font-medium">{COUNTRY_LABELS[r.country as CountryCode] || r.country}</span>
                     <span className="text-gray-400 mx-1">·</span>
                     <span>{r.city === COUNTRY_WIDE_CITY ? 'Вся країна' : r.city}</span>
+                    {r.target && r.target !== 'both' && (
+                      <span className="ml-2 text-[10px] text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
+                        {TARGET_LABELS[r.target]}
+                      </span>
+                    )}
                     {!r.acceptsCourierPickup && (
                       <span className="ml-2 text-[10px] text-red-700 bg-red-50 px-1.5 py-0.5 rounded">
                         🚫 Виклик кур&apos;єра

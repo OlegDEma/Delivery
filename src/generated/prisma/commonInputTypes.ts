@@ -680,6 +680,23 @@ export type EnumWarehouseActionWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumWarehouseActionFilter<$PrismaModel>
 }
 
+export type EnumServiceTargetFilter<$PrismaModel = never> = {
+  equals?: $Enums.ServiceTarget | Prisma.EnumServiceTargetFieldRefInput<$PrismaModel>
+  in?: $Enums.ServiceTarget[] | Prisma.ListEnumServiceTargetFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ServiceTarget[] | Prisma.ListEnumServiceTargetFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumServiceTargetFilter<$PrismaModel> | $Enums.ServiceTarget
+}
+
+export type EnumServiceTargetWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ServiceTarget | Prisma.EnumServiceTargetFieldRefInput<$PrismaModel>
+  in?: $Enums.ServiceTarget[] | Prisma.ListEnumServiceTargetFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ServiceTarget[] | Prisma.ListEnumServiceTargetFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumServiceTargetWithAggregatesFilter<$PrismaModel> | $Enums.ServiceTarget
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumServiceTargetFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumServiceTargetFilter<$PrismaModel>
+}
+
 export type EnumClaimStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.ClaimStatus | Prisma.EnumClaimStatusFieldRefInput<$PrismaModel>
   in?: $Enums.ClaimStatus[] | Prisma.ListEnumClaimStatusFieldRefInput<$PrismaModel>
@@ -1343,6 +1360,23 @@ export type NestedEnumWarehouseActionWithAggregatesFilter<$PrismaModel = never> 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumWarehouseActionFilter<$PrismaModel>
   _max?: Prisma.NestedEnumWarehouseActionFilter<$PrismaModel>
+}
+
+export type NestedEnumServiceTargetFilter<$PrismaModel = never> = {
+  equals?: $Enums.ServiceTarget | Prisma.EnumServiceTargetFieldRefInput<$PrismaModel>
+  in?: $Enums.ServiceTarget[] | Prisma.ListEnumServiceTargetFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ServiceTarget[] | Prisma.ListEnumServiceTargetFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumServiceTargetFilter<$PrismaModel> | $Enums.ServiceTarget
+}
+
+export type NestedEnumServiceTargetWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ServiceTarget | Prisma.EnumServiceTargetFieldRefInput<$PrismaModel>
+  in?: $Enums.ServiceTarget[] | Prisma.ListEnumServiceTargetFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ServiceTarget[] | Prisma.ListEnumServiceTargetFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumServiceTargetWithAggregatesFilter<$PrismaModel> | $Enums.ServiceTarget
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumServiceTargetFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumServiceTargetFilter<$PrismaModel>
 }
 
 export type NestedEnumClaimStatusFilter<$PrismaModel = never> = {

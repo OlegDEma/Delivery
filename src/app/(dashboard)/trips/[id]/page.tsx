@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
-import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { tripRouteLabel } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatWeight } from '@/lib/utils/format';
 
@@ -55,15 +56,46 @@ interface TripDetail {
 
 export default function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const [trip, setTrip] = useState<TripDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [newStatus, setNewStatus] = useState('');
   const [saving, setSaving] = useState(false);
+  // ТЗ docx 29.06.26 «Рейси» §2: редагування дат + видалення рейсу.
+  const [depDate, setDepDate] = useState('');
+  const [arrDate, setArrDate] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   async function fetchTrip() {
     const res = await fetch(`/api/trips/${id}`);
-    if (res.ok) setTrip(await res.json());
+    if (res.ok) {
+      const data = await res.json();
+      setTrip(data);
+      setDepDate(data.departureDate ? String(data.departureDate).slice(0, 10) : '');
+      setArrDate(data.arrivalDate ? String(data.arrivalDate).slice(0, 10) : '');
+    }
     setLoading(false);
+  }
+
+  async function handleSaveDates() {
+    if (!depDate) { toast.error('Вкажіть дату виїзду'); return; }
+    setSaving(true);
+    const res = await fetch(`/api/trips/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ departureDate: depDate, arrivalDate: arrDate || null }),
+    });
+    if (res.ok) { toast.success('Дати рейсу оновлено'); await fetchTrip(); }
+    else { const d = await res.json().catch(() => ({})); toast.error(d.error || 'Помилка'); }
+    setSaving(false);
+  }
+
+  async function handleDeleteTrip() {
+    if (!confirm('Видалити цей рейс? Посилки буде відв\'язано від рейсу (вони залишаться в системі), а маршрутні задачі та пасажирів — видалено.')) return;
+    setDeleting(true);
+    const res = await fetch(`/api/trips/${id}`, { method: 'DELETE' });
+    if (res.ok) { toast.success('Рейс видалено'); router.push('/trips'); }
+    else { const d = await res.json().catch(() => ({})); toast.error(d.error || 'Не вдалося видалити'); setDeleting(false); }
   }
 
   useEffect(() => { fetchTrip(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -103,7 +135,7 @@ export default function TripDetailPage() {
       <div>
         <div className="flex items-center gap-3 mb-1">
           <h1 className="text-xl font-bold">
-            {COUNTRY_LABELS[trip.country as CountryCode]} {trip.direction === 'eu_to_ua' ? '→ UA' : '← UA'}
+            {tripRouteLabel(trip.country, trip.direction)}
           </h1>
           <Badge className={TRIP_STATUSES[trip.status]?.color || ''}>
             {TRIP_STATUSES[trip.status]?.label || trip.status}
@@ -158,24 +190,62 @@ export default function TripDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Status change */}
+      {/* Керування рейсом — статус, дати, видалення (ТЗ docx 29.06.26 «Рейси») */}
       <Card>
-        <CardContent className="p-3 flex gap-2 items-end">
-          <div className="flex-1">
-            <Label className="text-xs">Статус рейсу</Label>
-            <Select value={newStatus} onValueChange={(v) => setNewStatus(v ?? '')}>
-              <SelectTrigger><SelectValue>{newStatus ? (TRIP_STATUSES[newStatus]?.label || newStatus) : 'Змінити статус'}</SelectValue></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="planned">Заплановано</SelectItem>
-                <SelectItem value="in_progress">В дорозі</SelectItem>
-                <SelectItem value="completed">Завершено</SelectItem>
-                <SelectItem value="cancelled">Скасовано</SelectItem>
-              </SelectContent>
-            </Select>
+        <CardHeader className="py-2 px-3">
+          <CardTitle className="text-sm">Керування рейсом</CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-0 space-y-3">
+          {/* Статус */}
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <Label className="text-xs">Статус рейсу</Label>
+              <Select value={newStatus} onValueChange={(v) => setNewStatus(v ?? '')}>
+                <SelectTrigger><SelectValue>{newStatus ? (TRIP_STATUSES[newStatus]?.label || newStatus) : 'Змінити статус'}</SelectValue></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="planned">Заплановано</SelectItem>
+                  <SelectItem value="in_progress">В дорозі</SelectItem>
+                  <SelectItem value="completed">Завершено</SelectItem>
+                  <SelectItem value="cancelled">Скасовано</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleStatusChange} disabled={!newStatus || saving} size="sm">
+              Змінити
+            </Button>
           </div>
-          <Button onClick={handleStatusChange} disabled={!newStatus || saving} size="sm">
-            Змінити
-          </Button>
+
+          {/* Дати рейсу — редагування (ТЗ docx 29.06.26 «Рейси» §2) */}
+          <div className="flex gap-2 items-end border-t pt-3">
+            <div className="flex-1">
+              <Label className="text-xs">Дата виїзду *</Label>
+              <Input type="date" value={depDate} onChange={(e) => setDepDate(e.target.value)} />
+            </div>
+            <div className="flex-1">
+              <Label className="text-xs">Дата прибуття</Label>
+              <Input type="date" value={arrDate} onChange={(e) => setArrDate(e.target.value)} />
+            </div>
+            <Button onClick={handleSaveDates} disabled={saving || !depDate} size="sm" variant="outline">
+              Зберегти дати
+            </Button>
+          </div>
+
+          {/* Видалення рейсу (ТЗ docx 29.06.26 «Рейси» §2: видалити будь-який) */}
+          <div className="border-t pt-3">
+            <Button
+              onClick={handleDeleteTrip}
+              disabled={deleting}
+              size="sm"
+              variant="ghost"
+              className="text-red-600 hover:text-red-700"
+            >
+              {deleting ? 'Видалення…' : '🗑 Видалити рейс'}
+            </Button>
+            <p className="text-xs text-gray-400 mt-1">
+              Посилки буде відв&apos;язано від рейсу (вони залишаться в системі);
+              маршрутні задачі та пасажирів — видалено.
+            </p>
+          </div>
         </CardContent>
       </Card>
 

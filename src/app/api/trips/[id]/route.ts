@@ -78,7 +78,25 @@ export async function PATCH(
   }
   if (body.assignedCourierId !== undefined) data.assignedCourierId = body.assignedCourierId || null;
   if (body.secondCourierId !== undefined) data.secondCourierId = body.secondCourierId || null;
-  if (body.arrivalDate !== undefined) data.arrivalDate = body.arrivalDate ? new Date(body.arrivalDate) : null;
+  // ТЗ docx 29.06.26 «Рейси»: дозволяємо редагувати дату рейсу.
+  if (body.departureDate !== undefined && body.departureDate) {
+    const d = new Date(body.departureDate);
+    if (Number.isNaN(d.getTime())) {
+      return NextResponse.json({ error: 'Невалідна дата виїзду' }, { status: 400 });
+    }
+    data.departureDate = d; // departureDate — NOT NULL, порожнє значення ігноруємо
+  }
+  if (body.arrivalDate !== undefined) {
+    if (body.arrivalDate) {
+      const d = new Date(body.arrivalDate);
+      if (Number.isNaN(d.getTime())) {
+        return NextResponse.json({ error: 'Невалідна дата прибуття' }, { status: 400 });
+      }
+      data.arrivalDate = d;
+    } else {
+      data.arrivalDate = null;
+    }
+  }
   if (body.notes !== undefined) data.notes = body.notes || null;
   if (body.passengerCapacity !== undefined) {
     const n = Number(body.passengerCapacity);
@@ -112,8 +130,11 @@ export async function PATCH(
   return NextResponse.json(updated);
 }
 
-// DELETE /api/trips/[id] — only allowed if trip has no parcels and is not in_progress.
-// Soft-cancel via PATCH status=cancelled is preferred for trips with history.
+// DELETE /api/trips/[id] — logistics roles only.
+// ТЗ docx 29.06.26 «Рейси»: «Зробити можливість видалення будь якого рейсу».
+// Тому дозволяємо видалити рейс у будь-якому статусі: перед видаленням
+// відв'язуємо посилки (tripId=null — посилки лишаються в системі) і прибираємо
+// залежні записи (маршрутні задачі та пасажири мають обов'язковий FK на рейс).
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -124,25 +145,14 @@ export async function DELETE(
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
-  const trip = await prisma.trip.findUnique({
-    where: { id },
-    select: { status: true, _count: { select: { parcels: { where: { deletedAt: null } } } } },
-  });
+  const trip = await prisma.trip.findUnique({ where: { id }, select: { id: true } });
   if (!trip) return NextResponse.json({ error: 'Рейс не знайдено' }, { status: 404 });
 
-  if (trip._count.parcels > 0) {
-    return NextResponse.json(
-      { error: `Неможливо видалити: до рейсу прив'язано ${trip._count.parcels} посилок. Спочатку переприв'яжіть або скасуйте їх. Альтернативно — змініть статус на «Скасовано».` },
-      { status: 409 }
-    );
-  }
-  if (trip.status === 'in_progress' || trip.status === 'completed') {
-    return NextResponse.json(
-      { error: 'Неможливо видалити рейс що вже почався або завершився. Скасуйте через статус.' },
-      { status: 409 }
-    );
-  }
-
-  await prisma.trip.delete({ where: { id } });
+  await prisma.$transaction([
+    prisma.parcel.updateMany({ where: { tripId: id }, data: { tripId: null } }),
+    prisma.routeTask.deleteMany({ where: { tripId: id } }),
+    prisma.passenger.deleteMany({ where: { tripId: id } }),
+    prisma.trip.delete({ where: { id } }),
+  ]);
   return NextResponse.json({ success: true });
 }

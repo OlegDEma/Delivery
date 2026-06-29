@@ -38,6 +38,7 @@ export async function PATCH(request: NextRequest) {
     parcelMoneyPercent, parcelMoneyPercentHigh, parcelMoneyThreshold,
     addressDeliveryPrice, pickupPointPrice,
     minMultiPerAddress, minBothDirections,
+    doorstepEnabled, doorstepPrice,
     collectionDays,
   } = body;
 
@@ -64,6 +65,7 @@ export async function PATCH(request: NextRequest) {
     [pickupPointPrice,            0, 1000,   'pickupPointPrice'],
     [minMultiPerAddress,          0, 1000,   'minMultiPerAddress'],
     [minBothDirections,           0, 1000,   'minBothDirections'],
+    [doorstepPrice,               0, 1000,   'doorstepPrice'],
     [packagingPer10kg,            0, 1000,   'packagingPer10kg'],
     [insuranceRate,               0, 1,      'insuranceRate (0..1)'],
     [parcelMoneyPercent,          0, 100,    'parcelMoneyPercent'],
@@ -106,6 +108,8 @@ export async function PATCH(request: NextRequest) {
       ...(numIfPresent(pickupPointPrice)     !== undefined && { pickupPointPrice:     numIfPresent(pickupPointPrice)! }),
       ...(numIfPresent(minMultiPerAddress)   !== undefined && { minMultiPerAddress:   numIfPresent(minMultiPerAddress)! }),
       ...(numIfPresent(minBothDirections)    !== undefined && { minBothDirections:    numIfPresent(minBothDirections)! }),
+      ...(doorstepEnabled                    !== undefined && { doorstepEnabled }),
+      ...(numIfPresent(doorstepPrice)        !== undefined && { doorstepPrice:        numIfPresent(doorstepPrice)! }),
       ...(collectionDays                     !== undefined && { collectionDays }),
       updatedById: user.id,
     },

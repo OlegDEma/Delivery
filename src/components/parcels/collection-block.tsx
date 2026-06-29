@@ -20,6 +20,7 @@ import {
 } from '@/lib/constants/collection';
 import { formatDate } from '@/lib/utils/format';
 import { isCourierAllowed, isPostalAllowed } from '@/lib/utils/logistics-availability';
+import { transliterateCity, normalizeCityForMatch } from '@/lib/utils/transliterate';
 
 export interface CollectionPointOption {
   id: string;
@@ -27,6 +28,7 @@ export interface CollectionPointOption {
   country: string;
   city: string;
   address: string;
+  postalCode: string | null;
   contactPhone: string | null;
   workingHours: string | null;
   workingDays: Weekday[];
@@ -46,6 +48,8 @@ export interface CollectionState {
    * Null коли method ≠ courier_pickup або відповідь ще не надана.
    */
   isMultiParcelPickup?: boolean | null;
+  /** ТЗ docx 29.06.26 §2: поштовий код обраного пункту збору (авто-Індекс). */
+  postalCode?: string | null;
   /**
    * ТЗ (docx 14.05.26 §b): для клієнтського «Як ви передасте» умовні поля.
    * «Виклик кур'єра» → Вулиця/Будинок/Орієнтир; «Пошта» → Номер складу.
@@ -74,6 +78,7 @@ interface ServiceCity {
   city: string;
   acceptsCourierPickup: boolean;
   acceptsPostal: boolean;
+  target?: 'sender' | 'receiver' | 'both';
 }
 
 // Per ТЗ: «Передати водію» приховано. Залишаються три способи.
@@ -143,18 +148,22 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
   // ТЗ (docx 20.06.26): «Виклик кур'єра» доступний ЗА ЗАМОВЧУВАННЯМ усюди;
   // заборонити можна для міста/країни в Логістиці. На staff боці CollectionBlock
   // не рендериться (спосіб гейтиться у формі Відправника).
+  // ТЗ docx 29.06.26 §3: для EU-країн порівнюємо за латинізованою назвою.
+  const senderCityMatch = transliterateCity(senderCity, senderCountry);
+  // CollectionBlock — це сторона ВІДПРАВНИКА (як клієнт передасть нам посилку),
+  // тож консультуємо обмеження для side='sender' (ТЗ docx 29.06.26).
   const courierPickupAvailableForClient =
-    !clientFacing || isCourierAllowed(serviceCities, senderCountry, senderCity);
+    !clientFacing || isCourierAllowed(serviceCities, senderCountry, senderCityMatch, 'sender');
 
   // ТЗ (docx 20.06.26): «Пошта» (відправка нам поштою) — теж default available;
-  // заборона через Логістику (місто/країна).
+  // заборона через Логістику (місто/країна), окремо для відправника.
   const externalShippingAvailableForClient =
-    !clientFacing || isPostalAllowed(serviceCities, senderCountry, senderCity);
+    !clientFacing || isPostalAllowed(serviceCities, senderCountry, senderCityMatch, 'sender');
 
   // ТЗ (docx 14.05.26): перелік Пунктів збору — САМЕ для вибраного
   // населеного пункту (приклад Венло: точка є в Amsterdam, але не у Венло →
   // список порожній). Якщо місто ще не введено — показуємо всі по країні.
-  const senderCityNorm = (senderCity || '').trim().toLowerCase();
+  const senderCityNorm = normalizeCityForMatch(senderCity, senderCountry);
   const pointsForCountry = points.filter(p =>
     (!senderCountry || p.country === senderCountry) &&
     (!senderCityNorm || p.city.trim().toLowerCase() === senderCityNorm)
@@ -257,7 +266,7 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => onChange({ ...value, pointId: p.id })}
+                    onClick={() => onChange({ ...value, pointId: p.id, postalCode: p.postalCode ?? '' })}
                     className={cn(
                       'w-full text-left border rounded-lg p-3 transition-all',
                       isSelected

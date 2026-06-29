@@ -25,6 +25,8 @@ export function buildPricingInput(config: PricingConfig): PricingConfigInput {
     packagingPrices: parsePackagingPrices(config.packagingPrices),
     addressDeliveryPrice: Number(config.addressDeliveryPrice),
     pickupPointPrice: Number(config.pickupPointPrice),
+    doorstepEnabled: config.doorstepEnabled,
+    doorstepPrice: Number(config.doorstepPrice),
     minMultiPerAddress: Number(config.minMultiPerAddress),
     minBothDirections: Number(config.minBothDirections),
     parcelMoneyPercent: Number(config.parcelMoneyPercent),

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { transliterateCity } from '@/lib/utils/transliterate';
 
 type SuggestionField = 'city' | 'street';
 
@@ -85,6 +86,16 @@ export function AddressInput({
     setOpen(false);
   }
 
+  // ТЗ docx 29.06.26 §3: для країни ≠ UA назву НАСЕЛЕНОГО ПУНКТУ, введену
+  // кирилицею, АВТОМАТИЧНО транслітеруємо в латиницю (Амстердам→Amsterdam,
+  // Відень→Wien). Робимо це на blur — щоб не заважати набору кирилицею і не
+  // стрибав курсор. Лише для field='city' (вулиці не чіпаємо).
+  function handleBlur() {
+    if (field !== 'city' || !country || country === 'UA') return;
+    const translit = transliterateCity(value, country);
+    if (translit !== value) onChange(translit);
+  }
+
   // EU → Latin keyboard hint; UA → Ukrainian (default browser locale handles it).
   const isEU = country && country !== 'UA';
   const lang = isEU ? 'en' : 'uk';
@@ -95,6 +106,7 @@ export function AddressInput({
         value={value}
         onChange={(e) => handleChange(e.target.value)}
         onFocus={() => suggestions.length > 0 && setOpen(true)}
+        onBlur={handleBlur}
         placeholder={placeholder}
         required={required}
         disabled={disabled}

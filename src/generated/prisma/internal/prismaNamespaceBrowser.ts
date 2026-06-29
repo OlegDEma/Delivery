@@ -338,6 +338,8 @@ export const PricingConfigScalarFieldEnum = {
   parcelMoneyThreshold: 'parcelMoneyThreshold',
   pickupPointPrice: 'pickupPointPrice',
   addressDeliveryPrice: 'addressDeliveryPrice',
+  doorstepEnabled: 'doorstepEnabled',
+  doorstepPrice: 'doorstepPrice',
   minMultiPerAddress: 'minMultiPerAddress',
   minBothDirections: 'minBothDirections',
   collectionDays: 'collectionDays',
@@ -487,6 +489,7 @@ export const ServiceCityScalarFieldEnum = {
   city: 'city',
   acceptsCourierPickup: 'acceptsCourierPickup',
   acceptsPostal: 'acceptsPostal',
+  target: 'target',
   notes: 'notes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

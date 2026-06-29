@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { tripRouteLabel } from '@/lib/constants/countries';
 import { formatCurrency, formatDate, formatWeight } from '@/lib/utils/format';
 
 interface ComparisonData {
@@ -200,7 +200,7 @@ export default function AnalyticsPage() {
                 <Link key={t.id} href={`/trips/${t.id}`} className="block px-4 py-3 hover:bg-gray-50">
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="font-medium text-sm">
-                      {COUNTRY_LABELS[t.country as CountryCode]} {t.direction === 'eu_to_ua' ? '→UA' : '←UA'}
+                      {tripRouteLabel(t.country, t.direction)}
                     </div>
                     <div className="text-xs text-gray-400">{formatDate(t.departureDate)}</div>
                   </div>

@@ -43,6 +43,9 @@ interface ConfigForm {
   minMultiPerAddress: string;
   /** Per ТЗ — мін. вартість при одночасному UA→EU + EU→UA з однієї локації. */
   minBothDirections: string;
+  /** ТЗ docx 29.06.26 «Тарифи»: послуга «Доставка до порога будинку». */
+  doorstepEnabled: boolean;
+  doorstepPrice: string;
   collectionDays: string[];
 }
 
@@ -65,6 +68,8 @@ interface ApiPricingConfig {
   addressDeliveryPrice: string | number;
   minMultiPerAddress: string | number;
   minBothDirections: string | number;
+  doorstepEnabled: boolean;
+  doorstepPrice: string | number;
   collectionDays: string[];
 }
 
@@ -90,6 +95,8 @@ function toForm(c: ApiPricingConfig): ConfigForm {
     addressDeliveryPrice: String(c.addressDeliveryPrice ?? '0'),
     minMultiPerAddress: String(c.minMultiPerAddress ?? '0'),
     minBothDirections: String(c.minBothDirections ?? '0'),
+    doorstepEnabled: !!c.doorstepEnabled,
+    doorstepPrice: String(c.doorstepPrice ?? '0'),
     collectionDays: c.collectionDays ?? [],
   };
 }
@@ -149,6 +156,7 @@ export default function PricingPage() {
       { key: 'pickupPointPrice',            label: 'Пункт збору',                  min: 0, max: 1000 },
       { key: 'minMultiPerAddress',          label: '2+ посилок з локації (мін.)',  min: 0, max: 1000 },
       { key: 'minBothDirections',           label: 'Туди-сюди з локації (мін.)',   min: 0, max: 1000 },
+      { key: 'doorstepPrice',               label: 'Доставка до порога (€)',       min: 0, max: 1000 },
       { key: 'packagingPer10kg',            label: 'Пакування (€/10кг)',           min: 0, max: 1000 },
       { key: 'insurancePercent',            label: 'Страхування (%)',              min: 0, max: 100 },
       { key: 'parcelMoneyPercent',          label: 'Пакет % (≤ порогу)',           min: 0, max: 100 },
@@ -176,6 +184,8 @@ export default function PricingPage() {
         pickupPointPrice:     parseNum(c.pickupPointPrice),
         minMultiPerAddress:   parseNum(c.minMultiPerAddress),
         minBothDirections:    parseNum(c.minBothDirections),
+        doorstepEnabled:      c.doorstepEnabled,
+        doorstepPrice:        parseNum(c.doorstepPrice),
         insuranceEnabled:     c.insuranceEnabled,
         // UI is whole-percent; DB stores 0..1 fraction.
         insuranceRate:        (parseNum(c.insurancePercent) ?? 0) / 100,
@@ -484,6 +494,32 @@ export default function PricingPage() {
                       value={config.packagingPer10kg}
                       onChange={(e) => update(config.id, 'packagingPer10kg', e.target.value)}
                       disabled={!config.packagingEnabled}
+                    />
+                  </div>
+                </div>
+
+                {/* Доставка до порога будинку — ТЗ docx 29.06.26 «Тарифи». */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={config.doorstepEnabled}
+                      onCheckedChange={(c) => update(config.id, 'doorstepEnabled', c === true)}
+                    />
+                    Доставка до порога будинку
+                  </label>
+                  <div>
+                    <Label className="text-xs">
+                      Сума (EUR){' '}
+                      <FieldHint text="Надбавка, яка ДОДАЄТЬСЯ до вартості посилки коли Отримувач обрав адресну доставку (до порога будинку)." />
+                    </Label>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min="0"
+                      value={config.doorstepPrice}
+                      onChange={(e) => update(config.id, 'doorstepPrice', e.target.value)}
+                      disabled={!config.doorstepEnabled}
                     />
                   </div>
                 </div>

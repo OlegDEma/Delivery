@@ -38,6 +38,7 @@ export type PricingConfigAvgAggregateOutputType = {
   parcelMoneyThreshold: runtime.Decimal | null
   pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
+  doorstepPrice: runtime.Decimal | null
   minMultiPerAddress: runtime.Decimal | null
   minBothDirections: runtime.Decimal | null
 }
@@ -54,6 +55,7 @@ export type PricingConfigSumAggregateOutputType = {
   parcelMoneyThreshold: runtime.Decimal | null
   pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
+  doorstepPrice: runtime.Decimal | null
   minMultiPerAddress: runtime.Decimal | null
   minBothDirections: runtime.Decimal | null
 }
@@ -76,6 +78,8 @@ export type PricingConfigMinAggregateOutputType = {
   parcelMoneyThreshold: runtime.Decimal | null
   pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
+  doorstepEnabled: boolean | null
+  doorstepPrice: runtime.Decimal | null
   minMultiPerAddress: runtime.Decimal | null
   minBothDirections: runtime.Decimal | null
   isActive: boolean | null
@@ -102,6 +106,8 @@ export type PricingConfigMaxAggregateOutputType = {
   parcelMoneyThreshold: runtime.Decimal | null
   pickupPointPrice: runtime.Decimal | null
   addressDeliveryPrice: runtime.Decimal | null
+  doorstepEnabled: boolean | null
+  doorstepPrice: runtime.Decimal | null
   minMultiPerAddress: runtime.Decimal | null
   minBothDirections: runtime.Decimal | null
   isActive: boolean | null
@@ -129,6 +135,8 @@ export type PricingConfigCountAggregateOutputType = {
   parcelMoneyThreshold: number
   pickupPointPrice: number
   addressDeliveryPrice: number
+  doorstepEnabled: number
+  doorstepPrice: number
   minMultiPerAddress: number
   minBothDirections: number
   collectionDays: number
@@ -152,6 +160,7 @@ export type PricingConfigAvgAggregateInputType = {
   parcelMoneyThreshold?: true
   pickupPointPrice?: true
   addressDeliveryPrice?: true
+  doorstepPrice?: true
   minMultiPerAddress?: true
   minBothDirections?: true
 }
@@ -168,6 +177,7 @@ export type PricingConfigSumAggregateInputType = {
   parcelMoneyThreshold?: true
   pickupPointPrice?: true
   addressDeliveryPrice?: true
+  doorstepPrice?: true
   minMultiPerAddress?: true
   minBothDirections?: true
 }
@@ -190,6 +200,8 @@ export type PricingConfigMinAggregateInputType = {
   parcelMoneyThreshold?: true
   pickupPointPrice?: true
   addressDeliveryPrice?: true
+  doorstepEnabled?: true
+  doorstepPrice?: true
   minMultiPerAddress?: true
   minBothDirections?: true
   isActive?: true
@@ -216,6 +228,8 @@ export type PricingConfigMaxAggregateInputType = {
   parcelMoneyThreshold?: true
   pickupPointPrice?: true
   addressDeliveryPrice?: true
+  doorstepEnabled?: true
+  doorstepPrice?: true
   minMultiPerAddress?: true
   minBothDirections?: true
   isActive?: true
@@ -243,6 +257,8 @@ export type PricingConfigCountAggregateInputType = {
   parcelMoneyThreshold?: true
   pickupPointPrice?: true
   addressDeliveryPrice?: true
+  doorstepEnabled?: true
+  doorstepPrice?: true
   minMultiPerAddress?: true
   minBothDirections?: true
   collectionDays?: true
@@ -358,6 +374,8 @@ export type PricingConfigGroupByOutputType = {
   parcelMoneyThreshold: runtime.Decimal
   pickupPointPrice: runtime.Decimal
   addressDeliveryPrice: runtime.Decimal
+  doorstepEnabled: boolean
+  doorstepPrice: runtime.Decimal
   minMultiPerAddress: runtime.Decimal
   minBothDirections: runtime.Decimal
   collectionDays: string[]
@@ -409,6 +427,8 @@ export type PricingConfigWhereInput = {
   parcelMoneyThreshold?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolFilter<"PricingConfig"> | boolean
+  doorstepPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.StringNullableListFilter<"PricingConfig">
@@ -438,6 +458,8 @@ export type PricingConfigOrderByWithRelationInput = {
   parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
+  doorstepEnabled?: Prisma.SortOrder
+  doorstepPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
   minBothDirections?: Prisma.SortOrder
   collectionDays?: Prisma.SortOrder
@@ -470,6 +492,8 @@ export type PricingConfigWhereUniqueInput = Prisma.AtLeast<{
   parcelMoneyThreshold?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolFilter<"PricingConfig"> | boolean
+  doorstepPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.StringNullableListFilter<"PricingConfig">
@@ -499,6 +523,8 @@ export type PricingConfigOrderByWithAggregationInput = {
   parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
+  doorstepEnabled?: Prisma.SortOrder
+  doorstepPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
   minBothDirections?: Prisma.SortOrder
   collectionDays?: Prisma.SortOrder
@@ -535,6 +561,8 @@ export type PricingConfigScalarWhereWithAggregatesInput = {
   parcelMoneyThreshold?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolWithAggregatesFilter<"PricingConfig"> | boolean
+  doorstepPrice?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalWithAggregatesFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.StringNullableListFilter<"PricingConfig">
@@ -563,6 +591,8 @@ export type PricingConfigCreateInput = {
   parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: boolean
+  doorstepPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
@@ -591,6 +621,8 @@ export type PricingConfigUncheckedCreateInput = {
   parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: boolean
+  doorstepPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
@@ -619,6 +651,8 @@ export type PricingConfigUpdateInput = {
   parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
@@ -647,6 +681,8 @@ export type PricingConfigUncheckedUpdateInput = {
   parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
@@ -675,6 +711,8 @@ export type PricingConfigCreateManyInput = {
   parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: boolean
+  doorstepPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
@@ -703,6 +741,8 @@ export type PricingConfigUpdateManyMutationInput = {
   parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
@@ -730,6 +770,8 @@ export type PricingConfigUncheckedUpdateManyInput = {
   parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
@@ -768,6 +810,8 @@ export type PricingConfigCountOrderByAggregateInput = {
   parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
+  doorstepEnabled?: Prisma.SortOrder
+  doorstepPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
   minBothDirections?: Prisma.SortOrder
   collectionDays?: Prisma.SortOrder
@@ -789,6 +833,7 @@ export type PricingConfigAvgOrderByAggregateInput = {
   parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
+  doorstepPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
   minBothDirections?: Prisma.SortOrder
 }
@@ -811,6 +856,8 @@ export type PricingConfigMaxOrderByAggregateInput = {
   parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
+  doorstepEnabled?: Prisma.SortOrder
+  doorstepPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
   minBothDirections?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -837,6 +884,8 @@ export type PricingConfigMinOrderByAggregateInput = {
   parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
+  doorstepEnabled?: Prisma.SortOrder
+  doorstepPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
   minBothDirections?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -857,6 +906,7 @@ export type PricingConfigSumOrderByAggregateInput = {
   parcelMoneyThreshold?: Prisma.SortOrder
   pickupPointPrice?: Prisma.SortOrder
   addressDeliveryPrice?: Prisma.SortOrder
+  doorstepPrice?: Prisma.SortOrder
   minMultiPerAddress?: Prisma.SortOrder
   minBothDirections?: Prisma.SortOrder
 }
@@ -943,6 +993,8 @@ export type PricingConfigCreateWithoutUpdatedByInput = {
   parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: boolean
+  doorstepPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
@@ -970,6 +1022,8 @@ export type PricingConfigUncheckedCreateWithoutUpdatedByInput = {
   parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: boolean
+  doorstepPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
@@ -1026,6 +1080,8 @@ export type PricingConfigScalarWhereInput = {
   parcelMoneyThreshold?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolFilter<"PricingConfig"> | boolean
+  doorstepPrice?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalFilter<"PricingConfig"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.StringNullableListFilter<"PricingConfig">
@@ -1054,6 +1110,8 @@ export type PricingConfigCreateManyUpdatedByInput = {
   parcelMoneyThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: boolean
+  doorstepPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigCreatecollectionDaysInput | string[]
@@ -1081,6 +1139,8 @@ export type PricingConfigUpdateWithoutUpdatedByInput = {
   parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
@@ -1108,6 +1168,8 @@ export type PricingConfigUncheckedUpdateWithoutUpdatedByInput = {
   parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
@@ -1135,6 +1197,8 @@ export type PricingConfigUncheckedUpdateManyWithoutUpdatedByInput = {
   parcelMoneyThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pickupPointPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   addressDeliveryPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  doorstepEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minMultiPerAddress?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   minBothDirections?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   collectionDays?: Prisma.PricingConfigUpdatecollectionDaysInput | string[]
@@ -1164,6 +1228,8 @@ export type PricingConfigSelect<ExtArgs extends runtime.Types.Extensions.Interna
   parcelMoneyThreshold?: boolean
   pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
+  doorstepEnabled?: boolean
+  doorstepPrice?: boolean
   minMultiPerAddress?: boolean
   minBothDirections?: boolean
   collectionDays?: boolean
@@ -1193,6 +1259,8 @@ export type PricingConfigSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   parcelMoneyThreshold?: boolean
   pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
+  doorstepEnabled?: boolean
+  doorstepPrice?: boolean
   minMultiPerAddress?: boolean
   minBothDirections?: boolean
   collectionDays?: boolean
@@ -1222,6 +1290,8 @@ export type PricingConfigSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   parcelMoneyThreshold?: boolean
   pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
+  doorstepEnabled?: boolean
+  doorstepPrice?: boolean
   minMultiPerAddress?: boolean
   minBothDirections?: boolean
   collectionDays?: boolean
@@ -1251,6 +1321,8 @@ export type PricingConfigSelectScalar = {
   parcelMoneyThreshold?: boolean
   pickupPointPrice?: boolean
   addressDeliveryPrice?: boolean
+  doorstepEnabled?: boolean
+  doorstepPrice?: boolean
   minMultiPerAddress?: boolean
   minBothDirections?: boolean
   collectionDays?: boolean
@@ -1260,7 +1332,7 @@ export type PricingConfigSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PricingConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "direction" | "pricePerKg" | "lvivPricePerKg" | "weightType" | "weightCustomFactualFraction" | "insuranceThreshold" | "insuranceRate" | "insuranceEnabled" | "packagingEnabled" | "packagingPrices" | "packagingPer10kg" | "parcelMoneyPercent" | "parcelMoneyPercentHigh" | "parcelMoneyThreshold" | "pickupPointPrice" | "addressDeliveryPrice" | "minMultiPerAddress" | "minBothDirections" | "collectionDays" | "isActive" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["pricingConfig"]>
+export type PricingConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "direction" | "pricePerKg" | "lvivPricePerKg" | "weightType" | "weightCustomFactualFraction" | "insuranceThreshold" | "insuranceRate" | "insuranceEnabled" | "packagingEnabled" | "packagingPrices" | "packagingPer10kg" | "parcelMoneyPercent" | "parcelMoneyPercentHigh" | "parcelMoneyThreshold" | "pickupPointPrice" | "addressDeliveryPrice" | "doorstepEnabled" | "doorstepPrice" | "minMultiPerAddress" | "minBothDirections" | "collectionDays" | "isActive" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["pricingConfig"]>
 export type PricingConfigInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   updatedBy?: boolean | Prisma.PricingConfig$updatedByArgs<ExtArgs>
 }
@@ -1331,6 +1403,15 @@ export type $PricingConfigPayload<ExtArgs extends runtime.Types.Extensions.Inter
      * на адресу (одна посилка від відправника). Діє як поріг.
      */
     addressDeliveryPrice: runtime.Decimal
+    /**
+     * ТЗ docx 29.06.26 «Тарифи»: окрема додаткова послуга «Доставка до порога
+     * будинку». doorstepEnabled — чи пропонується для цього напрямку;
+     * doorstepPrice — фіксована сума, яка АДИТИВНО додається до вартості
+     * посилки коли Отримувач обрав адресну доставку (до порога). На відміну
+     * від addressDeliveryPrice (поріг) — це надбавка зверху.
+     */
+    doorstepEnabled: boolean
+    doorstepPrice: runtime.Decimal
     /**
      * Per ТЗ: «При передачі двох і більше посилок з однієї локації на різні
      * адреси — мінімальна вартість посилки на кожну одну адресу». Поріг
@@ -1791,6 +1872,8 @@ export interface PricingConfigFieldRefs {
   readonly parcelMoneyThreshold: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly pickupPointPrice: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly addressDeliveryPrice: Prisma.FieldRef<"PricingConfig", 'Decimal'>
+  readonly doorstepEnabled: Prisma.FieldRef<"PricingConfig", 'Boolean'>
+  readonly doorstepPrice: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly minMultiPerAddress: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly minBothDirections: Prisma.FieldRef<"PricingConfig", 'Decimal'>
   readonly collectionDays: Prisma.FieldRef<"PricingConfig", 'String[]'>

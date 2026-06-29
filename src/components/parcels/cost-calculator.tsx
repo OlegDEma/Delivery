@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { formatCurrency } from '@/lib/utils/format';
+import { tripRouteLabel } from '@/lib/constants/countries';
 
 interface CostCalculatorProps {
   direction: string;
@@ -40,6 +41,8 @@ interface CostBreakdown {
   deliveryCost: number;
   insuranceCost: number;
   packagingCost: number;
+  /** ТЗ docx 29.06.26: надбавка «Доставка до порога будинку». */
+  doorstepCost: number;
   /** @deprecated тепер 0 (мінімум вкладено в deliveryCost). */
   addressDeliveryCost: number;
   /** @deprecated тепер 0 (мінімум вкладено в deliveryCost). */
@@ -114,7 +117,7 @@ export function CostCalculator(props: CostCalculatorProps) {
           setError('');
         } else {
           setCost(null);
-          setError(`Тариф для ${country} ${props.direction === 'eu_to_ua' ? '→' : '←'} UA не знайдено. Створіть його у «Адміністрування → Тарифи».`);
+          setError(`Тариф для ${tripRouteLabel(country ?? '', props.direction, { mode: 'code' })} не знайдено. Створіть його у «Адміністрування → Тарифи».`);
         }
       } catch (err) {
         // Ignore aborts — they're expected when inputs keep changing.
@@ -192,6 +195,14 @@ export function CostCalculator(props: CostCalculatorProps) {
         <div className="flex justify-between">
           <span className="text-gray-600">Пакування:</span>
           <span>{formatCurrency(cost.packagingCost, 'EUR')}</span>
+        </div>
+      )}
+      {/* ТЗ docx 29.06.26 «Тарифи»: «Доставка до порога будинку» — надбавка
+          при адресній доставці. */}
+      {cost.doorstepCost > 0 && (
+        <div className="flex justify-between">
+          <span className="text-gray-600">Доставка до порога будинку:</span>
+          <span>{formatCurrency(cost.doorstepCost, 'EUR')}</span>
         </div>
       )}
       {/* ТЗ §E4: «пакет, якщо він був відмічений — має бути відображений

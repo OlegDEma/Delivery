@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
-import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { tripRouteLabel } from '@/lib/constants/countries';
 import { formatDateTime, formatCurrency, formatDate } from '@/lib/utils/format';
 import { kyivYmd } from '@/lib/utils/tz';
 import { useAuth } from '@/lib/hooks/use-auth';
@@ -106,7 +106,7 @@ export default function DashboardPage() {
                 <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center text-blue-800 font-bold">{stats.upcomingTrip._count.parcels}</div>
                 <div>
                   <div className="font-medium text-blue-900">
-                    Найближчий рейс: {COUNTRY_LABELS[stats.upcomingTrip.country as CountryCode]} {stats.upcomingTrip.direction === 'eu_to_ua' ? '→UA' : '←UA'}
+                    Найближчий рейс: {tripRouteLabel(stats.upcomingTrip.country, stats.upcomingTrip.direction)}
                   </div>
                   <div className="text-xs text-blue-700">{formatDate(stats.upcomingTrip.departureDate)} • {stats.upcomingTrip._count.parcels} посилок</div>
                 </div>

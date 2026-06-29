@@ -31,6 +31,23 @@ export const COUNTRY_LABELS_ACCUSATIVE: Record<CountryCode, string> = {
   DE: 'Німеччину',
 };
 
+/**
+ * ТЗ docx 29.06.26 «Рейси»: у назві рейсу ПЕРШОЮ завжди йде країна ВИЇЗДУ,
+ * другою — країна ПРИБУТТЯ; стрілка завжди вказує зліва направо (→).
+ *   eu_to_ua → «{EU} → UA»;  ua_to_eu → «UA → {EU}».
+ * mode='label' (типово) — повна назва країни; mode='code' — код (NL/AT/DE).
+ */
+export function tripRouteLabel(
+  country: CountryCode | string,
+  direction: 'eu_to_ua' | 'ua_to_eu' | string,
+  opts?: { mode?: 'code' | 'label' },
+): string {
+  const eu = opts?.mode === 'code'
+    ? String(country)
+    : (COUNTRY_LABELS[country as CountryCode] || String(country));
+  return direction === 'eu_to_ua' ? `${eu} → UA` : `UA → ${eu}`;
+}
+
 export const COUNTRY_PHONE_CODES: Record<CountryCode, string> = {
   UA: '+380',
   NL: '+31',

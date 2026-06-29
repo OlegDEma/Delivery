@@ -94,8 +94,11 @@ export default function CalendarPage() {
                       {dayTrips.map(t => (
                         <Link key={t.id} href={`/trips/${t.id}`}>
                           <div className={`text-[10px] px-1 py-0.5 rounded text-white truncate cursor-pointer hover:opacity-80 ${STATUS_COLORS[t.status] || 'bg-gray-400'}`}>
-                            {COUNTRY_LABELS[t.country as CountryCode]?.slice(0, 3) || t.country}
-                            {t.direction === 'eu_to_ua' ? '→' : '←'}
+                            {/* ТЗ docx 29.06.26: країна виїзду першою, стрілка завжди → */}
+                            {(() => {
+                              const a = COUNTRY_LABELS[t.country as CountryCode]?.slice(0, 3) || t.country;
+                              return t.direction === 'eu_to_ua' ? `${a}→UA` : `UA→${a}`;
+                            })()}
                             {t._count.parcels > 0 && ` (${t._count.parcels})`}
                           </div>
                         </Link>

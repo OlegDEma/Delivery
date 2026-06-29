@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { COUNTRY_LABELS, tripRouteLabel, type CountryCode } from '@/lib/constants/countries';
 import { formatDateWithWeekday } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
@@ -157,7 +157,7 @@ export default function TripsPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-medium">
-                      {COUNTRY_LABELS[trip.country as CountryCode]} {trip.direction === 'eu_to_ua' ? '→ UA' : '← UA'}
+                      {tripRouteLabel(trip.country, trip.direction)}
                     </span>
                     <Badge className={STATUS_MAP[trip.status]?.color || ''}>
                       {STATUS_MAP[trip.status]?.label || trip.status}

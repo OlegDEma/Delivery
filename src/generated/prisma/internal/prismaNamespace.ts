@@ -2339,6 +2339,8 @@ export const PricingConfigScalarFieldEnum = {
   parcelMoneyThreshold: 'parcelMoneyThreshold',
   pickupPointPrice: 'pickupPointPrice',
   addressDeliveryPrice: 'addressDeliveryPrice',
+  doorstepEnabled: 'doorstepEnabled',
+  doorstepPrice: 'doorstepPrice',
   minMultiPerAddress: 'minMultiPerAddress',
   minBothDirections: 'minBothDirections',
   collectionDays: 'collectionDays',
@@ -2488,6 +2490,7 @@ export const ServiceCityScalarFieldEnum = {
   city: 'city',
   acceptsCourierPickup: 'acceptsCourierPickup',
   acceptsPostal: 'acceptsPostal',
+  target: 'target',
   notes: 'notes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -2907,6 +2910,20 @@ export type EnumWarehouseActionFieldRefInput<$PrismaModel> = FieldRefInputType<$
  * Reference to a field of type 'WarehouseAction[]'
  */
 export type ListEnumWarehouseActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WarehouseAction[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ServiceTarget'
+ */
+export type EnumServiceTargetFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceTarget'>
+    
+
+
+/**
+ * Reference to a field of type 'ServiceTarget[]'
+ */
+export type ListEnumServiceTargetFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceTarget[]'>
     
 
 
