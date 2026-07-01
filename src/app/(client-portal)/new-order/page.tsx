@@ -81,6 +81,9 @@ export default function NewOrderPage() {
   const [receiverPostalCode, setReceiverPostalCode] = useState('');
   // ТЗ §4: «Пункт видачі» — вибір зі списку реальних точок для отримувача.
   const [receiverPickupPointText, setReceiverPickupPointText] = useState('');
+  // ТЗ docx 29.06.26 §2: id обраного пункту видачі — для коректної підсвітки
+  // (пункти можуть мати однакову назву, тож матч по назві підсвічує всі).
+  const [receiverPickupPointId, setReceiverPickupPointId] = useState('');
   const [receiverPoints, setReceiverPoints] = useState<{ id: string; name: string | null; country: string; city: string; address: string; postalCode: string | null; workingHours: string | null; workingDays: Weekday[] }[]>([]);
   const [receiverStreet, setReceiverStreet] = useState('');
   // ТЗ (docx 20.06.26 §19): «Адресна доставка» Отримувача = Вулиця + Будинок +
@@ -440,14 +443,15 @@ export default function NewOrderPage() {
                   <div className="space-y-1.5">
                     {recvPointsToShow.map((p) => {
                       const label = p.name || `${p.city}, ${p.address}`;
-                      const sel = receiverPickupPointText === label;
+                      const sel = receiverPickupPointId ? receiverPickupPointId === p.id : receiverPickupPointText === label;
                       return (
                         <button
                           key={p.id}
                           type="button"
                           // ТЗ docx 29.06.26 §2: при виборі пункту його індекс
-                          // авто-вставляється в «Індекс» Отримувача.
+                          // авто-вставляється в «Індекс» Отримувача; підсвітка по id.
                           onClick={() => {
+                            setReceiverPickupPointId(p.id);
                             setReceiverPickupPointText(label);
                             if (p.postalCode) setReceiverPostalCode(p.postalCode);
                           }}

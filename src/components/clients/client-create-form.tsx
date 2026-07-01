@@ -598,7 +598,12 @@ export function ClientCreateForm({
               <div className="space-y-1.5">
                 {pointsToShow.map((p) => {
                   const label = p.name || `${p.city}, ${p.address}`;
-                  const sel = selectedPointId === p.id || pickupPointText === label;
+                  // ТЗ docx 29.06.26 §2: рівно ОДИН пункт. Підсвітка — по id
+                  // обраного пункту (а не по назві): у Відні 3 пункти можуть мати
+                  // однакову назву «Відень», і матч по назві підсвічував би всі
+                  // одразу. pickupPointText — лише фолбек для edit-режиму, поки
+                  // жодного пункту ще не клікнуто (selectedPointId порожній).
+                  const sel = selectedPointId ? selectedPointId === p.id : pickupPointText === label;
                   return (
                     <button
                       key={p.id}
