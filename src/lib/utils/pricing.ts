@@ -92,6 +92,13 @@ export interface ParcelCostInput {
   needsPackaging: boolean;
   /** Receiver chose address delivery (vs NP warehouse / poshtomat). */
   isAddressDelivery: boolean;
+  /**
+   * ТЗ docx 01.07.26: клієнт/оператор відмітив чекбокс «Доставка до порога
+   * будинку». Тоді додається doorstepPrice з тарифу напрямку (opt-in, як
+   * insurance/packaging). Раніше (docx 29.06) прив'язувалось до адресної
+   * доставки — тепер лише за явним чекбоксом.
+   */
+  isDoorstepDelivery?: boolean;
   /** EU→UA parcel handed over at a pickup point. */
   isPickupPoint: boolean;
   /**
@@ -268,8 +275,10 @@ export function calculateParcelCost(
   //    надбавка при адресній доставці Отримувачу (до порога). Налаштовується
   //    в тарифі напрямку (NL-UA, AT-UA). На відміну від addressDeliveryPrice
   //    (поріг) — додається зверху до вартості.
+  // ТЗ docx 01.07.26: «Доставка до порога будинку» — за ЯВНИМ чекбоксом
+  // (isDoorstepDelivery), а не автоматично за адресною доставкою.
   let doorstepCost = 0;
-  if (parcel.isAddressDelivery && config.doorstepEnabled && (config.doorstepPrice ?? 0) > 0) {
+  if (parcel.isDoorstepDelivery && config.doorstepEnabled && (config.doorstepPrice ?? 0) > 0) {
     doorstepCost = roundMoney(config.doorstepPrice!);
   }
 

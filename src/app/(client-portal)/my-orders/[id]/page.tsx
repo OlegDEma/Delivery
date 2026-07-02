@@ -41,10 +41,11 @@ interface ParcelDetail {
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: {
     country: string; city: string; street: string | null; building: string | null;
-    npWarehouseNum: string | null; deliveryMethod: string;
+    postalCode: string | null; npWarehouseNum: string | null; deliveryMethod: string;
   } | null;
   senderAddress: {
     country: string | null; city: string; street: string | null; building: string | null;
+    postalCode: string | null;
   } | null;
   places: {
     placeNumber: number; weight: number | string | null;
@@ -168,6 +169,8 @@ export default function MyOrderDetailPage() {
                 {parcel.senderAddress.city}
                 {parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}
                 {parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}
+                {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
+                {parcel.senderAddress.country !== 'UA' && parcel.senderAddress.postalCode ? `, ${parcel.senderAddress.postalCode}` : ''}
               </div>
             )}
           </div>
@@ -182,6 +185,8 @@ export default function MyOrderDetailPage() {
                 {' '}{parcel.receiverAddress.city}
                 {parcel.receiverAddress.street ? `, ${parcel.receiverAddress.street}` : ''}
                 {parcel.receiverAddress.building ? ` ${parcel.receiverAddress.building}` : ''}
+                {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
+                {parcel.receiverAddress.country !== 'UA' && parcel.receiverAddress.postalCode ? `, ${parcel.receiverAddress.postalCode}` : ''}
                 {parcel.receiverAddress.npWarehouseNum ? ` | НП №${parcel.receiverAddress.npWarehouseNum}` : ''}
               </div>
             )}

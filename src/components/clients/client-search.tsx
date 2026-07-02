@@ -234,6 +234,8 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
               {addr.street ? `, ${addr.street}` : ''}
               {addr.building ? ` ${addr.building}` : ''}
               {addr.npWarehouseNum ? ` | НП №${addr.npWarehouseNum}` : ''}
+              {/* ТЗ docx 01.07.26: для сторони в країні ≠ UA обов'язково поштовий код. */}
+              {country && country !== 'UA' && addr.postalCode ? `, індекс ${addr.postalCode}` : ''}
             </div>
           )}
           {/* ТЗ §5a: спосіб забору — всередині голубого поля, після адреси. */}

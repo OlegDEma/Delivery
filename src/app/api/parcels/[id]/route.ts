@@ -60,6 +60,7 @@ export async function GET(
           country: true,
           city: true,
           address: true,
+          postalCode: true,
           contactPhone: true,
           workingHours: true,
           workingDays: true,
@@ -326,6 +327,7 @@ export async function PATCH(
   if (body.declaredValue !== undefined) updateData.declaredValue = body.declaredValue ? Number(body.declaredValue) : null;
   if (body.insuranceApplied !== undefined) updateData.insuranceApplied = body.insuranceApplied;
   if (body.needsPackaging !== undefined) updateData.needsPackaging = body.needsPackaging;
+  if (body.doorstepDelivery !== undefined) updateData.doorstepDelivery = body.doorstepDelivery;
   if (body.parcelMoneyAmount !== undefined) {
     updateData.parcelMoneyAmount = body.parcelMoneyAmount && Number(body.parcelMoneyAmount) > 0
       ? Number(body.parcelMoneyAmount)
@@ -420,6 +422,7 @@ export async function PATCH(
     body.declaredValue !== undefined ||
     body.insuranceApplied !== undefined ||
     body.needsPackaging !== undefined ||
+    body.doorstepDelivery !== undefined ||
     body.parcelMoneyAmount !== undefined ||
     body.collectionMethod !== undefined ||
     body.collectionPointId !== undefined ||
@@ -469,6 +472,10 @@ export async function PATCH(
           const needsPackaging = body.needsPackaging !== undefined
             ? body.needsPackaging
             : parcel.needsPackaging;
+          // ТЗ docx 01.07.26: doorstep — opt-in чекбокс.
+          const doorstepDelivery = body.doorstepDelivery !== undefined
+            ? body.doorstepDelivery
+            : parcel.doorstepDelivery;
           const parcelMoneyAmount = body.parcelMoneyAmount !== undefined
             ? body.parcelMoneyAmount
             : parcel.parcelMoneyAmount;
@@ -487,6 +494,7 @@ export async function PATCH(
               declaredValue: declaredValueEur,
               insurance: !!insuranceApplied,
               needsPackaging: !!needsPackaging,
+              isDoorstepDelivery: !!doorstepDelivery,
               isAddressDelivery,
               isPickupPoint:
                 parcel.direction === 'eu_to_ua' && collectionMethod === 'pickup_point',
@@ -504,6 +512,7 @@ export async function PATCH(
           updateData.deliveryCost = breakdown.deliveryCost;
           updateData.insuranceCost = breakdown.insuranceCost;
           updateData.packagingCost = breakdown.packagingCost;
+          updateData.doorstepCost = breakdown.doorstepCost;
           updateData.addressDeliveryCost = breakdown.addressDeliveryCost;
           updateData.pickupPointCost = breakdown.pickupPointCost;
           updateData.parcelMoneyCost = breakdown.parcelMoneyCost;

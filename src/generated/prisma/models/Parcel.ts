@@ -35,6 +35,7 @@ export type ParcelAvgAggregateOutputType = {
   totalPlacesCount: number | null
   deliveryCost: runtime.Decimal | null
   packagingCost: runtime.Decimal | null
+  doorstepCost: runtime.Decimal | null
   insuranceCost: runtime.Decimal | null
   addressDeliveryCost: runtime.Decimal | null
   pickupPointCost: runtime.Decimal | null
@@ -52,6 +53,7 @@ export type ParcelSumAggregateOutputType = {
   totalPlacesCount: number | null
   deliveryCost: runtime.Decimal | null
   packagingCost: runtime.Decimal | null
+  doorstepCost: runtime.Decimal | null
   insuranceCost: runtime.Decimal | null
   addressDeliveryCost: runtime.Decimal | null
   pickupPointCost: runtime.Decimal | null
@@ -83,8 +85,10 @@ export type ParcelMinAggregateOutputType = {
   paymentMethod: $Enums.PaymentMethod | null
   paymentInUkraine: boolean | null
   needsPackaging: boolean | null
+  doorstepDelivery: boolean | null
   deliveryCost: runtime.Decimal | null
   packagingCost: runtime.Decimal | null
+  doorstepCost: runtime.Decimal | null
   insuranceCost: runtime.Decimal | null
   insuranceApplied: boolean | null
   addressDeliveryCost: runtime.Decimal | null
@@ -142,8 +146,10 @@ export type ParcelMaxAggregateOutputType = {
   paymentMethod: $Enums.PaymentMethod | null
   paymentInUkraine: boolean | null
   needsPackaging: boolean | null
+  doorstepDelivery: boolean | null
   deliveryCost: runtime.Decimal | null
   packagingCost: runtime.Decimal | null
+  doorstepCost: runtime.Decimal | null
   insuranceCost: runtime.Decimal | null
   insuranceApplied: boolean | null
   addressDeliveryCost: runtime.Decimal | null
@@ -201,8 +207,10 @@ export type ParcelCountAggregateOutputType = {
   paymentMethod: number
   paymentInUkraine: number
   needsPackaging: number
+  doorstepDelivery: number
   deliveryCost: number
   packagingCost: number
+  doorstepCost: number
   insuranceCost: number
   insuranceApplied: number
   addressDeliveryCost: number
@@ -249,6 +257,7 @@ export type ParcelAvgAggregateInputType = {
   totalPlacesCount?: true
   deliveryCost?: true
   packagingCost?: true
+  doorstepCost?: true
   insuranceCost?: true
   addressDeliveryCost?: true
   pickupPointCost?: true
@@ -266,6 +275,7 @@ export type ParcelSumAggregateInputType = {
   totalPlacesCount?: true
   deliveryCost?: true
   packagingCost?: true
+  doorstepCost?: true
   insuranceCost?: true
   addressDeliveryCost?: true
   pickupPointCost?: true
@@ -297,8 +307,10 @@ export type ParcelMinAggregateInputType = {
   paymentMethod?: true
   paymentInUkraine?: true
   needsPackaging?: true
+  doorstepDelivery?: true
   deliveryCost?: true
   packagingCost?: true
+  doorstepCost?: true
   insuranceCost?: true
   insuranceApplied?: true
   addressDeliveryCost?: true
@@ -356,8 +368,10 @@ export type ParcelMaxAggregateInputType = {
   paymentMethod?: true
   paymentInUkraine?: true
   needsPackaging?: true
+  doorstepDelivery?: true
   deliveryCost?: true
   packagingCost?: true
+  doorstepCost?: true
   insuranceCost?: true
   insuranceApplied?: true
   addressDeliveryCost?: true
@@ -415,8 +429,10 @@ export type ParcelCountAggregateInputType = {
   paymentMethod?: true
   paymentInUkraine?: true
   needsPackaging?: true
+  doorstepDelivery?: true
   deliveryCost?: true
   packagingCost?: true
+  doorstepCost?: true
   insuranceCost?: true
   insuranceApplied?: true
   addressDeliveryCost?: true
@@ -562,8 +578,10 @@ export type ParcelGroupByOutputType = {
   paymentMethod: $Enums.PaymentMethod
   paymentInUkraine: boolean
   needsPackaging: boolean
+  doorstepDelivery: boolean
   deliveryCost: runtime.Decimal | null
   packagingCost: runtime.Decimal | null
+  doorstepCost: runtime.Decimal | null
   insuranceCost: runtime.Decimal | null
   insuranceApplied: boolean
   addressDeliveryCost: runtime.Decimal | null
@@ -645,8 +663,10 @@ export type ParcelWhereInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFilter<"Parcel"> | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFilter<"Parcel"> | boolean
   needsPackaging?: Prisma.BoolFilter<"Parcel"> | boolean
+  doorstepDelivery?: Prisma.BoolFilter<"Parcel"> | boolean
   deliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFilter<"Parcel"> | boolean
   addressDeliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -721,8 +741,10 @@ export type ParcelOrderByWithRelationInput = {
   paymentMethod?: Prisma.SortOrder
   paymentInUkraine?: Prisma.SortOrder
   needsPackaging?: Prisma.SortOrder
+  doorstepDelivery?: Prisma.SortOrder
   deliveryCost?: Prisma.SortOrderInput | Prisma.SortOrder
   packagingCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  doorstepCost?: Prisma.SortOrderInput | Prisma.SortOrder
   insuranceCost?: Prisma.SortOrderInput | Prisma.SortOrder
   insuranceApplied?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -800,8 +822,10 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
   paymentMethod?: Prisma.EnumPaymentMethodFilter<"Parcel"> | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFilter<"Parcel"> | boolean
   needsPackaging?: Prisma.BoolFilter<"Parcel"> | boolean
+  doorstepDelivery?: Prisma.BoolFilter<"Parcel"> | boolean
   deliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFilter<"Parcel"> | boolean
   addressDeliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -876,8 +900,10 @@ export type ParcelOrderByWithAggregationInput = {
   paymentMethod?: Prisma.SortOrder
   paymentInUkraine?: Prisma.SortOrder
   needsPackaging?: Prisma.SortOrder
+  doorstepDelivery?: Prisma.SortOrder
   deliveryCost?: Prisma.SortOrderInput | Prisma.SortOrder
   packagingCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  doorstepCost?: Prisma.SortOrderInput | Prisma.SortOrder
   insuranceCost?: Prisma.SortOrderInput | Prisma.SortOrder
   insuranceApplied?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -944,8 +970,10 @@ export type ParcelScalarWhereWithAggregatesInput = {
   paymentMethod?: Prisma.EnumPaymentMethodWithAggregatesFilter<"Parcel"> | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolWithAggregatesFilter<"Parcel"> | boolean
   needsPackaging?: Prisma.BoolWithAggregatesFilter<"Parcel"> | boolean
+  doorstepDelivery?: Prisma.BoolWithAggregatesFilter<"Parcel"> | boolean
   deliveryCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolWithAggregatesFilter<"Parcel"> | boolean
   addressDeliveryCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -999,8 +1027,10 @@ export type ParcelCreateInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1071,8 +1101,10 @@ export type ParcelUncheckedCreateInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1133,8 +1165,10 @@ export type ParcelUpdateInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1205,8 +1239,10 @@ export type ParcelUncheckedUpdateInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1272,8 +1308,10 @@ export type ParcelCreateManyInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1327,8 +1365,10 @@ export type ParcelUpdateManyMutationInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1383,8 +1423,10 @@ export type ParcelUncheckedUpdateManyInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1461,8 +1503,10 @@ export type ParcelCountOrderByAggregateInput = {
   paymentMethod?: Prisma.SortOrder
   paymentInUkraine?: Prisma.SortOrder
   needsPackaging?: Prisma.SortOrder
+  doorstepDelivery?: Prisma.SortOrder
   deliveryCost?: Prisma.SortOrder
   packagingCost?: Prisma.SortOrder
+  doorstepCost?: Prisma.SortOrder
   insuranceCost?: Prisma.SortOrder
   insuranceApplied?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrder
@@ -1507,6 +1551,7 @@ export type ParcelAvgOrderByAggregateInput = {
   totalPlacesCount?: Prisma.SortOrder
   deliveryCost?: Prisma.SortOrder
   packagingCost?: Prisma.SortOrder
+  doorstepCost?: Prisma.SortOrder
   insuranceCost?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrder
   pickupPointCost?: Prisma.SortOrder
@@ -1538,8 +1583,10 @@ export type ParcelMaxOrderByAggregateInput = {
   paymentMethod?: Prisma.SortOrder
   paymentInUkraine?: Prisma.SortOrder
   needsPackaging?: Prisma.SortOrder
+  doorstepDelivery?: Prisma.SortOrder
   deliveryCost?: Prisma.SortOrder
   packagingCost?: Prisma.SortOrder
+  doorstepCost?: Prisma.SortOrder
   insuranceCost?: Prisma.SortOrder
   insuranceApplied?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrder
@@ -1597,8 +1644,10 @@ export type ParcelMinOrderByAggregateInput = {
   paymentMethod?: Prisma.SortOrder
   paymentInUkraine?: Prisma.SortOrder
   needsPackaging?: Prisma.SortOrder
+  doorstepDelivery?: Prisma.SortOrder
   deliveryCost?: Prisma.SortOrder
   packagingCost?: Prisma.SortOrder
+  doorstepCost?: Prisma.SortOrder
   insuranceCost?: Prisma.SortOrder
   insuranceApplied?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrder
@@ -1642,6 +1691,7 @@ export type ParcelSumOrderByAggregateInput = {
   totalPlacesCount?: Prisma.SortOrder
   deliveryCost?: Prisma.SortOrder
   packagingCost?: Prisma.SortOrder
+  doorstepCost?: Prisma.SortOrder
   insuranceCost?: Prisma.SortOrder
   addressDeliveryCost?: Prisma.SortOrder
   pickupPointCost?: Prisma.SortOrder
@@ -2197,8 +2247,10 @@ export type ParcelCreateWithoutAssignedCourierInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2268,8 +2320,10 @@ export type ParcelUncheckedCreateWithoutAssignedCourierInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2339,8 +2393,10 @@ export type ParcelCreateWithoutCreatedByInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2410,8 +2466,10 @@ export type ParcelUncheckedCreateWithoutCreatedByInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2481,8 +2539,10 @@ export type ParcelCreateWithoutCollectedByInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2552,8 +2612,10 @@ export type ParcelUncheckedCreateWithoutCollectedByInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2647,8 +2709,10 @@ export type ParcelScalarWhereInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFilter<"Parcel"> | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFilter<"Parcel"> | boolean
   needsPackaging?: Prisma.BoolFilter<"Parcel"> | boolean
+  doorstepDelivery?: Prisma.BoolFilter<"Parcel"> | boolean
   deliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFilter<"Parcel"> | boolean
   addressDeliveryCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2734,8 +2798,10 @@ export type ParcelCreateWithoutSenderInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2804,8 +2870,10 @@ export type ParcelUncheckedCreateWithoutSenderInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2876,8 +2944,10 @@ export type ParcelCreateWithoutReceiverInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2946,8 +3016,10 @@ export type ParcelUncheckedCreateWithoutReceiverInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3050,8 +3122,10 @@ export type ParcelCreateWithoutSenderAddressInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3120,8 +3194,10 @@ export type ParcelUncheckedCreateWithoutSenderAddressInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3192,8 +3268,10 @@ export type ParcelCreateWithoutReceiverAddressInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3262,8 +3340,10 @@ export type ParcelUncheckedCreateWithoutReceiverAddressInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3366,8 +3446,10 @@ export type ParcelCreateWithoutTripInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3436,8 +3518,10 @@ export type ParcelUncheckedCreateWithoutTripInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3524,8 +3608,10 @@ export type ParcelCreateWithoutPlacesInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3595,8 +3681,10 @@ export type ParcelUncheckedCreateWithoutPlacesInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3672,8 +3760,10 @@ export type ParcelUpdateWithoutPlacesInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3743,8 +3833,10 @@ export type ParcelUncheckedUpdateWithoutPlacesInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3804,8 +3896,10 @@ export type ParcelCreateWithoutStatusHistoryInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3875,8 +3969,10 @@ export type ParcelUncheckedCreateWithoutStatusHistoryInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3952,8 +4048,10 @@ export type ParcelUpdateWithoutStatusHistoryInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4023,8 +4121,10 @@ export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4084,8 +4184,10 @@ export type ParcelCreateWithoutCollectionPointInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4155,8 +4257,10 @@ export type ParcelUncheckedCreateWithoutCollectionPointInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4242,8 +4346,10 @@ export type ParcelCreateWithoutCashEntriesInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4313,8 +4419,10 @@ export type ParcelUncheckedCreateWithoutCashEntriesInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4390,8 +4498,10 @@ export type ParcelUpdateWithoutCashEntriesInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4461,8 +4571,10 @@ export type ParcelUncheckedUpdateWithoutCashEntriesInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4522,8 +4634,10 @@ export type ParcelCreateWithoutRouteTasksInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4593,8 +4707,10 @@ export type ParcelUncheckedCreateWithoutRouteTasksInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4670,8 +4786,10 @@ export type ParcelUpdateWithoutRouteTasksInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4741,8 +4859,10 @@ export type ParcelUncheckedUpdateWithoutRouteTasksInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4802,8 +4922,10 @@ export type ParcelCreateWithoutWarehouseActionsInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4873,8 +4995,10 @@ export type ParcelUncheckedCreateWithoutWarehouseActionsInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4950,8 +5074,10 @@ export type ParcelUpdateWithoutWarehouseActionsInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5021,8 +5147,10 @@ export type ParcelUncheckedUpdateWithoutWarehouseActionsInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5082,8 +5210,10 @@ export type ParcelCreateWithoutNpSyncLogsInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5153,8 +5283,10 @@ export type ParcelUncheckedCreateWithoutNpSyncLogsInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5230,8 +5362,10 @@ export type ParcelUpdateWithoutNpSyncLogsInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5301,8 +5435,10 @@ export type ParcelUncheckedUpdateWithoutNpSyncLogsInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5362,8 +5498,10 @@ export type ParcelCreateWithoutClaimsInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5433,8 +5571,10 @@ export type ParcelUncheckedCreateWithoutClaimsInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5510,8 +5650,10 @@ export type ParcelUpdateWithoutClaimsInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5581,8 +5723,10 @@ export type ParcelUncheckedUpdateWithoutClaimsInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5647,8 +5791,10 @@ export type ParcelCreateManyAssignedCourierInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5706,8 +5852,10 @@ export type ParcelCreateManyCreatedByInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5765,8 +5913,10 @@ export type ParcelCreateManyCollectedByInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5819,8 +5969,10 @@ export type ParcelUpdateWithoutAssignedCourierInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5890,8 +6042,10 @@ export type ParcelUncheckedUpdateWithoutAssignedCourierInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5956,8 +6110,10 @@ export type ParcelUncheckedUpdateManyWithoutAssignedCourierInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6010,8 +6166,10 @@ export type ParcelUpdateWithoutCreatedByInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6081,8 +6239,10 @@ export type ParcelUncheckedUpdateWithoutCreatedByInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6147,8 +6307,10 @@ export type ParcelUncheckedUpdateManyWithoutCreatedByInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6201,8 +6363,10 @@ export type ParcelUpdateWithoutCollectedByInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6272,8 +6436,10 @@ export type ParcelUncheckedUpdateWithoutCollectedByInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6338,8 +6504,10 @@ export type ParcelUncheckedUpdateManyWithoutCollectedByInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6396,8 +6564,10 @@ export type ParcelCreateManySenderInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6455,8 +6625,10 @@ export type ParcelCreateManyReceiverInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6510,8 +6682,10 @@ export type ParcelUpdateWithoutSenderInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6580,8 +6754,10 @@ export type ParcelUncheckedUpdateWithoutSenderInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6646,8 +6822,10 @@ export type ParcelUncheckedUpdateManyWithoutSenderInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6701,8 +6879,10 @@ export type ParcelUpdateWithoutReceiverInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6771,8 +6951,10 @@ export type ParcelUncheckedUpdateWithoutReceiverInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6837,8 +7019,10 @@ export type ParcelUncheckedUpdateManyWithoutReceiverInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6896,8 +7080,10 @@ export type ParcelCreateManySenderAddressInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6955,8 +7141,10 @@ export type ParcelCreateManyReceiverAddressInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7010,8 +7198,10 @@ export type ParcelUpdateWithoutSenderAddressInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7080,8 +7270,10 @@ export type ParcelUncheckedUpdateWithoutSenderAddressInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7146,8 +7338,10 @@ export type ParcelUncheckedUpdateManyWithoutSenderAddressInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7201,8 +7395,10 @@ export type ParcelUpdateWithoutReceiverAddressInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7271,8 +7467,10 @@ export type ParcelUncheckedUpdateWithoutReceiverAddressInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7337,8 +7535,10 @@ export type ParcelUncheckedUpdateManyWithoutReceiverAddressInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7396,8 +7596,10 @@ export type ParcelCreateManyTripInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7451,8 +7653,10 @@ export type ParcelUpdateWithoutTripInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7521,8 +7725,10 @@ export type ParcelUncheckedUpdateWithoutTripInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7587,8 +7793,10 @@ export type ParcelUncheckedUpdateManyWithoutTripInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7647,8 +7855,10 @@ export type ParcelCreateManyCollectionPointInput = {
   paymentMethod?: $Enums.PaymentMethod
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: boolean
   addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7701,8 +7911,10 @@ export type ParcelUpdateWithoutCollectionPointInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7772,8 +7984,10 @@ export type ParcelUncheckedUpdateWithoutCollectionPointInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7838,8 +8052,10 @@ export type ParcelUncheckedUpdateManyWithoutCollectionPointInput = {
   paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
   paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
   needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
   deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7982,8 +8198,10 @@ export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   paymentMethod?: boolean
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: boolean
   packagingCost?: boolean
+  doorstepCost?: boolean
   insuranceCost?: boolean
   insuranceApplied?: boolean
   addressDeliveryCost?: boolean
@@ -8059,8 +8277,10 @@ export type ParcelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   paymentMethod?: boolean
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: boolean
   packagingCost?: boolean
+  doorstepCost?: boolean
   insuranceCost?: boolean
   insuranceApplied?: boolean
   addressDeliveryCost?: boolean
@@ -8128,8 +8348,10 @@ export type ParcelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   paymentMethod?: boolean
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: boolean
   packagingCost?: boolean
+  doorstepCost?: boolean
   insuranceCost?: boolean
   insuranceApplied?: boolean
   addressDeliveryCost?: boolean
@@ -8197,8 +8419,10 @@ export type ParcelSelectScalar = {
   paymentMethod?: boolean
   paymentInUkraine?: boolean
   needsPackaging?: boolean
+  doorstepDelivery?: boolean
   deliveryCost?: boolean
   packagingCost?: boolean
+  doorstepCost?: boolean
   insuranceCost?: boolean
   insuranceApplied?: boolean
   addressDeliveryCost?: boolean
@@ -8234,7 +8458,7 @@ export type ParcelSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "deliveryCost" | "packagingCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "isMultiParcelPickup" | "parcelMoneyAmount" | "parcelMoneyCost" | "totalCost" | "costCurrency" | "npTtn" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
+export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "doorstepDelivery" | "deliveryCost" | "packagingCost" | "doorstepCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "isMultiParcelPickup" | "parcelMoneyAmount" | "parcelMoneyCost" | "totalCost" | "costCurrency" | "npTtn" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
 export type ParcelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sender?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   senderAddress?: boolean | Prisma.Parcel$senderAddressArgs<ExtArgs>
@@ -8320,8 +8544,17 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     paymentMethod: $Enums.PaymentMethod
     paymentInUkraine: boolean
     needsPackaging: boolean
+    /**
+     * ТЗ docx 01.07.26: opt-in чекбокс «Доставка до порога будинку». Коли true —
+     * до вартості додається doorstepPrice з тарифу напрямку (як insurance/packaging).
+     */
+    doorstepDelivery: boolean
     deliveryCost: runtime.Decimal | null
     packagingCost: runtime.Decimal | null
+    /**
+     * ТЗ docx 01.07.26: нарахована сума «Доставка до порога будинку» (для квитанції).
+     */
+    doorstepCost: runtime.Decimal | null
     insuranceCost: runtime.Decimal | null
     /**
      * User opted in for insurance via checkbox at parcel creation. Distinct
@@ -8841,8 +9074,10 @@ export interface ParcelFieldRefs {
   readonly paymentMethod: Prisma.FieldRef<"Parcel", 'PaymentMethod'>
   readonly paymentInUkraine: Prisma.FieldRef<"Parcel", 'Boolean'>
   readonly needsPackaging: Prisma.FieldRef<"Parcel", 'Boolean'>
+  readonly doorstepDelivery: Prisma.FieldRef<"Parcel", 'Boolean'>
   readonly deliveryCost: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly packagingCost: Prisma.FieldRef<"Parcel", 'Decimal'>
+  readonly doorstepCost: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly insuranceCost: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly insuranceApplied: Prisma.FieldRef<"Parcel", 'Boolean'>
   readonly addressDeliveryCost: Prisma.FieldRef<"Parcel", 'Decimal'>

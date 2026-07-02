@@ -17,6 +17,8 @@ interface CostCalculatorProps {
   insurance?: boolean;
   /** Packaging opt-in checkbox state. */
   needsPackaging: boolean;
+  /** ТЗ docx 01.07.26: чекбокс «Доставка до порога будинку». */
+  isDoorstepDelivery?: boolean;
   isAddressDelivery: boolean;
   /** Hand-off via pickup point — впливає на мінімальний тариф. */
   isPickupPoint?: boolean;
@@ -103,6 +105,7 @@ export function CostCalculator(props: CostCalculatorProps) {
             declaredValueCurrency: props.declaredValueCurrency ?? 'EUR',
             insurance: props.insurance ?? false,
             needsPackaging: props.needsPackaging,
+            isDoorstepDelivery: props.isDoorstepDelivery ?? false,
             isAddressDelivery: props.isAddressDelivery,
             isPickupPoint: props.isPickupPoint ?? false,
             isCourierPickup: props.isCourierPickup ?? false,
@@ -135,7 +138,7 @@ export function CostCalculator(props: CostCalculatorProps) {
     country, props.direction,
     props.actualWeight, props.volumetricWeight, props.declaredValue,
     props.declaredValueCurrency,
-    props.insurance, props.needsPackaging, props.isAddressDelivery,
+    props.insurance, props.needsPackaging, props.isDoorstepDelivery, props.isAddressDelivery,
     props.isPickupPoint, props.isCourierPickup, props.isMultiParcelPickup,
     props.isBothDirections, props.parcelMoneyAmount, props.receiverCity,
   ]);

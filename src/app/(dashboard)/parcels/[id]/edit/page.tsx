@@ -15,6 +15,7 @@ import { FieldHint } from '@/components/shared/field-hint';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { CollectionBlock, type CollectionState } from '@/components/parcels/collection-block';
+import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { getBillableWeight } from '@/lib/utils/volumetric';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
@@ -69,12 +70,18 @@ interface ParcelData {
   declaredValueCurrency: string | null;
   insuranceApplied: boolean;
   needsPackaging: boolean;
+  doorstepDelivery: boolean;
   parcelMoneyAmount: number | string | null;
   payer: string;
   paymentMethod: string;
   paymentInUkraine: boolean;
   collectionMethod: string | null;
   collectionPointId: string | null;
+  /** ТЗ docx 01.07.26: обраний пункт збору — щоб показати ЛИШЕ його (адреса+індекс). */
+  collectionPoint: {
+    id: string; name: string | null; city: string; address: string;
+    postalCode: string | null; workingHours: string | null; workingDays: string[];
+  } | null;
   collectionDate: string | null;
   collectionAddress: string | null;
   isMultiParcelPickup: boolean | null;
@@ -82,12 +89,12 @@ interface ParcelData {
   sender: { id: string; firstName: string; lastName: string; phone: string; country?: string | null };
   senderAddress: {
     id: string; country: string | null; city: string;
-    street: string | null; building: string | null; deliveryMethod: string;
+    street: string | null; building: string | null; postalCode: string | null; deliveryMethod: string;
   } | null;
   receiver: { id: string; firstName: string; lastName: string; phone: string };
   receiverAddress: {
     id: string; country: string; city: string;
-    street: string | null; building: string | null; npWarehouseNum: string | null;
+    street: string | null; building: string | null; postalCode: string | null; npWarehouseNum: string | null;
     deliveryMethod: string;
   } | null;
   places: {
@@ -115,6 +122,10 @@ export default function EditParcelPage() {
   const [declaredValue, setDeclaredValue] = useState('');
   const [insurance, setInsurance] = useState(false);
   const [needsPackaging, setNeedsPackaging] = useState(false);
+  // ТЗ docx 01.07.26: opt-in «Доставка до порога будинку».
+  const [doorstepDelivery, setDoorstepDelivery] = useState(false);
+  // ТЗ docx 01.07.26: при відкритті показуємо ЛИШЕ обраний пункт; «Змінити» відкриє список.
+  const [changePickup, setChangePickup] = useState(false);
   const [parcelMoneyEnabled, setParcelMoneyEnabled] = useState(false);
   const [parcelMoneyAmount, setParcelMoneyAmount] = useState('');
   const [payer, setPayer] = useState('sender');
@@ -161,6 +172,7 @@ export default function EditParcelPage() {
       setDeclaredValue(p.declaredValue != null ? String(p.declaredValue) : '');
       setInsurance(!!p.insuranceApplied);
       setNeedsPackaging(!!p.needsPackaging);
+      setDoorstepDelivery(!!p.doorstepDelivery);
       const pmAmt = p.parcelMoneyAmount != null ? Number(p.parcelMoneyAmount) : 0;
       setParcelMoneyEnabled(pmAmt > 0);
       setParcelMoneyAmount(pmAmt > 0 ? String(pmAmt) : '');
@@ -318,6 +330,7 @@ export default function EditParcelPage() {
         declaredValue: declaredValue ? Number(declaredValue) : 0,
         insuranceApplied: insurance,
         needsPackaging,
+        doorstepDelivery,
         parcelMoneyAmount:
           parcelMoneyEnabled && Number(parcelMoneyAmount) > 0
             ? Number(parcelMoneyAmount)
@@ -403,6 +416,8 @@ export default function EditParcelPage() {
                   {' '}{parcel.receiverAddress.city}
                   {parcel.receiverAddress.street ? `, ${parcel.receiverAddress.street}` : ''}
                   {parcel.receiverAddress.building ? ` ${parcel.receiverAddress.building}` : ''}
+                  {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
+                  {parcel.receiverAddress.postalCode ? `, ${parcel.receiverAddress.postalCode}` : ''}
                   {parcel.receiverAddress.npWarehouseNum ? ` | НП №${parcel.receiverAddress.npWarehouseNum}` : ''}
                 </div>
               )}
@@ -428,6 +443,8 @@ export default function EditParcelPage() {
                   {parcel.senderAddress.city}
                   {parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}
                   {parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}
+                  {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
+                  {parcel.senderAddress.postalCode ? `, ${parcel.senderAddress.postalCode}` : ''}
                 </div>
               )}
             </div>
@@ -439,11 +456,41 @@ export default function EditParcelPage() {
             {direction === 'eu_to_ua' && (
               <div className="pt-2 mt-1 border-t">
                 <Label className="text-sm font-medium mb-1.5 block">Спосіб відправки</Label>
-                <CollectionBlock
-                  senderCountry={senderCountry}
-                  value={collection}
-                  onChange={setCollection}
-                />
+                {/* ТЗ docx 01.07.26: при повторному відкритті показуємо ЛИШЕ раніше
+                    обраний пункт збору (адреса+індекс+години), а не весь список.
+                    «Змінити пункт» відкриває повний перелік. */}
+                {collection.method === 'pickup_point' && parcel.collectionPoint && !changePickup ? (
+                  <div className="border rounded-lg p-2 text-sm bg-blue-50">
+                    <div className="font-medium">
+                      Пункт збору — {parcel.collectionPoint.name
+                        ? `${parcel.collectionPoint.name} (${parcel.collectionPoint.city}, ${parcel.collectionPoint.address})`
+                        : `${parcel.collectionPoint.city}, ${parcel.collectionPoint.address}`}
+                    </div>
+                    {(parcel.collectionPoint.postalCode || parcel.senderAddress?.postalCode) && (
+                      <div className="text-xs text-gray-500">Індекс: {parcel.collectionPoint.postalCode || parcel.senderAddress?.postalCode}</div>
+                    )}
+                    {parcel.collectionPoint.workingDays?.length > 0 && (
+                      <div className="text-xs text-gray-500">
+                        📅 {formatWorkingDays(parcel.collectionPoint.workingDays as Weekday[])}
+                        {parcel.collectionPoint.workingHours ? ` · ${parcel.collectionPoint.workingHours}` : ''}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setChangePickup(true)}
+                      className="mt-1 text-xs font-medium text-blue-600 hover:text-blue-800"
+                    >
+                      Змінити пункт
+                    </button>
+                  </div>
+                ) : (
+                  <CollectionBlock
+                    senderCountry={senderCountry}
+                    senderCity={parcel.senderAddress?.city}
+                    value={collection}
+                    onChange={setCollection}
+                  />
+                )}
               </div>
             )}
           </CardContent>
@@ -493,6 +540,17 @@ export default function EditParcelPage() {
                 <Label htmlFor="packaging-cb" className="text-sm font-medium cursor-pointer">
                   Пакування{' '}
                   <FieldHint text="Відмітьте, якщо пакунок не є у коробці." />
+                </Label>
+              </div>
+            </div>
+
+            {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням. */}
+            <div className="rounded-lg border p-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <Checkbox id="doorstep-cb" checked={doorstepDelivery} onCheckedChange={(c) => setDoorstepDelivery(c === true)} />
+                <Label htmlFor="doorstep-cb" className="text-sm font-medium cursor-pointer">
+                  Доставка до порога будинку{' '}
+                  <FieldHint text="До вартості додається фіксована сума з Тарифів для цього напрямку." />
                 </Label>
               </div>
             </div>
@@ -701,6 +759,7 @@ export default function EditParcelPage() {
           declaredValueCurrency={declaredCurrency}
           insurance={insurance}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
+          isDoorstepDelivery={doorstepDelivery}
           isAddressDelivery={parcel.receiverAddress?.deliveryMethod === 'address'}
           isPickupPoint={direction === 'eu_to_ua' && collection.method === 'pickup_point'}
           isCourierPickup={direction === 'eu_to_ua' && collection.method === 'courier_pickup'}

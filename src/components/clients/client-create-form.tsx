@@ -169,7 +169,7 @@ export function ClientCreateForm({
   const [selectedPointId, setSelectedPointId] = useState<string>('');
   // ТЗ (docx 14.05.26 §a): доступність «Виклик кур'єра»/«Пошта» для Відправника
   // визначається Логістикою (ServiceCity), а не хардкодом.
-  const [serviceCities, setServiceCities] = useState<{ country: string; city: string; acceptsCourierPickup: boolean; acceptsPostal: boolean; target?: 'sender' | 'receiver' | 'both' }[]>([]);
+  const [serviceCities, setServiceCities] = useState<{ country: string; city: string; acceptsCourierPickup: boolean; acceptsPostal: boolean; target?: 'sender' | 'receiver' | 'both'; exceptions?: string[] }[]>([]);
 
   useEffect(() => {
     if (!country) { setPoints([]); return; }
@@ -187,7 +187,7 @@ export function ClientCreateForm({
     let cancelled = false;
     fetch('/api/service-cities')
       .then(r => (r.ok ? r.json() : []))
-      .then((list: { country: string; city: string; acceptsCourierPickup: boolean; acceptsPostal: boolean; target?: 'sender' | 'receiver' | 'both' }[]) => {
+      .then((list: { country: string; city: string; acceptsCourierPickup: boolean; acceptsPostal: boolean; target?: 'sender' | 'receiver' | 'both'; exceptions?: string[] }[]) => {
         if (!cancelled) setServiceCities(Array.isArray(list) ? list : []);
       })
       .catch(() => { if (!cancelled) setServiceCities([]); });

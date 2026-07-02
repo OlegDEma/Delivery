@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       declaredValue: declaredValueEur,
       insurance: body.insurance ?? false,
       needsPackaging: body.needsPackaging ?? false,
+      isDoorstepDelivery: body.isDoorstepDelivery ?? false,
       isAddressDelivery: body.isAddressDelivery ?? false,
       isPickupPoint: body.isPickupPoint ?? false,
       isCourierPickup: body.isCourierPickup ?? false,

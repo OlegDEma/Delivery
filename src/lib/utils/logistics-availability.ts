@@ -24,6 +24,12 @@ export interface ServiceRule {
   acceptsPostal: boolean;
   /** На кого поширюється обмеження: відправник / отримувач / обидва. */
   target?: ServiceTargetValue;
+  /**
+   * ТЗ docx 01.07.26: міста-ВИНЯТКИ для правила на всю країну (city='*').
+   * Напр. кур'єр заборонений по всій UA, окрім Львова → exceptions=['lviv'].
+   * Зберігаються нормалізованими (як і місто у порівнянні).
+   */
+  exceptions?: string[];
 }
 
 /** Спец-значення city для правила на цілу країну. */
@@ -40,9 +46,15 @@ function forbidden(
   const c = (city || '').trim().toLowerCase();
   return rules.some(r => {
     const target = r.target || 'both';
-    return r.country === country && r[flag] === false &&
-      (target === 'both' || target === side) &&
-      (r.city === COUNTRY_WIDE_CITY || r.city.trim().toLowerCase() === c);
+    if (r.country !== country || r[flag] !== false || (target !== 'both' && target !== side)) {
+      return false;
+    }
+    if (r.city === COUNTRY_WIDE_CITY) {
+      // ТЗ docx 01.07.26: заборона на всю країну — окрім міст-винятків.
+      const exc = (r.exceptions || []).map(e => e.trim().toLowerCase());
+      return !exc.includes(c);
+    }
+    return r.city.trim().toLowerCase() === c;
   });
 }
 

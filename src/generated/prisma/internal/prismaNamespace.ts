@@ -2244,8 +2244,10 @@ export const ParcelScalarFieldEnum = {
   paymentMethod: 'paymentMethod',
   paymentInUkraine: 'paymentInUkraine',
   needsPackaging: 'needsPackaging',
+  doorstepDelivery: 'doorstepDelivery',
   deliveryCost: 'deliveryCost',
   packagingCost: 'packagingCost',
+  doorstepCost: 'doorstepCost',
   insuranceCost: 'insuranceCost',
   insuranceApplied: 'insuranceApplied',
   addressDeliveryCost: 'addressDeliveryCost',
@@ -2491,6 +2493,7 @@ export const ServiceCityScalarFieldEnum = {
   acceptsCourierPickup: 'acceptsCourierPickup',
   acceptsPostal: 'acceptsPostal',
   target: 'target',
+  exceptions: 'exceptions',
   notes: 'notes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

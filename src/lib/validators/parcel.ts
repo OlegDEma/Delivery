@@ -70,6 +70,8 @@ export const createParcelSchema = z.object({
   paymentMethod: paymentMethodSchema.optional(),
   paymentInUkraine: z.boolean().optional(),
   needsPackaging: z.boolean().optional(),
+  /** ТЗ docx 01.07.26: opt-in «Доставка до порога будинку». */
+  doorstepDelivery: z.boolean().optional(),
   /** «Пакет» — money sender transfers to receiver. Optional. */
   parcelMoneyAmount: moneySchema.optional().nullable(),
   sendInvoice: z.boolean().optional(),
@@ -95,6 +97,8 @@ export const clientOrderSchema = z.object({
   insurance: z.boolean().optional(),
   /** Packaging opt-in checkbox (per ТЗ). */
   needsPackaging: z.boolean().optional(),
+  /** ТЗ docx 01.07.26: opt-in «Доставка до порога будинку» (клієнт теж бачить). */
+  doorstepDelivery: z.boolean().optional(),
   /** «Пакет» — money sender transfers to receiver. Optional. */
   parcelMoneyAmount: moneySchema.optional().nullable(),
   payer: payerSchema.optional(),
@@ -154,6 +158,8 @@ export const updateParcelSchema = z.object({
   /** Insurance opt-in checkbox state (per ТЗ — editable post-creation). */
   insuranceApplied: z.boolean().optional(),
   needsPackaging: z.boolean().optional(),
+  /** ТЗ docx 01.07.26: opt-in «Доставка до порога будинку» (редаговний). */
+  doorstepDelivery: z.boolean().optional(),
   /** «Пакет» — money sender transfers. Setting to 0/null clears the option. */
   parcelMoneyAmount: moneySchema.optional().nullable(),
   payer: payerSchema.optional(),
@@ -187,6 +193,8 @@ export const calculateCostSchema = z.object({
   /** Insurance opt-in checkbox state — drives whether insurance is added. */
   insurance: z.boolean().optional(),
   needsPackaging: z.boolean().optional(),
+  /** ТЗ docx 01.07.26: чекбокс «Доставка до порога будинку» у калькуляторі. */
+  isDoorstepDelivery: z.boolean().optional(),
   isAddressDelivery: z.boolean().optional(),
   /** Parcel handed over at a pickup point (EU→UA). */
   isPickupPoint: z.boolean().optional(),

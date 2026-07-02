@@ -18,6 +18,7 @@ interface ServiceCity {
   acceptsCourierPickup: boolean;
   acceptsPostal: boolean;
   target?: 'sender' | 'receiver' | 'both';
+  exceptions?: string[];
   notes: string | null;
 }
 
@@ -43,6 +44,8 @@ export default function ServiceCitiesPage() {
   const [forbidPostal, setForbidPostal] = useState(false);
   // ТЗ docx 29.06.26: сторона, на яку діє обмеження.
   const [target, setTarget] = useState<'sender' | 'receiver' | 'both'>('both');
+  // ТЗ docx 01.07.26: винятки-міста для правила на всю країну (через кому).
+  const [exceptions, setExceptions] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -83,6 +86,8 @@ export default function ServiceCitiesPage() {
         target,
         acceptsCourierPickup: !forbidCourier,
         acceptsPostal: !forbidPostal,
+        // ТЗ docx 01.07.26: винятки діють лише для «Вся країна».
+        exceptions: wholeCountry ? exceptions.split(',').map(s => s.trim()).filter(Boolean) : [],
       }),
     });
     setSaving(false);
@@ -93,6 +98,7 @@ export default function ServiceCitiesPage() {
       setForbidCourier(false);
       setForbidPostal(false);
       setTarget('both');
+      setExceptions('');
       await refresh();
     } else {
       const body = await res.json().catch(() => ({}));
@@ -152,6 +158,17 @@ export default function ServiceCitiesPage() {
                 <Checkbox checked={wholeCountry} onCheckedChange={(c) => setWholeCountry(c === true)} />
                 Вся країна (всі міста)
               </label>
+              {/* ТЗ docx 01.07.26: винятки — міста, де обмеження НЕ діє (через кому). */}
+              {wholeCountry && (
+                <div className="mt-1">
+                  <Label className="text-xs text-gray-500">Винятки (дозволити тут; міста через кому)</Label>
+                  <Input
+                    value={exceptions}
+                    onChange={(e) => setExceptions(e.target.value)}
+                    placeholder="Львів, Київ"
+                  />
+                </div>
+              )}
             </div>
             {/* ТЗ docx 29.06.26: на кого діє обмеження. */}
             <div>
@@ -199,6 +216,12 @@ export default function ServiceCitiesPage() {
                     <span className="font-medium">{COUNTRY_LABELS[r.country as CountryCode] || r.country}</span>
                     <span className="text-gray-400 mx-1">·</span>
                     <span>{r.city === COUNTRY_WIDE_CITY ? 'Вся країна' : r.city}</span>
+                    {/* ТЗ docx 01.07.26: винятки для country-wide правила. */}
+                    {r.city === COUNTRY_WIDE_CITY && r.exceptions && r.exceptions.length > 0 && (
+                      <span className="ml-1 text-[10px] text-green-700 bg-green-50 px-1.5 py-0.5 rounded">
+                        окрім: {r.exceptions.join(', ')}
+                      </span>
+                    )}
                     {r.target && r.target !== 'both' && (
                       <span className="ml-2 text-[10px] text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
                         {TARGET_LABELS[r.target]}

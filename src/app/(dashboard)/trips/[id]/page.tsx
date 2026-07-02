@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
-import { formatDate, formatWeight } from '@/lib/utils/format';
+import { formatDate, formatDateWithWeekday, formatWeight } from '@/lib/utils/format';
 
 const TRIP_STATUSES: Record<string, { label: string; color: string }> = {
   planned: { label: 'Заплановано', color: 'bg-blue-100 text-blue-800' },
@@ -142,8 +142,9 @@ export default function TripDetailPage() {
           </Badge>
         </div>
         <div className="text-sm text-gray-500">
-          Відправлення: {formatDate(trip.departureDate)}
-          {trip.arrivalDate && ` | Прибуття: ${formatDate(trip.arrivalDate)}`}
+          {/* ТЗ docx 01.07.26: поруч з датами відправлення/прибуття — день тижня. */}
+          Відправлення: {formatDateWithWeekday(trip.departureDate)}
+          {trip.arrivalDate && ` | Прибуття: ${formatDateWithWeekday(trip.arrivalDate)}`}
           {trip.assignedCourier && ` | ${trip.assignedCourier.fullName}`}
         </div>
         {trip.notes && <div className="text-sm text-gray-400 mt-1">{trip.notes}</div>}

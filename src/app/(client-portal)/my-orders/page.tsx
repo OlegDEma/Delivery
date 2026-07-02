@@ -20,7 +20,18 @@ interface Order {
   createdAt: string;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
-  receiverAddress: { city: string; deliveryMethod: string; npWarehouseNum: string | null } | null;
+  receiverAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; deliveryMethod: string; npWarehouseNum: string | null } | null;
+  senderAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null } | null;
+}
+
+/** ТЗ docx 01.07.26: адреса + індекс (для не-UA сторони обов'язково). */
+function fmtAddr(a: { country: string | null; city: string; street?: string | null; building?: string | null; postalCode: string | null } | null | undefined): string {
+  if (!a) return '';
+  const parts = [a.city];
+  if (a.street) parts.push(a.street);
+  if (a.building) parts[parts.length - 1] += ` ${a.building}`;
+  if (a.country !== 'UA' && a.postalCode) parts.push(a.postalCode);
+  return parts.join(', ');
 }
 
 export default function MyOrdersPage() {
@@ -74,11 +85,14 @@ export default function MyOrdersPage() {
                 </Badge>
               </div>
               <div className="text-sm mt-2">
-                <div><span className="text-gray-500">Від:</span> {o.sender.lastName} {o.sender.firstName}</div>
+                <div>
+                  <span className="text-gray-500">Від:</span> {o.sender.lastName} {o.sender.firstName}
+                  {o.senderAddress && <span className="text-gray-400"> — {fmtAddr(o.senderAddress)}</span>}
+                </div>
                 <div>
                   <span className="text-gray-500">Кому:</span> {o.receiver.lastName} {o.receiver.firstName}
                   {o.receiverAddress && (
-                    <span className="text-gray-400"> — {o.receiverAddress.city}
+                    <span className="text-gray-400"> — {fmtAddr(o.receiverAddress)}
                       {o.receiverAddress.npWarehouseNum ? `, НП №${o.receiverAddress.npWarehouseNum}` : ''}
                     </span>
                   )}

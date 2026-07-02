@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { COUNTRY_WIDE_CITY } from '@/lib/utils/logistics-availability';
+import { normalizeCityForMatch } from '@/lib/utils/transliterate';
 
 /**
  * GET  /api/service-cities[?country=UA&forCourierPickup=1]
@@ -43,7 +45,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  let body: { country?: string; city?: string; acceptsCourierPickup?: boolean; acceptsPostal?: boolean; target?: string; notes?: string };
+  let body: { country?: string; city?: string; acceptsCourierPickup?: boolean; acceptsPostal?: boolean; target?: string; notes?: string; exceptions?: string[] | string };
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
@@ -59,6 +61,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'target: sender/receiver/both' }, { status: 400 });
   }
 
+  // ТЗ docx 01.07.26: винятки-міста — лише для правила на ВСЮ країну (city='*').
+  // Нормалізуємо кожне місто (транслітерація + lower) для узгодженого матчингу
+  // у forbidden(). Для конкретного міста винятки не мають сенсу → ігноруємо.
+  const rawExceptions = Array.isArray(body.exceptions)
+    ? body.exceptions
+    : typeof body.exceptions === 'string'
+      ? body.exceptions.split(',')
+      : [];
+  const exceptions = city === COUNTRY_WIDE_CITY
+    ? [...new Set(
+        rawExceptions
+          .map(e => normalizeCityForMatch(String(e), body.country))
+          .filter(Boolean)
+      )]
+    : [];
+
   // Upsert — якщо вже є правило для (країна, місто, сторона), оновлюємо
   // прапорці; інакше створюємо.
   const row = await prisma.serviceCity.upsert({
@@ -68,6 +86,7 @@ export async function POST(request: NextRequest) {
     update: {
       acceptsCourierPickup: body.acceptsCourierPickup ?? true,
       acceptsPostal: body.acceptsPostal ?? false,
+      exceptions,
       notes: body.notes ?? null,
     },
     create: {
@@ -76,6 +95,7 @@ export async function POST(request: NextRequest) {
       target,
       acceptsCourierPickup: body.acceptsCourierPickup ?? true,
       acceptsPostal: body.acceptsPostal ?? false,
+      exceptions,
       notes: body.notes ?? null,
     },
   });

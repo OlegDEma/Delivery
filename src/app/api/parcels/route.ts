@@ -234,8 +234,8 @@ export async function GET(request: NextRequest) {
       include: {
         sender: { select: { id: true, phone: true, firstName: true, lastName: true } },
         receiver: { select: { id: true, phone: true, firstName: true, lastName: true } },
-        receiverAddress: { select: { city: true, street: true, building: true, npWarehouseNum: true, deliveryMethod: true } },
-        senderAddress: { select: { city: true, street: true, building: true, npWarehouseNum: true, deliveryMethod: true } },
+        receiverAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, npWarehouseNum: true, deliveryMethod: true } },
+        senderAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, npWarehouseNum: true, deliveryMethod: true } },
         places: {
           orderBy: { placeNumber: 'asc' },
           select: { id: true, placeNumber: true, weight: true, volumetricWeight: true, itnPlace: true },
@@ -337,6 +337,7 @@ export async function POST(request: NextRequest) {
       paymentMethod: parsed.paymentMethod,
       paymentInUkraine: parsed.paymentInUkraine,
       needsPackaging: parsed.needsPackaging,
+      doorstepDelivery: parsed.doorstepDelivery,
       // ТЗ §E4: «Пакет, якщо він був відмічений — має бути відображений
       // у створеній посилці». Раніше `parcelMoneyAmount` парсився зі схеми,
       // але НЕ передавався в createParcel — посилка зберігалась без Пакета.

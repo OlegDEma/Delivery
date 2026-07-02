@@ -375,8 +375,13 @@ model Parcel {
   paymentMethod         PaymentMethod @default(cash) @map("payment_method")
   paymentInUkraine      Boolean       @default(false) @map("payment_in_ukraine")
   needsPackaging        Boolean       @default(false) @map("needs_packaging")
+  /// ТЗ docx 01.07.26: opt-in чекбокс «Доставка до порога будинку». Коли true —
+  /// до вартості додається doorstepPrice з тарифу напрямку (як insurance/packaging).
+  doorstepDelivery      Boolean       @default(false) @map("doorstep_delivery")
   deliveryCost          Decimal?      @map("delivery_cost") @db.Decimal(10, 2)
   packagingCost         Decimal?      @default(0) @map("packaging_cost") @db.Decimal(10, 2)
+  /// ТЗ docx 01.07.26: нарахована сума «Доставка до порога будинку» (для квитанції).
+  doorstepCost          Decimal?      @default(0) @map("doorstep_cost") @db.Decimal(10, 2)
   insuranceCost         Decimal?      @default(0) @map("insurance_cost") @db.Decimal(10, 2)
   /// User opted in for insurance via checkbox at parcel creation. Distinct
   /// from `insuranceCost > 0` so we can tell "checked but 0% rate" apart
@@ -780,6 +785,10 @@ model ServiceCity {
   /// чи обох. Дозволяє, напр., заборонити «Пошту» лише Відправнику з Австрії,
   /// лишивши її доступною Отримувачу. both = діє на обидві сторони.
   target                ServiceTarget @default(both) @map("target")
+  /// ТЗ docx 01.07.26: винятки-міста для правила на ВСЮ країну (city='*').
+  /// Напр. кур'єр заборонений по всій UA, окрім Львова → exceptions=['lviv'].
+  /// Зберігаються нормалізовано (транслітерованими) для узгодженого матчингу.
+  exceptions            String[]      @default([]) @map("exceptions")
   /// Reserved for future expansion (e.g. delivery service zones).
   notes                 String?
   createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz

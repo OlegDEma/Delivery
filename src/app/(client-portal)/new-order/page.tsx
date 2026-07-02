@@ -100,6 +100,8 @@ export default function NewOrderPage() {
   // Per ТЗ — opt-in services. Прихований 3% автоматичний бонус скасовано.
   const [insurance, setInsurance] = useState(false);
   const [needsPackaging, setNeedsPackaging] = useState(false);
+  // ТЗ docx 01.07.26: opt-in чекбокс «Доставка до порога будинку» (клієнт теж бачить).
+  const [doorstepDelivery, setDoorstepDelivery] = useState(false);
   // ТЗ §E10: «Поле "Пакет" при заповненні Клієнтом відсутнє» — опція
   // з'являється лише коли оформлює Працівник. У клієнтському порталі не
   // показуємо і не відправляємо.
@@ -275,7 +277,7 @@ export default function NewOrderPage() {
       body: JSON.stringify({
         direction, shipmentType, description,
         declaredValue: declaredValue ? Number(declaredValue) : undefined,
-        insurance, needsPackaging,
+        insurance, needsPackaging, doorstepDelivery,
         // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
         payer, paymentMethod, paymentInUkraine,
         senderPhone, senderFirstName, senderLastName, senderMiddleName, senderCountry, senderCity, senderPostalCode,
@@ -630,6 +632,11 @@ export default function NewOrderPage() {
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
                 Пакування <FieldHint text="Відмітьте, якщо пакунок не є у коробці" />
+              </label>
+              {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням. */}
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox checked={doorstepDelivery} onCheckedChange={(c) => setDoorstepDelivery(c === true)} />
+                Доставка до порога будинку <FieldHint text="До вартості додається фіксована сума з Тарифів для цього напрямку." />
               </label>
               {/* Per ТЗ §E10: «Поле "Пакет" при заповненні Клієнтом
                   відсутнє». Опція з'являється лише коли посилку оформлює

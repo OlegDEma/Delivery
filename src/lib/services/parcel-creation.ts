@@ -52,6 +52,8 @@ export interface CreateParcelInput {
   paymentMethod?: PaymentMethod;
   paymentInUkraine?: boolean;
   needsPackaging?: boolean;
+  /** ТЗ docx 01.07.26: opt-in «Доставка до порога будинку». */
+  doorstepDelivery?: boolean;
   /**
    * Per ТЗ: при collectionMethod = courier_pickup — true якщо «2+ посилок
    * з цієї локації» (впливає на мінімальний тариф).
@@ -225,6 +227,7 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
   let addressDeliveryCost = 0;
   let pickupPointCost = 0;
   let parcelMoneyCost = 0;
+  let doorstepCost = 0;
   let totalCost = 0;
   if (pricingCountry) {
     const config = await prisma.pricingConfig.findFirst({
@@ -250,6 +253,8 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
           // even allowed for the direction.
           insurance: input.insurance === true,
           needsPackaging: input.needsPackaging ?? false,
+          // ТЗ docx 01.07.26: doorstep — за явним opt-in чекбоксом.
+          isDoorstepDelivery: input.doorstepDelivery ?? false,
           isAddressDelivery: deliveryMethod === 'address',
           isPickupPoint:
             input.direction === 'eu_to_ua' && input.collectionMethod === 'pickup_point',
@@ -265,6 +270,7 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
       );
       deliveryCost = breakdown.deliveryCost;
       packagingCost = breakdown.packagingCost;
+      doorstepCost = breakdown.doorstepCost;
       insuranceCost = breakdown.insuranceCost;
       addressDeliveryCost = breakdown.addressDeliveryCost;
       pickupPointCost = breakdown.pickupPointCost;
@@ -327,8 +333,10 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
           paymentMethod: input.paymentMethod || 'cash',
           paymentInUkraine: input.paymentInUkraine ?? false,
           needsPackaging: input.needsPackaging ?? false,
+          doorstepDelivery: input.doorstepDelivery ?? false,
           deliveryCost: deliveryCost || null,
           packagingCost: packagingCost || null,
+          doorstepCost: doorstepCost || null,
           insuranceCost: insuranceCost || null,
           insuranceApplied: input.insurance === true,
           addressDeliveryCost: addressDeliveryCost || null,

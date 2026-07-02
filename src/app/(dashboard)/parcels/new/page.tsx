@@ -184,6 +184,8 @@ export default function NewParcelPage() {
   const [paymentMethod, setPaymentMethod] = useState<string>('cash');
   const [paymentInUkraine, setPaymentInUkraine] = useState(false);
   const [needsPackaging, setNeedsPackaging] = useState(false);
+  // ТЗ docx 01.07.26: opt-in чекбокс «Доставка до порога будинку» під Пакуванням.
+  const [doorstepDelivery, setDoorstepDelivery] = useState(false);
   // Send invoice via SMS — per ТЗ: «на телефонний номер Платника за доставку
   // відправляється повідомлення». Phone defaults to payer's stored phone.
   const [sendInvoice, setSendInvoice] = useState(false);
@@ -460,6 +462,7 @@ export default function NewParcelPage() {
         paymentMethod,
         paymentInUkraine,
         needsPackaging,
+        doorstepDelivery,
         sendInvoice,
         invoicePhone: sendInvoice && invoicePhone ? invoicePhone : undefined,
         tripId: selectedTripId || undefined,
@@ -687,6 +690,22 @@ export default function NewParcelPage() {
                 <Label htmlFor="packaging-cb" className="text-sm font-medium cursor-pointer">
                   Пакування{' '}
                   <FieldHint text="Відмітьте, якщо пакунок не є у коробці, не є паралелепіпедом." />
+                </Label>
+              </div>
+            </div>
+
+            {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням.
+                При відмічанні до суми додається doorstepPrice з тарифу напрямку. */}
+            <div className="rounded-lg border p-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="doorstep-cb"
+                  checked={doorstepDelivery}
+                  onCheckedChange={(c) => setDoorstepDelivery(c === true)}
+                />
+                <Label htmlFor="doorstep-cb" className="text-sm font-medium cursor-pointer">
+                  Доставка до порога будинку{' '}
+                  <FieldHint text="До вартості додається фіксована сума, задана в Тарифах для цього напрямку." />
                 </Label>
               </div>
             </div>
@@ -989,6 +1008,7 @@ export default function NewParcelPage() {
           declaredValueCurrency={declaredCurrency}
           insurance={insurance}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
+          isDoorstepDelivery={doorstepDelivery}
           isAddressDelivery={receiver?.addresses[0]?.deliveryMethod === 'address'}
           isPickupPoint={direction === 'eu_to_ua' && collection.method === 'pickup_point'}
           isCourierPickup={direction === 'eu_to_ua' && collection.method === 'courier_pickup'}

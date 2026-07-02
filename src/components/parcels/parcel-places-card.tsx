@@ -48,6 +48,8 @@ interface ParcelPlacesCardProps {
   /** Currency of declaredValue (EUR | UAH). Default EUR. */
   declaredValueCurrency?: 'EUR' | 'UAH' | string | null;
   needsPackaging?: boolean;
+  /** ТЗ docx 01.07.26: opt-in «Доставка до порога будинку». */
+  doorstepDelivery?: boolean;
   /** Whether the parcel has insurance opted in (saved value > 0). */
   insuranceEnabled?: boolean;
   /** «Пакет» сума — для коректної live-оцінки фактично збереженого розрахунку. */
@@ -96,6 +98,7 @@ export function ParcelPlacesCard({
   declaredValue,
   declaredValueCurrency,
   needsPackaging,
+  doorstepDelivery,
   insuranceEnabled,
   parcelMoneyAmount,
   isPickupPoint,
@@ -284,6 +287,7 @@ export function ParcelPlacesCard({
                 declaredValue={Number(declaredValue) || 0}
                 declaredValueCurrency={(declaredValueCurrency === 'UAH' ? 'UAH' : 'EUR') as 'EUR' | 'UAH'}
                 needsPackaging={!!needsPackaging}
+                isDoorstepDelivery={!!doorstepDelivery}
                 isAddressDelivery={receiverDeliveryMethod === 'address'}
                 insurance={insuranceEnabled}
                 isPickupPoint={!!isPickupPoint}
@@ -336,6 +340,7 @@ export function ParcelPlacesCard({
                   declaredValue={Number(declaredValue) || 0}
                   declaredValueCurrency={(declaredValueCurrency === 'UAH' ? 'UAH' : 'EUR') as 'EUR' | 'UAH'}
                   needsPackaging={!!needsPackaging}
+                  isDoorstepDelivery={!!doorstepDelivery}
                   isAddressDelivery={receiverDeliveryMethod === 'address'}
                   insurance={insuranceEnabled}
                   isPickupPoint={!!isPickupPoint}

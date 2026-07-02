@@ -79,6 +79,7 @@ interface ServiceCity {
   acceptsCourierPickup: boolean;
   acceptsPostal: boolean;
   target?: 'sender' | 'receiver' | 'both';
+  exceptions?: string[];
 }
 
 // Per ТЗ: «Передати водію» приховано. Залишаються три способи.

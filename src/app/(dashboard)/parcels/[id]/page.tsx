@@ -16,6 +16,7 @@ import { useAuth } from '@/lib/hooks/use-auth';
 import { Camera, StickyNote, Lock, Pencil } from 'lucide-react';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDateTime } from '@/lib/utils/format';
+import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { CopyButton } from '@/components/shared/copy-button';
 import { ParcelPartyEdit } from '@/components/parcels/parcel-party-edit';
@@ -49,6 +50,7 @@ interface ParcelDetail {
   paymentMethod: string;
   paymentInUkraine: boolean;
   needsPackaging: boolean;
+  doorstepDelivery: boolean;
   npTtn: string | null;
   npTrackingStatus: string | null;
   estimatedDeliveryStart: string | null;
@@ -123,7 +125,7 @@ interface ParcelDetail {
   collectedAt: string | null;
   collectionPoint: {
     id: string; name: string | null; country: string; city: string; address: string;
-    contactPhone: string | null; workingHours: string | null; workingDays: string[];
+    postalCode: string | null; contactPhone: string | null; workingHours: string | null; workingDays: string[];
   } | null;
   collectedBy: { id: string; fullName: string } | null;
 }
@@ -443,7 +445,8 @@ export default function ParcelDetailPage() {
             <PhoneLink phone={parcel.receiver.phone} />
             {parcel.receiverAddress && (
               <span className="text-xs text-gray-500 ml-2">
-                <AddressLink address={`${COUNTRY_LABELS[parcel.receiverAddress.country as CountryCode] || parcel.receiverAddress.country}, ${parcel.receiverAddress.city}${parcel.receiverAddress.street ? `, ${parcel.receiverAddress.street}` : ''}${parcel.receiverAddress.building ? ` ${parcel.receiverAddress.building}` : ''}`} />
+                {/* ТЗ docx 01.07.26: для не-UA сторони — адреса + поштовий код (індекс). */}
+                <AddressLink address={`${COUNTRY_LABELS[parcel.receiverAddress.country as CountryCode] || parcel.receiverAddress.country}, ${parcel.receiverAddress.city}${parcel.receiverAddress.street ? `, ${parcel.receiverAddress.street}` : ''}${parcel.receiverAddress.building ? ` ${parcel.receiverAddress.building}` : ''}${parcel.receiverAddress.postalCode ? `, ${parcel.receiverAddress.postalCode}` : ''}`} />
                 {parcel.receiverAddress.apartment ? `, кв. ${parcel.receiverAddress.apartment}` : ''}
                 {parcel.receiverAddress.npWarehouseNum ? ` | НП №${parcel.receiverAddress.npWarehouseNum}` : ''}
                 {parcel.receiverAddress.landmark ? ` (${parcel.receiverAddress.landmark})` : ''}
@@ -474,7 +477,8 @@ export default function ParcelDetailPage() {
             <PhoneLink phone={parcel.sender.phone} />
             {parcel.senderAddress && (
               <span className="text-xs text-gray-500 ml-2">
-                <AddressLink address={`${parcel.senderAddress.city}${parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}${parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}`} />
+                {/* ТЗ docx 01.07.26: для не-UA відправника — країна + адреса + індекс. */}
+                <AddressLink address={`${parcel.senderAddress.country && parcel.senderAddress.country !== 'UA' ? `${COUNTRY_LABELS[parcel.senderAddress.country as CountryCode] || parcel.senderAddress.country}, ` : ''}${parcel.senderAddress.city}${parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}${parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}${parcel.senderAddress.postalCode ? `, ${parcel.senderAddress.postalCode}` : ''}`} />
                 {parcel.senderAddress.landmark ? ` (${parcel.senderAddress.landmark})` : ''}
               </span>
             )}
@@ -494,6 +498,28 @@ export default function ParcelDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* ТЗ docx 01.07.26 (C4): при перегляді показуємо ОБРАНИЙ пункт збору
+          з адресою та індексом (лише коли спосіб — «пункт збору»). */}
+      {parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'pickup_point' && parcel.collectionPoint && (
+        <div className="text-sm py-1 border-b">
+          <span className="text-gray-500">Пункт збору:</span>{' '}
+          <span className="font-medium">
+            {parcel.collectionPoint.name
+              ? `${parcel.collectionPoint.name} (${parcel.collectionPoint.city}, ${parcel.collectionPoint.address})`
+              : `${parcel.collectionPoint.city}, ${parcel.collectionPoint.address}`}
+          </span>
+          {(parcel.collectionPoint.postalCode || parcel.senderAddress?.postalCode) && (
+            <span className="text-gray-400 ml-1">· Індекс: {parcel.collectionPoint.postalCode || parcel.senderAddress?.postalCode}</span>
+          )}
+          {parcel.collectionPoint.workingDays?.length > 0 && (
+            <div className="text-xs text-gray-400">
+              📅 {formatWorkingDays(parcel.collectionPoint.workingDays as Weekday[])}
+              {parcel.collectionPoint.workingHours ? ` · ${parcel.collectionPoint.workingHours}` : ''}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Параметри відправлення — read-only. Редагування через /edit. */}
       <ParcelPlacesCard
@@ -518,6 +544,7 @@ export default function ParcelDetailPage() {
         declaredValue={parcel.declaredValue}
         declaredValueCurrency={parcel.declaredValueCurrency}
         needsPackaging={parcel.needsPackaging}
+        doorstepDelivery={parcel.doorstepDelivery}
         // Insurance opt-in: prefer the explicit boolean if the column was
         // backfilled (post-migration), fall back to deriving from cost > 0
         // for historical data.
