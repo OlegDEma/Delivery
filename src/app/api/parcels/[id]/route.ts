@@ -430,13 +430,20 @@ export async function PATCH(
 
   if (costAffectingTouched) {
     try {
+      // ТЗ docx 01.07.26 (C4-reopen): при зміні пункту збору перерахунок має
+      // брати країну тарифу з НОВОГО пункту (свіже body), а не зі збереженого —
+      // інакше зміна пункту на інший (наприклад іншої країни) рахує ціну за
+      // старим тарифом. Fallback на збережений id, коли поле не торкалось.
+      const effectiveCollectionPointId = body.collectionPointId !== undefined
+        ? body.collectionPointId
+        : parcel.collectionPointId;
       const [trip, collectionPoint, senderAddr, receiverAddr] = await Promise.all([
         parcel.tripId
           ? prisma.trip.findUnique({ where: { id: parcel.tripId }, select: { country: true } })
           : Promise.resolve(null),
-        parcel.collectionPointId
+        effectiveCollectionPointId
           ? prisma.collectionPoint.findUnique({
-              where: { id: parcel.collectionPointId },
+              where: { id: effectiveCollectionPointId },
               select: { country: true },
             })
           : Promise.resolve(null),

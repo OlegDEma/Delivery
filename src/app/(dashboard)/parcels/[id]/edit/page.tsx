@@ -79,7 +79,7 @@ interface ParcelData {
   collectionPointId: string | null;
   /** ТЗ docx 01.07.26: обраний пункт збору — щоб показати ЛИШЕ його (адреса+індекс). */
   collectionPoint: {
-    id: string; name: string | null; city: string; address: string;
+    id: string; name: string | null; country: string; city: string; address: string;
     postalCode: string | null; workingHours: string | null; workingDays: string[];
   } | null;
   collectionDate: string | null;
@@ -484,9 +484,14 @@ export default function EditParcelPage() {
                     </button>
                   </div>
                 ) : (
+                  // «Змінити пункт»: показуємо ВСІ пункти EU-країни (як у staff
+                  // collection-card), без фільтра за містом відправника — інакше
+                  // оператор не зміг би обрати інший пункт (напр. місто клієнта
+                  // не збігається з жодним пунктом). Країну беремо з обраного
+                  // пункту (надійне EU-джерело), а не з country клієнта (може
+                  // бути 'UA' у українця з EU-адресою).
                   <CollectionBlock
-                    senderCountry={senderCountry}
-                    senderCity={parcel.senderAddress?.city}
+                    senderCountry={parcel.collectionPoint?.country || senderCountry}
                     value={collection}
                     onChange={setCollection}
                   />
