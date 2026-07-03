@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { COUNTRY_SHORT_CODES, type CountryCode } from '@/lib/constants/countries';
 
 interface Trip {
   id: string;
@@ -20,7 +20,8 @@ const STATUS_COLORS: Record<string, string> = {
   planned: 'bg-blue-500', in_progress: 'bg-yellow-500', completed: 'bg-green-500', cancelled: 'bg-red-500',
 };
 
-const DAY_NAMES = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+// ТЗ docx 02.07.26 (D5): тиждень починається з понеділка, закінчується неділею.
+const DAY_NAMES = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
 const MONTH_NAMES = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
 
 export default function CalendarPage() {
@@ -94,9 +95,10 @@ export default function CalendarPage() {
                       {dayTrips.map(t => (
                         <Link key={t.id} href={`/trips/${t.id}`}>
                           <div className={`text-[10px] px-1 py-0.5 rounded text-white truncate cursor-pointer hover:opacity-80 ${STATUS_COLORS[t.status] || 'bg-gray-400'}`}>
-                            {/* ТЗ docx 29.06.26: країна виїзду першою, стрілка завжди → */}
+                            {/* ТЗ docx 29.06.26: країна виїзду першою, стрілка завжди →.
+                                ТЗ docx 02.07.26 (D5): міжнародні скорочення (A/NL/DE). */}
                             {(() => {
-                              const a = COUNTRY_LABELS[t.country as CountryCode]?.slice(0, 3) || t.country;
+                              const a = COUNTRY_SHORT_CODES[t.country as CountryCode] || t.country;
                               return t.direction === 'eu_to_ua' ? `${a}→UA` : `UA→${a}`;
                             })()}
                             {t._count.parcels > 0 && ` (${t._count.parcels})`}

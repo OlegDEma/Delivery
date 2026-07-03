@@ -48,6 +48,17 @@ export function tripRouteLabel(
   return direction === 'eu_to_ua' ? `${eu} → UA` : `UA → ${eu}`;
 }
 
+/**
+ * ТЗ docx 02.07.26 (D5): міжнародні скорочення країн для Календаря.
+ * A = Австрія, PL = Польща (на майбутнє). Напр. «A→UA», «UA→NL».
+ */
+export const COUNTRY_SHORT_CODES: Record<CountryCode, string> = {
+  UA: 'UA',
+  NL: 'NL',
+  AT: 'A',
+  DE: 'DE',
+};
+
 export const COUNTRY_PHONE_CODES: Record<CountryCode, string> = {
   UA: '+380',
   NL: '+31',

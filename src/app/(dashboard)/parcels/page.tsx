@@ -30,8 +30,8 @@ interface ParcelListItem {
   createdAt: string;
   sender: { phone: string; firstName: string; lastName: string };
   receiver: { phone: string; firstName: string; lastName: string };
-  receiverAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
-  senderAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
+  receiverAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; landmark: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
+  senderAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; landmark: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
   trip?: { id: string; country: string | null } | null;
   /** Хто прийняв посилку (collectedBy) — для відображення поряд з посилкою. */
   collectedBy?: { id: string; fullName: string } | null;
@@ -412,6 +412,8 @@ function ParcelsContent() {
                             {p.receiverAddress.building ? ` ${p.receiverAddress.building}` : ''}
                             {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
                             {p.receiverAddress.postalCode ? `, ${p.receiverAddress.postalCode}` : ''}
+                            {/* ТЗ docx 02.07.26 (D1): орієнтир (коли вказано). */}
+                            {p.receiverAddress.landmark ? ` (${p.receiverAddress.landmark})` : ''}
                             {p.receiverAddress.npWarehouseNum ? ` (НП №${p.receiverAddress.npWarehouseNum})` : ''}
                           </div>
                         )}
@@ -428,6 +430,8 @@ function ParcelsContent() {
                             {p.senderAddress.building ? ` ${p.senderAddress.building}` : ''}
                             {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
                             {p.senderAddress.postalCode ? `, ${p.senderAddress.postalCode}` : ''}
+                            {/* ТЗ docx 02.07.26 (D1): орієнтир (коли вказано). */}
+                            {p.senderAddress.landmark ? ` (${p.senderAddress.landmark})` : ''}
                             {p.senderAddress.npWarehouseNum ? ` (НП №${p.senderAddress.npWarehouseNum})` : ''}
                           </div>
                         )}

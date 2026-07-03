@@ -167,6 +167,10 @@ export default function NewParcelPage() {
   // що відправник в Україні (грн), eu_to_ua — у EU (євро).
   const senderCountry = sender?.country || sender?.addresses[0]?.country || null;
   const senderInUA = senderCountry === 'UA' || (!senderCountry && direction === 'ua_to_eu');
+  // ТЗ docx 02.07.26 (D4): «Доставка до порога будинку» доступна ЛИШЕ для напрямку
+  // Європа→Україна І лише при Адресній доставці Отримувача. Інакше — ховаємо чекбокс
+  // і не застосовуємо опцію (навіть якщо була відмічена раніше).
+  const canDoorstep = direction === 'eu_to_ua' && recvDeliveryMethod === 'address';
   const declaredCurrency = senderInUA ? 'UAH' : 'EUR';
   const declaredCurrencyLabel = senderInUA ? 'грн' : 'EUR';
 
@@ -462,7 +466,8 @@ export default function NewParcelPage() {
         paymentMethod,
         paymentInUkraine,
         needsPackaging,
-        doorstepDelivery,
+        // ТЗ docx 02.07.26 (D4): не застосовуємо doorstep, якщо опція недоступна.
+        doorstepDelivery: canDoorstep && doorstepDelivery,
         sendInvoice,
         invoicePhone: sendInvoice && invoicePhone ? invoicePhone : undefined,
         tripId: selectedTripId || undefined,
@@ -695,7 +700,9 @@ export default function NewParcelPage() {
             </div>
 
             {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням.
-                При відмічанні до суми додається doorstepPrice з тарифу напрямку. */}
+                При відмічанні до суми додається doorstepPrice з тарифу напрямку.
+                ТЗ docx 02.07.26 (D4): лише Європа→Україна + Адресна доставка. */}
+            {canDoorstep && (
             <div className="rounded-lg border p-3 bg-gray-50">
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -709,6 +716,7 @@ export default function NewParcelPage() {
                 </Label>
               </div>
             </div>
+            )}
 
             {/* «Пакет» — sender transfers cash to receiver. */}
             <div className="rounded-lg border p-3 bg-gray-50 space-y-2">
@@ -1008,7 +1016,7 @@ export default function NewParcelPage() {
           declaredValueCurrency={declaredCurrency}
           insurance={insurance}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
-          isDoorstepDelivery={doorstepDelivery}
+          isDoorstepDelivery={canDoorstep && doorstepDelivery}
           isAddressDelivery={receiver?.addresses[0]?.deliveryMethod === 'address'}
           isPickupPoint={direction === 'eu_to_ua' && collection.method === 'pickup_point'}
           isCourierPickup={direction === 'eu_to_ua' && collection.method === 'courier_pickup'}

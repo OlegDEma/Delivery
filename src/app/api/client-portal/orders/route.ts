@@ -29,8 +29,8 @@ export async function GET() {
     include: {
       sender: { select: { firstName: true, lastName: true, phone: true } },
       receiver: { select: { firstName: true, lastName: true, phone: true } },
-      receiverAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, deliveryMethod: true, npWarehouseNum: true } },
-      senderAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true } },
+      receiverAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, landmark: true, deliveryMethod: true, npWarehouseNum: true } },
+      senderAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, landmark: true } },
       statusHistory: {
         orderBy: { changedAt: 'desc' },
         take: 1,

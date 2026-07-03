@@ -174,7 +174,14 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
   // ТЗ Client (docx 14.05.26): навпаки — «Як Ви передасте нам посилку?» має
   // лишатись РОЗГОРНУТИМ (усі три картки видно). Тож згортаємо лише для staff.
   const hideOthers = !clientFacing && !!value.method;
-  const visibleMethods = hideOthers ? METHODS.filter(m => m === value.method) : METHODS;
+  // ТЗ docx 02.07.26 (D8): у Клієнта заборонені/ненастроєні для країни-міста
+  // опції способу передачі НЕ відображаємо взагалі (раніше показувались
+  // задизейбленими з підписом «Опція тимчасово недоступна»).
+  const isMethodForbiddenForClient = (m: CollectionMethod) =>
+    (m === COLLECTION_METHODS.COURIER_PICKUP && !courierPickupAvailableForClient) ||
+    (m === COLLECTION_METHODS.EXTERNAL_SHIPPING && !externalShippingAvailableForClient);
+  const visibleMethods = (hideOthers ? METHODS.filter(m => m === value.method) : METHODS)
+    .filter(m => !clientFacing || !isMethodForbiddenForClient(m));
 
   return (
     <div className="space-y-3">

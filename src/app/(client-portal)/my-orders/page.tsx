@@ -20,18 +20,21 @@ interface Order {
   createdAt: string;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
-  receiverAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; deliveryMethod: string; npWarehouseNum: string | null } | null;
-  senderAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null } | null;
+  receiverAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; landmark: string | null; deliveryMethod: string; npWarehouseNum: string | null } | null;
+  senderAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; landmark: string | null } | null;
 }
 
-/** ТЗ docx 01.07.26: адреса + індекс (для не-UA сторони обов'язково). */
-function fmtAddr(a: { country: string | null; city: string; street?: string | null; building?: string | null; postalCode: string | null } | null | undefined): string {
+/** ТЗ docx 01.07.26: адреса + індекс (для не-UA сторони обов'язково).
+ *  ТЗ docx 02.07.26 (D1): + Орієнтир (коли вказано). */
+function fmtAddr(a: { country: string | null; city: string; street?: string | null; building?: string | null; postalCode: string | null; landmark?: string | null } | null | undefined): string {
   if (!a) return '';
   const parts = [a.city];
   if (a.street) parts.push(a.street);
   if (a.building) parts[parts.length - 1] += ` ${a.building}`;
   if (a.country !== 'UA' && a.postalCode) parts.push(a.postalCode);
-  return parts.join(', ');
+  let out = parts.join(', ');
+  if (a.landmark) out += ` (${a.landmark})`;
+  return out;
 }
 
 export default function MyOrdersPage() {

@@ -234,8 +234,8 @@ export async function GET(request: NextRequest) {
       include: {
         sender: { select: { id: true, phone: true, firstName: true, lastName: true } },
         receiver: { select: { id: true, phone: true, firstName: true, lastName: true } },
-        receiverAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, npWarehouseNum: true, deliveryMethod: true } },
-        senderAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, npWarehouseNum: true, deliveryMethod: true } },
+        receiverAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, landmark: true, npWarehouseNum: true, deliveryMethod: true } },
+        senderAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, landmark: true, npWarehouseNum: true, deliveryMethod: true } },
         places: {
           orderBy: { placeNumber: 'asc' },
           select: { id: true, placeNumber: true, weight: true, volumetricWeight: true, itnPlace: true },

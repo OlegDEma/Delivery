@@ -14,7 +14,9 @@ import { AddressInput } from '@/components/parcels/address-input';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { FieldHint } from '@/components/shared/field-hint';
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
+import { getBillableWeight } from '@/lib/utils/volumetric';
 import { normalizeCityForMatch } from '@/lib/utils/transliterate';
+import { isCourierAllowed, isPostalAllowed, type ServiceRule } from '@/lib/utils/logistics-availability';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 
 interface PlaceData {
@@ -22,17 +24,15 @@ interface PlaceData {
   length: string;
   width: string;
   height: string;
-  volume: string;
 }
 
-const emptyPlace = (): PlaceData => ({ weight: '', length: '', width: '', height: '', volume: '' });
+// ТЗ docx 02.07.26 (D6): у Клієнта немає поля «об'єм» — лише Д/Ш/В.
+const emptyPlace = (): PlaceData => ({ weight: '', length: '', width: '', height: '' });
 
 function volWeight(p: PlaceData): number {
   const l = Number(p.length) || 0, w = Number(p.width) || 0, h = Number(p.height) || 0;
   if (l > 0 && w > 0 && h > 0) return Number(((l * w * h) / 4000).toFixed(2));
-  // ТЗ §1: коли розмірів немає — об'ємна вага з прямого об'єму (× 250).
-  const v = Number(p.volume) || 0;
-  return v > 0 ? Number((v * 250).toFixed(2)) : 0;
+  return 0;
 }
 
 interface PricingConfig {
@@ -40,6 +40,9 @@ interface PricingConfig {
   country: string;
   direction: string;
   collectionDays: string[];
+  // ТЗ docx 02.07.26 (D7): правило розрахункової ваги з Тарифів.
+  weightType?: 'actual' | 'volumetric' | 'average' | 'custom';
+  weightCustomFactualFraction?: number;
 }
 
 const DAY_MAP: Record<string, number> = {
@@ -57,6 +60,9 @@ export default function NewOrderPage() {
   const [error, setError] = useState('');
   const [successNumber, setSuccessNumber] = useState<string | null>(null);
   const [pricingConfigs, setPricingConfigs] = useState<PricingConfig[]>([]);
+  // ТЗ docx 02.07.26 (D8): правила Логістики — щоб ховати заборонені для
+  // Країни/НП способи доставки Отримувача (Адресна/Пошта).
+  const [serviceCities, setServiceCities] = useState<ServiceRule[]>([]);
   const [collectionDayWarning, setCollectionDayWarning] = useState('');
 
   // ТЗ: клієнт має свідомо вибрати напрямок — без дефолту.
@@ -102,6 +108,8 @@ export default function NewOrderPage() {
   const [needsPackaging, setNeedsPackaging] = useState(false);
   // ТЗ docx 01.07.26: opt-in чекбокс «Доставка до порога будинку» (клієнт теж бачить).
   const [doorstepDelivery, setDoorstepDelivery] = useState(false);
+  // ТЗ docx 02.07.26 (D4): доступна лише Європа→Україна + Адресна доставка Отримувача.
+  const canDoorstep = direction === 'eu_to_ua' && receiverDeliveryMethod === 'address';
   // ТЗ §E10: «Поле "Пакет" при заповненні Клієнтом відсутнє» — опція
   // з'являється лише коли оформлює Працівник. У клієнтському порталі не
   // показуємо і не відправляємо.
@@ -142,6 +150,7 @@ export default function NewOrderPage() {
 
   useEffect(() => {
     fetch('/api/pricing').then(r => r.ok ? r.json() : []).then(setPricingConfigs);
+    fetch('/api/service-cities').then(r => r.ok ? r.json() : []).then(setServiceCities);
 
     // Prefill «Відправник (ваші дані)» — ім'я / прізвище / телефон /
     // країна / місто з профілю клієнта + його основної адреси.
@@ -157,6 +166,24 @@ export default function NewOrderPage() {
       if (me.city) setSenderCity(me.city);
     });
   }, []);
+
+  // ТЗ docx 02.07.26 (D8): якщо поточний спосіб доставки Отримувача став
+  // недоступним за Логістикою (Адресна/Пошта заборонені для Країни/НП) —
+  // перемикаємо на перший доступний, щоб не відправити заборонену опцію.
+  useEffect(() => {
+    const cityNorm = normalizeCityForMatch(receiverCity, receiverCountry);
+    const allowed: string[] = [];
+    if (isCourierAllowed(serviceCities, receiverCountry, cityNorm, 'receiver')) allowed.push('address');
+    if (isPostalAllowed(serviceCities, receiverCountry, cityNorm, 'receiver')) allowed.push('np_warehouse');
+    if (
+      allowed.length > 0 &&
+      (receiverDeliveryMethod === 'address' || receiverDeliveryMethod === 'np_warehouse') &&
+      !allowed.includes(receiverDeliveryMethod)
+    ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setReceiverDeliveryMethod(allowed[0]);
+    }
+  }, [serviceCities, receiverCountry, receiverCity, receiverDeliveryMethod]);
 
   // ТЗ §4: точки видачі для країни отримувача — для опції «Пункт видачі».
   useEffect(() => {
@@ -233,17 +260,16 @@ export default function NewOrderPage() {
     } else if (receiverCountry === 'UA' && (!receiverStreet.trim() || !receiverBuilding.trim())) {
       setError('Для отримувача в Україні вкажіть вулицю та будинок'); return;
     }
-    // ТЗ (docx 13.06.26 §1): «об'ємна вага не може бути нульовою — має бути
-    // внесено АБО довжина/ширина/висота, АБО об'єм у м³». Для кожного місця.
+    // ТЗ docx 02.07.26 (D6): у Клієнта немає поля «об'єм» — тож для кожного
+    // місця з вагою мають бути вказані довжина, ширина ТА висота.
     {
       const badPlace = places.findIndex(p => {
         if (Number(p.weight) <= 0) return false;
         const hasDims = Number(p.length) > 0 && Number(p.width) > 0 && Number(p.height) > 0;
-        const hasVolume = Number(p.volume) > 0;
-        return !hasDims && !hasVolume;
+        return !hasDims;
       });
       if (badPlace !== -1) {
-        setError(`Місце ${badPlace + 1}: вкажіть довжину/ширину/висоту АБО об'єм (м³) — об'ємна вага не може бути нульовою`);
+        setError(`Місце ${badPlace + 1}: вкажіть довжину, ширину та висоту — об'ємна вага не може бути нульовою`);
         return;
       }
       if (!places.some(p => Number(p.weight) > 0)) {
@@ -277,7 +303,9 @@ export default function NewOrderPage() {
       body: JSON.stringify({
         direction, shipmentType, description,
         declaredValue: declaredValue ? Number(declaredValue) : undefined,
-        insurance, needsPackaging, doorstepDelivery,
+        insurance, needsPackaging,
+        // ТЗ docx 02.07.26 (D4): не застосовуємо doorstep, якщо опція недоступна.
+        doorstepDelivery: canDoorstep && doorstepDelivery,
         // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
         payer, paymentMethod, paymentInUkraine,
         senderPhone, senderFirstName, senderLastName, senderMiddleName, senderCountry, senderCity, senderPostalCode,
@@ -288,7 +316,6 @@ export default function NewOrderPage() {
           length: Number(p.length) || undefined,
           width: Number(p.width) || undefined,
           height: Number(p.height) || undefined,
-          volume: Number(p.volume) || undefined,
         })),
         collectionMethod, collectionPointId, collectionDate,
         collectionAddress: composedCollectionAddress,
@@ -306,6 +333,18 @@ export default function NewOrderPage() {
   }
 
   const totalWeight = places.reduce((s, p) => s + (Number(p.weight) || 0), 0);
+  // ТЗ docx 02.07.26 (D7): показуємо Розрахункову вагу за правилом з Тарифів.
+  // Тариф беремо з країни, що визначає ціну: eu_to_ua → відправник (EU),
+  // ua_to_eu → отримувач (EU).
+  const totalVolWeight = places.reduce((s, p) => s + volWeight(p), 0);
+  const billedCountry = direction === 'eu_to_ua' ? senderCountry : receiverCountry;
+  const weightCfg = pricingConfigs.find(c => c.country === billedCountry && c.direction === direction);
+  const billableWeight = getBillableWeight(
+    totalWeight,
+    totalVolWeight,
+    weightCfg?.weightType || 'custom',
+    weightCfg?.weightCustomFactualFraction ?? 0.5,
+  );
 
   const DIRECTION_LABELS: Record<string, string> = { eu_to_ua: 'З Європи в Україну', ua_to_eu: 'З України в Європу' };
   const COUNTRY_LABELS: Record<string, string> = { NL: 'Нідерланди', AT: 'Австрія', DE: 'Німеччина', UA: 'Україна' };
@@ -321,6 +360,10 @@ export default function NewOrderPage() {
   const recvCityPoints = recvCityNorm ? receiverPoints.filter(p => p.city.trim().toLowerCase() === recvCityNorm) : [];
   const recvPointsToShow = recvCityPoints;
   const recvHasPoints = recvCityPoints.length > 0;
+  // ТЗ docx 02.07.26 (D8): доступність способів доставки Отримувача за Логістикою
+  // (Адресна доставка = кур'єр; Пошта = поштова відправка). Заборонені — ховаємо.
+  const recvCourierAllowed = isCourierAllowed(serviceCities, receiverCountry, recvCityNorm, 'receiver');
+  const recvPostalAllowed = isPostalAllowed(serviceCities, receiverCountry, recvCityNorm, 'receiver');
   const SHIPMENT_TYPE_LABELS: Record<string, string> = { parcels_cargo: 'Посилки та вантажі', documents: 'Документи', tires_wheels: 'Шини та диски' };
   const PAYER_LABELS: Record<string, string> = { sender: 'Відправник', receiver: 'Отримувач' };
   const PAYMENT_METHOD_LABELS: Record<string, string> = { cash: 'Готівка', cashless: 'Безготівка' };
@@ -426,8 +469,13 @@ export default function NewOrderPage() {
                 <Select value={receiverDeliveryMethod} onValueChange={(v) => setReceiverDeliveryMethod(v ?? 'address')}>
                   <SelectTrigger><SelectValue>{DELIVERY_METHOD_LABELS[receiverDeliveryMethod]}</SelectValue></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="address">Адресна доставка</SelectItem>
-                    <SelectItem value="np_warehouse">Пошта</SelectItem>
+                    {/* ТЗ docx 02.07.26 (D8): заборонені для Країни/НП способи ховаємо. */}
+                    {(recvCourierAllowed || receiverDeliveryMethod === 'address') && (
+                      <SelectItem value="address">Адресна доставка</SelectItem>
+                    )}
+                    {(recvPostalAllowed || receiverDeliveryMethod === 'np_warehouse') && (
+                      <SelectItem value="np_warehouse">Пошта</SelectItem>
+                    )}
                     {(recvHasPoints || receiverDeliveryMethod === 'pickup_point') && (
                       <SelectItem value="pickup_point">Пункт видачі</SelectItem>
                     )}
@@ -633,11 +681,14 @@ export default function NewOrderPage() {
                 <Checkbox checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
                 Пакування <FieldHint text="Відмітьте, якщо пакунок не є у коробці" />
               </label>
-              {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням. */}
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox checked={doorstepDelivery} onCheckedChange={(c) => setDoorstepDelivery(c === true)} />
-                Доставка до порога будинку <FieldHint text="До вартості додається фіксована сума з Тарифів для цього напрямку." />
-              </label>
+              {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням.
+                  ТЗ docx 02.07.26 (D4): лише Європа→Україна + Адресна доставка. */}
+              {canDoorstep && (
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox checked={doorstepDelivery} onCheckedChange={(c) => setDoorstepDelivery(c === true)} />
+                  Доставка до порога будинку <FieldHint text="До вартості додається фіксована сума з Тарифів для цього напрямку." />
+                </label>
+              )}
               {/* Per ТЗ §E10: «Поле "Пакет" при заповненні Клієнтом
                   відсутнє». Опція з'являється лише коли посилку оформлює
                   Працівник. Тому в клієнтському порталі чекбокс «Пакет»
@@ -670,12 +721,18 @@ export default function NewOrderPage() {
                   <div><Label className="text-xs">Ширина (см)</Label><Input type="number" value={p.width} onChange={(e) => updatePlace(i, 'width', e.target.value)} /></div>
                   <div><Label className="text-xs">Висота (см)</Label><Input type="number" value={p.height} onChange={(e) => updatePlace(i, 'height', e.target.value)} /></div>
                 </div>
-                {/* ТЗ §1: альтернатива розмірам — прямий об'єм (м³). */}
-                <div><Label className="text-xs">Або об&apos;єм (м³)</Label><Input type="number" step="0.001" value={p.volume} onChange={(e) => updatePlace(i, 'volume', e.target.value)} className="w-40" /></div>
+                {/* ТЗ docx 02.07.26 (D6): поле «об'єм» у Клієнта прибрано — лише Д/Ш/В. */}
                 {volWeight(p) > 0 && <div className="text-xs text-gray-500">Об&apos;ємна вага: {volWeight(p)} кг</div>}
               </div>
             ))}
-            <div className="text-sm font-medium">Загальна вага: {totalWeight.toFixed(2)} кг</div>
+            {/* ТЗ docx 02.07.26 (D7): Фактична / Об'ємна / Розрахункова вага. */}
+            <div className="text-sm space-y-0.5 border-t pt-2 mt-1">
+              <div className="flex justify-between"><span className="text-gray-500">Фактична вага</span><span>{totalWeight.toFixed(2)} кг</span></div>
+              {totalVolWeight > 0 && (
+                <div className="flex justify-between"><span className="text-gray-500">Об&apos;ємна вага</span><span>{totalVolWeight.toFixed(2)} кг</span></div>
+              )}
+              <div className="flex justify-between font-medium"><span>Розрахункова вага</span><span>{billableWeight.toFixed(2)} кг</span></div>
+            </div>
           </CardContent>
         </Card>
 

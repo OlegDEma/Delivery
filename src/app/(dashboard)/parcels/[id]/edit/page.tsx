@@ -250,6 +250,9 @@ export default function EditParcelPage() {
       : null);
 
   const senderInUA = senderCountry === 'UA' || (!senderCountry && direction === 'ua_to_eu');
+  // ТЗ docx 02.07.26 (D4): «Доставка до порога будинку» — лише Європа→Україна +
+  // Адресна доставка Отримувача (спосіб зберігається в receiverAddress).
+  const canDoorstep = direction === 'eu_to_ua' && parcel?.receiverAddress?.deliveryMethod === 'address';
   const declaredCurrencyLabel = parcel?.declaredValueCurrency === 'UAH' || senderInUA ? 'грн' : 'EUR';
   const declaredCurrency = (parcel?.declaredValueCurrency || (senderInUA ? 'UAH' : 'EUR')) as 'UAH' | 'EUR';
 
@@ -330,7 +333,8 @@ export default function EditParcelPage() {
         declaredValue: declaredValue ? Number(declaredValue) : 0,
         insuranceApplied: insurance,
         needsPackaging,
-        doorstepDelivery,
+        // ТЗ docx 02.07.26 (D4): не застосовуємо doorstep, якщо опція недоступна.
+        doorstepDelivery: canDoorstep && doorstepDelivery,
         parcelMoneyAmount:
           parcelMoneyEnabled && Number(parcelMoneyAmount) > 0
             ? Number(parcelMoneyAmount)
@@ -549,7 +553,9 @@ export default function EditParcelPage() {
               </div>
             </div>
 
-            {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням. */}
+            {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням.
+                ТЗ docx 02.07.26 (D4): лише Європа→Україна + Адресна доставка. */}
+            {canDoorstep && (
             <div className="rounded-lg border p-3 bg-gray-50">
               <div className="flex items-center gap-2">
                 <Checkbox id="doorstep-cb" checked={doorstepDelivery} onCheckedChange={(c) => setDoorstepDelivery(c === true)} />
@@ -559,6 +565,7 @@ export default function EditParcelPage() {
                 </Label>
               </div>
             </div>
+            )}
 
             <div className="rounded-lg border p-3 bg-gray-50 space-y-2">
               <div className="flex items-center gap-2">
@@ -764,7 +771,7 @@ export default function EditParcelPage() {
           declaredValueCurrency={declaredCurrency}
           insurance={insurance}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
-          isDoorstepDelivery={doorstepDelivery}
+          isDoorstepDelivery={canDoorstep && doorstepDelivery}
           isAddressDelivery={parcel.receiverAddress?.deliveryMethod === 'address'}
           isPickupPoint={direction === 'eu_to_ua' && collection.method === 'pickup_point'}
           isCourierPickup={direction === 'eu_to_ua' && collection.method === 'courier_pickup'}

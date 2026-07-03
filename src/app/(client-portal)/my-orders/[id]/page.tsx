@@ -36,16 +36,23 @@ interface ParcelDetail {
   parcelMoneyAmount: number | string | null;
   parcelMoneyCost: number | string | null;
   isPaid: boolean;
+  // ТЗ docx 02.07.26 (D9): поля для секції «Деталі».
+  payer: string | null;
+  paymentMethod: string | null;
+  paymentInUkraine: boolean;
+  needsPackaging: boolean;
+  insuranceApplied: boolean;
+  doorstepDelivery: boolean;
   createdAt: string;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: {
     country: string; city: string; street: string | null; building: string | null;
-    postalCode: string | null; npWarehouseNum: string | null; deliveryMethod: string;
+    postalCode: string | null; landmark: string | null; npWarehouseNum: string | null; deliveryMethod: string;
   } | null;
   senderAddress: {
     country: string | null; city: string; street: string | null; building: string | null;
-    postalCode: string | null;
+    postalCode: string | null; landmark: string | null;
   } | null;
   places: {
     placeNumber: number; weight: number | string | null;
@@ -62,6 +69,13 @@ function num(v: number | string | null | undefined): number {
   const n = typeof v === 'number' ? v : Number(v);
   return Number.isFinite(n) ? n : 0;
 }
+
+// ТЗ docx 02.07.26 (D9): мітки для секції «Деталі» (read-only у клієнта).
+const SHIPMENT_LABELS: Record<string, string> = {
+  parcels_cargo: 'Посилки та вантажі', documents: 'Документи', tires_wheels: 'Шини та диски',
+};
+const PAYER_LABELS: Record<string, string> = { sender: 'Відправник', receiver: 'Отримувач' };
+const METHOD_LABELS: Record<string, string> = { cash: 'Готівка', cashless: 'Безготівка' };
 
 export default function MyOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -171,6 +185,8 @@ export default function MyOrderDetailPage() {
                 {parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}
                 {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
                 {parcel.senderAddress.country !== 'UA' && parcel.senderAddress.postalCode ? `, ${parcel.senderAddress.postalCode}` : ''}
+                {/* ТЗ docx 02.07.26 (D1): орієнтир (коли вказано). */}
+                {parcel.senderAddress.landmark ? ` (${parcel.senderAddress.landmark})` : ''}
               </div>
             )}
           </div>
@@ -187,6 +203,8 @@ export default function MyOrderDetailPage() {
                 {parcel.receiverAddress.building ? ` ${parcel.receiverAddress.building}` : ''}
                 {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
                 {parcel.receiverAddress.country !== 'UA' && parcel.receiverAddress.postalCode ? `, ${parcel.receiverAddress.postalCode}` : ''}
+                {/* ТЗ docx 02.07.26 (D1): орієнтир (коли вказано). */}
+                {parcel.receiverAddress.landmark ? ` (${parcel.receiverAddress.landmark})` : ''}
                 {parcel.receiverAddress.npWarehouseNum ? ` | НП №${parcel.receiverAddress.npWarehouseNum}` : ''}
               </div>
             )}
@@ -208,6 +226,50 @@ export default function MyOrderDetailPage() {
               </span>
             </div>
           ))}
+        </CardContent>
+      </Card>
+
+      {/* ТЗ docx 02.07.26 (D9): секція «Деталі» (read-only у клієнта). */}
+      <Card>
+        <CardHeader className="py-2 px-3"><CardTitle className="text-sm">Деталі</CardTitle></CardHeader>
+        <CardContent className="px-3 pb-3 pt-0 text-sm space-y-1">
+          <div className="flex justify-between">
+            <span className="text-gray-500">Вид відправлення</span>
+            <span>{SHIPMENT_LABELS[parcel.shipmentType] || parcel.shipmentType}</span>
+          </div>
+          {parcel.payer && (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Платник</span>
+              <span>{PAYER_LABELS[parcel.payer] || parcel.payer}</span>
+            </div>
+          )}
+          {parcel.paymentMethod && (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Оплата</span>
+              <span>
+                {METHOD_LABELS[parcel.paymentMethod] || parcel.paymentMethod}
+                {parcel.paymentInUkraine ? ' (в Україні)' : ''}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span className="text-gray-500">Страхування</span>
+            <span>{parcel.insuranceApplied ? 'Так' : 'Ні'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Пакування</span>
+            <span>{parcel.needsPackaging ? 'Так' : 'Ні'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Доставка до порога</span>
+            <span>{parcel.doorstepDelivery ? 'Так' : 'Ні'}</span>
+          </div>
+          {!!num(parcel.parcelMoneyAmount) && (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Пакет (передача)</span>
+              <span>{num(parcel.parcelMoneyAmount).toFixed(2)}</span>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -51,6 +51,8 @@ interface TripDetail {
   secondCourier: { id: string; fullName: string } | null;
   createdBy: { fullName: string } | null;
   parcels: TripParcel[];
+  /** ТЗ docx 02.07.26 (D12): кількість місць для пасажирів (стеля пасажирів). */
+  passengerCapacity: number;
   _count: { parcels: number; routeTasks: number };
 }
 
@@ -65,6 +67,8 @@ export default function TripDetailPage() {
   const [depDate, setDepDate] = useState('');
   const [arrDate, setArrDate] = useState('');
   const [deleting, setDeleting] = useState(false);
+  // ТЗ docx 02.07.26 (D12): кількість місць для пасажирів у Керуванні рейсом.
+  const [capacity, setCapacity] = useState('');
 
   async function fetchTrip() {
     const res = await fetch(`/api/trips/${id}`);
@@ -73,8 +77,22 @@ export default function TripDetailPage() {
       setTrip(data);
       setDepDate(data.departureDate ? String(data.departureDate).slice(0, 10) : '');
       setArrDate(data.arrivalDate ? String(data.arrivalDate).slice(0, 10) : '');
+      setCapacity(String(data.passengerCapacity ?? 0));
     }
     setLoading(false);
+  }
+
+  // ТЗ docx 02.07.26 (D12): зберегти кількість місць для пасажирів.
+  async function handleSaveCapacity() {
+    setSaving(true);
+    const res = await fetch(`/api/trips/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passengerCapacity: Number(capacity) || 0 }),
+    });
+    if (res.ok) { toast.success('Кількість місць оновлено'); await fetchTrip(); }
+    else { const d = await res.json().catch(() => ({})); toast.error(d.error || 'Помилка'); }
+    setSaving(false);
   }
 
   async function handleSaveDates() {
@@ -159,37 +177,8 @@ export default function TripDetailPage() {
         </div>
       </div>
 
-      {/* Customs declaration summary */}
-      <Card>
-        <CardHeader className="py-2 px-3">
-          <CardTitle className="text-sm">Митна декларація</CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3 pt-0">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-            <div>
-              <div className="text-gray-500">Посилок</div>
-              <div className="font-bold text-lg">{trip._count.parcels}</div>
-            </div>
-            <div>
-              <div className="text-gray-500">Місць</div>
-              <div className="font-bold text-lg">{totalPlaces}</div>
-            </div>
-            <div>
-              <div className="text-gray-500">Загальна вага</div>
-              <div className="font-bold text-lg">{totalWeight.toFixed(1)} кг</div>
-            </div>
-            <div>
-              <div className="text-gray-500">Оголошена вартість</div>
-              <div className="font-bold text-lg">
-                {trip.parcels.reduce((s, p) => s + (Number(p.declaredValue) || 0), 0).toFixed(2)} EUR
-              </div>
-            </div>
-          </div>
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => window.print()}>
-            Друкувати для митниці
-          </Button>
-        </CardContent>
-      </Card>
+      {/* ТЗ docx 02.07.26 (D12): картку «Митна декларація» прибрано (ті самі
+          показники лишились у зведенні «Summary» нижче). */}
 
       {/* Керування рейсом — статус, дати, видалення (ТЗ docx 29.06.26 «Рейси») */}
       <Card>
@@ -228,6 +217,23 @@ export default function TripDetailPage() {
             </div>
             <Button onClick={handleSaveDates} disabled={saving || !depDate} size="sm" variant="outline">
               Зберегти дати
+            </Button>
+          </div>
+
+          {/* ТЗ docx 02.07.26 (D12): кількість місць для пасажирів (стеля пасажирів). */}
+          <div className="flex gap-2 items-end border-t pt-3">
+            <div className="flex-1">
+              <Label className="text-xs">Кількість місць (пасажири)</Label>
+              <Input
+                type="number"
+                min={0}
+                value={capacity}
+                onChange={(e) => setCapacity(e.target.value)}
+                placeholder="0 — не возимо пасажирів"
+              />
+            </div>
+            <Button onClick={handleSaveCapacity} disabled={saving} size="sm" variant="outline">
+              Зберегти
             </Button>
           </div>
 
