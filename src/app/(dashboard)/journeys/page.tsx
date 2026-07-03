@@ -90,6 +90,15 @@ export default function JourneysPage() {
   const [editNotes, setEditNotes] = useState('');
   const [editSaving, setEditSaving] = useState(false);
 
+  // ТЗ docx 02.07.26 (D10): груповий вибір + групування за країною + масові дії.
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [groupByCountry, setGroupByCountry] = useState(false);
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [bulkCourier1, setBulkCourier1] = useState('');
+  const [bulkCourier2, setBulkCourier2] = useState('');
+  const [bulkVehicle, setBulkVehicle] = useState('');
+  const [bulkSaving, setBulkSaving] = useState(false);
+
   async function fetchJourneys() {
     setLoading(true);
     const res = await fetch('/api/journeys');
@@ -204,6 +213,77 @@ export default function JourneysPage() {
   function tripLabel(direction: string, c: string) {
     return tripRouteLabel(c, direction);
   }
+
+  // ── ТЗ docx 02.07.26 (D10): груповий вибір ──────────────────────
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+  function toggleAllVisible() {
+    setSelectedIds(prev => (prev.size === journeys.length && journeys.length > 0) ? new Set() : new Set(journeys.map(j => j.id)));
+  }
+  function clearSelection() { setSelectedIds(new Set()); }
+  const selectedJourneys = journeys.filter(j => selectedIds.has(j.id));
+
+  async function handleBulkDelete() {
+    if (selectedJourneys.length === 0) return;
+    if (!confirm(`Видалити вибрані поїздки (${selectedJourneys.length}) разом з усіма їхніми рейсами? Прив'язані посилки буде відв'язано (не видалено).`)) return;
+    setBulkSaving(true);
+    const results = await Promise.all(selectedJourneys.map(j =>
+      fetch(`/api/journeys?id=${j.id}`, { method: 'DELETE' }).then(r => r.ok).catch(() => false)
+    ));
+    setBulkSaving(false);
+    const ok = results.filter(Boolean).length;
+    if (ok === results.length) toast.success(`Видалено поїздок: ${ok}`);
+    else toast.error(`Видалено ${ok}/${results.length}`);
+    clearSelection();
+    fetchJourneys();
+  }
+
+  async function handleBulkEditSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (selectedJourneys.length === 0) return;
+    // Надсилаємо лише заповнені поля (щоб не затерти наявні порожніми).
+    const patch: Record<string, unknown> = {};
+    if (bulkCourier1) patch.assignedCourierId = bulkCourier1 === '_none' ? null : bulkCourier1;
+    if (bulkCourier2) patch.secondCourierId = bulkCourier2 === '_none' ? null : bulkCourier2;
+    if (bulkVehicle) patch.vehicleInfo = bulkVehicle;
+    if (Object.keys(patch).length === 0) { toast.error('Заповніть хоча б одне поле для масового редагування'); return; }
+    setBulkSaving(true);
+    const results = await Promise.all(selectedJourneys.map(j =>
+      fetch(`/api/journeys?id=${j.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      }).then(r => r.ok).catch(() => false)
+    ));
+    setBulkSaving(false);
+    const ok = results.filter(Boolean).length;
+    if (ok === results.length) toast.success(`Оновлено поїздок: ${ok}`);
+    else toast.error(`Оновлено ${ok}/${results.length}`);
+    setBulkEditOpen(false);
+    setBulkCourier1(''); setBulkCourier2(''); setBulkVehicle('');
+    clearSelection();
+    fetchJourneys();
+  }
+
+  // Групування за країною (ТЗ D10: у Поїздок немає напрямку → групуємо за країною).
+  const journeyGroups: { key: string; label: string; items: Journey[] }[] = groupByCountry
+    ? (() => {
+        const map = new Map<string, Journey[]>();
+        for (const j of journeys) {
+          if (!map.has(j.country)) map.set(j.country, []);
+          map.get(j.country)!.push(j);
+        }
+        return [...map.entries()].map(([key, items]) => ({
+          key, label: COUNTRY_LABELS[key as CountryCode] || key, items,
+        }));
+      })()
+    : [{ key: '', label: '', items: journeys }];
+  const allSelected = journeys.length > 0 && selectedIds.size === journeys.length;
 
   return (
     <div>
@@ -331,17 +411,54 @@ export default function JourneysPage() {
         </Dialog>
       </div>
 
+      {/* ТЗ docx 02.07.26 (D10): панель групового вибору + групування за країною. */}
+      {!loading && journeys.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 mb-3 text-sm">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <Checkbox checked={allSelected} onCheckedChange={() => toggleAllVisible()} />
+            Вибрати всі
+          </label>
+          {selectedIds.size > 0 && <span className="text-gray-500">Вибрано: {selectedIds.size}</span>}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <Checkbox checked={groupByCountry} onCheckedChange={(c) => setGroupByCountry(c === true)} />
+            Групувати за країною
+          </label>
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-2 ml-auto">
+              <Button size="sm" variant="outline" onClick={() => { setBulkCourier1(''); setBulkCourier2(''); setBulkVehicle(''); setBulkEditOpen(true); }} disabled={bulkSaving}>
+                Редагувати вибрані
+              </Button>
+              <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={handleBulkDelete} disabled={bulkSaving}>
+                Видалити вибрані
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <ListSkeleton />
       ) : journeys.length === 0 ? (
         <EmptyState title="Ще немає поїздок" description="Створіть першу поїздку — автоматично додасться 2 рейси" />
       ) : (
-        <div className="space-y-3">
-          {journeys.map(j => (
+        <div className="space-y-4">
+          {journeyGroups.map(group => (
+            <div key={group.key || 'all'}>
+              {groupByCountry && (
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 px-1">
+                  {group.label} ({group.items.length})
+                </div>
+              )}
+              <div className="space-y-3">
+          {group.items.map(j => (
             <div key={j.id} className="bg-white rounded-lg border overflow-hidden">
               {/* Journey header */}
-              <div className="p-3 flex items-start justify-between bg-gradient-to-r from-blue-50 to-transparent">
-                <div>
+              <div className="p-3 flex items-start gap-2 bg-gradient-to-r from-blue-50 to-transparent">
+                {/* ТЗ docx 02.07.26 (D10): чекбокс вибору поїздки. */}
+                <div className="pt-0.5">
+                  <Checkbox checked={selectedIds.has(j.id)} onCheckedChange={() => toggleSelect(j.id)} />
+                </div>
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-semibold">
                       🚐 UA → {COUNTRY_LABELS[j.country as CountryCode]} → UA
@@ -404,6 +521,9 @@ export default function JourneysPage() {
               </div>
             </div>
           ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -460,6 +580,49 @@ export default function JourneysPage() {
               </Button>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ТЗ docx 02.07.26 (D10): масове редагування вибраних поїздок. */}
+      <Dialog open={bulkEditOpen} onOpenChange={setBulkEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Масове редагування ({selectedJourneys.length})</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleBulkEditSave} className="space-y-3">
+            <p className="text-xs text-gray-500">Заповніть лише ті поля, які треба змінити для всіх вибраних поїздок.</p>
+            <div>
+              <Label className="text-xs">Водій 1</Label>
+              <Select value={bulkCourier1} onValueChange={(v) => setBulkCourier1(v ?? '')}>
+                <SelectTrigger>
+                  <SelectValue>{bulkCourier1 && bulkCourier1 !== '_none' ? (couriers.find(c => c.id === bulkCourier1)?.fullName || '') : (bulkCourier1 === '_none' ? 'Прибрати' : 'Не змінювати')}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">Прибрати водія</SelectItem>
+                  {couriers.map(c => (<SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Водій 2</Label>
+              <Select value={bulkCourier2} onValueChange={(v) => setBulkCourier2(v ?? '')}>
+                <SelectTrigger>
+                  <SelectValue>{bulkCourier2 && bulkCourier2 !== '_none' ? (couriers.find(c => c.id === bulkCourier2)?.fullName || '') : (bulkCourier2 === '_none' ? 'Прибрати' : 'Не змінювати')}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">Прибрати водія</SelectItem>
+                  {couriers.map(c => (<SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Транспорт</Label>
+              <Input value={bulkVehicle} onChange={(e) => setBulkVehicle(e.target.value)} placeholder="Не змінювати" />
+            </div>
+            <Button type="submit" className="w-full" disabled={bulkSaving}>
+              {bulkSaving ? 'Збереження…' : 'Застосувати до вибраних'}
+            </Button>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

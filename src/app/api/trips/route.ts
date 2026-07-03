@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
     include: {
       assignedCourier: { select: { id: true, fullName: true } },
       secondCourier: { select: { id: true, fullName: true } },
-      _count: { select: { parcels: true, routeTasks: true } },
+      // ТЗ docx 02.07.26 (D11): passengers — щоб попереджати при заниженні місць.
+      _count: { select: { parcels: true, routeTasks: true, passengers: true } },
     },
     orderBy: { departureDate: 'desc' },
     take: 50,

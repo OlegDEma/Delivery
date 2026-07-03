@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +25,9 @@ interface Trip {
   assignedCourier: { id: string; fullName: string } | null;
   secondCourier: { id: string; fullName: string } | null;
   notes: string | null;
-  _count: { parcels: number; routeTasks: number };
+  // ТЗ docx 02.07.26 (D11): кількість місць для пасажирів + лічильник призначених.
+  passengerCapacity: number;
+  _count: { parcels: number; routeTasks: number; passengers: number };
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -33,6 +36,11 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   completed: { label: 'Завершено', color: 'bg-green-100 text-green-800' },
   cancelled: { label: 'Скасовано', color: 'bg-red-100 text-red-800' },
 };
+
+const DIRECTION_LABELS: Record<string, string> = { eu_to_ua: 'Європа → Україна', ua_to_eu: 'Україна → Європа' };
+const TRIP_COUNTRY_LABELS: Record<string, string> = { NL: 'Нідерланди', AT: 'Австрія', DE: 'Німеччина' };
+
+type GroupBy = 'none' | 'country' | 'direction';
 
 export default function TripsPage() {
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -48,12 +56,18 @@ export default function TripsPage() {
   const [notes, setNotes] = useState('');
   const [passengerCapacity, setPassengerCapacity] = useState('');
 
-  // ТЗ docx 01.07.26: inline «Редагувати(дата)»/«Видалити» на кожному рейсі
-  // (візуально як у вкладці Поїздки).
+  // ТЗ docx 01.07.26: inline «Редагувати(дата)»/«Видалити» на кожному рейсі.
   const [editTrip, setEditTrip] = useState<Trip | null>(null);
   const [editDep, setEditDep] = useState('');
   const [editArr, setEditArr] = useState('');
   const [editSaving, setEditSaving] = useState(false);
+
+  // ТЗ docx 02.07.26 (D11): груповий вибір + групування + масова «кількість місць».
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [groupBy, setGroupBy] = useState<GroupBy>('none');
+  const [capDialogOpen, setCapDialogOpen] = useState(false);
+  const [bulkCapacity, setBulkCapacity] = useState('');
+  const [bulkSaving, setBulkSaving] = useState(false);
 
   async function fetchTrips() {
     setLoading(true);
@@ -91,11 +105,76 @@ export default function TripsPage() {
     else { const d = await res.json().catch(() => ({})); toast.error(d.error || 'Не вдалося видалити'); }
   }
 
+  // ── Груповий вибір ──────────────────────────────────────────────
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+  function toggleAllVisible() {
+    setSelectedIds(prev => {
+      if (prev.size === trips.length && trips.length > 0) return new Set();
+      return new Set(trips.map(t => t.id));
+    });
+  }
+  function clearSelection() { setSelectedIds(new Set()); }
+
+  const selectedTrips = trips.filter(t => selectedIds.has(t.id));
+
+  async function handleBulkDelete() {
+    if (selectedTrips.length === 0) return;
+    if (!confirm(`Видалити вибрані рейси (${selectedTrips.length})? Посилки буде відв'язано (лишаться в системі), маршрутні задачі та пасажирів — видалено.`)) return;
+    setBulkSaving(true);
+    const results = await Promise.all(selectedTrips.map(t =>
+      fetch(`/api/trips/${t.id}`, { method: 'DELETE' }).then(r => r.ok).catch(() => false)
+    ));
+    setBulkSaving(false);
+    const ok = results.filter(Boolean).length;
+    if (ok === results.length) toast.success(`Видалено рейсів: ${ok}`);
+    else toast.error(`Видалено ${ok}/${results.length}; частину не вдалося видалити`);
+    clearSelection();
+    fetchTrips();
+  }
+
+  async function handleBulkSetCapacity(e: React.FormEvent) {
+    e.preventDefault();
+    if (selectedTrips.length === 0) return;
+    const cap = Number(bulkCapacity);
+    if (!Number.isFinite(cap) || cap < 0) { toast.error('Вкажіть невідʼємне число місць'); return; }
+    // ТЗ docx 02.07.26 (D11): попереджаємо (але дозволяємо), якщо занижуємо нижче
+    // вже призначених пасажирів у якомусь із рейсів.
+    const conflicting = selectedTrips.filter(t => cap < t._count.passengers);
+    if (conflicting.length > 0) {
+      const ok = confirm(
+        `У ${conflicting.length} рейс(ах) уже призначено більше пасажирів, ніж ${cap} місць. ` +
+        `Все одно встановити ${cap}? (наявні пасажири залишаться, але місць буде менше)`
+      );
+      if (!ok) return;
+    }
+    setBulkSaving(true);
+    const results = await Promise.all(selectedTrips.map(t =>
+      fetch(`/api/trips/${t.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passengerCapacity: cap }),
+      }).then(r => r.ok).catch(() => false)
+    ));
+    setBulkSaving(false);
+    const ok = results.filter(Boolean).length;
+    if (ok === results.length) toast.success(`Оновлено місць у рейсах: ${ok}`);
+    else toast.error(`Оновлено ${ok}/${results.length}`);
+    setCapDialogOpen(false);
+    setBulkCapacity('');
+    clearSelection();
+    fetchTrips();
+  }
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setSaving(true);
-
     const res = await fetch('/api/trips', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -105,12 +184,9 @@ export default function TripsPage() {
         passengerCapacity: passengerCapacity ? Number(passengerCapacity) : 0,
       }),
     });
-
     if (res.ok) {
       setDialogOpen(false);
-      setDepartureDate('');
-      setNotes('');
-      setPassengerCapacity('');
+      setDepartureDate(''); setNotes(''); setPassengerCapacity('');
       fetchTrips();
     } else {
       const data = await res.json();
@@ -119,8 +195,25 @@ export default function TripsPage() {
     setSaving(false);
   }
 
-  const DIRECTION_LABELS: Record<string, string> = { eu_to_ua: 'Європа → Україна', ua_to_eu: 'Україна → Європа' };
-  const TRIP_COUNTRY_LABELS: Record<string, string> = { NL: 'Нідерланди', AT: 'Австрія', DE: 'Німеччина' };
+  // ── Групування списку ───────────────────────────────────────────
+  const groups: { key: string; label: string; items: Trip[] }[] = (() => {
+    if (groupBy === 'none') return [{ key: '', label: '', items: trips }];
+    const map = new Map<string, Trip[]>();
+    for (const t of trips) {
+      const key = groupBy === 'country' ? t.country : t.direction;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(t);
+    }
+    return [...map.entries()].map(([key, items]) => ({
+      key,
+      label: groupBy === 'country'
+        ? (COUNTRY_LABELS[key as CountryCode] || key)
+        : (DIRECTION_LABELS[key] || key),
+      items,
+    }));
+  })();
+
+  const allSelected = trips.length > 0 && selectedIds.size === trips.length;
 
   return (
     <div>
@@ -180,59 +273,116 @@ export default function TripsPage() {
         </Dialog>
       </div>
 
+      {/* ТЗ docx 02.07.26 (D11): панель групового вибору + групування. */}
+      {!loading && trips.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 mb-3 text-sm">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <Checkbox checked={allSelected} onCheckedChange={() => toggleAllVisible()} />
+            Вибрати всі
+          </label>
+          {selectedIds.size > 0 && (
+            <span className="text-gray-500">Вибрано: {selectedIds.size}</span>
+          )}
+          <div className="flex items-center gap-1">
+            <span className="text-gray-500">Групувати:</span>
+            <Select value={groupBy} onValueChange={(v) => setGroupBy((v ?? 'none') as GroupBy)}>
+              <SelectTrigger className="h-8 w-40">
+                <SelectValue>
+                  {groupBy === 'none' ? 'Без групування' : groupBy === 'country' ? 'За країною' : 'За напрямком'}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Без групування</SelectItem>
+                <SelectItem value="country">За країною</SelectItem>
+                <SelectItem value="direction">За напрямком</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-2 ml-auto">
+              <Button size="sm" variant="outline" onClick={() => { setBulkCapacity(''); setCapDialogOpen(true); }} disabled={bulkSaving}>
+                Задати місця
+              </Button>
+              <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={handleBulkDelete} disabled={bulkSaving}>
+                Видалити вибрані
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <ListSkeleton />
       ) : trips.length === 0 ? (
         <EmptyState title="Ще немає рейсів" />
       ) : (
-        <div className="bg-white rounded-lg border divide-y">
-          {trips.map(trip => (
-            <div key={trip.id} className="p-3 hover:bg-gray-50 flex items-start justify-between gap-2">
-              {/* Клікабельна частина — деталі рейсу. Кнопки поза Link (не вкладаються). */}
-              <Link href={`/trips/${trip.id}`} className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="font-medium">
-                    {tripRouteLabel(trip.country, trip.direction)}
-                  </span>
-                  <Badge className={STATUS_MAP[trip.status]?.color || ''}>
-                    {STATUS_MAP[trip.status]?.label || trip.status}
-                  </Badge>
+        <div className="space-y-4">
+          {groups.map(group => (
+            <div key={group.key || 'all'}>
+              {groupBy !== 'none' && (
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 px-1">
+                  {group.label} ({group.items.length})
                 </div>
-                <div className="text-sm text-gray-600">
-                  {/* ТЗ L1/01.07.26: день тижня + дата. */}
-                  {formatDateWithWeekday(trip.departureDate)}
-                  {trip.arrivalDate && ` → ${formatDateWithWeekday(trip.arrivalDate)}`}
-                  {trip.assignedCourier && ` | ${trip.assignedCourier.fullName}`}
-                </div>
-                {trip.notes && <div className="text-xs text-gray-400 mt-0.5">{trip.notes}</div>}
-              </Link>
-              <div className="text-right text-sm shrink-0">
-                <div className="font-medium">{trip._count.parcels} посилок</div>
-                <div className="text-xs text-gray-400">{trip._count.routeTasks} заїздів</div>
-                {/* ТЗ docx 01.07.26: inline «Редагувати(дата)»/«Видалити» як у Поїздках. */}
-                <div className="flex flex-col items-end gap-0.5 mt-1">
-                  <button
-                    type="button"
-                    onClick={() => openEditTrip(trip)}
-                    className="text-xs font-medium text-blue-600 hover:text-blue-800"
-                  >
-                    Редагувати
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteTrip(trip)}
-                    className="text-xs font-medium text-red-600 hover:text-red-800"
-                  >
-                    Видалити
-                  </button>
-                </div>
+              )}
+              <div className="bg-white rounded-lg border divide-y">
+                {group.items.map(trip => (
+                  <div key={trip.id} className="p-3 hover:bg-gray-50 flex items-start gap-2">
+                    {/* ТЗ docx 02.07.26 (D11): чекбокс вибору рядка. */}
+                    <div className="pt-0.5">
+                      <Checkbox checked={selectedIds.has(trip.id)} onCheckedChange={() => toggleSelect(trip.id)} />
+                    </div>
+                    {/* Клікабельна частина — деталі рейсу. */}
+                    <Link href={`/trips/${trip.id}`} className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="font-medium">
+                          {tripRouteLabel(trip.country, trip.direction)}
+                        </span>
+                        <Badge className={STATUS_MAP[trip.status]?.color || ''}>
+                          {STATUS_MAP[trip.status]?.label || trip.status}
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {/* ТЗ L1/01.07.26: день тижня + дата. */}
+                        {formatDateWithWeekday(trip.departureDate)}
+                        {trip.arrivalDate && ` → ${formatDateWithWeekday(trip.arrivalDate)}`}
+                        {trip.assignedCourier && ` | ${trip.assignedCourier.fullName}`}
+                      </div>
+                      {trip.notes && <div className="text-xs text-gray-400 mt-0.5">{trip.notes}</div>}
+                    </Link>
+                    <div className="text-right text-sm shrink-0">
+                      <div className="font-medium">{trip._count.parcels} посилок</div>
+                      <div className="text-xs text-gray-400">{trip._count.routeTasks} заїздів</div>
+                      {/* ТЗ docx 02.07.26 (D11): місць/пасажирів. */}
+                      <div className="text-xs text-gray-400">
+                        {trip._count.passengers}/{trip.passengerCapacity} пасаж.
+                      </div>
+                      {/* ТЗ docx 01.07.26: inline «Редагувати(дата)»/«Видалити». */}
+                      <div className="flex flex-col items-end gap-0.5 mt-1">
+                        <button
+                          type="button"
+                          onClick={() => openEditTrip(trip)}
+                          className="text-xs font-medium text-blue-600 hover:text-blue-800"
+                        >
+                          Редагувати
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTrip(trip)}
+                          className="text-xs font-medium text-red-600 hover:text-red-800"
+                        >
+                          Видалити
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* ТЗ docx 01.07.26: редагування дат рейсу (як у Поїздках). */}
+      {/* ТЗ docx 01.07.26: редагування дат рейсу. */}
       <Dialog open={!!editTrip} onOpenChange={(o) => { if (!o) setEditTrip(null); }}>
         <DialogContent>
           <DialogHeader>
@@ -258,6 +408,33 @@ export default function TripsPage() {
             </div>
             <Button type="submit" className="w-full" disabled={editSaving || !editDep}>
               {editSaving ? 'Збереження…' : 'Зберегти дати'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ТЗ docx 02.07.26 (D11): масове задання кількості місць для пасажирів. */}
+      <Dialog open={capDialogOpen} onOpenChange={setCapDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Кількість місць для пасажирів</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleBulkSetCapacity} className="space-y-3">
+            <p className="text-sm text-gray-500">
+              Застосувати до вибраних рейсів: {selectedTrips.length}
+            </p>
+            <div>
+              <Label className="text-xs">Кількість місць</Label>
+              <Input
+                type="number" min={0} max={99}
+                value={bulkCapacity}
+                onChange={(e) => setBulkCapacity(e.target.value)}
+                placeholder="0 — не возимо пасажирів"
+                autoFocus
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={bulkSaving || bulkCapacity === ''}>
+              {bulkSaving ? 'Збереження…' : 'Застосувати'}
             </Button>
           </form>
         </DialogContent>
