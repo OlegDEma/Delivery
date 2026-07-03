@@ -106,14 +106,18 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
         addr.npWarehouseNum !== (address?.npWarehouseNum || '') ||
         addr.pickupPointText !== (address?.pickupPointText || '');
 
-      if (addrChanged && address?.id) {
-        const r = await fetch(`/api/clients/${party.id}`, {
+      // ТЗ docx 02.07.26 (D2): зміна адреси/міста створює НОВИЙ запис адреси і
+      // прив'язує ЦЮ посилку до нього — щоб не зачепити інші посилки, які
+      // посилаються на стару адресу (за рішенням: «новий запис на зміну»).
+      if (addrChanged) {
+        const country = (address?.country ?? party.country) || 'UA';
+        const rNew = await fetch(`/api/clients/${party.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            action: 'updateAddress',
-            addressId: address.id,
+            action: 'addAddress',
             address: {
+              country,
               deliveryMethod: addr.deliveryMethod,
               postalCode: addr.postalCode || null,
               city: addr.city,
@@ -125,9 +129,21 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
             },
           }),
         });
-        if (!r.ok) {
-          const d = await r.json().catch(() => ({}));
-          throw new Error(d.error || 'Помилка збереження адреси');
+        if (!rNew.ok) {
+          const d = await rNew.json().catch(() => ({}));
+          throw new Error(d.error || 'Помилка створення адреси');
+        }
+        const created = await rNew.json();
+        // Прив'язуємо посилку до нового запису адреси (тригерить перерахунок).
+        const field = role === 'sender' ? 'senderAddressId' : 'receiverAddressId';
+        const rLink = await fetch(`/api/parcels/${parcelId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ [field]: created.id }),
+        });
+        if (!rLink.ok) {
+          const d = await rLink.json().catch(() => ({}));
+          throw new Error(d.error || 'Помилка прив\'язки адреси');
         }
       }
 
@@ -173,8 +189,10 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
         </Button>
       </div>
       <div className="text-[11px] text-gray-500">
-        {/* Per ТЗ: parcel ID context only — actual updates land on the client + address. */}
-        Зміни підуть до картки клієнта (#{parcelId.slice(0, 8)}…)
+        {/* ТЗ docx 02.07.26 (D2): зміна адреси створює новий запис саме для цієї
+            посилки (#{parcelId.slice(0, 8)}…) — інші посилки на стару адресу не
+            зачіпаються. Телефон оновлюється в картці клієнта. */}
+        Зміна адреси застосується лише до цієї посилки (#{parcelId.slice(0, 8)}…)
       </div>
     </div>
   );

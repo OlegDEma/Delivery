@@ -170,6 +170,10 @@ export const updateParcelSchema = z.object({
   collectionPointId: optionalUuidSchema,
   collectionDate: z.string().nullable().optional(),
   collectionAddress: z.string().trim().max(300).nullable().optional(),
+  /** ТЗ docx 02.07.26 (D2): при зміні міста/адреси прив'язуємо посилку до
+      НОВОГО запису адреси клієнта (створеного окремо). */
+  senderAddressId: optionalUuidSchema,
+  receiverAddressId: optionalUuidSchema,
   /** Per ТЗ-docx 03.06.2026: «всі поля редаговані» — multi-parcel answer
       теж має оновлюватись при редагуванні (раніше брали лише з створення). */
   isMultiParcelPickup: z.boolean().nullable().optional(),

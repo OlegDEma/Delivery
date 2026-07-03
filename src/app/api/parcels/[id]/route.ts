@@ -312,6 +312,15 @@ export async function PATCH(
       updateData.assignedCourier = { disconnect: true };
     }
   }
+  // ТЗ docx 02.07.26 (D2): зміна адреси/міста при редагуванні — прив'язуємо
+  // посилку до НОВОГО запису адреси (створеного клієнтом), не мутуючи спільну
+  // адресу (щоб не зачепити інші посилки на цю ж адресу).
+  if (body.senderAddressId !== undefined && body.senderAddressId) {
+    updateData.senderAddress = { connect: { id: body.senderAddressId } };
+  }
+  if (body.receiverAddressId !== undefined && body.receiverAddressId) {
+    updateData.receiverAddress = { connect: { id: body.receiverAddressId } };
+  }
   if (body.isPaid !== undefined) {
     updateData.isPaid = body.isPaid;
     if (body.isPaid) updateData.paidAt = new Date();
@@ -426,7 +435,10 @@ export async function PATCH(
     body.parcelMoneyAmount !== undefined ||
     body.collectionMethod !== undefined ||
     body.collectionPointId !== undefined ||
-    body.isMultiParcelPickup !== undefined;
+    body.isMultiParcelPickup !== undefined ||
+    // ТЗ docx 02.07.26 (D2): зміна адреси впливає на країну тарифу/спосіб.
+    body.senderAddressId !== undefined ||
+    body.receiverAddressId !== undefined;
 
   if (costAffectingTouched) {
     try {
@@ -437,6 +449,12 @@ export async function PATCH(
       const effectiveCollectionPointId = body.collectionPointId !== undefined
         ? body.collectionPointId
         : parcel.collectionPointId;
+      // ТЗ docx 02.07.26 (D2): при зміні адреси беремо НОВИЙ addressId зі свіжого
+      // body, щоб перерахунок ішов за новим містом/країною.
+      const effectiveSenderAddressId = body.senderAddressId !== undefined && body.senderAddressId
+        ? body.senderAddressId : parcel.senderAddressId;
+      const effectiveReceiverAddressId = body.receiverAddressId !== undefined && body.receiverAddressId
+        ? body.receiverAddressId : parcel.receiverAddressId;
       const [trip, collectionPoint, senderAddr, receiverAddr] = await Promise.all([
         parcel.tripId
           ? prisma.trip.findUnique({ where: { id: parcel.tripId }, select: { country: true } })
@@ -447,11 +465,11 @@ export async function PATCH(
               select: { country: true },
             })
           : Promise.resolve(null),
-        parcel.senderAddressId
-          ? prisma.clientAddress.findUnique({ where: { id: parcel.senderAddressId } })
+        effectiveSenderAddressId
+          ? prisma.clientAddress.findUnique({ where: { id: effectiveSenderAddressId } })
           : Promise.resolve(null),
-        parcel.receiverAddressId
-          ? prisma.clientAddress.findUnique({ where: { id: parcel.receiverAddressId } })
+        effectiveReceiverAddressId
+          ? prisma.clientAddress.findUnique({ where: { id: effectiveReceiverAddressId } })
           : Promise.resolve(null),
       ]);
 
