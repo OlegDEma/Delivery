@@ -185,6 +185,18 @@ export default function NewOrderPage() {
     }
   }, [serviceCities, receiverCountry, receiverCity, receiverDeliveryMethod]);
 
+  // ТЗ docx 09.07.26: коли відправник в Україні, «Пункт збору» недоступний
+  // (в UA пунктів збору немає — вони суто європейські). Стандартний дефолт
+  // collectionMethod='pickup_point' у цьому разі скидаємо, щоб клієнт свідомо
+  // обрав доступний спосіб і не було відправлено приховану опцію.
+  useEffect(() => {
+    if (senderCountry === 'UA' && collectionMethod === 'pickup_point') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCollectionMethod('');
+      setCollectionPointId('');
+    }
+  }, [senderCountry, collectionMethod]);
+
   // ТЗ §4: точки видачі для країни отримувача — для опції «Пункт видачі».
   useEffect(() => {
     if (!receiverCountry) { setReceiverPoints([]); return; }

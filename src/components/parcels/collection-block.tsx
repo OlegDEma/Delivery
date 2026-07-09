@@ -161,6 +161,13 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
   const externalShippingAvailableForClient =
     !clientFacing || isPostalAllowed(serviceCities, senderCountry, senderCityMatch, 'sender');
 
+  // ТЗ docx 09.07.26: «Пункт збору» — суто європейська опція (фізичні пункти
+  // збору є лише в EU-країнах). Для відправника в Україні їх НЕ ПЕРЕДБАЧЕНО,
+  // тож клієнту при напрямку «Україна → Європа» цю опцію взагалі не показуємо
+  // (вона має бути фізично відсутня, а не задизейблена).
+  const pickupPointAvailableForClient =
+    !clientFacing || senderCountry !== 'UA';
+
   // ТЗ (docx 14.05.26): перелік Пунктів збору — САМЕ для вибраного
   // населеного пункту (приклад Венло: точка є в Amsterdam, але не у Венло →
   // список порожній). Якщо місто ще не введено — показуємо всі по країні.
@@ -178,6 +185,7 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
   // опції способу передачі НЕ відображаємо взагалі (раніше показувались
   // задизейбленими з підписом «Опція тимчасово недоступна»).
   const isMethodForbiddenForClient = (m: CollectionMethod) =>
+    (m === COLLECTION_METHODS.PICKUP_POINT && !pickupPointAvailableForClient) ||
     (m === COLLECTION_METHODS.COURIER_PICKUP && !courierPickupAvailableForClient) ||
     (m === COLLECTION_METHODS.EXTERNAL_SHIPPING && !externalShippingAvailableForClient);
   const visibleMethods = (hideOthers ? METHODS.filter(m => m === value.method) : METHODS)

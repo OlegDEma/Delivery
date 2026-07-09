@@ -93,6 +93,9 @@ export default function JourneysPage() {
   // ТЗ docx 02.07.26 (D10): груповий вибір + групування за країною + масові дії.
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [groupByCountry, setGroupByCountry] = useState(false);
+  // ТЗ docx 09.07.26: фільтр за країною — на відміну від групування ПРИХОВУЄ
+  // поїздки до інших країн (показуємо лише обрану). '' = всі.
+  const [filterCountry, setFilterCountry] = useState<string>('');
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [bulkCourier1, setBulkCourier1] = useState('');
   const [bulkCourier2, setBulkCourier2] = useState('');
@@ -223,7 +226,15 @@ export default function JourneysPage() {
     });
   }
   function toggleAllVisible() {
-    setSelectedIds(prev => (prev.size === journeys.length && journeys.length > 0) ? new Set() : new Set(journeys.map(j => j.id)));
+    // «Вибрати всі» діє на ВИДИМІ (з урахуванням фільтра країни).
+    const visible = filterCountry ? journeys.filter(j => j.country === filterCountry) : journeys;
+    setSelectedIds(prev => {
+      const allSel = visible.length > 0 && visible.every(j => prev.has(j.id));
+      const next = new Set(prev);
+      if (allSel) visible.forEach(j => next.delete(j.id));
+      else visible.forEach(j => next.add(j.id));
+      return next;
+    });
   }
   function clearSelection() { setSelectedIds(new Set()); }
   const selectedJourneys = journeys.filter(j => selectedIds.has(j.id));
@@ -270,11 +281,14 @@ export default function JourneysPage() {
     fetchJourneys();
   }
 
+  // ТЗ docx 09.07.26: спершу застосовуємо ФІЛЬТР країни (ховає інші), потім
+  // (за потреби) групуємо відфільтрований список.
+  const filteredJourneys = filterCountry ? journeys.filter(j => j.country === filterCountry) : journeys;
   // Групування за країною (ТЗ D10: у Поїздок немає напрямку → групуємо за країною).
   const journeyGroups: { key: string; label: string; items: Journey[] }[] = groupByCountry
     ? (() => {
         const map = new Map<string, Journey[]>();
-        for (const j of journeys) {
+        for (const j of filteredJourneys) {
           if (!map.has(j.country)) map.set(j.country, []);
           map.get(j.country)!.push(j);
         }
@@ -282,8 +296,8 @@ export default function JourneysPage() {
           key, label: COUNTRY_LABELS[key as CountryCode] || key, items,
         }));
       })()
-    : [{ key: '', label: '', items: journeys }];
-  const allSelected = journeys.length > 0 && selectedIds.size === journeys.length;
+    : [{ key: '', label: '', items: filteredJourneys }];
+  const allSelected = filteredJourneys.length > 0 && filteredJourneys.every(j => selectedIds.has(j.id));
 
   return (
     <div>
@@ -423,6 +437,22 @@ export default function JourneysPage() {
             <Checkbox checked={groupByCountry} onCheckedChange={(c) => setGroupByCountry(c === true)} />
             Групувати за країною
           </label>
+          {/* ТЗ docx 09.07.26: фільтр за країною — показує лише поїздки до
+              обраної країни (на відміну від групування, що лишає всі). */}
+          <div className="flex items-center gap-1">
+            <span className="text-gray-500">Країна:</span>
+            <Select value={filterCountry || 'all'} onValueChange={(v) => setFilterCountry(v === 'all' ? '' : (v ?? ''))}>
+              <SelectTrigger className="h-8 w-40">
+                <SelectValue>{filterCountry ? (EU_COUNTRY_LABELS[filterCountry] || filterCountry) : 'Усі країни'}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Усі країни</SelectItem>
+                <SelectItem value="NL">Нідерланди</SelectItem>
+                <SelectItem value="AT">Австрія</SelectItem>
+                <SelectItem value="DE">Німеччина</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {selectedIds.size > 0 && (
             <div className="flex items-center gap-2 ml-auto">
               <Button size="sm" variant="outline" onClick={() => { setBulkCourier1(''); setBulkCourier2(''); setBulkVehicle(''); setBulkEditOpen(true); }} disabled={bulkSaving}>
@@ -440,6 +470,11 @@ export default function JourneysPage() {
         <ListSkeleton />
       ) : journeys.length === 0 ? (
         <EmptyState title="Ще немає поїздок" description="Створіть першу поїздку — автоматично додасться 2 рейси" />
+      ) : filteredJourneys.length === 0 ? (
+        <div className="text-sm text-gray-500 py-6 text-center">
+          Немає поїздок до обраної країни.{' '}
+          <button type="button" onClick={() => setFilterCountry('')} className="text-blue-600 hover:underline">Скинути фільтр</button>
+        </div>
       ) : (
         <div className="space-y-4">
           {journeyGroups.map(group => (

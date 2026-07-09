@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDateTime, formatDate } from '@/lib/utils/format';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 
 /**
  * Деталі посилки для Клієнта (read-only). Створено для виправлення багу
@@ -36,6 +37,8 @@ interface ParcelDetail {
   parcelMoneyAmount: number | string | null;
   parcelMoneyCost: number | string | null;
   isPaid: boolean;
+  // ТЗ docx 09.07.26: спосіб забору — для рядка «Пункт збору» в підсумку.
+  collectionMethod: string | null;
   // ТЗ docx 02.07.26 (D9): поля для секції «Деталі».
   payer: string | null;
   paymentMethod: string | null;
@@ -61,7 +64,10 @@ interface ParcelDetail {
   }[];
   statusHistory: { status: string; changedAt: string; notes: string | null }[];
   trip: { departureDate: string; country: string } | null;
-  collectionPoint: { name: string | null; city: string; address: string; country: string } | null;
+  collectionPoint: {
+    name: string | null; city: string; address: string; country: string;
+    postalCode: string | null; workingHours: string | null; workingDays: Weekday[];
+  } | null;
 }
 
 function num(v: number | string | null | undefined): number {
@@ -209,6 +215,32 @@ export default function MyOrderDetailPage() {
               </div>
             )}
           </div>
+          {/* ТЗ docx 09.07.26: підсумок Клієнта = підсумок Працівника. Рядок
+              «Пункт збору» з КОНКРЕТНОЮ адресою, індексом і годинами — так само,
+              як у детальній посилки Працівника. */}
+          {parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'pickup_point' && parcel.collectionPoint && (
+            <div className="border-t pt-2">
+              <div className="text-xs text-gray-500">Спосіб забору</div>
+              <div>
+                Пункт збору — <span className="font-medium">
+                  {parcel.collectionPoint.name
+                    ? `${parcel.collectionPoint.name} (${parcel.collectionPoint.city}, ${parcel.collectionPoint.address})`
+                    : `${parcel.collectionPoint.city}, ${parcel.collectionPoint.address}`}
+                </span>
+              </div>
+              {(parcel.collectionPoint.postalCode || parcel.senderAddress?.postalCode) && (
+                <div className="text-xs text-gray-500">
+                  Індекс: {parcel.collectionPoint.postalCode || parcel.senderAddress?.postalCode}
+                </div>
+              )}
+              {parcel.collectionPoint.workingDays?.length > 0 && (
+                <div className="text-xs text-gray-400">
+                  📅 {formatWorkingDays(parcel.collectionPoint.workingDays)}
+                  {parcel.collectionPoint.workingHours ? ` · ${parcel.collectionPoint.workingHours}` : ''}
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 

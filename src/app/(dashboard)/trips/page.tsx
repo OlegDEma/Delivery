@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -65,6 +65,15 @@ export default function TripsPage() {
   // ТЗ docx 02.07.26 (D11): груповий вибір + групування + масова «кількість місць».
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
+  // ТЗ docx 09.07.26: фільтри за країною та напрямком. На відміну від
+  // групування ПРИХОВУЮТЬ нерелевантні рейси (показують лише відповідні).
+  const [filterCountry, setFilterCountry] = useState<string>('');
+  const [filterDirection, setFilterDirection] = useState<string>('');
+  // ТЗ docx 09.07.26: авто-фокус на рейс поточної дати при відкритті вкладки
+  // + повернення «курсора» на щойно відредагований рейс після reload.
+  const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const didInitialFocus = useRef(false);
+  const pendingFocusId = useRef<string | null>(null);
   const [capDialogOpen, setCapDialogOpen] = useState(false);
   const [bulkCapacity, setBulkCapacity] = useState('');
   const [bulkSaving, setBulkSaving] = useState(false);
@@ -77,6 +86,53 @@ export default function TripsPage() {
   }
 
   useEffect(() => { fetchTrips(); }, []);
+
+  // ── ТЗ docx 09.07.26: авто-фокус на найближчий рейс ─────────────
+  // Рейс, найближчий до сьогодні за датою виїзду (серед переданого списку).
+  function nearestTripId(list: Trip[]): string | null {
+    if (list.length === 0) return null;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    let bestId: string | null = null;
+    let bestDiff = Infinity;
+    for (const t of list) {
+      if (!t.departureDate) continue;
+      const d = new Date(t.departureDate); d.setHours(0, 0, 0, 0);
+      const diff = Math.abs(d.getTime() - today.getTime());
+      if (diff < bestDiff) { bestDiff = diff; bestId = t.id; }
+    }
+    return bestId;
+  }
+
+  // Прокрутити рядок рейсу в центр екрана + короткий підсвіт («курсор»).
+  // behavior:'auto' (миттєво) — надійно спрацьовує навіть коли вкладку ще не
+  // видно (smooth-скрол у прихованій вкладці браузер не виконує).
+  function focusRow(id: string | null) {
+    if (!id) return;
+    const el = rowRefs.current.get(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'auto', block: 'center' });
+    el.classList.add('ring-2', 'ring-blue-400', 'ring-offset-1');
+    setTimeout(() => el.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-1'), 2200);
+  }
+
+  // Один раз після першого завантаження — фокус на рейс поточної дати.
+  // setTimeout (а не requestAnimationFrame): rAF призупиняється у прихованій/
+  // фоновій вкладці, тож автофокус би не спрацював при відкритті в новій вкладці.
+  useEffect(() => {
+    if (loading || trips.length === 0 || didInitialFocus.current) return;
+    didInitialFocus.current = true;
+    setTimeout(() => focusRow(nearestTripId(trips)), 60);
+  }, [loading, trips]);
+
+  // Після редагування дат рейсу список перезавантажується — повертаємо
+  // «курсор» на той самий рейс (ТЗ docx 09.07.26).
+  useEffect(() => {
+    const id = pendingFocusId.current;
+    if (id && trips.some(t => t.id === id)) {
+      pendingFocusId.current = null;
+      setTimeout(() => focusRow(id), 60);
+    }
+  }, [trips]);
 
   function openEditTrip(trip: Trip) {
     setEditTrip(trip);
@@ -94,7 +150,13 @@ export default function TripsPage() {
       body: JSON.stringify({ departureDate: editDep, arrivalDate: editArr || null }),
     });
     setEditSaving(false);
-    if (res.ok) { toast.success('Дати рейсу оновлено'); setEditTrip(null); fetchTrips(); }
+    if (res.ok) {
+      // ТЗ docx 09.07.26: після reload повернути курсор на цей же рейс.
+      pendingFocusId.current = editTrip.id;
+      toast.success('Дати рейсу оновлено');
+      setEditTrip(null);
+      fetchTrips();
+    }
     else { const d = await res.json().catch(() => ({})); toast.error(d.error || 'Помилка'); }
   }
 
@@ -114,9 +176,17 @@ export default function TripsPage() {
     });
   }
   function toggleAllVisible() {
+    // «Вибрати всі» діє на ВИДИМІ рейси (з урахуванням фільтрів).
+    const visible = trips.filter(t =>
+      (!filterCountry || t.country === filterCountry) &&
+      (!filterDirection || t.direction === filterDirection)
+    );
     setSelectedIds(prev => {
-      if (prev.size === trips.length && trips.length > 0) return new Set();
-      return new Set(trips.map(t => t.id));
+      const allSel = visible.length > 0 && visible.every(t => prev.has(t.id));
+      const next = new Set(prev);
+      if (allSel) visible.forEach(t => next.delete(t.id));
+      else visible.forEach(t => next.add(t.id));
+      return next;
     });
   }
   function clearSelection() { setSelectedIds(new Set()); }
@@ -195,11 +265,15 @@ export default function TripsPage() {
     setSaving(false);
   }
 
-  // ── Групування списку ───────────────────────────────────────────
+  // ── ТЗ docx 09.07.26: спершу ФІЛЬТР (ховає інші), потім групування ──
+  const filteredTrips = trips.filter(t =>
+    (!filterCountry || t.country === filterCountry) &&
+    (!filterDirection || t.direction === filterDirection)
+  );
   const groups: { key: string; label: string; items: Trip[] }[] = (() => {
-    if (groupBy === 'none') return [{ key: '', label: '', items: trips }];
+    if (groupBy === 'none') return [{ key: '', label: '', items: filteredTrips }];
     const map = new Map<string, Trip[]>();
-    for (const t of trips) {
+    for (const t of filteredTrips) {
       const key = groupBy === 'country' ? t.country : t.direction;
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(t);
@@ -213,7 +287,7 @@ export default function TripsPage() {
     }));
   })();
 
-  const allSelected = trips.length > 0 && selectedIds.size === trips.length;
+  const allSelected = filteredTrips.length > 0 && filteredTrips.every(t => selectedIds.has(t.id));
 
   return (
     <div>
@@ -298,6 +372,35 @@ export default function TripsPage() {
               </SelectContent>
             </Select>
           </div>
+          {/* ТЗ docx 09.07.26: фільтри за країною та напрямком — ховають
+              нерелевантні рейси (на відміну від групування). */}
+          <div className="flex items-center gap-1">
+            <span className="text-gray-500">Країна:</span>
+            <Select value={filterCountry || 'all'} onValueChange={(v) => setFilterCountry(v === 'all' ? '' : (v ?? ''))}>
+              <SelectTrigger className="h-8 w-36">
+                <SelectValue>{filterCountry ? (TRIP_COUNTRY_LABELS[filterCountry] || filterCountry) : 'Усі країни'}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Усі країни</SelectItem>
+                <SelectItem value="NL">Нідерланди</SelectItem>
+                <SelectItem value="AT">Австрія</SelectItem>
+                <SelectItem value="DE">Німеччина</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-gray-500">Напрямок:</span>
+            <Select value={filterDirection || 'all'} onValueChange={(v) => setFilterDirection(v === 'all' ? '' : (v ?? ''))}>
+              <SelectTrigger className="h-8 w-44">
+                <SelectValue>{filterDirection ? (DIRECTION_LABELS[filterDirection] || filterDirection) : 'Усі напрямки'}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Усі напрямки</SelectItem>
+                <SelectItem value="eu_to_ua">Європа → Україна</SelectItem>
+                <SelectItem value="ua_to_eu">Україна → Європа</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {selectedIds.size > 0 && (
             <div className="flex items-center gap-2 ml-auto">
               <Button size="sm" variant="outline" onClick={() => { setBulkCapacity(''); setCapDialogOpen(true); }} disabled={bulkSaving}>
@@ -315,6 +418,11 @@ export default function TripsPage() {
         <ListSkeleton />
       ) : trips.length === 0 ? (
         <EmptyState title="Ще немає рейсів" />
+      ) : filteredTrips.length === 0 ? (
+        <div className="text-sm text-gray-500 py-6 text-center">
+          Немає рейсів за обраними фільтрами.{' '}
+          <button type="button" onClick={() => { setFilterCountry(''); setFilterDirection(''); }} className="text-blue-600 hover:underline">Скинути фільтри</button>
+        </div>
       ) : (
         <div className="space-y-4">
           {groups.map(group => (
@@ -326,7 +434,11 @@ export default function TripsPage() {
               )}
               <div className="bg-white rounded-lg border divide-y">
                 {group.items.map(trip => (
-                  <div key={trip.id} className="p-3 hover:bg-gray-50 flex items-start gap-2">
+                  <div
+                    key={trip.id}
+                    ref={(el) => { if (el) rowRefs.current.set(trip.id, el); else rowRefs.current.delete(trip.id); }}
+                    className="p-3 hover:bg-gray-50 flex items-start gap-2 rounded transition-shadow"
+                  >
                     {/* ТЗ docx 02.07.26 (D11): чекбокс вибору рядка. */}
                     <div className="pt-0.5">
                       <Checkbox checked={selectedIds.has(trip.id)} onCheckedChange={() => toggleSelect(trip.id)} />

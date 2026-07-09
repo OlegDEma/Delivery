@@ -51,8 +51,13 @@ export async function GET(
         select: { status: true, changedAt: true, notes: true },
       },
       trip: { select: { departureDate: true, country: true } },
+      // ТЗ docx 09.07.26: підсумок Клієнта = підсумок Працівника. Показуємо
+      // «Пункт збору» так само, як у staff — з індексом і годинами роботи.
       collectionPoint: {
-        select: { name: true, city: true, address: true, country: true },
+        select: {
+          name: true, city: true, address: true, country: true,
+          postalCode: true, workingHours: true, workingDays: true,
+        },
       },
     },
   });
