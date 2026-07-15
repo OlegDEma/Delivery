@@ -62,6 +62,19 @@ interface ParcelPlacesCardProps {
   isMultiParcelPickup?: boolean;
   /** Блокує редагування ваги/розмірів — після accepted_for_transport_* */
   readOnly?: boolean;
+  /** ТЗ docx 12.07.26: картка показується і Клієнту — нейтральні тексти
+      помилок у CostCalculator (без staff-інструкцій). */
+  clientFacing?: boolean;
+  /** ТЗ docx 12.07.26: збережена розбивка вартості — коли передана,
+      CostCalculator рендерить її замість живого перерахунку. */
+  savedBreakdown?: {
+    deliveryCost: number | string | null;
+    insuranceCost: number | string | null;
+    packagingCost: number | string | null;
+    doorstepCost: number | string | null;
+    parcelMoneyCost: number | string | null;
+    totalCost: number | string | null;
+  } | null;
   onUpdate: () => void;
 }
 
@@ -105,6 +118,8 @@ export function ParcelPlacesCard({
   isCourierPickup,
   isMultiParcelPickup,
   readOnly = false,
+  clientFacing = false,
+  savedBreakdown = null,
   onUpdate,
 }: ParcelPlacesCardProps) {
   const [editing, setEditing] = useState(false);
@@ -329,7 +344,7 @@ export function ParcelPlacesCard({
             {/* ТЗ E4: «Слова 'Загальна вага' забрати». Сумарна вага видно
                 у блоці «Розрахунок вартості» нижче — окремий рядок
                 непотрібен. */}
-            {canCalculate && calcActualWeight > 0 && (
+            {((canCalculate && calcActualWeight > 0) || savedBreakdown) && (
               <div className="mt-2">
                 <CostCalculator
                   direction={direction!}
@@ -348,6 +363,9 @@ export function ParcelPlacesCard({
                   isMultiParcelPickup={!!isMultiParcelPickup}
                   parcelMoneyAmount={parcelMoneyAmount ? Number(parcelMoneyAmount) : 0}
                   receiverCity={receiverCity ?? null}
+                  // ТЗ docx 12.07.26: клієнтський контекст + збережена розбивка.
+                  clientFacing={clientFacing}
+                  saved={savedBreakdown}
                 />
               </div>
             )}

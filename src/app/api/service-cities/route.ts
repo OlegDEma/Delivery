@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  let body: { country?: string; city?: string; acceptsCourierPickup?: boolean; acceptsPostal?: boolean; target?: string; notes?: string; exceptions?: string[] | string };
+  let body: { country?: string; city?: string; acceptsCourierPickup?: boolean; acceptsPostal?: boolean; acceptsPickupPoint?: boolean; target?: string; notes?: string; exceptions?: string[] | string };
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
@@ -77,15 +77,22 @@ export async function POST(request: NextRequest) {
       )]
     : [];
 
-  // Upsert — якщо вже є правило для (країна, місто, сторона), оновлюємо
-  // прапорці; інакше створюємо.
+  // Upsert — якщо вже є правило для (країна, місто, сторона), ДОДАЄМО
+  // заборони до наявних; інакше створюємо. В update-гілці прапорці лише
+  // ПОСИЛЮЮТЬСЯ (ставимо false тільки коли прийшла явна заборона): форма
+  // «Додати обмеження» завжди порожня, тож перезапис усіх прапорців тихо
+  // знімав би попередні заборони цього ж міста. Зняти заборону можна
+  // виключно кнопкою «Зняти» (DELETE).
   const row = await prisma.serviceCity.upsert({
     where: {
       country_city_target: { country: body.country as 'UA'|'NL'|'AT'|'DE', city, target },
     },
     update: {
-      acceptsCourierPickup: body.acceptsCourierPickup ?? true,
-      acceptsPostal: body.acceptsPostal ?? false,
+      ...(body.acceptsCourierPickup === false ? { acceptsCourierPickup: false } : {}),
+      ...(body.acceptsPostal === false ? { acceptsPostal: false } : {}),
+      // ТЗ docx 12.07.26: заборона «Пункт збору» — так само лише посилення.
+      ...(body.acceptsPickupPoint === false ? { acceptsPickupPoint: false } : {}),
+      // Винятки — остання заявка адміна для country-wide правила (замінюємо).
       exceptions,
       notes: body.notes ?? null,
     },
@@ -95,6 +102,7 @@ export async function POST(request: NextRequest) {
       target,
       acceptsCourierPickup: body.acceptsCourierPickup ?? true,
       acceptsPostal: body.acceptsPostal ?? false,
+      acceptsPickupPoint: body.acceptsPickupPoint ?? true,
       exceptions,
       notes: body.notes ?? null,
     },

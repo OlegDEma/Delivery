@@ -22,6 +22,9 @@ export interface ServiceRule {
   city: string;
   acceptsCourierPickup: boolean;
   acceptsPostal: boolean;
+  /** ТЗ docx 12.07.26: false = «Пункт збору»/«Пункт видачі» заборонено.
+      Optional — старі виклики без прапорця трактуються як «дозволено». */
+  acceptsPickupPoint?: boolean;
   /** На кого поширюється обмеження: відправник / отримувач / обидва. */
   target?: ServiceTargetValue;
   /**
@@ -39,7 +42,7 @@ function forbidden(
   rules: ServiceRule[],
   country: string | null | undefined,
   city: string | null | undefined,
-  flag: 'acceptsCourierPickup' | 'acceptsPostal',
+  flag: 'acceptsCourierPickup' | 'acceptsPostal' | 'acceptsPickupPoint',
   side: ServiceSide,
 ): boolean {
   if (!country) return false; // без країни заборону не визначити → дозволено
@@ -79,4 +82,20 @@ export function isPostalAllowed(
   side: ServiceSide,
 ): boolean {
   return !forbidden(rules, country, city, 'acceptsPostal', side);
+}
+
+/**
+ * ТЗ docx 12.07.26: «Пункт збору» (Відправник) / «Пункт видачі» (Отримувач)
+ * дозволені за замовчуванням; адмін може заборонити для міста/країни —
+ * механізм такий самий, як для Пошти та Виклику кур'єра.
+ * Прапорець optional у ServiceRule, тож r[flag] !== false у forbidden()
+ * коректно трактує відсутність поля як «дозволено».
+ */
+export function isPickupPointAllowed(
+  rules: ServiceRule[],
+  country: string | null | undefined,
+  city: string | null | undefined,
+  side: ServiceSide,
+): boolean {
+  return !forbidden(rules, country, city, 'acceptsPickupPoint', side);
 }

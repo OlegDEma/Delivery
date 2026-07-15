@@ -25,6 +25,8 @@ interface ParcelDetailsCardProps {
     paymentMethod: string;
     paymentInUkraine: boolean;
     needsPackaging: boolean;
+    /** ТЗ docx 12.07.26: read-only маркер «Доставка до порога». */
+    doorstepDelivery?: boolean;
     /** Per ТЗ: signal of opted-in insurance (vs deriving from cost > 0). */
     insuranceApplied?: boolean;
     /** «Пакет» — money sender transfers to receiver. Shown as «(N)». */
@@ -137,8 +139,8 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
         </div>
 
         {/* Вид відправлення — ТЗ §E4: при редагуванні повертаємось до полів
-            вкладки «Відправлення». У read-режимі рядок не показуємо, щоб не
-            міняти звичний вигляд картки «Деталі». */}
+            вкладки «Відправлення». ТЗ docx 12.07.26 (п.2): у read-режимі теж
+            показуємо рядком (клієнтський підсумок його завжди мав). */}
         {editing ? (
           <div>
             <Label className="text-xs text-gray-500">Вид відправлення</Label>
@@ -151,7 +153,12 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
               </SelectContent>
             </Select>
           </div>
-        ) : null}
+        ) : (
+          <div className="flex justify-between">
+            <span className="text-gray-500">Вид відправлення</span>
+            <span>{SHIPMENT_LABELS[parcel.shipmentType] || parcel.shipmentType}</span>
+          </div>
+        )}
 
         {/* Description */}
         {editing ? (
@@ -273,6 +280,15 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
         {!editing && parcel.needsPackaging && (
           <div className="flex justify-between">
             <span className="text-gray-500">Пакування</span>
+            <span>Так</span>
+          </div>
+        )}
+
+        {/* ТЗ docx 12.07.26: обраний doorstep видно як атрибут, а не лише як
+            рядок надбавки в живому розрахунку (який може не відрендеритись). */}
+        {!editing && parcel.doorstepDelivery && (
+          <div className="flex justify-between">
+            <span className="text-gray-500">Доставка до порога</span>
             <span>Так</span>
           </div>
         )}

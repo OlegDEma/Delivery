@@ -39,6 +39,17 @@ const STAFF_ONLY_PREFIXES = [
 // Routes explicitly for clients (the consumer portal)
 const CLIENT_ONLY_PREFIXES = ['/my-orders', '/new-order'];
 
+// Точкові винятки зі staff-only для Клієнта (ТЗ docx 12.07.26: підсумок
+// Клієнта = підсумок Працівника, включно з «Розрахунком вартості»):
+//  - /api/parcels/calculate — калькулятор; route сам requireAuth («including
+//    clients»), але префікс /api/parcels його перекривав;
+//  - /api/pricing — GET активних тарифів (auth-only; PATCH окремо захищений
+//    admin-перевіркою у route). Потрібен /new-order для правила Розрахункової
+//    ваги (D7) і попередження про дні збору.
+// Матчимо ТОЧНО (шлях або підшлях) — startsWith без '/' зачепив би сусідні
+// роути на кшталт /api/parcels/calculateX.
+const CLIENT_ALLOWED_API = ['/api/parcels/calculate', '/api/pricing'];
+
 // Public routes — no auth needed
 const PUBLIC_PREFIXES = [
   '/login',
@@ -118,7 +129,9 @@ export async function updateSession(request: NextRequest) {
 
     // Client trying to access staff area → bounce to /my-orders (or 403 for API)
     if (role === 'client') {
-      const isStaffOnly = STAFF_ONLY_PREFIXES.some(p => pathname.startsWith(p)) || pathname === '/';
+      const isClientAllowedApi = CLIENT_ALLOWED_API.some(p => pathname === p || pathname.startsWith(p + '/'));
+      const isStaffOnly = !isClientAllowedApi &&
+        (STAFF_ONLY_PREFIXES.some(p => pathname.startsWith(p)) || pathname === '/');
       if (isStaffOnly) {
         if (isApi) {
           return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

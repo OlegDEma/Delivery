@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { getNbuEurRate } from '@/lib/utils/nbu-rate';
 
 /**
  * GET / PATCH /api/admin/invoice-settings
@@ -32,7 +33,15 @@ export async function GET() {
   }
 
   const row = await loadSettings();
-  return NextResponse.json(row);
+  // ТЗ docx 12.07.26: показуємо адміну поточний курс НБУ (він і застосовується
+  // при виставленні рахунку; збережений uahPerEur — лише резерв). Значення
+  // суто інформаційне — не тримаємо сторінку налаштувань довше 1.5с, якщо
+  // НБУ гальмує (null → у UI «НБУ недоступний»).
+  const nbuRateNow = await Promise.race([
+    getNbuEurRate(),
+    new Promise<null>(resolve => setTimeout(() => resolve(null), 1500)),
+  ]);
+  return NextResponse.json({ ...row, nbuRateNow });
 }
 
 export async function PATCH(request: NextRequest) {

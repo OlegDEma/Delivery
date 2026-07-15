@@ -1,8 +1,12 @@
 import { prisma } from '@/lib/prisma';
+import { getNbuEurRate } from '@/lib/utils/nbu-rate';
 
 /**
- * Convert a money amount in `fromCurrency` to EUR using the rate stored in
- * `invoice_settings.uahPerEur`.
+ * Convert a money amount in `fromCurrency` to EUR.
+ *
+ * ТЗ docx 12.07.26: за курс береться КУРС НБУ на момент розрахунку/виставлення
+ * рахунку (getNbuEurRate, кеш 1 год). Якщо НБУ недоступний — fallback на
+ * резервний курс `invoice_settings.uahPerEur`, далі — 42.
  *
  * Why we need this: the cost calculator works in EUR. If declared value is
  * in UAH (наприклад UA→EU посилки), множити її напряму на % страхування
@@ -16,6 +20,12 @@ export async function toEur(amount: number, fromCurrency: 'EUR' | 'UAH' | string
   if (fromCurrency === 'EUR' || !fromCurrency) return amount;
 
   if (fromCurrency === 'UAH') {
+    // ТЗ docx 12.07.26: курс НБУ — першоджерело.
+    const nbuRate = await getNbuEurRate();
+    if (nbuRate && Number.isFinite(nbuRate) && nbuRate > 0) {
+      return amount / nbuRate;
+    }
+    // Fallback: резервний курс, збережений адміном у «Реквізити для рахунку».
     const settings = await prisma.invoiceSettings.findFirst({
       where: { isSingleton: true },
       select: { uahPerEur: true },

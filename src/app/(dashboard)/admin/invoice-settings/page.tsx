@@ -16,6 +16,8 @@ interface InvoiceSettings {
   swift: string | null;
   smsTemplate: string | null;
   uahPerEur: string | number;
+  /** ТЗ docx 12.07.26: поточний курс НБУ (грн за 1 EUR), підтягується GET-ом. */
+  nbuRateNow?: number | null;
 }
 
 const PLACEHOLDERS_HELP = [
@@ -108,11 +110,13 @@ export default function InvoiceSettingsPage() {
               />
             </div>
             <div>
-              <Label className="text-xs">SWIFT / BIC</Label>
+              {/* ТЗ docx 12.07.26: замість надпису «SWIFT / BIC» — «ЄДРПОУ».
+                  Поле в БД лишається swift (та сама підстановка {{swift}}). */}
+              <Label className="text-xs">ЄДРПОУ</Label>
               <Input
                 value={settings.swift ?? ''}
                 onChange={(e) => update('swift', e.target.value)}
-                placeholder="PBANUA2X"
+                placeholder="2236117857"
               />
             </div>
           </div>
@@ -132,9 +136,26 @@ export default function InvoiceSettingsPage() {
         <CardHeader className="py-3 px-4">
           <CardTitle className="text-base">Курс обміну</CardTitle>
         </CardHeader>
-        <CardContent className="px-4 pb-4 pt-0 space-y-2">
+        <CardContent className="px-4 pb-4 pt-0 space-y-3">
+          {/* ТЗ docx 12.07.26: за курс береться курс НАЦБАНКУ на момент
+              виставлення рахунку — автоматично, редагувати не потрібно. */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-blue-900 font-medium">Курс НБУ (застосовується автоматично)</span>
+              <span className="font-mono font-semibold text-blue-800">
+                {settings.nbuRateNow
+                  ? `${Number(settings.nbuRateNow).toFixed(2)} грн / 1 EUR`
+                  : 'НБУ недоступний'}
+              </span>
+            </div>
+            <p className="text-xs text-blue-700 mt-1">
+              За величину курсу береться офіційний курс Нацбанку на момент
+              виставлення рахунку (конвертація оголошеної вартості UAH → EUR
+              при розрахунку страхування).
+            </p>
+          </div>
           <div>
-            <Label className="text-xs">Скільки гривень за 1 EUR</Label>
+            <Label className="text-xs">Резервний курс (якщо НБУ недоступний), грн за 1 EUR</Label>
             <Input
               type="number"
               inputMode="decimal"
@@ -146,9 +167,8 @@ export default function InvoiceSettingsPage() {
               className="font-mono"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Використовується для конвертації оголошеної вартості з UAH в EUR
-              при розрахунку страхування. Без курсу 2500 грн × 1% дають
-              25 «EUR» страхування — система ведеться в EUR.
+              Використовується лише коли API НБУ не відповідає. Без курсу
+              2500 грн × 1% дають 25 «EUR» страхування — система ведеться в EUR.
             </p>
           </div>
         </CardContent>

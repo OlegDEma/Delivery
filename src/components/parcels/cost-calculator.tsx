@@ -32,6 +32,26 @@ interface CostCalculatorProps {
   parcelMoneyAmount?: number;
   /** Населений пункт Отримувача — для Львів-винятку (§49/§50). */
   receiverCity?: string | null;
+  /**
+   * ТЗ docx 12.07.26 (п.2): блок показується і Клієнту. clientFacing вмикає
+   * нейтральні тексти помилок (без staff-інструкцій «створіть тариф» тощо).
+   */
+  clientFacing?: boolean;
+  /**
+   * Збережена в БД розбивка вартості. Якщо передана (і totalCost порахований)
+   * — рендеримо ЇЇ замість живого перерахунку: клієнт бачить саме ту суму,
+   * яку йому виставлено (без розбіжності з «До оплати»), і блок не залежить
+   * від поточної наявності тарифу. Якщо totalCost ще не розраховано —
+   * повертаємось до живої оцінки.
+   */
+  saved?: {
+    deliveryCost: number | string | null;
+    insuranceCost: number | string | null;
+    packagingCost: number | string | null;
+    doorstepCost: number | string | null;
+    parcelMoneyCost: number | string | null;
+    totalCost: number | string | null;
+  } | null;
 }
 
 interface CostBreakdown {
@@ -71,16 +91,23 @@ export function CostCalculator(props: CostCalculatorProps) {
     ? props.senderCountry
     : props.receiverCountry;
 
+  // ТЗ docx 12.07.26: якщо передана збережена розбивка з порахованим
+  // totalCost — рендеримо її без живого запиту (див. коментар до props.saved).
+  const useSaved = !!props.saved && props.saved.totalCost != null && Number(props.saved.totalCost) > 0;
+
   // The "skip" branches (no country / no weight / UA-only) used to setState
   // synchronously inside useEffect — that triggers cascading renders and
   // is now flagged by react-hooks/set-state-in-effect. Instead we derive
   // those branches at render time below; the effect only handles the
   // network fetch when it's actually needed.
-  const shouldFetch = !!country && country !== 'UA' && props.actualWeight > 0;
-  const inlineErrorMessage = country === 'UA'
-    ? (props.direction === 'eu_to_ua'
-        ? 'Не визначено європейську країну збору. Привʼяжіть рейс або пункт збору.'
-        : 'Не визначено країну отримувача.')
+  const shouldFetch = !useSaved && !!country && country !== 'UA' && props.actualWeight > 0;
+  // ТЗ docx 12.07.26: для Клієнта — нейтральні тексти без staff-інструкцій.
+  const inlineErrorMessage = !useSaved && country === 'UA'
+    ? (props.clientFacing
+        ? 'Вартість буде уточнена працівником.'
+        : (props.direction === 'eu_to_ua'
+            ? 'Не визначено європейську країну збору. Привʼяжіть рейс або пункт збору.'
+            : 'Не визначено країну отримувача.'))
     : '';
 
   useEffect(() => {
@@ -120,7 +147,15 @@ export function CostCalculator(props: CostCalculatorProps) {
           setError('');
         } else {
           setCost(null);
-          setError(`Тариф для ${tripRouteLabel(country ?? '', props.direction, { mode: 'code' })} не знайдено. Створіть його у «Адміністрування → Тарифи».`);
+          // ТЗ docx 12.07.26: Клієнту — нейтральний текст; staff'у — 404
+          // (тарифу нема) відрізняємо від інших помилок (500/400 тощо).
+          setError(
+            props.clientFacing
+              ? 'Вартість буде розрахована працівником.'
+              : res.status === 404
+                ? `Тариф для ${tripRouteLabel(country ?? '', props.direction, { mode: 'code' })} не знайдено. Створіть його у «Адміністрування → Тарифи».`
+                : 'Не вдалося розрахувати вартість. Спробуйте пізніше.'
+          );
         }
       } catch (err) {
         // Ignore aborts — they're expected when inputs keep changing.
@@ -141,7 +176,59 @@ export function CostCalculator(props: CostCalculatorProps) {
     props.insurance, props.needsPackaging, props.isDoorstepDelivery, props.isAddressDelivery,
     props.isPickupPoint, props.isCourierPickup, props.isMultiParcelPickup,
     props.isBothDirections, props.parcelMoneyAmount, props.receiverCity,
+    props.clientFacing,
   ]);
+
+  // ── ТЗ docx 12.07.26: збережена розбивка (без живого перерахунку) ──
+  if (useSaved && props.saved) {
+    const s = props.saved;
+    const n = (v: number | string | null) => Number(v) || 0;
+    return (
+      <div className="bg-blue-50 rounded-lg p-3 text-sm space-y-1">
+        <div className="font-medium text-blue-800 mb-1">Розрахунок вартості</div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Фактична вага:</span>
+          <span>{props.actualWeight.toFixed(2)} кг</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Об&apos;ємна вага:</span>
+          <span>{props.volumetricWeight.toFixed(2)} кг</span>
+        </div>
+        <div className="flex justify-between border-t border-blue-200 pt-1">
+          <span className="text-gray-600">Вартість доставки:</span>
+          <span>{formatCurrency(n(s.deliveryCost), 'EUR')}</span>
+        </div>
+        {n(s.insuranceCost) > 0 && (
+          <div className="flex justify-between">
+            <span className="text-gray-600">Страхування:</span>
+            <span>{formatCurrency(n(s.insuranceCost), 'EUR')}</span>
+          </div>
+        )}
+        {n(s.packagingCost) > 0 && (
+          <div className="flex justify-between">
+            <span className="text-gray-600">Пакування:</span>
+            <span>{formatCurrency(n(s.packagingCost), 'EUR')}</span>
+          </div>
+        )}
+        {n(s.doorstepCost) > 0 && (
+          <div className="flex justify-between">
+            <span className="text-gray-600">Доставка до порога будинку:</span>
+            <span>{formatCurrency(n(s.doorstepCost), 'EUR')}</span>
+          </div>
+        )}
+        {(props.parcelMoneyAmount ?? 0) > 0 && (
+          <div className="flex justify-between">
+            <span className="text-gray-600">Пакет:</span>
+            <span>{formatCurrency(n(s.parcelMoneyCost), 'EUR')}</span>
+          </div>
+        )}
+        <div className="flex justify-between font-bold border-t border-blue-200 pt-1 mt-1">
+          <span>Всього:</span>
+          <span className="text-blue-800">{formatCurrency(n(s.totalCost), 'EUR')}</span>
+        </div>
+      </div>
+    );
+  }
 
   // Inline error has priority over fetched state (UA / no country picked yet).
   if (inlineErrorMessage) {

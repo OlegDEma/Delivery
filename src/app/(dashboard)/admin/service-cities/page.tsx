@@ -17,6 +17,8 @@ interface ServiceCity {
   city: string;
   acceptsCourierPickup: boolean;
   acceptsPostal: boolean;
+  /** ТЗ docx 12.07.26: false = «Пункт збору» заборонено. */
+  acceptsPickupPoint?: boolean;
   target?: 'sender' | 'receiver' | 'both';
   exceptions?: string[];
   notes: string | null;
@@ -42,6 +44,8 @@ export default function ServiceCitiesPage() {
   const [wholeCountry, setWholeCountry] = useState(false);
   const [forbidCourier, setForbidCourier] = useState(false);
   const [forbidPostal, setForbidPostal] = useState(false);
+  // ТЗ docx 12.07.26: заборона «Пункт збору» — механізм як у Пошти/кур'єра.
+  const [forbidPickupPoint, setForbidPickupPoint] = useState(false);
   // ТЗ docx 29.06.26: сторона, на яку діє обмеження.
   const [target, setTarget] = useState<'sender' | 'receiver' | 'both'>('both');
   // ТЗ docx 01.07.26: винятки-міста для правила на всю країну (через кому).
@@ -71,8 +75,8 @@ export default function ServiceCitiesPage() {
     e.preventDefault();
     const cityValue = wholeCountry ? COUNTRY_WIDE_CITY : city.trim();
     if (!cityValue) return;
-    if (!forbidCourier && !forbidPostal) {
-      toast.error('Оберіть, що саме заборонити (Виклик кур\'єра і/або Пошта)');
+    if (!forbidCourier && !forbidPostal && !forbidPickupPoint) {
+      toast.error('Оберіть, що саме заборонити (Пункт збору, Виклик кур\'єра і/або Пошта)');
       return;
     }
     setSaving(true);
@@ -86,6 +90,8 @@ export default function ServiceCitiesPage() {
         target,
         acceptsCourierPickup: !forbidCourier,
         acceptsPostal: !forbidPostal,
+        // ТЗ docx 12.07.26: заборона «Пункт збору».
+        acceptsPickupPoint: !forbidPickupPoint,
         // ТЗ docx 01.07.26: винятки діють лише для «Вся країна».
         exceptions: wholeCountry ? exceptions.split(',').map(s => s.trim()).filter(Boolean) : [],
       }),
@@ -97,6 +103,7 @@ export default function ServiceCitiesPage() {
       setWholeCountry(false);
       setForbidCourier(false);
       setForbidPostal(false);
+      setForbidPickupPoint(false);
       setTarget('both');
       setExceptions('');
       await refresh();
@@ -116,16 +123,16 @@ export default function ServiceCitiesPage() {
   if (loading) return <div className="text-center py-12 text-gray-500">Завантаження...</div>;
 
   // Показуємо лише рядки, що дійсно щось забороняють (acceptsX === false).
-  const restrictions = rows.filter(r => !r.acceptsCourierPickup || !r.acceptsPostal);
+  const restrictions = rows.filter(r => !r.acceptsCourierPickup || !r.acceptsPostal || r.acceptsPickupPoint === false);
 
   return (
     <div className="max-w-3xl">
       <h1 className="text-2xl font-bold mb-2">Обмеження доступності способів</h1>
       <p className="text-sm text-gray-500 mb-4">
-        «Виклик кур&apos;єра» та «Пошта» доступні <b>за замовчуванням</b> у всіх країнах і
-        населених пунктах. Тут можна <b>заборонити</b> опцію для окремого міста або
-        цілої країни. («Пункт збору/видачі» налаштовується окремо — у розділі
-        «Пункти збору».)
+        «Пункт збору», «Виклик кур&apos;єра» та «Пошта» доступні <b>за замовчуванням</b> у
+        всіх країнах і населених пунктах. Тут можна <b>заборонити</b> опцію для окремого
+        міста або цілої країни. (Самі точки «Пунктів збору» додаються в розділі
+        «Пункти збору» — тут лише доступність опції.)
       </p>
 
       <Card>
@@ -183,6 +190,12 @@ export default function ServiceCitiesPage() {
               </Select>
             </div>
             <div className="flex flex-col gap-1">
+              {/* ТЗ docx 12.07.26: «Заборонити "Пункт збору"» — механізм
+                  аналогічний Пошті/Виклику кур'єра (першим у списку, як у ТЗ). */}
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox checked={forbidPickupPoint} onCheckedChange={(c) => setForbidPickupPoint(c === true)} />
+                Заборонити «Пункт збору»
+              </label>
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox checked={forbidCourier} onCheckedChange={(c) => setForbidCourier(c === true)} />
                 Заборонити «Виклик кур&apos;єра»
@@ -225,6 +238,12 @@ export default function ServiceCitiesPage() {
                     {r.target && r.target !== 'both' && (
                       <span className="ml-2 text-[10px] text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
                         {TARGET_LABELS[r.target]}
+                      </span>
+                    )}
+                    {/* ТЗ docx 12.07.26: бейдж заборони «Пункт збору». */}
+                    {r.acceptsPickupPoint === false && (
+                      <span className="ml-2 text-[10px] text-red-700 bg-red-50 px-1.5 py-0.5 rounded">
+                        🚫 Пункт збору
                       </span>
                     )}
                     {!r.acceptsCourierPickup && (

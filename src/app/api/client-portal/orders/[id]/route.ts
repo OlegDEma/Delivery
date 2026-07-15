@@ -41,7 +41,14 @@ export async function GET(
       OR: [{ senderId: client.id }, { receiverId: client.id }],
     },
     include: {
-      sender: { select: { firstName: true, lastName: true, phone: true } },
+      // addresses (лише country, 1 шт.) — fallback визначення EU-країни для
+      // «Розрахунку вартості», як на staff-детальній (той самий порядок).
+      sender: {
+        select: {
+          firstName: true, lastName: true, phone: true,
+          addresses: { select: { country: true }, orderBy: { usageCount: 'desc' }, take: 1 },
+        },
+      },
       receiver: { select: { firstName: true, lastName: true, phone: true } },
       receiverAddress: true,
       senderAddress: true,
@@ -51,6 +58,9 @@ export async function GET(
         select: { status: true, changedAt: true, notes: true },
       },
       trip: { select: { departureDate: true, country: true } },
+      // ТЗ docx 12.07.26: підсумок Клієнта = детальна Працівника — картка
+      // «Деталі» показує кур'єра, як у staff-вигляді.
+      assignedCourier: { select: { id: true, fullName: true } },
       // ТЗ docx 09.07.26: підсумок Клієнта = підсумок Працівника. Показуємо
       // «Пункт збору» так само, як у staff — з індексом і годинами роботи.
       collectionPoint: {

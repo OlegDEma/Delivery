@@ -16,7 +16,7 @@ import { FieldHint } from '@/components/shared/field-hint';
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { getBillableWeight } from '@/lib/utils/volumetric';
 import { normalizeCityForMatch } from '@/lib/utils/transliterate';
-import { isCourierAllowed, isPostalAllowed, type ServiceRule } from '@/lib/utils/logistics-availability';
+import { isCourierAllowed, isPostalAllowed, isPickupPointAllowed, type ServiceRule } from '@/lib/utils/logistics-availability';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 
 interface PlaceData {
@@ -170,18 +170,27 @@ export default function NewOrderPage() {
   // ТЗ docx 02.07.26 (D8): якщо поточний спосіб доставки Отримувача став
   // недоступним за Логістикою (Адресна/Пошта заборонені для Країни/НП) —
   // перемикаємо на перший доступний, щоб не відправити заборонену опцію.
+  // ТЗ docx 12.07.26: те саме для «Пункт видачі» (заборона acceptsPickupPoint)
+  // — інакше збережений вибір обходив би заборону при зміні міста.
   useEffect(() => {
     const cityNorm = normalizeCityForMatch(receiverCity, receiverCountry);
     const allowed: string[] = [];
     if (isCourierAllowed(serviceCities, receiverCountry, cityNorm, 'receiver')) allowed.push('address');
     if (isPostalAllowed(serviceCities, receiverCountry, cityNorm, 'receiver')) allowed.push('np_warehouse');
+    if (isPickupPointAllowed(serviceCities, receiverCountry, cityNorm, 'receiver')) allowed.push('pickup_point');
     if (
       allowed.length > 0 &&
-      (receiverDeliveryMethod === 'address' || receiverDeliveryMethod === 'np_warehouse') &&
+      (receiverDeliveryMethod === 'address' || receiverDeliveryMethod === 'np_warehouse' || receiverDeliveryMethod === 'pickup_point') &&
       !allowed.includes(receiverDeliveryMethod)
     ) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setReceiverDeliveryMethod(allowed[0]);
+      // Обраний пункт видачі більше не валідний — чистимо, щоб не
+      // відправити його разом із новим способом.
+      if (receiverDeliveryMethod === 'pickup_point') {
+        setReceiverPickupPointId('');
+        setReceiverPickupPointText('');
+      }
     }
   }, [serviceCities, receiverCountry, receiverCity, receiverDeliveryMethod]);
 
@@ -189,13 +198,18 @@ export default function NewOrderPage() {
   // (в UA пунктів збору немає — вони суто європейські). Стандартний дефолт
   // collectionMethod='pickup_point' у цьому разі скидаємо, щоб клієнт свідомо
   // обрав доступний спосіб і не було відправлено приховану опцію.
+  // ТЗ docx 12.07.26: те саме, коли «Пункт збору» ЗАБОРОНЕНО для міста/країни
+  // Відправника у «Містах обслуговування».
   useEffect(() => {
-    if (senderCountry === 'UA' && collectionMethod === 'pickup_point') {
+    const senderCityNorm = normalizeCityForMatch(senderCity, senderCountry);
+    const pickupAllowed = senderCountry !== 'UA' &&
+      isPickupPointAllowed(serviceCities, senderCountry, senderCityNorm, 'sender');
+    if (!pickupAllowed && collectionMethod === 'pickup_point') {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCollectionMethod('');
       setCollectionPointId('');
     }
-  }, [senderCountry, collectionMethod]);
+  }, [senderCountry, senderCity, serviceCities, collectionMethod]);
 
   // ТЗ §4: точки видачі для країни отримувача — для опції «Пункт видачі».
   useEffect(() => {
@@ -376,6 +390,9 @@ export default function NewOrderPage() {
   // (Адресна доставка = кур'єр; Пошта = поштова відправка). Заборонені — ховаємо.
   const recvCourierAllowed = isCourierAllowed(serviceCities, receiverCountry, recvCityNorm, 'receiver');
   const recvPostalAllowed = isPostalAllowed(serviceCities, receiverCountry, recvCityNorm, 'receiver');
+  // ТЗ docx 12.07.26: «Пункт видачі» Отримувача теж можна заборонити в
+  // «Містах обслуговування» — тоді опцію ховаємо, навіть якщо точки існують.
+  const recvPickupAllowed = isPickupPointAllowed(serviceCities, receiverCountry, recvCityNorm, 'receiver');
   const SHIPMENT_TYPE_LABELS: Record<string, string> = { parcels_cargo: 'Посилки та вантажі', documents: 'Документи', tires_wheels: 'Шини та диски' };
   const PAYER_LABELS: Record<string, string> = { sender: 'Відправник', receiver: 'Отримувач' };
   const PAYMENT_METHOD_LABELS: Record<string, string> = { cash: 'Готівка', cashless: 'Безготівка' };
@@ -488,7 +505,7 @@ export default function NewOrderPage() {
                     {(recvPostalAllowed || receiverDeliveryMethod === 'np_warehouse') && (
                       <SelectItem value="np_warehouse">Пошта</SelectItem>
                     )}
-                    {(recvHasPoints || receiverDeliveryMethod === 'pickup_point') && (
+                    {((recvHasPoints && recvPickupAllowed) || receiverDeliveryMethod === 'pickup_point') && (
                       <SelectItem value="pickup_point">Пункт видачі</SelectItem>
                     )}
                   </SelectContent>

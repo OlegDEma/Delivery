@@ -2492,6 +2492,7 @@ export const ServiceCityScalarFieldEnum = {
   city: 'city',
   acceptsCourierPickup: 'acceptsCourierPickup',
   acceptsPostal: 'acceptsPostal',
+  acceptsPickupPoint: 'acceptsPickupPoint',
   target: 'target',
   exceptions: 'exceptions',
   notes: 'notes',

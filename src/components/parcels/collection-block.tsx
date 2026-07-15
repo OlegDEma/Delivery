@@ -19,7 +19,7 @@ import {
   type Weekday,
 } from '@/lib/constants/collection';
 import { formatDate } from '@/lib/utils/format';
-import { isCourierAllowed, isPostalAllowed } from '@/lib/utils/logistics-availability';
+import { isCourierAllowed, isPostalAllowed, isPickupPointAllowed } from '@/lib/utils/logistics-availability';
 import { transliterateCity, normalizeCityForMatch } from '@/lib/utils/transliterate';
 
 export interface CollectionPointOption {
@@ -165,8 +165,13 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
   // збору є лише в EU-країнах). Для відправника в Україні їх НЕ ПЕРЕДБАЧЕНО,
   // тож клієнту при напрямку «Україна → Європа» цю опцію взагалі не показуємо
   // (вона має бути фізично відсутня, а не задизейблена).
+  // ТЗ docx 12.07.26: додатково опцію можна ЗАБОРОНИТИ для міста/країни в
+  // «Містах обслуговування» — механізм як у Пошти/Виклику кур'єра.
   const pickupPointAvailableForClient =
-    !clientFacing || senderCountry !== 'UA';
+    !clientFacing || (
+      senderCountry !== 'UA' &&
+      isPickupPointAllowed(serviceCities, senderCountry, senderCityMatch, 'sender')
+    );
 
   // ТЗ (docx 14.05.26): перелік Пунктів збору — САМЕ для вибраного
   // населеного пункту (приклад Венло: точка є в Amsterdam, але не у Венло →
