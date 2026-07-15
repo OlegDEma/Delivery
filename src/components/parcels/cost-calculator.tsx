@@ -194,7 +194,15 @@ export function CostCalculator(props: CostCalculatorProps) {
           <span className="text-gray-600">Об&apos;ємна вага:</span>
           <span>{props.volumetricWeight.toFixed(2)} кг</span>
         </div>
+        {/* ТЗ docx 12.07.26: «Розрахункова вага» — щоб вигляд збігався зі
+            staff. У збереженому режимі точний weightType недоступний, тож
+            беремо max(факт., об'ємна) — це і є білінгова вага для дефолтного
+            тарифу (actual); «Всього» нижче завжди точне (з БД). */}
         <div className="flex justify-between border-t border-blue-200 pt-1">
+          <span className="text-gray-600">Розрахункова вага:</span>
+          <span className="font-medium">{Math.max(props.actualWeight, props.volumetricWeight).toFixed(2)} кг</span>
+        </div>
+        <div className="flex justify-between">
           <span className="text-gray-600">Вартість доставки:</span>
           <span>{formatCurrency(n(s.deliveryCost), 'EUR')}</span>
         </div>
