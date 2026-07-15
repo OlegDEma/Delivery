@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { COUNTRY_WIDE_CITY } from '@/lib/utils/logistics-availability';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface ServiceCity {
@@ -140,35 +141,54 @@ export default function ServiceCitiesPage() {
           <CardTitle className="text-base">Додати обмеження</CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-0">
-          <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-[8rem_1fr_10rem_auto_auto] gap-2 items-end">
-            <div>
-              <Label className="text-xs">Країна</Label>
-              <Select value={country} onValueChange={(v) => setCountry(v ?? 'UA')}>
-                <SelectTrigger><SelectValue>{COUNTRY_LABELS[country as CountryCode]}</SelectValue></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="UA">Україна</SelectItem>
-                  <SelectItem value="NL">Нідерланди</SelectItem>
-                  <SelectItem value="AT">Австрія</SelectItem>
-                  <SelectItem value="DE">Німеччина</SelectItem>
-                </SelectContent>
-              </Select>
+          <form onSubmit={handleAdd} className="space-y-4">
+            {/* Де діє: Країна + Кого стосується в один вирівняний ряд. */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-gray-500">Країна</Label>
+                <Select value={country} onValueChange={(v) => setCountry(v ?? 'UA')}>
+                  <SelectTrigger className="w-full"><SelectValue>{COUNTRY_LABELS[country as CountryCode]}</SelectValue></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="UA">Україна</SelectItem>
+                    <SelectItem value="NL">Нідерланди</SelectItem>
+                    <SelectItem value="AT">Австрія</SelectItem>
+                    <SelectItem value="DE">Німеччина</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* ТЗ docx 29.06.26: на кого діє обмеження. */}
+              <div className="space-y-1">
+                <Label className="text-xs text-gray-500">Кого стосується</Label>
+                <Select value={target} onValueChange={(v) => setTarget((v ?? 'both') as 'sender' | 'receiver' | 'both')}>
+                  <SelectTrigger className="w-full"><SelectValue>{TARGET_LABELS[target]}</SelectValue></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="both">Обидві сторони</SelectItem>
+                    <SelectItem value="sender">Відправник</SelectItem>
+                    <SelectItem value="receiver">Отримувач</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label className="text-xs">Населений пункт</Label>
+
+            {/* Населений пункт + перемикач «Вся країна» праворуч. */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <Label className="text-xs text-gray-500">Населений пункт</Label>
+                <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none">
+                  <Checkbox checked={wholeCountry} onCheckedChange={(c) => setWholeCountry(c === true)} />
+                  Вся країна (всі міста)
+                </label>
+              </div>
               <Input
                 value={wholeCountry ? '' : city}
                 onChange={(e) => setCity(e.target.value)}
-                placeholder="Львів"
+                placeholder={wholeCountry ? 'Обмеження діє на всю країну' : 'Напр. Львів'}
                 disabled={wholeCountry}
               />
-              <label className="flex items-center gap-2 text-xs mt-1 text-gray-600">
-                <Checkbox checked={wholeCountry} onCheckedChange={(c) => setWholeCountry(c === true)} />
-                Вся країна (всі міста)
-              </label>
               {/* ТЗ docx 01.07.26: винятки — міста, де обмеження НЕ діє (через кому). */}
               {wholeCountry && (
-                <div className="mt-1">
-                  <Label className="text-xs text-gray-500">Винятки (дозволити тут; міста через кому)</Label>
+                <div className="pt-1">
+                  <Label className="text-xs text-gray-500">Винятки — міста, де обмеження НЕ діє (через кому)</Label>
                   <Input
                     value={exceptions}
                     onChange={(e) => setExceptions(e.target.value)}
@@ -177,36 +197,48 @@ export default function ServiceCitiesPage() {
                 </div>
               )}
             </div>
-            {/* ТЗ docx 29.06.26: на кого діє обмеження. */}
-            <div>
-              <Label className="text-xs">Кого стосується</Label>
-              <Select value={target} onValueChange={(v) => setTarget((v ?? 'both') as 'sender' | 'receiver' | 'both')}>
-                <SelectTrigger><SelectValue>{TARGET_LABELS[target]}</SelectValue></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="both">Обидві сторони</SelectItem>
-                  <SelectItem value="sender">Відправник</SelectItem>
-                  <SelectItem value="receiver">Отримувач</SelectItem>
-                </SelectContent>
-              </Select>
+
+            {/* Що заборонити — згрупований блок, клікабельні чипи з підсвіткою.
+                ТЗ docx 12.07.26: «Пункт збору» першим (як у ТЗ). */}
+            <div className="space-y-1.5">
+              <Label className="text-xs text-gray-500">
+                Що заборонити <span className="text-gray-400">(можна кілька)</span>
+              </Label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {[
+                  { on: forbidPickupPoint, set: setForbidPickupPoint, icon: '🏢', label: 'Пункт збору' },
+                  { on: forbidCourier, set: setForbidCourier, icon: '🚐', label: "Виклик кур'єра" },
+                  { on: forbidPostal, set: setForbidPostal, icon: '📮', label: 'Пошта' },
+                ].map((opt) => (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    onClick={() => opt.set(!opt.on)}
+                    aria-pressed={opt.on}
+                    className={cn(
+                      'flex items-center gap-2 text-sm text-left rounded-lg border px-3 py-2.5 transition-colors',
+                      opt.on
+                        ? 'border-red-300 bg-red-50 text-red-800'
+                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                    )}
+                  >
+                    <Checkbox checked={opt.on} className="pointer-events-none" />
+                    <span>{opt.icon} {opt.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              {/* ТЗ docx 12.07.26: «Заборонити "Пункт збору"» — механізм
-                  аналогічний Пошті/Виклику кур'єра (першим у списку, як у ТЗ). */}
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox checked={forbidPickupPoint} onCheckedChange={(c) => setForbidPickupPoint(c === true)} />
-                Заборонити «Пункт збору»
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox checked={forbidCourier} onCheckedChange={(c) => setForbidCourier(c === true)} />
-                Заборонити «Виклик кур&apos;єра»
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox checked={forbidPostal} onCheckedChange={(c) => setForbidPostal(c === true)} />
-                Заборонити «Пошта»
-              </label>
-            </div>
-            <Button type="submit" disabled={saving || (!wholeCountry && !city.trim())}>
-              {saving ? '...' : 'Додати'}
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                saving ||
+                (!wholeCountry && !city.trim()) ||
+                (!forbidPickupPoint && !forbidCourier && !forbidPostal)
+              }
+            >
+              {saving ? 'Додаємо…' : '+ Додати обмеження'}
             </Button>
           </form>
         </CardContent>
