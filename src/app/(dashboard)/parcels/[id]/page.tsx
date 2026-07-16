@@ -14,8 +14,8 @@ import { STATUS_TRANSITIONS, isTerminal } from '@/lib/parcels/status-transitions
 import { statusLabel } from '@/lib/parcels/status-label';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { Camera, StickyNote, Lock, Pencil } from 'lucide-react';
-import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDateTime } from '@/lib/utils/format';
+import { summarizePartyAddress } from '@/lib/utils/address-summary';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { CopyButton } from '@/components/shared/copy-button';
@@ -443,15 +443,16 @@ export default function ParcelDetailPage() {
             <span className="font-medium">{parcel.receiver.lastName} {parcel.receiver.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
             <PhoneLink phone={parcel.receiver.phone} />
-            {parcel.receiverAddress && (
-              <span className="text-xs text-gray-500 ml-2">
-                {/* ТЗ docx 01.07.26: для не-UA сторони — адреса + поштовий код (індекс). */}
-                <AddressLink address={`${COUNTRY_LABELS[parcel.receiverAddress.country as CountryCode] || parcel.receiverAddress.country}, ${parcel.receiverAddress.city}${parcel.receiverAddress.street ? `, ${parcel.receiverAddress.street}` : ''}${parcel.receiverAddress.building ? ` ${parcel.receiverAddress.building}` : ''}${parcel.receiverAddress.postalCode ? `, ${parcel.receiverAddress.postalCode}` : ''}`} />
-                {parcel.receiverAddress.apartment ? `, кв. ${parcel.receiverAddress.apartment}` : ''}
-                {parcel.receiverAddress.npWarehouseNum ? ` | НП №${parcel.receiverAddress.npWarehouseNum}` : ''}
-                {parcel.receiverAddress.landmark ? ` (${parcel.receiverAddress.landmark})` : ''}
-              </span>
-            )}
+            {parcel.receiverAddress && (() => {
+              // ТЗ docx 15.07.26 (п.2): у підсумку — ЛИШЕ дані поточного способу
+              // доставки (стара НП після зміни на Адресну не «зависає»).
+              const s = summarizePartyAddress(parcel.receiverAddress);
+              return (
+                <span className="text-xs text-gray-500 ml-2">
+                  <AddressLink address={s.main} />{s.suffix}
+                </span>
+              );
+            })()}
             <ParcelPartyEdit
               parcelId={parcel.id}
               role="receiver"
@@ -475,13 +476,16 @@ export default function ParcelDetailPage() {
             <span className="font-medium">{parcel.sender.lastName} {parcel.sender.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
             <PhoneLink phone={parcel.sender.phone} />
-            {parcel.senderAddress && (
-              <span className="text-xs text-gray-500 ml-2">
-                {/* ТЗ docx 01.07.26: для не-UA відправника — країна + адреса + індекс. */}
-                <AddressLink address={`${parcel.senderAddress.country && parcel.senderAddress.country !== 'UA' ? `${COUNTRY_LABELS[parcel.senderAddress.country as CountryCode] || parcel.senderAddress.country}, ` : ''}${parcel.senderAddress.city}${parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}${parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}${parcel.senderAddress.postalCode ? `, ${parcel.senderAddress.postalCode}` : ''}`} />
-                {parcel.senderAddress.landmark ? ` (${parcel.senderAddress.landmark})` : ''}
-              </span>
-            )}
+            {parcel.senderAddress && (() => {
+              // ТЗ docx 15.07.26 (п.2): лише дані поточного способу; країну UA у
+              // Відправника не показуємо (ТЗ docx 01.07.26).
+              const s = summarizePartyAddress(parcel.senderAddress, { hideCountryForUA: true });
+              return (
+                <span className="text-xs text-gray-500 ml-2">
+                  <AddressLink address={s.main} />{s.suffix}
+                </span>
+              );
+            })()}
             <ParcelPartyEdit
               parcelId={parcel.id}
               role="sender"

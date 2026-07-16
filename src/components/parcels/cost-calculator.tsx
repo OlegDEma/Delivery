@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { formatCurrency } from '@/lib/utils/format';
 import { tripRouteLabel } from '@/lib/constants/countries';
+import { getBillableWeight } from '@/lib/utils/volumetric';
+import { cn } from '@/lib/utils';
 
 interface CostCalculatorProps {
   direction: string;
@@ -51,6 +53,13 @@ interface CostCalculatorProps {
     doorstepCost: number | string | null;
     parcelMoneyCost: number | string | null;
     totalCost: number | string | null;
+    /**
+     * ТЗ docx 15.07.26 (п.3): рядок «Розрахункова вага» має бути і в Клієнта,
+     * і збігатися зі staff. weightType/weightFraction — з тарифу; billable
+     * рахуємо тим самим getBillableWeight, що й staff, тож значення однакове.
+     */
+    weightType?: 'actual' | 'volumetric' | 'average' | 'custom';
+    weightFraction?: number;
   } | null;
 }
 
@@ -194,12 +203,21 @@ export function CostCalculator(props: CostCalculatorProps) {
           <span className="text-gray-600">Об&apos;ємна вага:</span>
           <span>{props.volumetricWeight.toFixed(2)} кг</span>
         </div>
-        {/* ТЗ docx 12.07.26: рядок «Розрахункова вага» тут НЕ показуємо —
-            у збереженому режимі точний weightType недоступний, а наближення
-            max(факт., об'ємна) суперечить staff-значенню для тарифів
-            'average'/'custom' (порушує парність). Показуємо лише фактичну/
-            об'ємну + підсумкові суми з БД (вони точні). */}
-        <div className="flex justify-between border-t border-blue-200 pt-1">
+        {/* ТЗ docx 15.07.26 (п.3): «Розрахункова вага» — така сама, як у staff.
+            weightType з тарифу → getBillableWeight дає ідентичне значення
+            (напр. 'average' → (факт.+об'ємна)/2). Показуємо лише коли тариф
+            відомий (weightType переданий); інакше — без рядка, суми з БД точні. */}
+        {s.weightType && (
+          <div className="flex justify-between border-t border-blue-200 pt-1">
+            <span className="text-gray-600">
+              Розрахункова вага ({WEIGHT_TYPE_LABELS[s.weightType] || s.weightType}):
+            </span>
+            <span className="font-medium">
+              {getBillableWeight(props.actualWeight, props.volumetricWeight, s.weightType, s.weightFraction).toFixed(2)} кг
+            </span>
+          </div>
+        )}
+        <div className={cn('flex justify-between', !s.weightType && 'border-t border-blue-200 pt-1')}>
           <span className="text-gray-600">Вартість доставки:</span>
           <span>{formatCurrency(n(s.deliveryCost), 'EUR')}</span>
         </div>

@@ -116,16 +116,18 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'addAddress',
+            // ТЗ docx 15.07.26 (п.2): зберігаємо ЛИШЕ поля, релевантні обраному
+            // способу — щоб стара НП не «зависала» після зміни на Адресну.
             address: {
               country,
               deliveryMethod: addr.deliveryMethod,
               postalCode: addr.postalCode || null,
               city: addr.city,
-              street: addr.street || null,
-              building: addr.building || null,
-              landmark: addr.landmark || null,
-              npWarehouseNum: addr.npWarehouseNum || null,
-              pickupPointText: addr.pickupPointText || null,
+              street: addr.deliveryMethod === 'address' ? (addr.street || null) : null,
+              building: addr.deliveryMethod === 'address' ? (addr.building || null) : null,
+              landmark: addr.deliveryMethod === 'address' ? (addr.landmark || null) : null,
+              npWarehouseNum: addr.deliveryMethod === 'np_warehouse' ? (addr.npWarehouseNum || null) : null,
+              pickupPointText: addr.deliveryMethod === 'pickup_point' ? (addr.pickupPointText || null) : null,
             },
           }),
         });

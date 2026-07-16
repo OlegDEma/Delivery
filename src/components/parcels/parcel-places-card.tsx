@@ -74,6 +74,9 @@ interface ParcelPlacesCardProps {
     doorstepCost: number | string | null;
     parcelMoneyCost: number | string | null;
     totalCost: number | string | null;
+    /** ТЗ docx 15.07.26: weightType з тарифу — для рядка «Розрахункова вага». */
+    weightType?: 'actual' | 'volumetric' | 'average' | 'custom';
+    weightFraction?: number;
   } | null;
   onUpdate: () => void;
 }

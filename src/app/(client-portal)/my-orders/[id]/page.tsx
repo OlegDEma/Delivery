@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { statusLabel } from '@/lib/parcels/status-label';
 import { formatDateTime, formatCurrency } from '@/lib/utils/format';
-import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
+import { summarizePartyAddress } from '@/lib/utils/address-summary';
 import { CopyButton } from '@/components/shared/copy-button';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
@@ -69,11 +69,12 @@ interface ParcelDetail {
   receiverAddress: {
     country: string; city: string; street: string | null; building: string | null;
     apartment: string | null; postalCode: string | null; landmark: string | null;
-    npWarehouseNum: string | null; deliveryMethod: string;
+    npWarehouseNum: string | null; pickupPointText: string | null; deliveryMethod: string;
   } | null;
   senderAddress: {
     country: string | null; city: string; street: string | null; building: string | null;
-    postalCode: string | null; landmark: string | null;
+    apartment: string | null; postalCode: string | null; landmark: string | null;
+    npWarehouseNum: string | null; pickupPointText: string | null; deliveryMethod: string | null;
   } | null;
   places: {
     id: string; placeNumber: number; weight: number | null;
@@ -90,11 +91,21 @@ interface ParcelDetail {
   } | null;
 }
 
+interface PricingCfg {
+  country: string;
+  direction: string;
+  weightType?: 'actual' | 'volumetric' | 'average' | 'custom';
+  weightCustomFactualFraction?: number;
+}
+
 export default function MyOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [parcel, setParcel] = useState<ParcelDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // ТЗ docx 15.07.26 (п.3): тарифи — для рядка «Розрахункова вага» (як у staff).
+  // Клієнту дозволено GET /api/pricing (докс 12.07.26 middleware-виняток).
+  const [pricingConfigs, setPricingConfigs] = useState<PricingCfg[]>([]);
 
   const fetchParcel = useCallback(() => {
     fetch(`/api/client-portal/orders/${id}`)
@@ -108,6 +119,9 @@ export default function MyOrderDetailPage() {
   }, [id]);
 
   useEffect(() => { fetchParcel(); }, [fetchParcel]);
+  useEffect(() => {
+    fetch('/api/pricing').then(r => (r.ok ? r.json() : [])).then(setPricingConfigs).catch(() => {});
+  }, []);
 
   if (loading) {
     return <div className="text-center py-12 text-gray-500">Завантаження...</div>;
@@ -120,6 +134,19 @@ export default function MyOrderDetailPage() {
       </div>
     );
   }
+
+  // ТЗ docx 15.07.26 (п.3): EU-країна, що визначає тариф (той самий ланцюжок,
+  // що й staff-детальна). eu_to_ua → відправник; ua_to_eu → отримувач.
+  const senderCountryChain =
+    (parcel.trip?.country && parcel.trip.country !== 'UA' ? parcel.trip.country : null)
+    || parcel.collectionPoint?.country
+    || parcel.senderAddress?.country
+    || parcel.sender.addresses?.[0]?.country
+    || null;
+  const billedCountry = parcel.direction === 'eu_to_ua'
+    ? senderCountryChain
+    : (parcel.receiverAddress?.country || null);
+  const weightCfg = pricingConfigs.find(c => c.country === billedCountry && c.direction === parcel.direction);
 
   return (
     <div className="space-y-4 max-w-2xl">
@@ -157,14 +184,15 @@ export default function MyOrderDetailPage() {
             <span className="font-medium">{parcel.receiver.lastName} {parcel.receiver.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
             <PhoneLink phone={parcel.receiver.phone} />
-            {parcel.receiverAddress && (
-              <span className="text-xs text-gray-500 ml-2">
-                <AddressLink address={`${COUNTRY_LABELS[parcel.receiverAddress.country as CountryCode] || parcel.receiverAddress.country}, ${parcel.receiverAddress.city}${parcel.receiverAddress.street ? `, ${parcel.receiverAddress.street}` : ''}${parcel.receiverAddress.building ? ` ${parcel.receiverAddress.building}` : ''}${parcel.receiverAddress.postalCode ? `, ${parcel.receiverAddress.postalCode}` : ''}`} />
-                {parcel.receiverAddress.apartment ? `, кв. ${parcel.receiverAddress.apartment}` : ''}
-                {parcel.receiverAddress.npWarehouseNum ? ` | НП №${parcel.receiverAddress.npWarehouseNum}` : ''}
-                {parcel.receiverAddress.landmark ? ` (${parcel.receiverAddress.landmark})` : ''}
-              </span>
-            )}
+            {parcel.receiverAddress && (() => {
+              // ТЗ docx 15.07.26 (п.2): лише дані поточного способу доставки.
+              const s = summarizePartyAddress(parcel.receiverAddress);
+              return (
+                <span className="text-xs text-gray-500 ml-2">
+                  <AddressLink address={s.main} />{s.suffix}
+                </span>
+              );
+            })()}
           </div>
         </div>
         <div className="flex items-baseline gap-2">
@@ -173,12 +201,16 @@ export default function MyOrderDetailPage() {
             <span className="font-medium">{parcel.sender.lastName} {parcel.sender.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
             <PhoneLink phone={parcel.sender.phone} />
-            {parcel.senderAddress && (
-              <span className="text-xs text-gray-500 ml-2">
-                <AddressLink address={`${parcel.senderAddress.country && parcel.senderAddress.country !== 'UA' ? `${COUNTRY_LABELS[parcel.senderAddress.country as CountryCode] || parcel.senderAddress.country}, ` : ''}${parcel.senderAddress.city}${parcel.senderAddress.street ? `, ${parcel.senderAddress.street}` : ''}${parcel.senderAddress.building ? ` ${parcel.senderAddress.building}` : ''}${parcel.senderAddress.postalCode ? `, ${parcel.senderAddress.postalCode}` : ''}`} />
-                {parcel.senderAddress.landmark ? ` (${parcel.senderAddress.landmark})` : ''}
-              </span>
-            )}
+            {parcel.senderAddress && (() => {
+              // ТЗ docx 15.07.26 (п.2): лише дані поточного способу; країну UA у
+              // Відправника не показуємо (як і раніше).
+              const s = summarizePartyAddress(parcel.senderAddress, { hideCountryForUA: true });
+              return (
+                <span className="text-xs text-gray-500 ml-2">
+                  <AddressLink address={s.main} />{s.suffix}
+                </span>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -212,13 +244,7 @@ export default function MyOrderDetailPage() {
         places={parcel.places}
         totalWeight={parcel.totalWeight}
         direction={parcel.direction}
-        senderCountry={
-          (parcel.trip?.country && parcel.trip.country !== 'UA' ? parcel.trip.country : null)
-          || parcel.collectionPoint?.country
-          || parcel.senderAddress?.country
-          || parcel.sender.addresses?.[0]?.country
-          || null
-        }
+        senderCountry={senderCountryChain}
         receiverCountry={parcel.receiverAddress?.country || null}
         receiverCity={parcel.receiverAddress?.city || null}
         receiverDeliveryMethod={parcel.receiverAddress?.deliveryMethod || null}
@@ -244,6 +270,10 @@ export default function MyOrderDetailPage() {
           doorstepCost: parcel.doorstepCost,
           parcelMoneyCost: parcel.parcelMoneyCost,
           totalCost: parcel.totalCost,
+          // ТЗ docx 15.07.26 (п.3): weightType з тарифу → «Розрахункова вага»
+          // рахується так само, як у staff (той самий getBillableWeight).
+          weightType: weightCfg?.weightType,
+          weightFraction: weightCfg?.weightCustomFactualFraction,
         }}
       />
 
