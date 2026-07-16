@@ -54,20 +54,39 @@ async function upsertClientAddress(args: {
     pickupPointText: clean(override.pickupPointText),
   };
 
+  // ТЗ docx 15.07.26 (п.2): у сховищі лишаємо ЛИШЕ поля, релевантні обраному
+  // способу доставки — щоб стара НП/пункт видачі не «зависали» після зміни на
+  // Адресну (і навпаки). Симетрично клієнтському POST і staff-підсумку
+  // (summarizePartyAddress), тож БД не тримає нерелевантних «хвостів».
+  const gate = (method: DeliveryMethod) => ({
+    street: method === 'address' ? data.street : null,
+    building: method === 'address' ? data.building : null,
+    landmark: method === 'address' ? data.landmark : null,
+    npWarehouseNum: method === 'np_warehouse' ? data.npWarehouseNum : null,
+    pickupPointText: method === 'pickup_point' ? data.pickupPointText : null,
+  });
+
   if (addressId) {
     // Update existing — but only fields that the worker actually entered.
-    // Country isn't editable inline, so we leave it alone.
+    // Country isn't editable inline, so we leave it alone. Гейтуємо лише коли
+    // спосіб явно переданий; інакше (метод не чіпали) — пишемо як є, щоб не
+    // затерти дані на основі здогадки про спосіб.
+    const g = data.deliveryMethod !== undefined
+      ? gate(data.deliveryMethod)
+      : {
+          street: data.street,
+          building: data.building,
+          landmark: data.landmark,
+          npWarehouseNum: data.npWarehouseNum,
+          pickupPointText: data.pickupPointText,
+        };
     await prisma.clientAddress.update({
       where: { id: addressId },
       data: {
         ...(data.deliveryMethod !== undefined && { deliveryMethod: data.deliveryMethod }),
         postalCode: data.postalCode,
         ...(data.city != null && { city: data.city }),
-        street: data.street,
-        building: data.building,
-        landmark: data.landmark,
-        npWarehouseNum: data.npWarehouseNum,
-        pickupPointText: data.pickupPointText,
+        ...g,
       },
     });
     return addressId;
@@ -78,18 +97,15 @@ async function upsertClientAddress(args: {
   const country = override.country ?? defaultCountry;
   if (!country) return null;
 
+  const method = data.deliveryMethod ?? 'address';
   const created = await prisma.clientAddress.create({
     data: {
       clientId,
       country,
       city: data.city,
-      deliveryMethod: data.deliveryMethod ?? 'address',
+      deliveryMethod: method,
       postalCode: data.postalCode,
-      street: data.street,
-      building: data.building,
-      landmark: data.landmark,
-      npWarehouseNum: data.npWarehouseNum,
-      pickupPointText: data.pickupPointText,
+      ...gate(method),
       isDefault: false,
     },
     select: { id: true },

@@ -142,13 +142,29 @@ export async function POST(request: NextRequest) {
   let receiverAddressId: string | null = null;
   if (body.receiverCity) {
     const receiverCountry = (body.receiverCountry ?? 'UA') as Country;
+    const rMethod = body.receiverDeliveryMethod || 'address';
+    // ТЗ docx 15.07.26 (п.2): зберігаємо у БД ЛИШЕ поля, релевантні обраному
+    // способу доставки — щоб стара НП/пункт видачі не «зависали» після зміни на
+    // Адресну (і навпаки). Дзеркалить staff-шлях (parcel-party-edit addAddress),
+    // тож у сховищі немає нерелевантних «хвостів», а не лише у підсумку.
+    const rStreet = rMethod === 'address' ? (body.receiverStreet || null) : null;
+    const rBuilding = rMethod === 'address' ? (body.receiverBuilding || null) : null;
+    const rLandmark = rMethod === 'address' ? (body.receiverLandmark || null) : null;
+    const rNp = rMethod === 'np_warehouse' ? (body.receiverNpWarehouse || null) : null;
+    const rPickup = rMethod === 'pickup_point' ? (body.receiverPickupPointText || null) : null;
+    // Dedupe включає спосіб + усі релевантні йому поля — щоб гейтована адреса
+    // не «злилася» з записом іншого способу (напр. pickup_point зі street=null,
+    // np=null не збігся з іншим pickup_point, що має інший текст пункту).
     const existingReceiverAddr = await prisma.clientAddress.findFirst({
       where: {
         clientId: receiver.id,
         country: receiverCountry,
         city: body.receiverCity,
-        street: body.receiverStreet || null,
-        npWarehouseNum: body.receiverNpWarehouse || null,
+        deliveryMethod: rMethod,
+        street: rStreet,
+        building: rBuilding,
+        npWarehouseNum: rNp,
+        pickupPointText: rPickup,
       },
     });
     if (existingReceiverAddr) {
@@ -159,14 +175,14 @@ export async function POST(request: NextRequest) {
           clientId: receiver.id,
           country: receiverCountry,
           city: body.receiverCity,
-          street: body.receiverStreet || null,
+          street: rStreet,
           // ТЗ docx 20.06.26 §19: Будинок + Орієнтир Отримувача.
-          building: body.receiverBuilding || null,
-          landmark: body.receiverLandmark || null,
+          building: rBuilding,
+          landmark: rLandmark,
           postalCode: body.receiverPostalCode || null,
-          npWarehouseNum: body.receiverNpWarehouse || null,
-          pickupPointText: body.receiverPickupPointText || null,
-          deliveryMethod: body.receiverDeliveryMethod || 'address',
+          npWarehouseNum: rNp,
+          pickupPointText: rPickup,
+          deliveryMethod: rMethod,
         },
       });
       receiverAddressId = addr.id;
