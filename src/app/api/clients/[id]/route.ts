@@ -201,11 +201,20 @@ export async function PATCH(
             deletedAt: null,
             OR: [{ phone }, { phoneNormalized: normalized }],
           },
-          select: { firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true },
         });
         if (conflict) {
+          // ТЗ docx 15.07.26 (п.1): один номер = один запис Client (телефон
+          // @unique — портал ідентифікує клієнта по ньому). Тож не мутуємо
+          // поточний запис, а віддаємо id власника номера, щоб форма
+          // прив'язала посилку саме до нього (resolve-to-owner). Це не хард-
+          // блок, а вказівка «використай наявного клієнта з цим номером».
           return NextResponse.json(
-            { error: `Цей номер вже належить іншому клієнту: ${conflict.lastName} ${conflict.firstName}` },
+            {
+              error: `Цей номер вже належить клієнту: ${conflict.lastName} ${conflict.firstName}`,
+              conflictClientId: conflict.id,
+              conflictName: `${conflict.lastName} ${conflict.firstName}`,
+            },
             { status: 409 },
           );
         }

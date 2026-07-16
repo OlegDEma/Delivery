@@ -82,7 +82,14 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
   async function handleSave() {
     setSaving(true);
     try {
-      // 1. Phone changed → update client
+      // Клієнт, до якого зрештою прив'язана посилка (може стати власником
+      // номера при resolve-to-owner).
+      let targetClientId = party.id;
+      let resolvedToOwner = false;
+
+      // 1. Phone changed → update client. ТЗ docx 15.07.26 (п.1): якщо номер
+      // належить іншому запису Client — не блокуємо, а перелінковуємо посилку
+      // на власника номера (типово це дублікат тієї ж особи).
       if (phone && phone !== party.phone) {
         const r = await fetch(`/api/clients/${party.id}`, {
           method: 'PATCH',
@@ -91,7 +98,22 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
         });
         if (!r.ok) {
           const d = await r.json().catch(() => ({}));
-          throw new Error(d.error || 'Помилка збереження телефону');
+          if (r.status === 409 && d.conflictClientId) {
+            targetClientId = d.conflictClientId as string;
+            resolvedToOwner = true;
+            const field = role === 'sender' ? 'senderId' : 'receiverId';
+            const rLink = await fetch(`/api/parcels/${parcelId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ [field]: targetClientId }),
+            });
+            if (!rLink.ok) {
+              const dd = await rLink.json().catch(() => ({}));
+              throw new Error(dd.error || 'Помилка прив\'язки клієнта');
+            }
+          } else {
+            throw new Error(d.error || 'Помилка збереження телефону');
+          }
         }
       }
 
@@ -109,9 +131,11 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
       // ТЗ docx 02.07.26 (D2): зміна адреси/міста створює НОВИЙ запис адреси і
       // прив'язує ЦЮ посилку до нього — щоб не зачепити інші посилки, які
       // посилаються на стару адресу (за рішенням: «новий запис на зміну»).
-      if (addrChanged) {
+      // ТЗ docx 15.07.26 (п.1): при resolve-to-owner ЗАВЖДИ створюємо адресу на
+      // власника номера (посилка тепер на нього) — навіть якщо поля не «змінились».
+      if (addrChanged || resolvedToOwner) {
         const country = (address?.country ?? party.country) || 'UA';
-        const rNew = await fetch(`/api/clients/${party.id}`, {
+        const rNew = await fetch(`/api/clients/${targetClientId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -149,7 +173,11 @@ export function ParcelPartyEdit({ parcelId, role, party, address, onSaved }: Par
         }
       }
 
-      toast.success(role === 'receiver' ? 'Отримувача оновлено' : 'Відправника оновлено');
+      toast.success(
+        resolvedToOwner
+          ? 'Використано наявного клієнта з цим номером'
+          : (role === 'receiver' ? 'Отримувача оновлено' : 'Відправника оновлено')
+      );
       setOpen(false);
       onSaved();
     } catch (err) {

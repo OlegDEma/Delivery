@@ -174,6 +174,10 @@ export const updateParcelSchema = z.object({
       НОВОГО запису адреси клієнта (створеного окремо). */
   senderAddressId: optionalUuidSchema,
   receiverAddressId: optionalUuidSchema,
+  /** ТЗ docx 15.07.26 (п.1): resolve-to-owner — перелінк посилки на власника
+      номера, коли введений телефон належить іншому запису Client. */
+  senderId: optionalUuidSchema,
+  receiverId: optionalUuidSchema,
   /** Per ТЗ-docx 03.06.2026: «всі поля редаговані» — multi-parcel answer
       теж має оновлюватись при редагуванні (раніше брали лише з створення). */
   isMultiParcelPickup: z.boolean().nullable().optional(),

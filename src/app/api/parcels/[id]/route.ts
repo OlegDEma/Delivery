@@ -321,6 +321,16 @@ export async function PATCH(
   if (body.receiverAddressId !== undefined && body.receiverAddressId) {
     updateData.receiverAddress = { connect: { id: body.receiverAddressId } };
   }
+  // ТЗ docx 15.07.26 (п.1): resolve-to-owner — при редагуванні сторони, коли
+  // введений номер належить іншому запису Client, посилку перелінковуємо на
+  // власника номера. Чиста зміна relation (вартість залежить від адреси, не
+  // від id клієнта), тож перерахунок не потрібен.
+  if (body.senderId !== undefined && body.senderId) {
+    updateData.sender = { connect: { id: body.senderId } };
+  }
+  if (body.receiverId !== undefined && body.receiverId) {
+    updateData.receiver = { connect: { id: body.receiverId } };
+  }
   if (body.isPaid !== undefined) {
     updateData.isPaid = body.isPaid;
     if (body.isPaid) updateData.paidAt = new Date();

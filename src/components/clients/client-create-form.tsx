@@ -335,6 +335,15 @@ export function ClientCreateForm({
           || lastName !== initialData.lastName
           || (middleName || null) !== (initialData.middleName || null);
 
+        // ТЗ docx 15.07.26 (п.1): «допустимі будь-які комбінації, зберегти має
+        // бути можливо». Телефон @unique (портал шукає клієнта по ньому), тож
+        // не мутуємо чужий номер. Якщо оператор ввів номер, що вже належить
+        // ІНШОМУ запису (типово — дублікат тієї ж особи) — не блокуємо, а
+        // прив'язуємо посилку до власника номера (targetId) і вішаємо на нього
+        // введену адресу. resolvedToOwner → адресу додаємо (не оновлюємо стару).
+        let targetId = initialData.id;
+        let resolvedToOwner = false;
+
         if (phoneChanged || nameChanged) {
           const r = await fetch(`/api/clients/${initialData.id}`, {
             method: 'PATCH',
@@ -347,13 +356,21 @@ export function ClientCreateForm({
           });
           if (!r.ok) {
             const d = await r.json().catch(() => ({}));
-            throw new Error(d.error || 'Помилка оновлення клієнта');
+            if (r.status === 409 && d.conflictClientId) {
+              targetId = d.conflictClientId as string;
+              resolvedToOwner = true;
+            } else {
+              throw new Error(d.error || 'Помилка оновлення клієнта');
+            }
           }
         }
 
-        if (initialAddr?.id) {
-          // Наявна адреса — оновлюємо.
-          const r = await fetch(`/api/clients/${initialData.id}`, {
+        // Адреса: якщо лишились на початковому клієнті й у нього була адреса —
+        // оновлюємо ту саму (щоб «останні дані» перезаписали попередні). Якщо
+        // перескочили на власника номера (resolvedToOwner) або адреси не було —
+        // додаємо введену адресу як нову.
+        if (!resolvedToOwner && initialAddr?.id) {
+          const r = await fetch(`/api/clients/${targetId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -376,10 +393,7 @@ export function ClientCreateForm({
             throw new Error(d.error || 'Помилка оновлення адреси');
           }
         } else {
-          // У клієнта не було збереженої адреси — створюємо нову.
-          // Без цього раніше нова адреса з діалогу мовчки втрачалась
-          // (PATCH не відправлявся) — посилка зберігалась без адреси.
-          const r = await fetch(`/api/clients/${initialData.id}`, {
+          const r = await fetch(`/api/clients/${targetId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -403,9 +417,13 @@ export function ClientCreateForm({
           }
         }
 
-        toast.success('Дані підтверджено');
-        // Re-fetch the updated client so caller has fresh data.
-        const fresh = await fetch(`/api/clients/${initialData.id}`).then(r => r.ok ? r.json() : null);
+        // Re-fetch the (possibly resolved) client so caller has fresh data.
+        const fresh = await fetch(`/api/clients/${targetId}`).then(r => r.ok ? r.json() : null);
+        toast.success(
+          resolvedToOwner
+            ? `Використано наявного клієнта з цим номером${fresh ? `: ${fresh.lastName} ${fresh.firstName}` : ''}`
+            : 'Дані підтверджено'
+        );
         onSuccess(fresh || initialData, meta);
         return;
       }
