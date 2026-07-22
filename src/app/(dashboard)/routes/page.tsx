@@ -249,9 +249,15 @@ export default function RoutesPage() {
   const TASK_LABELS = TASK_STATUS_LABELS;
 
   const selectedJourney = journeys.find(j => j.id === selectedJourneyId) || null;
-  // ТЗ docx 21.07.26 (п.3): «прізвища водіїв». Profile має лише fullName —
-  // показуємо повне ім'я (прізвище в ньому міститься); двох водіїв через кому.
+  // ТЗ docx 21.07.26 (п.3): показуємо саме «прізвища водіїв». Profile має лише
+  // fullName у форматі «Ім'я Прізвище» (напр. «Руслан Волошин»), тож прізвище —
+  // ОСТАННЄ слово. Двох водіїв — через кому.
+  const surnameOf = (full?: string | null) => {
+    const parts = (full || '').trim().split(/\s+/).filter(Boolean);
+    return parts.length ? parts[parts.length - 1] : '';
+  };
   const drivers = [selectedJourney?.assignedCourier?.fullName, selectedJourney?.secondCourier?.fullName]
+    .map(surnameOf)
     .filter(Boolean)
     .join(', ');
 
