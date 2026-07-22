@@ -128,6 +128,9 @@ export async function GET(request: NextRequest) {
   const dateFrom = searchParams.get('dateFrom');
   const dateTo = searchParams.get('dateTo');
   const tripId = searchParams.get('tripId');
+  // ТЗ docx 21.07.26 (п.3): Маршрутний лист показує посилки ОБОХ рейсів
+  // поїздки — фільтр за journeyId резолвиться у tripId обох її рейсів.
+  const journeyId = searchParams.get('journeyId');
   const courierId = searchParams.get('courierId');
   const unassigned = searchParams.get('unassigned');
   // Per ТЗ — фільтр «по кур'єру, який приймав посилку» (хто фізично її
@@ -166,7 +169,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: `Невалідний статус: ${status}` }, { status: 400 });
     }
   }
-  if (tripId) where.tripId = tripId;
+  if (journeyId) {
+    // ТЗ docx 21.07.26 (п.3): усі посилки поїздки = посилки обох її рейсів.
+    const jTrips = await prisma.trip.findMany({ where: { journeyId }, select: { id: true } });
+    where.tripId = { in: jTrips.map(t => t.id) };
+  } else if (tripId) {
+    where.tripId = tripId;
+  }
   if (courierId) where.assignedCourierId = courierId;
   if (unassigned === '1') where.assignedCourierId = null;
   if (acceptedById) where.collectedById = acceptedById;

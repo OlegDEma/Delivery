@@ -756,6 +756,10 @@ export default function EditParcelPage() {
               selectedTripId={selectedTripId}
               onChange={setSelectedTripId}
               allowNone={true}
+              // ТЗ docx 21.07.26 (п.2): лише рейси з країни Відправника. Беремо
+              // СИРУ країну (sender/адреса), а не похідну senderCountry — вона
+              // має trip-fallback, що дав би циклічність (рейс→країна→фільтр).
+              senderCountry={parcel?.sender?.country || parcel?.senderAddress?.country || null}
             />
           </CardContent>
         </Card>

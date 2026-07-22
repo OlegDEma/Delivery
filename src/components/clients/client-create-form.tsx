@@ -334,6 +334,12 @@ export function ClientCreateForm({
         const nameChanged = firstName !== initialData.firstName
           || lastName !== initialData.lastName
           || (middleName || null) !== (initialData.middleName || null);
+        // ТЗ docx 21.07.26 (п.1): країну існуючого клієнта теж можна змінити
+        // (напр. UA→NL для Відправника). Раніше зміна країни губилась — оновлення
+        // клієнта не спрацьовувало, а payload адреси не ніс country. Тепер
+        // синхронізуємо і Client.country, і ClientAddress.country (саме адресну
+        // країну читає підсумок). initialCountry = адреса.country || client.country.
+        const countryChanged = country !== initialCountry;
 
         // ТЗ docx 15.07.26 (п.1): «допустимі будь-які комбінації, зберегти має
         // бути можливо». Телефон @unique (портал шукає клієнта по ньому), тож
@@ -344,7 +350,7 @@ export function ClientCreateForm({
         let targetId = initialData.id;
         let resolvedToOwner = false;
 
-        if (phoneChanged || nameChanged) {
+        if (phoneChanged || nameChanged || countryChanged) {
           const r = await fetch(`/api/clients/${initialData.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -352,6 +358,8 @@ export function ClientCreateForm({
               action: 'update',
               ...(phoneChanged ? { phone } : {}),
               ...(nameChanged ? { firstName, lastName, middleName: middleName || null } : {}),
+              // ТЗ docx 21.07.26 (п.1): синхронізуємо Client.country при зміні.
+              ...(countryChanged ? { country } : {}),
             }),
           });
           if (!r.ok) {
@@ -377,6 +385,9 @@ export function ClientCreateForm({
               action: 'updateAddress',
               addressId: initialAddr.id,
               address: {
+                // ТЗ docx 21.07.26 (п.1): зберігаємо змінену країну в адресу —
+                // саме ClientAddress.country читає підсумок («Країна: …»).
+                country,
                 deliveryMethod,
                 postalCode: postalCode || null,
                 city,

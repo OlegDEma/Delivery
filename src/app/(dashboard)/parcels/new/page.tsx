@@ -223,14 +223,19 @@ export default function NewParcelPage() {
     fetch('/api/trips').then(r => r.ok ? r.json() : []).then(setTrips);
   }, []);
 
-  // Clear selected trip if direction no longer matches
+  // Clear selected trip if it no longer matches direction OR the sender's
+  // country of departure. ТЗ docx 21.07.26 (п.2): рейс має виїжджати з країни
+  // Відправника — інакше знімаємо вибір, щоб прихований рейс не лишився обраним
+  // (напр. оператор перемкнув відправника з Австрії на Нідерланди).
   useEffect(() => {
     if (!selectedTripId) return;
     const selected = trips.find(t => t.id === selectedTripId);
-    if (selected && selected.direction !== direction) {
+    if (!selected) return;
+    const departure = selected.direction === 'eu_to_ua' ? selected.country : 'UA';
+    if (selected.direction !== direction || (senderCountry && departure !== senderCountry)) {
       setSelectedTripId('');
     }
-  }, [direction, selectedTripId, trips]);
+  }, [direction, selectedTripId, trips, senderCountry]);
 
   // EU-країна для live-калькулятора вартості. Для eu_to_ua вона може бути
   // визначена ОБРАНИМ РЕЙСОМ — навіть якщо в картці відправника країна ще
@@ -967,6 +972,8 @@ export default function NewParcelPage() {
                 selectedTripId={selectedTripId}
                 onChange={setSelectedTripId}
                 allowNone={false}
+                // ТЗ docx 21.07.26 (п.2): лише рейси з країни Відправника.
+                senderCountry={senderCountry}
               />
             )}
 

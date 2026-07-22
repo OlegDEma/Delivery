@@ -612,6 +612,8 @@ export default function ParcelDetailPage() {
                 selectedTripId={parcel.trip?.id || ''}
                 onChange={(tripId) => handleAssignTrip(tripId)}
                 compact
+                // ТЗ docx 21.07.26 (п.2): лише рейси з країни Відправника.
+                senderCountry={parcel.sender?.country || parcel.senderAddress?.country || null}
               />
               <div>
                 <Label className="text-xs">Кур&apos;єр</Label>

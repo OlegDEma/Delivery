@@ -23,6 +23,13 @@ interface TripSelectorProps {
   allowNone?: boolean;
   /** Compact mode: smaller cards */
   compact?: boolean;
+  /**
+   * Країна Відправника. ТЗ docx 21.07.26 (п.2): до прив'язки пропонуємо ЛИШЕ
+   * рейси, країна ВИЇЗДУ яких збігається з країною Відправника (Австрія-
+   * відправник → лише «Австрія→UA»). Якщо не задано — не фільтруємо (напр.
+   * відправника ще не обрано).
+   */
+  senderCountry?: string | null;
 }
 
 export function TripSelector({
@@ -32,12 +39,21 @@ export function TripSelector({
   onChange,
   allowNone = true,
   compact = false,
+  senderCountry = null,
 }: TripSelectorProps) {
   const filtered = trips
     .filter(
-      t =>
-        t.direction === direction &&
-        (t.status === 'planned' || t.status === 'in_progress')
+      t => {
+        // ТЗ «Рейси»: країна ВИЇЗДУ рейсу = trip.country для eu_to_ua (EU→UA),
+        // або UA для ua_to_eu (UA→EU). trip.country завжди зберігає EU-кінець.
+        const departure = t.direction === 'eu_to_ua' ? t.country : 'UA';
+        return (
+          t.direction === direction &&
+          (t.status === 'planned' || t.status === 'in_progress') &&
+          // ТЗ docx 21.07.26 (п.2): країна виїзду має збігатися з країною Відправника.
+          (!senderCountry || departure === senderCountry)
+        );
+      }
     )
     .sort(
       (a, b) =>
@@ -45,10 +61,19 @@ export function TripSelector({
     );
 
   if (filtered.length === 0) {
+    // ТЗ docx 21.07.26 (п.2): якщо рейси є в напрямку, але жоден не виїжджає з
+    // країни Відправника — пояснюємо саме це, а не «немає рейсів узагалі».
+    const hasDirectionTrips = trips.some(
+      t => t.direction === direction && (t.status === 'planned' || t.status === 'in_progress')
+    );
+    const countryLabel = senderCountry
+      ? (COUNTRY_LABELS[senderCountry as CountryCode] || senderCountry)
+      : null;
     return (
       <div className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 border border-dashed">
-        Немає активних рейсів у цьому напрямку.
-        Створіть рейс у розділі «Рейси».
+        {senderCountry && hasDirectionTrips
+          ? `Немає активних рейсів з країни Відправника (${countryLabel}). Створіть рейс у розділі «Рейси».`
+          : 'Немає активних рейсів у цьому напрямку. Створіть рейс у розділі «Рейси».'}
       </div>
     );
   }

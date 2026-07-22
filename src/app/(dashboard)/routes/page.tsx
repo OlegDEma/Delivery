@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,19 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { formatDate, formatDateWithWeekday } from '@/lib/utils/format';
+
+interface PartyAddr {
+  country: string | null;
+  city: string;
+  street: string | null;
+  building: string | null;
+  postalCode: string | null;
+  landmark: string | null;
+  npWarehouseNum: string | null;
+  deliveryMethod?: string | null;
+}
 
 interface RouteItem {
   id: string;
@@ -22,17 +35,22 @@ interface RouteItem {
   estimatedDeliveryEnd: string | null;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
-  receiverAddress: {
-    city: string;
-    street: string | null;
-    building: string | null;
-    postalCode: string | null;
-    landmark: string | null;
-    npWarehouseNum: string | null;
-  } | null;
+  senderAddress: PartyAddr | null;
+  receiverAddress: PartyAddr | null;
   routeTaskStatus: string | null;
   routeTaskFailReason: string | null;
   routeTaskReschedDate: string | null;
+}
+
+interface JourneyOption {
+  id: string;
+  country: string;
+  departureDate: string;
+  euReturnDate: string | null;
+  endDate: string | null;
+  vehicleInfo: string | null;
+  assignedCourier: { id: string; fullName: string } | null;
+  secondCourier: { id: string; fullName: string } | null;
 }
 
 type TaskStatus = 'pending' | 'address_confirmed' | 'in_navigator' | 'completed' | 'not_completed' | 'rescheduled';
@@ -61,10 +79,31 @@ interface CourierUser {
   role: string;
 }
 
+/** UA → {EU} → UA · дата — компактний лейбл поїздки для селектора. */
+function journeyLabel(j: JourneyOption): string {
+  const c = COUNTRY_LABELS[j.country as CountryCode] || j.country;
+  return `UA → ${c} → UA · ${formatDate(j.departureDate)}`;
+}
+
+/**
+ * ТЗ docx 21.07.26 (п.3): у Маршрутному листі показуємо сторону в країні
+ * ПРИЗНАЧЕННЯ поїздки (EU). Посилка EU→UA (eu_to_ua) → Відправник у EU;
+ * посилка UA→EU (ua_to_eu) → Отримувач у EU. UA-сторону видно лише при
+ * відкритті конкретної посилки.
+ */
+function euDestParty(p: RouteItem) {
+  const showSender = p.direction === 'eu_to_ua';
+  return showSender
+    ? { roleLabel: 'Відправник', name: `${p.sender.lastName} ${p.sender.firstName}`, phone: p.sender.phone, addr: p.senderAddress }
+    : { roleLabel: 'Отримувач', name: `${p.receiver.lastName} ${p.receiver.firstName}`, phone: p.receiver.phone, addr: p.receiverAddress };
+}
+
 export default function RoutesPage() {
+  const [journeys, setJourneys] = useState<JourneyOption[]>([]);
+  const [selectedJourneyId, setSelectedJourneyId] = useState('');
+  const [journeysLoaded, setJourneysLoaded] = useState(false);
   const [parcels, setParcels] = useState<RouteItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0]);
   const [taskStatuses, setTaskStatuses] = useState<Record<string, TaskStatus>>({});
   const [failureReasons, setFailureReasons] = useState<Record<string, string>>({});
   const [reschedDates, setReschedDates] = useState<Record<string, string>>({});
@@ -73,41 +112,67 @@ export default function RoutesPage() {
   const [selectedParcelIds, setSelectedParcelIds] = useState<Set<string>>(new Set());
   const [assigning, setAssigning] = useState(false);
 
-  const fetchParcels = useCallback(async () => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (dateFilter) {
-      params.set('dateFrom', dateFilter);
-      params.set('dateTo', dateFilter);
-    }
-    params.set('limit', '100');
+  // Завантажуємо поїздки; дефолт — ?journeyId з URL або найближча до сьогодні.
+  useEffect(() => {
+    fetch('/api/journeys')
+      .then(r => (r.ok ? r.json() : []))
+      .then((data: JourneyOption[]) => {
+        setJourneys(data);
+        setJourneysLoaded(true);
+        const urlId = new URLSearchParams(window.location.search).get('journeyId');
+        if (urlId && data.some(j => j.id === urlId)) {
+          setSelectedJourneyId(urlId);
+        } else if (data.length > 0) {
+          const now = Date.now();
+          const nearest = [...data].sort(
+            (a, b) =>
+              Math.abs(new Date(a.departureDate).getTime() - now) -
+              Math.abs(new Date(b.departureDate).getTime() - now)
+          )[0];
+          setSelectedJourneyId(nearest.id);
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch(() => { setJourneysLoaded(true); setLoading(false); });
+  }, []);
 
-    const res = await fetch(`/api/parcels?${params}`);
-    if (res.ok) {
-      const data = await res.json();
-      const sorted = (data.parcels as RouteItem[]).sort((a, b) => {
-        const codeA = a.receiverAddress?.postalCode || '';
-        const codeB = b.receiverAddress?.postalCode || '';
-        return codeA.localeCompare(codeB);
-      });
-      setParcels(sorted);
-      // Init task statuses from DB
-      const statuses: Record<string, TaskStatus> = {};
-      const reasons: Record<string, string> = {};
-      const rescheds: Record<string, string> = {};
-      sorted.forEach(p => {
-        statuses[p.id] = (p.routeTaskStatus as TaskStatus) || 'pending';
-        if (p.routeTaskFailReason) reasons[p.id] = p.routeTaskFailReason;
-        if (p.routeTaskReschedDate) rescheds[p.id] = p.routeTaskReschedDate.split('T')[0];
-      });
-      setTaskStatuses(statuses);
-      setFailureReasons(reasons);
-      setReschedDates(rescheds);
-    }
-    setLoading(false);
-  }, [dateFilter]);
+  // reload-лічильник: після призначення кур'єра піднімаємо його, і ефект нижче
+  // перезавантажує посилки (setState лише в .then-колбеку, не синхронно в ефекті).
+  const [reload, setReload] = useState(0);
 
-  useEffect(() => { fetchParcels(); }, [fetchParcels]);
+  useEffect(() => {
+    if (!selectedJourneyId) return;
+    let active = true;
+    fetch(`/api/parcels?journeyId=${selectedJourneyId}&limit=100`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => {
+        if (!active) return;
+        if (data?.parcels) {
+          // ТЗ: сортуємо за поштовим індексом сторони в країні призначення.
+          const sorted = (data.parcels as RouteItem[]).sort((a, b) => {
+            const ca = euDestParty(a).addr?.postalCode || '';
+            const cb = euDestParty(b).addr?.postalCode || '';
+            return ca.localeCompare(cb);
+          });
+          setParcels(sorted);
+          const statuses: Record<string, TaskStatus> = {};
+          const reasons: Record<string, string> = {};
+          const rescheds: Record<string, string> = {};
+          sorted.forEach(p => {
+            statuses[p.id] = (p.routeTaskStatus as TaskStatus) || 'pending';
+            if (p.routeTaskFailReason) reasons[p.id] = p.routeTaskFailReason;
+            if (p.routeTaskReschedDate) rescheds[p.id] = p.routeTaskReschedDate.split('T')[0];
+          });
+          setTaskStatuses(statuses);
+          setFailureReasons(reasons);
+          setReschedDates(rescheds);
+        }
+        setLoading(false);
+      })
+      .catch(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [selectedJourneyId, reload]);
 
   useEffect(() => {
     fetch('/api/users')
@@ -147,7 +212,7 @@ export default function RoutesPage() {
     await Promise.all(promises);
     setAssigning(false);
     setSelectedParcelIds(new Set());
-    fetchParcels();
+    setReload(n => n + 1);
   }
 
   function updateTaskStatus(parcelId: string, status: TaskStatus) {
@@ -183,20 +248,57 @@ export default function RoutesPage() {
 
   const TASK_LABELS = TASK_STATUS_LABELS;
 
+  const selectedJourney = journeys.find(j => j.id === selectedJourneyId) || null;
+  // ТЗ docx 21.07.26 (п.3): «прізвища водіїв». Profile має лише fullName —
+  // показуємо повне ім'я (прізвище в ньому міститься); двох водіїв через кому.
+  const drivers = [selectedJourney?.assignedCourier?.fullName, selectedJourney?.secondCourier?.fullName]
+    .filter(Boolean)
+    .join(', ');
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-start justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold">Маршрутний лист</h1>
-          <p className="text-sm text-gray-500">
+          {/* ТЗ docx 21.07.26 (п.3): зверху — дата поїздки, прізвища водіїв,
+              номер машини (саме в цьому порядку). Видимі й у друку. */}
+          {selectedJourney && (
+            <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+              <span>
+                <span className="text-gray-500">Дата поїздки:</span>{' '}
+                <span className="font-medium">{formatDateWithWeekday(selectedJourney.departureDate)}</span>
+              </span>
+              <span>
+                <span className="text-gray-500">Водії:</span>{' '}
+                <span className="font-medium">{drivers || '—'}</span>
+              </span>
+              <span>
+                <span className="text-gray-500">Машина:</span>{' '}
+                <span className="font-medium">{selectedJourney.vehicleInfo || '—'}</span>
+              </span>
+            </div>
+          )}
+          <p className="text-sm text-gray-500 mt-1">
             {completedCount}/{parcels.length} виконано | {totalPlaces} місць | {totalWeight.toFixed(1)} кг
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => window.print()}>Друкувати</Button>
       </div>
 
-      <div className="flex gap-2 mb-4">
-        <Input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className="w-44" />
+      {/* Вибір поїздки — лист показує посилки ОБОХ її рейсів. */}
+      <div className="flex gap-2 mb-4 print:hidden">
+        <Select value={selectedJourneyId} onValueChange={(v) => { setSelectedJourneyId(v ?? ''); setLoading(true); }}>
+          <SelectTrigger className="w-96 h-9 text-sm">
+            <SelectValue placeholder="Виберіть поїздку">
+              {selectedJourney ? journeyLabel(selectedJourney) : 'Виберіть поїздку'}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent className="min-w-[24rem]">
+            {journeys.map(j => (
+              <SelectItem key={j.id} value={j.id}>{journeyLabel(j)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Courier assignment section */}
@@ -221,17 +323,24 @@ export default function RoutesPage() {
             {assigning ? 'Призначення...' : `Призначити кур'єра (${selectedParcelIds.size})`}
           </Button>
           <Button size="sm" variant="outline" onClick={toggleAllParcels}>
-            {selectedParcelIds.size === parcels.length ? 'Зняти все' : 'Вибрати все'}
+            {selectedParcelIds.size === parcels.length && parcels.length > 0 ? 'Зняти все' : 'Вибрати все'}
           </Button>
         </div>
       </div>
 
       {loading ? (
         <div className="text-center py-12 text-gray-500">Завантаження...</div>
+      ) : !selectedJourney ? (
+        <div className="text-center py-12 text-gray-500">
+          {journeysLoaded && journeys.length === 0
+            ? 'Немає активних поїздок. Створіть поїздку у розділі «Поїздки».'
+            : 'Виберіть поїздку, щоб побачити маршрутний лист.'}
+        </div>
       ) : (
         <div className="bg-white rounded-lg border divide-y">
           {parcels.map((p, idx) => {
             const ts = taskStatuses[p.id] || 'pending';
+            const d = euDestParty(p);
             return (
               <div key={p.id} className={`p-3 ${ts === 'completed' ? 'bg-green-50/50' : ts === 'not_completed' ? 'bg-red-50/50' : ''}`}>
                 <div className="flex items-start justify-between gap-2">
@@ -253,17 +362,18 @@ export default function RoutesPage() {
 
                     <div className="ml-7">
                       <div className="text-sm font-medium">
-                        {p.receiver.lastName} {p.receiver.firstName}
+                        {d.name}
+                        <span className="ml-2 text-[10px] font-normal uppercase tracking-wide text-gray-400">{d.roleLabel}</span>
                       </div>
-                      <div className="text-xs text-gray-600">{p.receiver.phone}</div>
-                      {p.receiverAddress && (
+                      <div className="text-xs text-gray-600">{d.phone}</div>
+                      {d.addr && (
                         <div className="text-xs text-gray-400 mt-0.5">
-                          {p.receiverAddress.postalCode && <span className="font-mono mr-1">{p.receiverAddress.postalCode}</span>}
-                          {p.receiverAddress.city}
-                          {p.receiverAddress.street ? `, ${p.receiverAddress.street}` : ''}
-                          {p.receiverAddress.building ? ` ${p.receiverAddress.building}` : ''}
-                          {p.receiverAddress.landmark && (
-                            <span className="italic text-gray-500"> ({p.receiverAddress.landmark})</span>
+                          {d.addr.postalCode && <span className="font-mono mr-1">{d.addr.postalCode}</span>}
+                          {d.addr.city}
+                          {d.addr.street ? `, ${d.addr.street}` : ''}
+                          {d.addr.building ? ` ${d.addr.building}` : ''}
+                          {d.addr.landmark && (
+                            <span className="italic text-gray-500"> ({d.addr.landmark})</span>
                           )}
                         </div>
                       )}
@@ -318,7 +428,7 @@ export default function RoutesPage() {
             );
           })}
           {parcels.length === 0 && (
-            <div className="text-center py-8 text-gray-500">Немає посилок на цю дату</div>
+            <div className="text-center py-8 text-gray-500">У цій поїздці ще немає посилок</div>
           )}
         </div>
       )}
