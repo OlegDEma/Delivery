@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { STATUS_TRANSITIONS, isTerminal } from '@/lib/parcels/status-transitions';
 import { statusLabel } from '@/lib/parcels/status-label';
+import { canEditParcelData } from '@/lib/parcels/edit-lock';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { Camera, StickyNote, Lock, Pencil } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils/format';
@@ -39,6 +40,8 @@ interface ParcelDetail {
   shortNumber: number | null;
   direction: string;
   status: ParcelStatusType;
+  /** ТЗ docx 26.07.26 (п.1): автор посилки — редагувати може лише він. */
+  createdById: string | null;
   shipmentType: string;
   description: string | null;
   declaredValue: number | null;
@@ -132,7 +135,7 @@ interface ParcelDetail {
 
 export default function ParcelDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { role } = useAuth();
+  const { user, role } = useAuth();
   const isSuperAdmin = role === 'super_admin';
   const [parcel, setParcel] = useState<ParcelDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -245,7 +248,14 @@ export default function ParcelDetailPage() {
     'accepted_for_transport_to_eu', 'in_transit_to_eu', 'at_eu_warehouse', 'delivered_eu',
   ];
   const isAccepted = LOCKED_STATUSES.includes(parcel.status);
-  const isEditLocked = isAccepted && !isSuperAdmin;
+  // ТЗ docx 26.07.26 (п.1): дані посилки редаговні лише у статусі «Створена» і
+  // лише автором (super_admin — виняток). isEditLocked драйвить кнопку
+  // «Редагувати», party-edit та readOnly карток.
+  const canEdit = canEditParcelData(
+    { status: parcel.status, createdById: parcel.createdById },
+    { userId: user?.id ?? '', role: role ?? '' },
+  );
+  const isEditLocked = !canEdit;
 
   const isClientOrderPending =
     parcel.status === 'draft' &&
@@ -367,17 +377,19 @@ export default function ParcelDetailPage() {
         </div>
       </div>
 
-      {/* Банер блокування редагування */}
-      {isAccepted && (
+      {/* Банер блокування редагування (ТЗ docx 26.07.26 п.1). */}
+      {(isEditLocked || (isSuperAdmin && isAccepted)) && (
         <div className={`rounded-lg border px-3 py-2 flex items-start gap-2 text-sm ${
-          isSuperAdmin ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-gray-50 border-gray-200 text-gray-700'
+          isSuperAdmin && isAccepted ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-gray-50 border-gray-200 text-gray-700'
         }`}>
           <Lock className="w-4 h-4 mt-0.5 shrink-0" />
           <div>
-            {isSuperAdmin ? (
-              <>Посилка прийнята до перевезення. Редагування місць і деталей доступне тільки вам як Суперадміну.</>
+            {isSuperAdmin && isAccepted ? (
+              <>Посилка вже у роботі. Редагування даних доступне тільки вам як Суперадміну.</>
+            ) : parcel.status !== 'draft' ? (
+              <>Посилку прийнято до перевезення — дані заморожено (ТЗ). Змінювати можна лише посилку у статусі «Створена».</>
             ) : (
-              <>Посилка прийнята до перевезення. Редагування ваги, розмірів і деталей заборонено — зверніться до Суперадміна.</>
+              <>Редагувати дані цієї посилки може лише той, хто її створив.</>
             )}
           </div>
         </div>
@@ -453,13 +465,18 @@ export default function ParcelDetailPage() {
                 </span>
               );
             })()}
-            <ParcelPartyEdit
-              parcelId={parcel.id}
-              role="receiver"
-              party={parcel.receiver}
-              address={parcel.receiverAddress ? { ...parcel.receiverAddress, id: parcel.receiverAddressId } : null}
-              onSaved={fetchParcel}
-            />
+            {/* ТЗ docx 26.07.26 (п.1): редагувати сторони можна лише поки
+                посилка «Створена» (і лише автором). Раніше олівець показувався
+                завжди — тепер гейтуємо за canEdit. */}
+            {canEdit && (
+              <ParcelPartyEdit
+                parcelId={parcel.id}
+                role="receiver"
+                party={parcel.receiver}
+                address={parcel.receiverAddress ? { ...parcel.receiverAddress, id: parcel.receiverAddressId } : null}
+                onSaved={fetchParcel}
+              />
+            )}
             {/* ТЗ: чекбокс «Відправити рахунок» — справа від значка
                 редагувати, для уже створеної але ще не доставленої посилки. */}
             <SendInvoiceButton
@@ -486,13 +503,15 @@ export default function ParcelDetailPage() {
                 </span>
               );
             })()}
-            <ParcelPartyEdit
-              parcelId={parcel.id}
-              role="sender"
-              party={parcel.sender}
-              address={parcel.senderAddress ? { ...parcel.senderAddress, id: parcel.senderAddressId } : null}
-              onSaved={fetchParcel}
-            />
+            {canEdit && (
+              <ParcelPartyEdit
+                parcelId={parcel.id}
+                role="sender"
+                party={parcel.sender}
+                address={parcel.senderAddress ? { ...parcel.senderAddress, id: parcel.senderAddressId } : null}
+                onSaved={fetchParcel}
+              />
+            )}
             <SendInvoiceButton
               parcelId={parcel.id}
               toParty="sender"

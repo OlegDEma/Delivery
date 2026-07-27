@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -57,6 +57,41 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 
 const EU_COUNTRY_LABELS: Record<string, string> = { NL: 'Нідерланди', AT: 'Австрія', DE: 'Німеччина' };
 
+/**
+ * ТЗ docx 26.07.26 (п.2): поїздка для авто-фокусу/підсвітки —
+ *  1) яка відбувається ЗАРАЗ (departure ≤ сьогодні ≤ endDate/euReturn/departure);
+ *  2) інакше — найближча МАЙБУТНЯ (найменший departure ≥ сьогодні);
+ *  3) інакше (усі в минулому) — найсвіжіша МИНУЛА.
+ */
+function pickFocusJourneyId(list: { id: string; departureDate: string; euReturnDate: string | null; endDate: string | null }[]): string | null {
+  if (list.length === 0) return null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const t0 = today.getTime();
+  const day = (s: string | null) => {
+    if (!s) return null;
+    const d = new Date(s); d.setHours(0, 0, 0, 0);
+    return Number.isNaN(d.getTime()) ? null : d.getTime();
+  };
+  for (const j of list) {
+    const dep = day(j.departureDate);
+    if (dep === null) continue;
+    const end = day(j.endDate) ?? day(j.euReturnDate) ?? dep;
+    if (dep <= t0 && t0 <= end) return j.id;
+  }
+  let upId: string | null = null, upBest = Infinity;
+  for (const j of list) {
+    const dep = day(j.departureDate);
+    if (dep !== null && dep >= t0 && dep < upBest) { upBest = dep; upId = j.id; }
+  }
+  if (upId) return upId;
+  let pastId: string | null = null, pastBest = -Infinity;
+  for (const j of list) {
+    const dep = day(j.departureDate);
+    if (dep !== null && dep < t0 && dep > pastBest) { pastBest = dep; pastId = j.id; }
+  }
+  return pastId;
+}
+
 export default function JourneysPage() {
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [couriers, setCouriers] = useState<Courier[]>([]);
@@ -101,6 +136,10 @@ export default function JourneysPage() {
   const [bulkCourier2, setBulkCourier2] = useState('');
   const [bulkVehicle, setBulkVehicle] = useState('');
   const [bulkSaving, setBulkSaving] = useState(false);
+
+  // ТЗ docx 26.07.26 (п.2): авто-фокус + підсвітка поточної/найближчої поїздки.
+  const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const didInitialFocus = useRef(false);
 
   async function fetchJourneys() {
     setLoading(true);
@@ -284,6 +323,18 @@ export default function JourneysPage() {
   // ТЗ docx 09.07.26: спершу застосовуємо ФІЛЬТР країни (ховає інші), потім
   // (за потреби) групуємо відфільтрований список.
   const filteredJourneys = filterCountry ? journeys.filter(j => j.country === filterCountry) : journeys;
+  // ТЗ docx 26.07.26 (п.2): id поїздки для авто-фокусу/підсвітки (над видимим списком).
+  const focusJourneyId = useMemo(() => pickFocusJourneyId(filteredJourneys), [filteredJourneys]);
+  // Одноразовий авто-скрол у центр на поточну/найближчу поїздку при відкритті.
+  // setTimeout (не rAF — призупинений у прихованій вкладці) + behavior:'auto'.
+  useEffect(() => {
+    if (loading || filteredJourneys.length === 0 || didInitialFocus.current || !focusJourneyId) return;
+    didInitialFocus.current = true;
+    setTimeout(() => {
+      const el = rowRefs.current.get(focusJourneyId);
+      if (el) el.scrollIntoView({ behavior: 'auto', block: 'center' });
+    }, 60);
+  }, [loading, filteredJourneys, focusJourneyId]);
   // Групування за країною (ТЗ D10: у Поїздок немає напрямку → групуємо за країною).
   const journeyGroups: { key: string; label: string; items: Journey[] }[] = groupByCountry
     ? (() => {
@@ -486,7 +537,17 @@ export default function JourneysPage() {
               )}
               <div className="space-y-3">
           {group.items.map(j => (
-            <div key={j.id} className="bg-white rounded-lg border overflow-hidden">
+            <div
+              key={j.id}
+              ref={(el) => { if (el) rowRefs.current.set(j.id, el); else rowRefs.current.delete(j.id); }}
+              className={cn(
+                'rounded-lg border overflow-hidden transition-colors',
+                // ТЗ docx 26.07.26 (п.2): поточна/найближча поїздка — кольоровий фон + рамка.
+                j.id === focusJourneyId
+                  ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-400 ring-offset-1 shadow-sm'
+                  : 'bg-white'
+              )}
+            >
               {/* Journey header */}
               <div className="p-3 flex items-start gap-2 bg-gradient-to-r from-blue-50 to-transparent">
                 {/* ТЗ docx 02.07.26 (D10): чекбокс вибору поїздки. */}
@@ -501,6 +562,10 @@ export default function JourneysPage() {
                     <Badge className={STATUS_MAP[j.status]?.color || ''}>
                       {STATUS_MAP[j.status]?.label || j.status}
                     </Badge>
+                    {/* ТЗ docx 26.07.26 (п.2): маркер поточної/найближчої поїздки. */}
+                    {j.id === focusJourneyId && (
+                      <Badge className="bg-amber-500 text-white">Зараз / найближча</Badge>
+                    )}
                   </div>
                   {/* ТЗ L1: день тижня + дата. */}
                   <div className="text-xs text-gray-500 space-x-1">

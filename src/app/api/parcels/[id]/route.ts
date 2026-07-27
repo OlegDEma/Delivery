@@ -13,15 +13,7 @@ import { logger } from '@/lib/logger';
 import { writeAuditLog } from '@/lib/audit';
 import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transitions';
 import { isUuid } from '@/lib/validators/common';
-
-// Статуси «прийнято до перевезення» і далі — після них редагування ваги,
-// розмірів та деталей заборонено всім, окрім super_admin. Список дублює
-// LOCKED_STATUSES з UI-сторінки /parcels/[id] навмисно — клієнт і сервер
-// повинні узгоджувати правило, навіть якщо одна сторона буде обійдена.
-const LOCKED_FOR_EDIT: ParcelStatus[] = [
-  'accepted_for_transport_to_ua', 'in_transit_to_ua', 'at_lviv_warehouse', 'at_nova_poshta', 'delivered_ua',
-  'accepted_for_transport_to_eu', 'in_transit_to_eu', 'at_eu_warehouse', 'delivered_eu',
-];
+import { canEditParcelData, editLockReason } from '@/lib/parcels/edit-lock';
 
 // GET /api/parcels/[id]
 export async function GET(
@@ -131,16 +123,19 @@ export async function PATCH(
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }
 
-  const isLocked = LOCKED_FOR_EDIT.includes(parcel.status);
-
-  // Блок редагування «Місць» (ваги/розмірів) після accepted_for_transport_*
-  // — тільки super_admin може обходити. Фронтенд вже приховує кнопку
-  // «Редагувати», але сервер має валідувати самостійно.
-  if (Array.isArray(body.places) && isLocked && !isSuperAdmin) {
-    return NextResponse.json(
-      { error: 'Редагування місць заборонено після прийому посилки до перевезення. Зверніться до Суперадміна.' },
-      { status: 403 }
-    );
+  // ТЗ docx 26.07.26 (п.1): ДАНІ посилки (сторони/адреси/спосіб/послуги/місця/
+  // «Пакет»/оплата тощо) редаговні ЛИШЕ поки статус «Створена» і лише автором
+  // (super_admin — виняток). Операційні поля (статус, ТТН, рейс, кур'єр, isPaid,
+  // оцінка доставки, маршрутні задачі) НЕ блокуємо — це логістичний стан.
+  const DATA_FIELDS = [
+    'description', 'declaredValue', 'insuranceApplied', 'needsPackaging', 'doorstepDelivery',
+    'parcelMoneyAmount', 'payer', 'paymentMethod', 'paymentInUkraine', 'shipmentType',
+    'collectionMethod', 'collectionPointId', 'collectionDate', 'collectionAddress', 'isMultiParcelPickup',
+    'senderId', 'receiverId', 'senderAddressId', 'receiverAddressId', 'places',
+  ] as const;
+  const touchesData = DATA_FIELDS.some((f) => body[f as keyof typeof body] !== undefined);
+  if (touchesData && !canEditParcelData(parcel, guard.user)) {
+    return NextResponse.json({ error: editLockReason() }, { status: 403 });
   }
 
   // Status-only change path (doesn't touch places, can be simple update).
@@ -235,25 +230,9 @@ export async function PATCH(
     return NextResponse.json(updated);
   }
 
-  // General field updates (non-status path). Build once, execute in one tx if places present.
-  // Блокування «Деталей» (description / declaredValue / payer / paymentMethod /
-  // paymentInUkraine / shipmentType / needsPackaging) після accepted_for_transport_*.
-  // Решта полів (npTtn, tripId, assignedCourierId, isPaid, estimatedDelivery*, etc.)
-  // — це операційні поля, їх редагування не блокуємо.
-  if (isLocked && !isSuperAdmin) {
-    const DETAIL_FIELDS: Array<keyof typeof body> = [
-      'description', 'declaredValue', 'payer', 'paymentMethod',
-      'paymentInUkraine', 'shipmentType', 'needsPackaging',
-    ];
-    const hasDetailEdit = DETAIL_FIELDS.some((f) => body[f] !== undefined);
-    if (hasDetailEdit) {
-      return NextResponse.json(
-        { error: 'Редагування деталей заборонено після прийому посилки до перевезення. Зверніться до Суперадміна.' },
-        { status: 403 }
-      );
-    }
-  }
-
+  // General field updates (non-status path). Дані-поля вже згейтовані вище
+  // (ТЗ docx 26.07.26 п.1); операційні поля лишаються редагованими в будь-якому
+  // статусі. Build once, execute in one tx if places present.
   const updateData: Prisma.ParcelUpdateInput = {};
   if (body.npTtn !== undefined) {
     updateData.npTtn = body.npTtn;

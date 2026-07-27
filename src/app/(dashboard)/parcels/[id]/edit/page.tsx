@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/hooks/use-auth';
+import { canEditParcelData, editLockReason } from '@/lib/parcels/edit-lock';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,6 +64,9 @@ function calcVolWeight(p: PlaceDraft): number {
 
 interface ParcelData {
   id: string;
+  /** ТЗ docx 26.07.26 (п.1): редагувати можна лише «Створена» і лише автором. */
+  status: string;
+  createdById: string | null;
   internalNumber: string;
   direction: string;
   shipmentType: string;
@@ -111,6 +116,7 @@ type PricingRule = { country: string; direction: string; weightType: 'actual'|'v
 export default function EditParcelPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { user, role, loading: authLoading } = useAuth();
   const [parcel, setParcel] = useState<ParcelData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -204,6 +210,21 @@ export default function EditParcelPage() {
       setLoading(false);
     });
   }, [id]);
+
+  // ТЗ docx 26.07.26 (п.1): edit-сторінка доступна лише для статусу «Створена»
+  // і лише автору (super_admin — виняток). Інакше повертаємо на детальну з
+  // поясненням. Чекаємо, поки завантажаться і auth, і посилка.
+  useEffect(() => {
+    if (authLoading || !parcel) return;
+    const ok = canEditParcelData(
+      { status: parcel.status, createdById: parcel.createdById },
+      { userId: user?.id ?? '', role: role ?? '' },
+    );
+    if (!ok) {
+      toast.error(editLockReason());
+      router.replace(`/parcels/${id}`);
+    }
+  }, [authLoading, parcel, user, role, id, router]);
 
   function handleShipmentTypeChange(val: string) {
     setShipmentType(val);

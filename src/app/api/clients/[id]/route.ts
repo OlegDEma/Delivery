@@ -284,22 +284,42 @@ export async function PATCH(
     const exists = await prisma.clientAddress.findFirst({ where: { id: body.addressId, clientId: id } });
     if (!exists) return NextResponse.json({ error: 'Адресу не знайдено' }, { status: 404 });
     const addr = body.address;
-    const updated = await prisma.clientAddress.update({
-      where: { id: body.addressId },
-      data: {
-        ...(addr.country !== undefined && { country: addr.country }),
-        ...(addr.city !== undefined && { city: addr.city }),
-        ...(addr.street !== undefined && { street: addr.street || null }),
-        ...(addr.building !== undefined && { building: addr.building || null }),
-        ...(addr.apartment !== undefined && { apartment: addr.apartment || null }),
-        ...(addr.postalCode !== undefined && { postalCode: addr.postalCode || null }),
-        ...(addr.landmark !== undefined && { landmark: addr.landmark || null }),
-        ...(addr.npWarehouseNum !== undefined && { npWarehouseNum: addr.npWarehouseNum || null }),
-        ...(addr.pickupPointText !== undefined && { pickupPointText: addr.pickupPointText || null }),
-        ...(addr.deliveryMethod !== undefined && { deliveryMethod: addr.deliveryMethod }),
+    // Злиті значення: існуючі поля, перекриті переданими змінами.
+    const merged = {
+      country: addr.country !== undefined ? addr.country : exists.country,
+      city: addr.city !== undefined ? addr.city : exists.city,
+      street: addr.street !== undefined ? (addr.street || null) : exists.street,
+      building: addr.building !== undefined ? (addr.building || null) : exists.building,
+      apartment: addr.apartment !== undefined ? (addr.apartment || null) : exists.apartment,
+      postalCode: addr.postalCode !== undefined ? (addr.postalCode || null) : exists.postalCode,
+      landmark: addr.landmark !== undefined ? (addr.landmark || null) : exists.landmark,
+      npWarehouseNum: addr.npWarehouseNum !== undefined ? (addr.npWarehouseNum || null) : exists.npWarehouseNum,
+      pickupPointText: addr.pickupPointText !== undefined ? (addr.pickupPointText || null) : exists.pickupPointText,
+      deliveryMethod: addr.deliveryMethod !== undefined ? addr.deliveryMethod : exists.deliveryMethod,
+    };
+    // ТЗ docx 26.07.26 (п.1): якщо цю адресу вже використовує ЗАМОРОЖЕНА посилка
+    // (статус не «Створена») І дані реально змінюються — НЕ мутуємо спільний
+    // запис, а створюємо НОВИЙ (стара посилка лишається з оригінальними даними;
+    // викликач лінкує новий id). Якщо змін немає — повертаємо наявний (без
+    // дубля). Для не-заморожених адрес оновлюємо на місці, як і раніше.
+    const ADDR_KEYS = ['country', 'city', 'street', 'building', 'apartment',
+      'postalCode', 'landmark', 'npWarehouseNum', 'pickupPointText', 'deliveryMethod'] as const;
+    const changed = ADDR_KEYS.some(k => merged[k] !== (exists as Record<string, unknown>)[k]);
+    const usedByFrozen = await prisma.parcel.count({
+      where: {
+        deletedAt: null, status: { not: 'draft' },
+        OR: [{ senderAddressId: body.addressId }, { receiverAddressId: body.addressId }],
       },
     });
-    return NextResponse.json(updated);
+    let saved;
+    if (usedByFrozen > 0) {
+      saved = changed
+        ? await prisma.clientAddress.create({ data: { clientId: id, ...merged, isDefault: false } })
+        : exists;
+    } else {
+      saved = await prisma.clientAddress.update({ where: { id: body.addressId }, data: merged });
+    }
+    return NextResponse.json(saved);
   }
 
   // Delete address

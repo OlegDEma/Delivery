@@ -377,59 +377,60 @@ export function ClientCreateForm({
         // оновлюємо ту саму (щоб «останні дані» перезаписали попередні). Якщо
         // перескочили на власника номера (resolvedToOwner) або адреси не було —
         // додаємо введену адресу як нову.
+        // ТЗ docx 26.07.26 (п.1): API може повернути НОВИЙ запис адреси (коли
+        // стару вже використовує заморожена посилка) — запам'ятовуємо його id,
+        // щоб нова посилка прив'язалась саме до нього.
+        let savedAddressId: string | null = null;
+        const addressBody = {
+          // ТЗ docx 21.07.26 (п.1): зберігаємо змінену країну в адресу —
+          // саме ClientAddress.country читає підсумок («Країна: …»).
+          country,
+          deliveryMethod,
+          postalCode: postalCode || null,
+          city,
+          street: street || null,
+          building: building || null,
+          landmark: landmark || null,
+          npWarehouseNum: deliveryMethod === 'np_warehouse' ? (npWarehouseNum || null) : null,
+          pickupPointText: deliveryMethod === 'pickup_point' ? (pickupPointText || null) : null,
+        };
         if (!resolvedToOwner && initialAddr?.id) {
           const r = await fetch(`/api/clients/${targetId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'updateAddress',
-              addressId: initialAddr.id,
-              address: {
-                // ТЗ docx 21.07.26 (п.1): зберігаємо змінену країну в адресу —
-                // саме ClientAddress.country читає підсумок («Країна: …»).
-                country,
-                deliveryMethod,
-                postalCode: postalCode || null,
-                city,
-                street: street || null,
-                building: building || null,
-                landmark: landmark || null,
-                npWarehouseNum: deliveryMethod === 'np_warehouse' ? (npWarehouseNum || null) : null,
-                pickupPointText: deliveryMethod === 'pickup_point' ? (pickupPointText || null) : null,
-              },
-            }),
+            body: JSON.stringify({ action: 'updateAddress', addressId: initialAddr.id, address: addressBody }),
           });
           if (!r.ok) {
             const d = await r.json().catch(() => ({}));
             throw new Error(d.error || 'Помилка оновлення адреси');
           }
+          const saved = await r.json().catch(() => null);
+          savedAddressId = saved?.id ?? initialAddr.id;
         } else {
           const r = await fetch(`/api/clients/${targetId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'addAddress',
-              address: {
-                country,
-                deliveryMethod,
-                postalCode: postalCode || null,
-                city,
-                street: street || null,
-                building: building || null,
-                landmark: landmark || null,
-                npWarehouseNum: deliveryMethod === 'np_warehouse' ? (npWarehouseNum || null) : null,
-                pickupPointText: deliveryMethod === 'pickup_point' ? (pickupPointText || null) : null,
-              },
-            }),
+            body: JSON.stringify({ action: 'addAddress', address: addressBody }),
           });
           if (!r.ok) {
             const d = await r.json().catch(() => ({}));
             throw new Error(d.error || 'Помилка збереження адреси');
           }
+          const saved = await r.json().catch(() => null);
+          savedAddressId = saved?.id ?? null;
         }
 
         // Re-fetch the (possibly resolved) client so caller has fresh data.
         const fresh = await fetch(`/api/clients/${targetId}`).then(r => r.ok ? r.json() : null);
+        // ТЗ docx 26.07.26 (п.1): ставимо збережену адресу ПЕРШОЮ, щоб
+        // handleSenderSelect/handleReceiverSelect (беруть addresses[0]) прив'язали
+        // нову посилку саме до неї (а не до старої, яку лишили незмінною).
+        if (fresh && Array.isArray(fresh.addresses) && savedAddressId) {
+          fresh.addresses = [
+            ...fresh.addresses.filter((a: { id: string }) => a.id === savedAddressId),
+            ...fresh.addresses.filter((a: { id: string }) => a.id !== savedAddressId),
+          ];
+        }
         toast.success(
           resolvedToOwner
             ? `Використано наявного клієнта з цим номером${fresh ? `: ${fresh.lastName} ${fresh.firstName}` : ''}`
