@@ -9,14 +9,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatCurrency } from '@/lib/utils/format';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 interface WarehouseParcel {
   id: string;
   internalNumber: string;
   totalWeight: number | null;
   totalPlacesCount: number;
-  receiver: { firstName: string; lastName: string };
+  // ТЗ docx 26.07.26 (п.1): статус потрібен parcelParties, щоб брати знімок для accepted+.
+  status: string;
+  receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { city: string } | null;
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
 }
 
 interface CourierUser {
@@ -241,22 +247,25 @@ export default function ReportsPage() {
               </div>
 
               <div className="bg-white rounded-lg border divide-y">
-                {warehouseParcels.map(p => (
+                {warehouseParcels.map(p => {
+                  const pt = parcelParties(p);
+                  return (
                   <div key={p.id} className="p-3 flex items-center justify-between">
                     <div>
                       <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
                       <span className="text-sm text-gray-500 ml-2">
-                        {p.receiver.lastName} {p.receiver.firstName}
+                        {pt.receiver.lastName} {pt.receiver.firstName}
                       </span>
-                      {p.receiverAddress && (
-                        <span className="text-xs text-gray-400 ml-2">{p.receiverAddress.city}</span>
+                      {pt.receiver.address && (
+                        <span className="text-xs text-gray-400 ml-2">{pt.receiver.address.city}</span>
                       )}
                     </div>
                     <div className="text-sm text-gray-600">
                       {p.totalWeight ? `${Number(p.totalWeight).toFixed(1)} кг` : '—'} | {p.totalPlacesCount} м.
                     </div>
                   </div>
-                ))}
+                  );
+                })}
                 {warehouseParcels.length === 0 && (
                   <div className="text-center py-8 text-gray-500">Немає посилок на складі</div>
                 )}

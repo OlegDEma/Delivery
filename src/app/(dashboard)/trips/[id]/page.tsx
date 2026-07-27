@@ -14,6 +14,7 @@ import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatDateWithWeekday, formatWeight } from '@/lib/utils/format';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 const TRIP_STATUSES: Record<string, { label: string; color: string }> = {
   planned: { label: 'Заплановано', color: 'bg-blue-100 text-blue-800' },
@@ -35,6 +36,9 @@ interface TripParcel {
   collectionAddress: string | null;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
   receiverAddress: { city: string; street: string | null; building: string | null; npWarehouseNum: string | null } | null;
   collectionPoint: { id: string; name: string | null; city: string; address: string } | null;
 }
@@ -338,15 +342,18 @@ export default function TripDetailPage() {
                     <Badge variant="secondary" className="text-xs shrink-0">{courierPickups.length} пос.</Badge>
                   </div>
                   <div className="space-y-1">
-                    {courierPickups.map(p => (
+                    {courierPickups.map(p => {
+                      const pt = parcelParties(p);
+                      return (
                       <Link key={p.id} href={`/parcels/${p.id}`} className="block text-xs hover:bg-gray-50 rounded px-1">
                         <span className="font-mono">{p.internalNumber}</span>
-                        <span className="text-gray-500"> — {p.sender.lastName} {p.sender.firstName}</span>
+                        <span className="text-gray-500"> — {pt.sender.lastName} {pt.sender.firstName}</span>
                         {p.collectionAddress && (
                           <span className="text-gray-400"> · {p.collectionAddress}</span>
                         )}
                       </Link>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -394,7 +401,9 @@ export default function TripDetailPage() {
         </CardHeader>
         <CardContent className="px-0 pb-0">
           <div className="divide-y">
-            {trip.parcels.map(p => (
+            {trip.parcels.map(p => {
+              const pt = parcelParties(p);
+              return (
               <div key={p.id} className="px-4 py-3 flex items-start justify-between hover:bg-gray-50">
                 <Link href={`/parcels/${p.id}`} className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
@@ -407,13 +416,13 @@ export default function TripDetailPage() {
                     </Badge>
                   </div>
                   <div className="text-sm">
-                    {p.receiver.lastName} {p.receiver.firstName}
-                    <span className="text-gray-400 ml-1">{p.receiver.phone}</span>
+                    {pt.receiver.lastName} {pt.receiver.firstName}
+                    <span className="text-gray-400 ml-1">{pt.receiver.phone}</span>
                   </div>
-                  {p.receiverAddress && (
+                  {pt.receiver.address && (
                     <div className="text-xs text-gray-400">
-                      {p.receiverAddress.city}
-                      {p.receiverAddress.street ? `, ${p.receiverAddress.street}` : ''}
+                      {pt.receiver.address.city}
+                      {pt.receiver.address.street ? `, ${pt.receiver.address.street}` : ''}
                     </div>
                   )}
                 </Link>
@@ -432,7 +441,8 @@ export default function TripDetailPage() {
                   </Button>
                 </div>
               </div>
-            ))}
+              );
+            })}
             {trip.parcels.length === 0 && (
               <div className="text-center py-6 text-gray-500 text-sm">
                 Немає посилок. Прив&apos;яжіть посилки через сторінку деталей посилки.

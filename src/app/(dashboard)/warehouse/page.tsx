@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate } from '@/lib/utils/format';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 interface ParcelItem {
   id: string;
@@ -21,6 +22,9 @@ interface ParcelItem {
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { city: string } | null;
   createdAt: string;
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
   // Present only when the aging endpoint is used (at_lviv_warehouse / at_eu_warehouse).
   warehouseSince?: string;
   daysAtWarehouse?: number;
@@ -233,7 +237,9 @@ export default function WarehousePage() {
 
           {/* List */}
           <div className="divide-y">
-            {parcels.map(p => (
+            {parcels.map(p => {
+              const pt = parcelParties(p);
+              return (
               <div key={p.id} className="flex items-start gap-3 p-3 hover:bg-gray-50">
                 <Checkbox
                   checked={selectedIds.has(p.id)}
@@ -251,11 +257,11 @@ export default function WarehousePage() {
                     )}
                   </div>
                   <div className="text-sm">
-                    {p.receiver.lastName} {p.receiver.firstName}
-                    <span className="text-gray-400 ml-1">{p.receiver.phone}</span>
+                    {pt.receiver.lastName} {pt.receiver.firstName}
+                    <span className="text-gray-400 ml-1">{pt.receiver.phone}</span>
                   </div>
-                  {p.receiverAddress && (
-                    <div className="text-xs text-gray-400">{p.receiverAddress.city}</div>
+                  {pt.receiver.address && (
+                    <div className="text-xs text-gray-400">{pt.receiver.address.city}</div>
                   )}
                 </div>
                 <div className="text-right text-sm shrink-0">
@@ -269,7 +275,8 @@ export default function WarehousePage() {
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
             {parcels.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 Немає посилок з цим статусом

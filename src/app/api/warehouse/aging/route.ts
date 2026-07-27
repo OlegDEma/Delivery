@@ -43,6 +43,9 @@ export async function GET(request: NextRequest) {
       sender: { select: { firstName: true, lastName: true, phone: true } },
       receiver: { select: { firstName: true, lastName: true, phone: true } },
       receiverAddress: { select: { city: true } },
+      // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (рендер через parcelParties).
+      senderSnapshot: true,
+      receiverSnapshot: true,
     },
   });
 

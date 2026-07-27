@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { formatDateTime, formatCurrency, formatDate } from '@/lib/utils/format';
 import { kyivYmd } from '@/lib/utils/tz';
@@ -38,7 +39,10 @@ interface Stats {
     internalNumber: string;
     status: ParcelStatusType;
     createdAt: string;
-    receiver: { lastName: string; firstName: string };
+    receiver: { lastName: string; firstName: string; phone: string };
+    // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+    senderSnapshot: unknown;
+    receiverSnapshot: unknown;
   }[];
   recentActivity: Activity[];
 }
@@ -183,17 +187,21 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="divide-y">
-            {stats.recentParcels.map(p => (
+            {stats.recentParcels.map(p => {
+              // ТЗ docx 26.07.26 (п.1): для accepted+ — ПІБ зі знімка (незмінно).
+              const pt = parcelParties(p);
+              return (
               <Link key={p.id} href={`/parcels/${p.id}`} className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50">
                 <div>
                   <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
-                  <span className="text-sm text-gray-500 ml-2">{p.receiver.lastName} {p.receiver.firstName}</span>
+                  <span className="text-sm text-gray-500 ml-2">{pt.receiver.lastName} {pt.receiver.firstName}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{STATUS_LABELS[p.status]}</Badge>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

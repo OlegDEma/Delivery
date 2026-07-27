@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatWeight } from '@/lib/utils/format';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 interface SearchResult {
   id: string;
@@ -22,6 +23,9 @@ interface SearchResult {
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { city: string; street: string | null } | null;
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
 }
 
 export default function SearchPage() {
@@ -78,23 +82,28 @@ export default function SearchPage() {
       // Client-side filtering for additional criteria
       if (name && searchParts.length > 1) {
         const nameLower = name.toLowerCase();
-        filtered = filtered.filter(p =>
-          p.sender.lastName.toLowerCase().includes(nameLower) ||
-          p.sender.firstName.toLowerCase().includes(nameLower) ||
-          p.receiver.lastName.toLowerCase().includes(nameLower) ||
-          p.receiver.firstName.toLowerCase().includes(nameLower)
-        );
+        filtered = filtered.filter(p => {
+          const pt = parcelParties(p);
+          return (
+            pt.sender.lastName.toLowerCase().includes(nameLower) ||
+            pt.sender.firstName.toLowerCase().includes(nameLower) ||
+            pt.receiver.lastName.toLowerCase().includes(nameLower) ||
+            pt.receiver.firstName.toLowerCase().includes(nameLower)
+          );
+        });
       }
       if (phone && name) {
-        filtered = filtered.filter(p =>
-          p.sender.phone.includes(phone) || p.receiver.phone.includes(phone)
-        );
+        filtered = filtered.filter(p => {
+          const pt = parcelParties(p);
+          return pt.sender.phone.includes(phone) || pt.receiver.phone.includes(phone);
+        });
       }
       if (city) {
         const cityLower = city.toLowerCase();
-        filtered = filtered.filter(p =>
-          p.receiverAddress?.city?.toLowerCase().includes(cityLower)
-        );
+        filtered = filtered.filter(p => {
+          const pt = parcelParties(p);
+          return pt.receiver.address?.city?.toLowerCase().includes(cityLower);
+        });
       }
 
       setResults(filtered);
@@ -164,7 +173,9 @@ export default function SearchPage() {
       )}
 
       <div className="bg-white rounded-lg border divide-y">
-        {results.map(p => (
+        {results.map(p => {
+          const pt = parcelParties(p);
+          return (
           <Link key={p.id} href={`/parcels/${p.id}`} className="block p-3 hover:bg-gray-50">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
@@ -173,15 +184,15 @@ export default function SearchPage() {
                   <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{STATUS_LABELS[p.status]}</Badge>
                 </div>
                 <div className="text-sm">
-                  <span className="text-gray-500">Від:</span> {p.sender.lastName} {p.sender.firstName}
-                  <span className="text-gray-400 ml-1">{p.sender.phone}</span>
+                  <span className="text-gray-500">Від:</span> {pt.sender.lastName} {pt.sender.firstName}
+                  <span className="text-gray-400 ml-1">{pt.sender.phone}</span>
                 </div>
                 <div className="text-sm">
-                  <span className="text-gray-500">Кому:</span> {p.receiver.lastName} {p.receiver.firstName}
-                  <span className="text-gray-400 ml-1">{p.receiver.phone}</span>
+                  <span className="text-gray-500">Кому:</span> {pt.receiver.lastName} {pt.receiver.firstName}
+                  <span className="text-gray-400 ml-1">{pt.receiver.phone}</span>
                 </div>
-                {p.receiverAddress && (
-                  <div className="text-xs text-gray-400">{p.receiverAddress.city}</div>
+                {pt.receiver.address && (
+                  <div className="text-xs text-gray-400">{pt.receiver.address.city}</div>
                 )}
               </div>
               <div className="text-right shrink-0 text-sm">
@@ -191,7 +202,8 @@ export default function SearchPage() {
               </div>
             </div>
           </Link>
-        ))}
+          );
+        })}
         {searched && results.length === 0 && (
           <div className="text-center py-8 text-gray-500">Нічого не знайдено</div>
         )}

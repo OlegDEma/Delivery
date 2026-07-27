@@ -23,6 +23,7 @@ import {
 } from '@/lib/constants/collection';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { EmptyState } from '@/components/shared/empty-state';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 interface CollectionPointDetail {
   id: string;
@@ -52,6 +53,9 @@ interface ParcelAtPoint {
   collectedAt: string | null;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
   trip: { id: string; departureDate: string; country: string } | null;
   collectedBy: { fullName: string } | null;
 }
@@ -333,7 +337,9 @@ export default function CollectionPointDetailPage() {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y">
-                    {items.map(p => (
+                    {items.map(p => {
+                      const pt = parcelParties(p);
+                      return (
                       <Link
                         key={p.id}
                         href={`/parcels/${p.id}`}
@@ -348,7 +354,7 @@ export default function CollectionPointDetailPage() {
                               </Badge>
                             </div>
                             <div className="text-xs text-gray-500 mt-0.5">
-                              Від {p.sender.lastName} {p.sender.firstName} → {p.receiver.lastName} {p.receiver.firstName}
+                              Від {pt.sender.lastName} {pt.sender.firstName} → {pt.receiver.lastName} {pt.receiver.firstName}
                             </div>
                             {p.collectedAt && (
                               <div className="text-xs text-gray-400 mt-0.5">
@@ -362,7 +368,8 @@ export default function CollectionPointDetailPage() {
                           </div>
                         </div>
                       </Link>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -379,7 +386,9 @@ export default function CollectionPointDetailPage() {
           </h2>
           <Card>
             <CardContent className="p-0 divide-y">
-              {draftHere.map(p => (
+              {draftHere.map(p => {
+                const pt = parcelParties(p);
+                return (
                 <Link
                   key={p.id}
                   href={`/parcels/${p.id}`}
@@ -394,7 +403,7 @@ export default function CollectionPointDetailPage() {
                         </Badge>
                       </div>
                       <div className="text-xs text-gray-500 mt-0.5">
-                        Від {p.sender.lastName} {p.sender.firstName} · {p.sender.phone}
+                        Від {pt.sender.lastName} {pt.sender.firstName} · {pt.sender.phone}
                       </div>
                     </div>
                     <div className="text-right text-xs text-gray-400 shrink-0">
@@ -402,7 +411,8 @@ export default function CollectionPointDetailPage() {
                     </div>
                   </div>
                 </Link>
-              ))}
+                );
+              })}
             </CardContent>
           </Card>
         </div>

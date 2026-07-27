@@ -20,6 +20,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 export interface InvoiceContext {
   /** Recipient party — who's getting the SMS. */
@@ -158,6 +159,8 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
     where: { id: args.parcelId },
     select: {
       id: true, itn: true, internalNumber: true, totalCost: true,
+      // ТЗ docx 26.07.26 (п.1): для accepted+ ПІБ/тел беремо зі знімка (parcelParties).
+      status: true, senderSnapshot: true, receiverSnapshot: true,
       sender: { select: { firstName: true, lastName: true, phone: true } },
       receiver: { select: { firstName: true, lastName: true, phone: true } },
     },
@@ -166,7 +169,8 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
     throw new Error('PARCEL_NOT_FOUND');
   }
 
-  const target = args.toParty === 'sender' ? parcel.sender : parcel.receiver;
+  const parties = parcelParties(parcel);
+  const target = args.toParty === 'sender' ? parties.sender : parties.receiver;
   const phone = args.overridePhone?.trim() || target.phone;
   if (!phone) throw new Error('NO_PHONE_FOR_PARTY');
 

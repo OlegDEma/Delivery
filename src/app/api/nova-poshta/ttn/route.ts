@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createTTN, getSenderCounterparty, getContactPersons } from '@/lib/nova-poshta/client';
 import { prisma } from '@/lib/prisma';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 import type { ParcelStatus } from '@/generated/prisma/client';
 
 // POST /api/nova-poshta/ttn — create TTN for a parcel
@@ -36,6 +37,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'ТТН вже створено', ttn: parcel.npTtn }, { status: 409 });
   }
 
+  // ТЗ docx 26.07.26 (п.1): дані отримувача у ТТН — зі знімка (для accepted+ незмінні).
+  const parties = parcelParties(parcel);
+
   try {
     // Get sender counterparty (our company)
     const senderResult = await getSenderCounterparty();
@@ -56,7 +60,7 @@ export async function POST(request: NextRequest) {
     let npServiceType: 'WarehouseWarehouse' | 'WarehouseDoors' = 'WarehouseWarehouse';
     if (serviceType) {
       npServiceType = serviceType;
-    } else if (parcel.receiverAddress?.deliveryMethod === 'address') {
+    } else if (parties.receiver.address?.deliveryMethod === 'address') {
       npServiceType = 'WarehouseDoors';
     }
 
@@ -75,8 +79,8 @@ export async function POST(request: NextRequest) {
       senderPhone,
       recipientCityRef: recipientCityRef || '',
       recipientAddressRef: recipientAddressRef || '',
-      recipientName: `${parcel.receiver.lastName} ${parcel.receiver.firstName}`,
-      recipientPhone: parcel.receiver.phone,
+      recipientName: `${parties.receiver.lastName} ${parties.receiver.firstName}`,
+      recipientPhone: parties.receiver.phone,
       weight: Number(parcel.totalWeight) || 0.5,
       volumeWeight: Number(parcel.totalVolumetricWeight) || undefined,
       seatsAmount: parcel.totalPlacesCount,

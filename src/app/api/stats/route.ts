@@ -67,7 +67,10 @@ export async function GET() {
       internalNumber: true,
       status: true,
       createdAt: true,
-      receiver: { select: { lastName: true, firstName: true } },
+      receiver: { select: { lastName: true, firstName: true, phone: true } },
+      // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (рендер через parcelParties).
+      senderSnapshot: true,
+      receiverSnapshot: true,
     },
   });
 

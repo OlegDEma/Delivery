@@ -14,6 +14,7 @@ import { formatDate, formatWeight, formatCurrency } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 interface ParcelItem {
   id: string;
@@ -31,6 +32,9 @@ interface ParcelItem {
   receiver: { phone: string; firstName: string; lastName: string };
   receiverAddress: { city: string; street: string | null; npWarehouseNum: string | null } | null;
   trip?: { id: string; country: string | null } | null;
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
 }
 
 // 3 відра за ТЗ «Логіка Кур'єр». API вже фільтрує лише прив'язані до
@@ -214,7 +218,9 @@ export default function MyParcelsPage() {
         <ListSkeleton />
       ) : (
         <div className="bg-white rounded-lg border divide-y">
-          {visibleParcels.map((p) => (
+          {visibleParcels.map((p) => {
+            const pt = parcelParties(p);
+            return (
             <Link key={p.id} href={`/parcels/${p.id}`} className="block p-3 hover:bg-gray-50">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -224,12 +230,12 @@ export default function MyParcelsPage() {
                     {!p.isPaid && p.totalCost && <Badge variant="destructive" className="text-xs">Не оплачено</Badge>}
                   </div>
                   <div className="text-sm">
-                    {p.receiver.lastName} {p.receiver.firstName}
-                    <span className="text-gray-400 ml-1">{p.receiver.phone}</span>
+                    {pt.receiver.lastName} {pt.receiver.firstName}
+                    <span className="text-gray-400 ml-1">{pt.receiver.phone}</span>
                   </div>
-                  {p.receiverAddress && (
+                  {pt.receiver.address && (
                     <div className="text-xs text-gray-400">
-                      {p.receiverAddress.city}{p.receiverAddress.street ? `, ${p.receiverAddress.street}` : ''}
+                      {pt.receiver.address.city}{pt.receiver.address.street ? `, ${pt.receiver.address.street}` : ''}
                     </div>
                   )}
                 </div>
@@ -240,7 +246,8 @@ export default function MyParcelsPage() {
                 </div>
               </div>
             </Link>
-          ))}
+            );
+          })}
           {visibleParcels.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               {bucket === 'mine' && 'Ще немає посилок, які ви оформили самі'}

@@ -481,7 +481,7 @@ export default function ParcelDetailPage() {
             {/* ТЗ docx 26.07.26 (п.1): редагувати сторони можна лише поки
                 посилка «Створена» (і лише автором). Раніше олівець показувався
                 завжди — тепер гейтуємо за canEdit. */}
-            {canEdit && (
+            {canEdit && isDraft && (
               <ParcelPartyEdit
                 parcelId={parcel.id}
                 role="receiver"
@@ -516,7 +516,7 @@ export default function ParcelDetailPage() {
                 </span>
               );
             })()}
-            {canEdit && (
+            {canEdit && isDraft && (
               <ParcelPartyEdit
                 parcelId={parcel.id}
                 role="sender"

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 // GET /api/tracking?q=... — public, no auth required
 export async function GET(request: NextRequest) {
@@ -30,6 +31,10 @@ export async function GET(request: NextRequest) {
       totalPlacesCount: true,
       createdAt: true,
       receiverAddress: { select: { city: true } },
+      // ТЗ docx 26.07.26 (п.1): місто отримувача — зі знімка для accepted+ (parcelParties
+      // визначає «заморожено» за наявністю senderSnapshot, тож потрібні обидва поля).
+      senderSnapshot: true,
+      receiverSnapshot: true,
       statusHistory: {
         orderBy: { changedAt: 'desc' },
         select: {
@@ -52,7 +57,7 @@ export async function GET(request: NextRequest) {
     direction: parcel.direction,
     totalPlacesCount: parcel.totalPlacesCount,
     createdAt: parcel.createdAt,
-    receiverCity: parcel.receiverAddress?.city || null,
+    receiverCity: parcelParties(parcel).receiver.address?.city || null,
     statusHistory: parcel.statusHistory,
   });
 }

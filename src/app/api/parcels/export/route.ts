@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireStaff } from '@/lib/auth/guards';
 import ExcelJS from 'exceljs';
 import { kyivDateRange } from '@/lib/utils/tz';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 import type { Prisma, ParcelStatus } from '@/generated/prisma/client';
 
 // GET /api/parcels/export?status=...&dateFrom=...&dateTo=...&tripId=...
@@ -59,6 +60,8 @@ export async function GET(request: NextRequest) {
 
   // Data rows
   parcels.forEach((p, i) => {
+    // ТЗ docx 26.07.26 (п.1): для accepted+ — сторони зі знімка (незмінно).
+    const pt = parcelParties(p);
     ws.addRow([
       i + 1,
       p.itn,
@@ -66,13 +69,13 @@ export async function GET(request: NextRequest) {
       p.shortNumber || '',
       p.direction === 'eu_to_ua' ? 'EU→UA' : 'UA→EU',
       p.status,
-      `${p.sender.lastName} ${p.sender.firstName}`,
-      p.sender.phone,
-      `${p.receiver.lastName} ${p.receiver.firstName}`,
-      p.receiver.phone,
-      p.receiverAddress?.city || '',
-      [p.receiverAddress?.street, p.receiverAddress?.building].filter(Boolean).join(' '),
-      p.receiverAddress?.npWarehouseNum || '',
+      `${pt.sender.lastName} ${pt.sender.firstName}`,
+      pt.sender.phone,
+      `${pt.receiver.lastName} ${pt.receiver.firstName}`,
+      pt.receiver.phone,
+      pt.receiver.address?.city || '',
+      [pt.receiver.address?.street, pt.receiver.address?.building].filter(Boolean).join(' '),
+      pt.receiver.address?.npWarehouseNum || '',
       p.totalPlacesCount,
       p.totalWeight ? Number(p.totalWeight) : '',
       p.totalVolumetricWeight ? Number(p.totalVolumetricWeight) : '',

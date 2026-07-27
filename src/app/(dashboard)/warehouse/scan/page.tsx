@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { STATUS_LABELS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 interface ScanResult {
   id: string;
@@ -17,6 +18,9 @@ interface ScanResult {
   totalWeight: number | null;
   needsPackaging: boolean;
   receiver: { firstName: string; lastName: string; phone: string };
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
 }
 
 // Audio context for beep sounds
@@ -153,7 +157,9 @@ export default function WarehouseScanPage() {
       </div>
 
       <div className="bg-white rounded-lg border divide-y">
-        {scannedParcels.map((p, i) => (
+        {scannedParcels.map((p, i) => {
+          const pt = parcelParties(p);
+          return (
           <div key={p.id} className={`p-3 ${p.needsPackaging ? 'bg-red-50 border-l-4 border-l-red-500' : ''}`}>
             {p.needsPackaging && (
               <div className="bg-red-100 text-red-800 font-bold text-sm px-3 py-2 rounded mb-2 flex items-center gap-2">
@@ -170,7 +176,7 @@ export default function WarehouseScanPage() {
                   <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
                 </div>
                 <div className="text-sm text-gray-600 mt-0.5">
-                  {p.receiver.lastName} {p.receiver.firstName} | {p.receiver.phone}
+                  {pt.receiver.lastName} {pt.receiver.firstName} | {pt.receiver.phone}
                 </div>
               </div>
               <div className="text-right text-sm">
@@ -179,7 +185,8 @@ export default function WarehouseScanPage() {
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
         {scannedParcels.length === 0 && (
           <div className="text-center py-8 text-gray-400 text-sm">
             Наведіть камеру на QR-код або введіть номер вручну

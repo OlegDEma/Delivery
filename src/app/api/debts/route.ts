@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth/guards';
 import { FINANCE_ROLES } from '@/lib/constants/roles';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 // GET /api/debts — parcels not paid, grouped by client
 export async function GET() {
@@ -34,7 +35,11 @@ export async function GET() {
   }>();
 
   for (const p of unpaidParcels) {
+    // Ключ групування — за живим клієнтом (id). ТЗ docx 26.07.26 (п.1): відображувані
+    // ПІБ/тел платника беремо зі знімка (для accepted+ незмінні).
     const payerClient = p.payer === 'sender' ? p.sender : p.receiver;
+    const parties = parcelParties(p);
+    const payerSnap = p.payer === 'sender' ? parties.sender : parties.receiver;
     const existing = debtMap.get(payerClient.id);
     const parcelInfo = {
       id: p.id,
@@ -51,8 +56,8 @@ export async function GET() {
     } else {
       debtMap.set(payerClient.id, {
         clientId: payerClient.id,
-        clientName: `${payerClient.lastName} ${payerClient.firstName}`,
-        clientPhone: payerClient.phone,
+        clientName: `${payerSnap.lastName} ${payerSnap.firstName}`,
+        clientPhone: payerSnap.phone,
         totalDebt: parcelInfo.totalCost,
         parcelsCount: 1,
         oldestDate: p.createdAt.toISOString(),
