@@ -195,6 +195,8 @@ export type ParcelCountAggregateOutputType = {
   senderAddressId: number
   receiverId: number
   receiverAddressId: number
+  senderSnapshot: number
+  receiverSnapshot: number
   tripId: number
   shipmentType: number
   description: number
@@ -417,6 +419,8 @@ export type ParcelCountAggregateInputType = {
   senderAddressId?: true
   receiverId?: true
   receiverAddressId?: true
+  senderSnapshot?: true
+  receiverSnapshot?: true
   tripId?: true
   shipmentType?: true
   description?: true
@@ -566,6 +570,8 @@ export type ParcelGroupByOutputType = {
   senderAddressId: string | null
   receiverId: string
   receiverAddressId: string | null
+  senderSnapshot: runtime.JsonValue | null
+  receiverSnapshot: runtime.JsonValue | null
   tripId: string | null
   shipmentType: $Enums.ShipmentType
   description: string | null
@@ -651,6 +657,8 @@ export type ParcelWhereInput = {
   senderAddressId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
   receiverId?: Prisma.UuidFilter<"Parcel"> | string
   receiverAddressId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
+  senderSnapshot?: Prisma.JsonNullableFilter<"Parcel">
+  receiverSnapshot?: Prisma.JsonNullableFilter<"Parcel">
   tripId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
   shipmentType?: Prisma.EnumShipmentTypeFilter<"Parcel"> | $Enums.ShipmentType
   description?: Prisma.StringNullableFilter<"Parcel"> | string | null
@@ -729,6 +737,8 @@ export type ParcelOrderByWithRelationInput = {
   senderAddressId?: Prisma.SortOrderInput | Prisma.SortOrder
   receiverId?: Prisma.SortOrder
   receiverAddressId?: Prisma.SortOrderInput | Prisma.SortOrder
+  senderSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  receiverSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   tripId?: Prisma.SortOrderInput | Prisma.SortOrder
   shipmentType?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -810,6 +820,8 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
   senderAddressId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
   receiverId?: Prisma.UuidFilter<"Parcel"> | string
   receiverAddressId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
+  senderSnapshot?: Prisma.JsonNullableFilter<"Parcel">
+  receiverSnapshot?: Prisma.JsonNullableFilter<"Parcel">
   tripId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
   shipmentType?: Prisma.EnumShipmentTypeFilter<"Parcel"> | $Enums.ShipmentType
   description?: Prisma.StringNullableFilter<"Parcel"> | string | null
@@ -888,6 +900,8 @@ export type ParcelOrderByWithAggregationInput = {
   senderAddressId?: Prisma.SortOrderInput | Prisma.SortOrder
   receiverId?: Prisma.SortOrder
   receiverAddressId?: Prisma.SortOrderInput | Prisma.SortOrder
+  senderSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  receiverSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   tripId?: Prisma.SortOrderInput | Prisma.SortOrder
   shipmentType?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -958,6 +972,8 @@ export type ParcelScalarWhereWithAggregatesInput = {
   senderAddressId?: Prisma.UuidNullableWithAggregatesFilter<"Parcel"> | string | null
   receiverId?: Prisma.UuidWithAggregatesFilter<"Parcel"> | string
   receiverAddressId?: Prisma.UuidNullableWithAggregatesFilter<"Parcel"> | string | null
+  senderSnapshot?: Prisma.JsonNullableWithAggregatesFilter<"Parcel">
+  receiverSnapshot?: Prisma.JsonNullableWithAggregatesFilter<"Parcel">
   tripId?: Prisma.UuidNullableWithAggregatesFilter<"Parcel"> | string | null
   shipmentType?: Prisma.EnumShipmentTypeWithAggregatesFilter<"Parcel"> | $Enums.ShipmentType
   description?: Prisma.StringNullableWithAggregatesFilter<"Parcel"> | string | null
@@ -1016,6 +1032,8 @@ export type ParcelCreateInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1089,6 +1107,8 @@ export type ParcelUncheckedCreateInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -1154,6 +1174,8 @@ export type ParcelUpdateInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1227,6 +1249,8 @@ export type ParcelUncheckedUpdateInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1296,6 +1320,8 @@ export type ParcelCreateManyInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -1354,6 +1380,8 @@ export type ParcelUpdateManyMutationInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1411,6 +1439,8 @@ export type ParcelUncheckedUpdateManyInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1491,6 +1521,8 @@ export type ParcelCountOrderByAggregateInput = {
   senderAddressId?: Prisma.SortOrder
   receiverId?: Prisma.SortOrder
   receiverAddressId?: Prisma.SortOrder
+  senderSnapshot?: Prisma.SortOrder
+  receiverSnapshot?: Prisma.SortOrder
   tripId?: Prisma.SortOrder
   shipmentType?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -2236,6 +2268,8 @@ export type ParcelCreateWithoutAssignedCourierInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2308,6 +2342,8 @@ export type ParcelUncheckedCreateWithoutAssignedCourierInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -2382,6 +2418,8 @@ export type ParcelCreateWithoutCreatedByInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2454,6 +2492,8 @@ export type ParcelUncheckedCreateWithoutCreatedByInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -2528,6 +2568,8 @@ export type ParcelCreateWithoutCollectedByInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2600,6 +2642,8 @@ export type ParcelUncheckedCreateWithoutCollectedByInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -2697,6 +2741,8 @@ export type ParcelScalarWhereInput = {
   senderAddressId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
   receiverId?: Prisma.UuidFilter<"Parcel"> | string
   receiverAddressId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
+  senderSnapshot?: Prisma.JsonNullableFilter<"Parcel">
+  receiverSnapshot?: Prisma.JsonNullableFilter<"Parcel">
   tripId?: Prisma.UuidNullableFilter<"Parcel"> | string | null
   shipmentType?: Prisma.EnumShipmentTypeFilter<"Parcel"> | $Enums.ShipmentType
   description?: Prisma.StringNullableFilter<"Parcel"> | string | null
@@ -2787,6 +2833,8 @@ export type ParcelCreateWithoutSenderInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2858,6 +2906,8 @@ export type ParcelUncheckedCreateWithoutSenderInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -2933,6 +2983,8 @@ export type ParcelCreateWithoutReceiverInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3004,6 +3056,8 @@ export type ParcelUncheckedCreateWithoutReceiverInput = {
   senderId: string
   senderAddressId?: string | null
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -3111,6 +3165,8 @@ export type ParcelCreateWithoutSenderAddressInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3182,6 +3238,8 @@ export type ParcelUncheckedCreateWithoutSenderAddressInput = {
   senderId: string
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -3257,6 +3315,8 @@ export type ParcelCreateWithoutReceiverAddressInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3328,6 +3388,8 @@ export type ParcelUncheckedCreateWithoutReceiverAddressInput = {
   senderId: string
   senderAddressId?: string | null
   receiverId: string
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -3435,6 +3497,8 @@ export type ParcelCreateWithoutTripInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3507,6 +3571,8 @@ export type ParcelUncheckedCreateWithoutTripInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3597,6 +3663,8 @@ export type ParcelCreateWithoutPlacesInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3669,6 +3737,8 @@ export type ParcelUncheckedCreateWithoutPlacesInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -3749,6 +3819,8 @@ export type ParcelUpdateWithoutPlacesInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3821,6 +3893,8 @@ export type ParcelUncheckedUpdateWithoutPlacesInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3885,6 +3959,8 @@ export type ParcelCreateWithoutStatusHistoryInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3957,6 +4033,8 @@ export type ParcelUncheckedCreateWithoutStatusHistoryInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -4037,6 +4115,8 @@ export type ParcelUpdateWithoutStatusHistoryInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4109,6 +4189,8 @@ export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4173,6 +4255,8 @@ export type ParcelCreateWithoutCollectionPointInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4245,6 +4329,8 @@ export type ParcelUncheckedCreateWithoutCollectionPointInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -4335,6 +4421,8 @@ export type ParcelCreateWithoutCashEntriesInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4407,6 +4495,8 @@ export type ParcelUncheckedCreateWithoutCashEntriesInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -4487,6 +4577,8 @@ export type ParcelUpdateWithoutCashEntriesInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4559,6 +4651,8 @@ export type ParcelUncheckedUpdateWithoutCashEntriesInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4623,6 +4717,8 @@ export type ParcelCreateWithoutRouteTasksInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4695,6 +4791,8 @@ export type ParcelUncheckedCreateWithoutRouteTasksInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -4775,6 +4873,8 @@ export type ParcelUpdateWithoutRouteTasksInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4847,6 +4947,8 @@ export type ParcelUncheckedUpdateWithoutRouteTasksInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4911,6 +5013,8 @@ export type ParcelCreateWithoutWarehouseActionsInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4983,6 +5087,8 @@ export type ParcelUncheckedCreateWithoutWarehouseActionsInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -5063,6 +5169,8 @@ export type ParcelUpdateWithoutWarehouseActionsInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5135,6 +5243,8 @@ export type ParcelUncheckedUpdateWithoutWarehouseActionsInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5199,6 +5309,8 @@ export type ParcelCreateWithoutNpSyncLogsInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5271,6 +5383,8 @@ export type ParcelUncheckedCreateWithoutNpSyncLogsInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -5351,6 +5465,8 @@ export type ParcelUpdateWithoutNpSyncLogsInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5423,6 +5539,8 @@ export type ParcelUncheckedUpdateWithoutNpSyncLogsInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5487,6 +5605,8 @@ export type ParcelCreateWithoutClaimsInput = {
   sequentialNumber: number
   shortNumber?: number | null
   direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5559,6 +5679,8 @@ export type ParcelUncheckedCreateWithoutClaimsInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -5639,6 +5761,8 @@ export type ParcelUpdateWithoutClaimsInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5711,6 +5835,8 @@ export type ParcelUncheckedUpdateWithoutClaimsInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5779,6 +5905,8 @@ export type ParcelCreateManyAssignedCourierInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -5840,6 +5968,8 @@ export type ParcelCreateManyCreatedByInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -5901,6 +6031,8 @@ export type ParcelCreateManyCollectedByInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -5958,6 +6090,8 @@ export type ParcelUpdateWithoutAssignedCourierInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6030,6 +6164,8 @@ export type ParcelUncheckedUpdateWithoutAssignedCourierInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6098,6 +6234,8 @@ export type ParcelUncheckedUpdateManyWithoutAssignedCourierInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6155,6 +6293,8 @@ export type ParcelUpdateWithoutCreatedByInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6227,6 +6367,8 @@ export type ParcelUncheckedUpdateWithoutCreatedByInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6295,6 +6437,8 @@ export type ParcelUncheckedUpdateManyWithoutCreatedByInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6352,6 +6496,8 @@ export type ParcelUpdateWithoutCollectedByInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6424,6 +6570,8 @@ export type ParcelUncheckedUpdateWithoutCollectedByInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6492,6 +6640,8 @@ export type ParcelUncheckedUpdateManyWithoutCollectedByInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6552,6 +6702,8 @@ export type ParcelCreateManySenderInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -6613,6 +6765,8 @@ export type ParcelCreateManyReceiverInput = {
   senderId: string
   senderAddressId?: string | null
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -6671,6 +6825,8 @@ export type ParcelUpdateWithoutSenderInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6742,6 +6898,8 @@ export type ParcelUncheckedUpdateWithoutSenderInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6810,6 +6968,8 @@ export type ParcelUncheckedUpdateManyWithoutSenderInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6868,6 +7028,8 @@ export type ParcelUpdateWithoutReceiverInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -6939,6 +7101,8 @@ export type ParcelUncheckedUpdateWithoutReceiverInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7007,6 +7171,8 @@ export type ParcelUncheckedUpdateManyWithoutReceiverInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7068,6 +7234,8 @@ export type ParcelCreateManySenderAddressInput = {
   senderId: string
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -7129,6 +7297,8 @@ export type ParcelCreateManyReceiverAddressInput = {
   senderId: string
   senderAddressId?: string | null
   receiverId: string
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -7187,6 +7357,8 @@ export type ParcelUpdateWithoutSenderAddressInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7258,6 +7430,8 @@ export type ParcelUncheckedUpdateWithoutSenderAddressInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7326,6 +7500,8 @@ export type ParcelUncheckedUpdateManyWithoutSenderAddressInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7384,6 +7560,8 @@ export type ParcelUpdateWithoutReceiverAddressInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7455,6 +7633,8 @@ export type ParcelUncheckedUpdateWithoutReceiverAddressInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7523,6 +7703,8 @@ export type ParcelUncheckedUpdateManyWithoutReceiverAddressInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7585,6 +7767,8 @@ export type ParcelCreateManyTripInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: $Enums.ShipmentType
   description?: string | null
   declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7642,6 +7826,8 @@ export type ParcelUpdateWithoutTripInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7714,6 +7900,8 @@ export type ParcelUncheckedUpdateWithoutTripInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7782,6 +7970,8 @@ export type ParcelUncheckedUpdateManyWithoutTripInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7843,6 +8033,8 @@ export type ParcelCreateManyCollectionPointInput = {
   senderAddressId?: string | null
   receiverId: string
   receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: string | null
   shipmentType?: $Enums.ShipmentType
   description?: string | null
@@ -7900,6 +8092,8 @@ export type ParcelUpdateWithoutCollectionPointInput = {
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -7972,6 +8166,8 @@ export type ParcelUncheckedUpdateWithoutCollectionPointInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8040,6 +8236,8 @@ export type ParcelUncheckedUpdateManyWithoutCollectionPointInput = {
   senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   receiverId?: Prisma.StringFieldUpdateOperationsInput | string
   receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8186,6 +8384,8 @@ export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   senderAddressId?: boolean
   receiverId?: boolean
   receiverAddressId?: boolean
+  senderSnapshot?: boolean
+  receiverSnapshot?: boolean
   tripId?: boolean
   shipmentType?: boolean
   description?: boolean
@@ -8265,6 +8465,8 @@ export type ParcelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   senderAddressId?: boolean
   receiverId?: boolean
   receiverAddressId?: boolean
+  senderSnapshot?: boolean
+  receiverSnapshot?: boolean
   tripId?: boolean
   shipmentType?: boolean
   description?: boolean
@@ -8336,6 +8538,8 @@ export type ParcelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   senderAddressId?: boolean
   receiverId?: boolean
   receiverAddressId?: boolean
+  senderSnapshot?: boolean
+  receiverSnapshot?: boolean
   tripId?: boolean
   shipmentType?: boolean
   description?: boolean
@@ -8407,6 +8611,8 @@ export type ParcelSelectScalar = {
   senderAddressId?: boolean
   receiverId?: boolean
   receiverAddressId?: boolean
+  senderSnapshot?: boolean
+  receiverSnapshot?: boolean
   tripId?: boolean
   shipmentType?: boolean
   description?: boolean
@@ -8458,7 +8664,7 @@ export type ParcelSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "doorstepDelivery" | "deliveryCost" | "packagingCost" | "doorstepCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "isMultiParcelPickup" | "parcelMoneyAmount" | "parcelMoneyCost" | "totalCost" | "costCurrency" | "npTtn" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
+export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "senderSnapshot" | "receiverSnapshot" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "doorstepDelivery" | "deliveryCost" | "packagingCost" | "doorstepCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "isMultiParcelPickup" | "parcelMoneyAmount" | "parcelMoneyCost" | "totalCost" | "costCurrency" | "npTtn" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
 export type ParcelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sender?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   senderAddress?: boolean | Prisma.Parcel$senderAddressArgs<ExtArgs>
@@ -8532,6 +8738,16 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     senderAddressId: string | null
     receiverId: string
     receiverAddressId: string | null
+    /**
+     * ТЗ docx 26.07.26 (п.1): НЕЗМІННИЙ знімок сторін. При першому виході з
+     * «Створена» (draft → «Прийнято до перевезення») заморожуємо ПІБ/телефон/
+     * адресу Відправника й Отримувача. Усі accepted+ вигляди рендеряться з цього
+     * знімка, а не з живих Client/ClientAddress (які могли змінитись при
+     * створенні іншої посилки). Форма — PartySnapshot у lib/parcels/party-snapshot.
+     * NULL лише поки посилка «Створена».
+     */
+    senderSnapshot: runtime.JsonValue | null
+    receiverSnapshot: runtime.JsonValue | null
     tripId: string | null
     shipmentType: $Enums.ShipmentType
     description: string | null
@@ -9062,6 +9278,8 @@ export interface ParcelFieldRefs {
   readonly senderAddressId: Prisma.FieldRef<"Parcel", 'String'>
   readonly receiverId: Prisma.FieldRef<"Parcel", 'String'>
   readonly receiverAddressId: Prisma.FieldRef<"Parcel", 'String'>
+  readonly senderSnapshot: Prisma.FieldRef<"Parcel", 'Json'>
+  readonly receiverSnapshot: Prisma.FieldRef<"Parcel", 'Json'>
   readonly tripId: Prisma.FieldRef<"Parcel", 'String'>
   readonly shipmentType: Prisma.FieldRef<"Parcel", 'ShipmentType'>
   readonly description: Prisma.FieldRef<"Parcel", 'String'>

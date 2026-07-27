@@ -231,6 +231,8 @@ export const ParcelScalarFieldEnum = {
   senderAddressId: 'senderAddressId',
   receiverId: 'receiverId',
   receiverAddressId: 'receiverAddressId',
+  senderSnapshot: 'senderSnapshot',
+  receiverSnapshot: 'receiverSnapshot',
   tripId: 'tripId',
   shipmentType: 'shipmentType',
   description: 'description',

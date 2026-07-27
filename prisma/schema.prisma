@@ -363,6 +363,14 @@ model Parcel {
   senderAddressId       String?       @map("sender_address_id") @db.Uuid
   receiverId            String        @map("receiver_id") @db.Uuid
   receiverAddressId     String?       @map("receiver_address_id") @db.Uuid
+  /// ТЗ docx 26.07.26 (п.1): НЕЗМІННИЙ знімок сторін. При першому виході з
+  /// «Створена» (draft → «Прийнято до перевезення») заморожуємо ПІБ/телефон/
+  /// адресу Відправника й Отримувача. Усі accepted+ вигляди рендеряться з цього
+  /// знімка, а не з живих Client/ClientAddress (які могли змінитись при
+  /// створенні іншої посилки). Форма — PartySnapshot у lib/parcels/party-snapshot.
+  /// NULL лише поки посилка «Створена».
+  senderSnapshot        Json?         @map("sender_snapshot")
+  receiverSnapshot      Json?         @map("receiver_snapshot")
   tripId                String?       @map("trip_id") @db.Uuid
   shipmentType          ShipmentType  @default(parcels_cargo) @map("shipment_type")
   description           String?

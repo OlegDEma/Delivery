@@ -11,6 +11,7 @@ import { statusLabel } from '@/lib/parcels/status-label';
 import { formatDateTime, formatCurrency } from '@/lib/utils/format';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { summarizePartyAddress } from '@/lib/utils/address-summary';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { CopyButton } from '@/components/shared/copy-button';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
@@ -76,6 +77,9 @@ interface ParcelDetail {
     apartment: string | null; postalCode: string | null; landmark: string | null;
     npWarehouseNum: string | null; pickupPointText: string | null; deliveryMethod: string | null;
   } | null;
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
   places: {
     id: string; placeNumber: number; weight: number | null;
     length: number | null; width: number | null; height: number | null;
@@ -147,6 +151,8 @@ export default function MyOrderDetailPage() {
     ? senderCountryChain
     : (parcel.receiverAddress?.country || null);
   const weightCfg = pricingConfigs.find(c => c.country === billedCountry && c.direction === parcel.direction);
+  // ТЗ docx 26.07.26 (п.1): сторони — зі знімка для accepted+, живі для «Створена».
+  const parties = parcelParties(parcel);
 
   return (
     <div className="space-y-4 max-w-2xl">
@@ -181,12 +187,13 @@ export default function MyOrderDetailPage() {
         <div className="flex items-baseline gap-2">
           <span className="text-blue-600 font-bold shrink-0 w-24 text-xs uppercase tracking-wide">Отримувач</span>
           <div className="min-w-0 flex-1">
-            <span className="font-medium">{parcel.receiver.lastName} {parcel.receiver.firstName}</span>
+            <span className="font-medium">{parties.receiver.lastName} {parties.receiver.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
-            <PhoneLink phone={parcel.receiver.phone} />
-            {parcel.receiverAddress && (() => {
-              // ТЗ docx 15.07.26 (п.2): лише дані поточного способу доставки.
-              const s = summarizePartyAddress(parcel.receiverAddress);
+            <PhoneLink phone={parties.receiver.phone} />
+            {parties.receiver.address && (() => {
+              // ТЗ docx 15.07.26 (п.2): лише дані поточного способу. ТЗ docx
+              // 26.07.26 (п.1): для accepted+ — зі знімка.
+              const s = summarizePartyAddress(parties.receiver.address);
               return (
                 <span className="text-xs text-gray-500 ml-2">
                   <AddressLink address={s.main} />{s.suffix}
@@ -198,13 +205,13 @@ export default function MyOrderDetailPage() {
         <div className="flex items-baseline gap-2">
           <span className="text-green-600 font-bold shrink-0 w-24 text-xs uppercase tracking-wide">Відправник</span>
           <div className="min-w-0 flex-1">
-            <span className="font-medium">{parcel.sender.lastName} {parcel.sender.firstName}</span>
+            <span className="font-medium">{parties.sender.lastName} {parties.sender.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
-            <PhoneLink phone={parcel.sender.phone} />
-            {parcel.senderAddress && (() => {
+            <PhoneLink phone={parties.sender.phone} />
+            {parties.sender.address && (() => {
               // ТЗ docx 15.07.26 (п.2): лише дані поточного способу; країну UA у
-              // Відправника не показуємо (як і раніше).
-              const s = summarizePartyAddress(parcel.senderAddress, { hideCountryForUA: true });
+              // Відправника не показуємо. ТЗ docx 26.07.26 (п.1): accepted+ — зі знімка.
+              const s = summarizePartyAddress(parties.sender.address, { hideCountryForUA: true });
               return (
                 <span className="text-xs text-gray-500 ml-2">
                   <AddressLink address={s.main} />{s.suffix}

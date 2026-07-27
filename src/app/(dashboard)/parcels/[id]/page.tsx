@@ -13,6 +13,7 @@ import { STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { STATUS_TRANSITIONS, isTerminal } from '@/lib/parcels/status-transitions';
 import { statusLabel } from '@/lib/parcels/status-label';
 import { canEditParcelData } from '@/lib/parcels/edit-lock';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { Camera, StickyNote, Lock, Pencil } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils/format';
@@ -102,6 +103,9 @@ interface ParcelDetail {
     pickupPointText: string | null;
     deliveryMethod: string; country: string;
   } | null;
+  // ТЗ docx 26.07.26 (п.1): незмінний знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
   places: {
     id: string; placeNumber: number; weight: number | null; length: number | null;
     width: number | null; height: number | null; volumetricWeight: number | null;
@@ -185,7 +189,10 @@ export default function ParcelDetailPage() {
     setLoading(false);
   }
 
-  async function handleConfirmClientOrder() {
+  // ТЗ docx 26.07.26: «Прийняти до перевезення» — перехід «Створена» → accepted
+  // (за напрямком). Служить і для staff-чернеток, і для клієнтських замовлень.
+  // Саме тут бекенд робить незмінний знімок сторін.
+  async function handleAcceptForTransport() {
     if (!parcel) return;
     const targetStatus = parcel.direction === 'eu_to_ua'
       ? 'accepted_for_transport_to_ua'
@@ -196,15 +203,15 @@ export default function ParcelDetailPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         status: targetStatus,
-        statusNote: 'Замовлення клієнта підтверджено',
+        statusNote: 'Прийнято до перевезення',
       }),
     });
     setSaving(false);
     if (res.ok) {
-      toast.success('Замовлення підтверджено і прийнято до перевезення');
+      toast.success('Посилку прийнято до перевезення');
       fetchParcel();
     } else {
-      toast.error('Помилка підтвердження');
+      toast.error('Помилка прийняття');
     }
   }
 
@@ -256,6 +263,10 @@ export default function ParcelDetailPage() {
     { userId: user?.id ?? '', role: role ?? '' },
   );
   const isEditLocked = !canEdit;
+  // ТЗ docx 26.07.26 (п.1): сторони для показу — зі знімка для accepted+, живі
+  // для «Створена». Усі місця з ПІБ/тел/адресою беруть звідси.
+  const parties = parcelParties(parcel);
+  const isDraft = parcel.status === 'draft';
 
   const isClientOrderPending =
     parcel.status === 'draft' &&
@@ -269,24 +280,26 @@ export default function ParcelDetailPage() {
       ]} />
 
       {/* Client order — awaiting confirmation */}
-      {isClientOrderPending && (
+      {/* ТЗ docx 26.07.26: будь-яка посилка «Створена» (staff чи клієнтська) —
+          перевір дані і «Прийми до перевезення». Саме тут дані заморожуються. */}
+      {isDraft && (
         <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <div className="text-2xl">⚠️</div>
             <div className="flex-1">
               <div className="font-semibold text-yellow-900 mb-1">
-                Замовлення клієнта — очікує підтвердження
+                {isClientOrderPending ? 'Замовлення клієнта — очікує підтвердження' : 'Посилка «Створена» — очікує прийняття'}
               </div>
               <div className="text-sm text-yellow-800 mb-3">
-                Перевірте дані (адреси, вагу, розміри, опис), внесіть корективи і натисніть «Підтвердити».
-                Статус зміниться на «Прийнято до перевезення» і посилка буде автоматично прив&apos;язана до найближчого рейсу.
+                Перевірте дані (сторони, адреси, вагу, розміри, опис), внесіть корективи і натисніть «Прийняти».
+                Статус зміниться на «Прийнято до перевезення», після чого дані замороженюються і редагування стане недоступним.
               </div>
               <Button
-                onClick={handleConfirmClientOrder}
+                onClick={handleAcceptForTransport}
                 disabled={saving}
                 className="bg-yellow-600 hover:bg-yellow-700 text-white"
               >
-                {saving ? 'Підтвердження...' : '✓ Підтвердити замовлення'}
+                {saving ? 'Прийняття...' : '✓ Прийняти до перевезення'}
               </Button>
             </div>
           </div>
@@ -371,8 +384,8 @@ export default function ParcelDetailPage() {
           </Link>
           <ShareButton
             parcelNumber={parcel.internalNumber}
-            receiverName={`${parcel.receiver.lastName} ${parcel.receiver.firstName}`}
-            receiverPhone={parcel.receiver.phone}
+            receiverName={`${parties.receiver.lastName} ${parties.receiver.firstName}`}
+            receiverPhone={parties.receiver.phone}
           />
         </div>
       </div>
@@ -452,13 +465,13 @@ export default function ParcelDetailPage() {
         <div className="flex items-baseline gap-2">
           <span className="text-blue-600 font-bold shrink-0 w-24 text-xs uppercase tracking-wide">Отримувач</span>
           <div className="min-w-0 flex-1">
-            <span className="font-medium">{parcel.receiver.lastName} {parcel.receiver.firstName}</span>
+            <span className="font-medium">{parties.receiver.lastName} {parties.receiver.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
-            <PhoneLink phone={parcel.receiver.phone} />
-            {parcel.receiverAddress && (() => {
+            <PhoneLink phone={parties.receiver.phone} />
+            {parties.receiver.address && (() => {
               // ТЗ docx 15.07.26 (п.2): у підсумку — ЛИШЕ дані поточного способу
-              // доставки (стара НП після зміни на Адресну не «зависає»).
-              const s = summarizePartyAddress(parcel.receiverAddress);
+              // доставки. ТЗ docx 26.07.26 (п.1): для accepted+ — зі знімка.
+              const s = summarizePartyAddress(parties.receiver.address);
               return (
                 <span className="text-xs text-gray-500 ml-2">
                   <AddressLink address={s.main} />{s.suffix}
@@ -490,13 +503,13 @@ export default function ParcelDetailPage() {
         <div className="flex items-baseline gap-2">
           <span className="text-green-600 font-bold shrink-0 w-24 text-xs uppercase tracking-wide">Відправник</span>
           <div className="min-w-0 flex-1">
-            <span className="font-medium">{parcel.sender.lastName} {parcel.sender.firstName}</span>
+            <span className="font-medium">{parties.sender.lastName} {parties.sender.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
-            <PhoneLink phone={parcel.sender.phone} />
-            {parcel.senderAddress && (() => {
+            <PhoneLink phone={parties.sender.phone} />
+            {parties.sender.address && (() => {
               // ТЗ docx 15.07.26 (п.2): лише дані поточного способу; країну UA у
-              // Відправника не показуємо (ТЗ docx 01.07.26).
-              const s = summarizePartyAddress(parcel.senderAddress, { hideCountryForUA: true });
+              // Відправника не показуємо. ТЗ docx 26.07.26 (п.1): accepted+ — зі знімка.
+              const s = summarizePartyAddress(parties.sender.address, { hideCountryForUA: true });
               return (
                 <span className="text-xs text-gray-500 ml-2">
                   <AddressLink address={s.main} />{s.suffix}

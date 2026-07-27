@@ -14,6 +14,7 @@ import { writeAuditLog } from '@/lib/audit';
 import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transitions';
 import { isUuid } from '@/lib/validators/common';
 import { canEditParcelData, editLockReason } from '@/lib/parcels/edit-lock';
+import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
 
 // GET /api/parcels/[id]
 export async function GET(
@@ -168,8 +169,15 @@ export async function PATCH(
         { status: 409 }
       );
     }
+    // ТЗ docx 26.07.26 (п.1): при першому виході зі статусу «Створена» (draft →
+    // «Прийнято до перевезення») заморожуємо знімок сторін (ПІБ/тел/адреса) —
+    // далі accepted+ рендериться з нього незмінно, попри пізніші правки клієнта.
+    const partySnapshot = parcel.status === 'draft'
+      ? await snapshotParcelParties(prisma, id)
+      : null;
     const statusUpdateData: Prisma.ParcelUpdateInput = {
       status: body.status as ParcelStatus,
+      ...(partySnapshot ?? {}),
       statusHistory: {
         create: {
           status: body.status as ParcelStatus,

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 import QRCode from 'qrcode';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils/format';
@@ -21,10 +22,14 @@ interface PrintData {
   paymentMethod: string;
   paymentInUkraine: boolean;
   createdAt: string;
+  status: string;
   sender: { firstName: string; lastName: string; phone: string };
   senderAddress: { city: string } | null;
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { city: string; street: string | null; building: string | null; npWarehouseNum: string | null; country: string } | null;
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
   places: { placeNumber: number; weight: number | null; itnPlace: string | null; volumetricWeight: number | null }[];
   description: string | null;
   totalCost: number | null;
@@ -59,6 +64,9 @@ export default function PrintLabelPage() {
   }, [data]);
 
   if (!data) return <div className="text-center py-12">Завантаження...</div>;
+
+  // ТЗ docx 26.07.26 (п.1): сторони — зі знімка для accepted+, живі для «Створена».
+  const parties = parcelParties(data);
 
   return (
     <div className="p-2">
@@ -104,22 +112,22 @@ export default function PrintLabelPage() {
             {/* From */}
             <div className="mb-1">
               <div className="font-bold">ВІД:</div>
-              <div>{data.sender.lastName} {data.sender.firstName}</div>
-              <div>{data.sender.phone}</div>
-              {data.senderAddress && <div>{data.senderAddress.city}</div>}
+              <div>{parties.sender.lastName} {parties.sender.firstName}</div>
+              <div>{parties.sender.phone}</div>
+              {parties.sender.address && <div>{parties.sender.address.city}</div>}
             </div>
 
             {/* To */}
             <div className="mb-1">
               <div className="font-bold">КОМУ:</div>
-              <div>{data.receiver.lastName} {data.receiver.firstName}</div>
-              <div>{data.receiver.phone}</div>
-              {data.receiverAddress && (
+              <div>{parties.receiver.lastName} {parties.receiver.firstName}</div>
+              <div>{parties.receiver.phone}</div>
+              {parties.receiver.address && (
                 <div>
-                  {data.receiverAddress.city}
-                  {data.receiverAddress.street ? `, ${data.receiverAddress.street}` : ''}
-                  {data.receiverAddress.building ? ` ${data.receiverAddress.building}` : ''}
-                  {data.receiverAddress.npWarehouseNum ? ` | НП №${data.receiverAddress.npWarehouseNum}` : ''}
+                  {parties.receiver.address.city}
+                  {parties.receiver.address.street ? `, ${parties.receiver.address.street}` : ''}
+                  {parties.receiver.address.building ? ` ${parties.receiver.address.building}` : ''}
+                  {parties.receiver.address.npWarehouseNum ? ` | НП №${parties.receiver.address.npWarehouseNum}` : ''}
                 </div>
               )}
             </div>
@@ -160,20 +168,20 @@ export default function PrintLabelPage() {
 
         <div className="border-t border-black pt-1 mb-1">
           <div className="font-bold">ВІД:</div>
-          <div>{data.sender.lastName} {data.sender.firstName}</div>
-          <div>{data.sender.phone}</div>
-          {data.senderAddress && <div>{data.senderAddress.city}</div>}
+          <div>{parties.sender.lastName} {parties.sender.firstName}</div>
+          <div>{parties.sender.phone}</div>
+          {parties.sender.address && <div>{parties.sender.address.city}</div>}
         </div>
 
         <div className="mb-1">
           <div className="font-bold">КОМУ:</div>
-          <div>{data.receiver.lastName} {data.receiver.firstName}</div>
-          <div>{data.receiver.phone}</div>
-          {data.receiverAddress && (
+          <div>{parties.receiver.lastName} {parties.receiver.firstName}</div>
+          <div>{parties.receiver.phone}</div>
+          {parties.receiver.address && (
             <div>
-              {data.receiverAddress.city}
-              {data.receiverAddress.street ? `, ${data.receiverAddress.street}` : ''}
-              {data.receiverAddress.npWarehouseNum ? ` | НП №${data.receiverAddress.npWarehouseNum}` : ''}
+              {parties.receiver.address.city}
+              {parties.receiver.address.street ? `, ${parties.receiver.address.street}` : ''}
+              {parties.receiver.address.npWarehouseNum ? ` | НП №${parties.receiver.address.npWarehouseNum}` : ''}
             </div>
           )}
         </div>

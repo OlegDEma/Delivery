@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { statusLabel } from '@/lib/parcels/status-label';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { formatDate } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
@@ -32,6 +33,9 @@ interface ParcelListItem {
   receiver: { phone: string; firstName: string; lastName: string };
   receiverAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; landmark: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
   senderAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; landmark: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
   trip?: { id: string; country: string | null } | null;
   /** Хто прийняв посилку (collectedBy) — для відображення поряд з посилкою. */
   collectedBy?: { id: string; fullName: string } | null;
@@ -379,6 +383,8 @@ function ParcelsContent() {
           <div className="bg-white rounded-lg border divide-y">
             {parcels.map((p) => {
               const checked = selectedIds.has(p.id);
+              // ТЗ docx 26.07.26 (п.1): сторони — зі знімка для accepted+.
+              const pt = parcelParties(p);
               return (
                 <div key={p.id} className="flex items-start gap-2 p-3 hover:bg-gray-50 transition-colors">
                   <div className="pt-1" onClick={(e) => e.stopPropagation()}>
@@ -401,38 +407,38 @@ function ParcelsContent() {
                         {/* Receiver block first per ТЗ: Кому/Куди → Від кого/Звідки */}
                         <div className="text-sm">
                           <span className="text-gray-500 font-medium">Кому:</span>{' '}
-                          <span>{p.receiver.lastName} {p.receiver.firstName}</span>
-                          <span className="text-gray-400 ml-1">{p.receiver.phone}</span>
+                          <span>{pt.receiver.lastName} {pt.receiver.firstName}</span>
+                          <span className="text-gray-400 ml-1">{pt.receiver.phone}</span>
                         </div>
-                        {p.receiverAddress && (
+                        {pt.receiver.address && (
                           <div className="text-xs text-gray-500">
                             <span className="text-gray-400">Куди:</span>{' '}
-                            {p.receiverAddress.city}
-                            {p.receiverAddress.street ? `, ${p.receiverAddress.street}` : ''}
-                            {p.receiverAddress.building ? ` ${p.receiverAddress.building}` : ''}
+                            {pt.receiver.address.city}
+                            {pt.receiver.address.street ? `, ${pt.receiver.address.street}` : ''}
+                            {pt.receiver.address.building ? ` ${pt.receiver.address.building}` : ''}
                             {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
-                            {p.receiverAddress.postalCode ? `, ${p.receiverAddress.postalCode}` : ''}
+                            {pt.receiver.address.postalCode ? `, ${pt.receiver.address.postalCode}` : ''}
                             {/* ТЗ docx 02.07.26 (D1): орієнтир (коли вказано). */}
-                            {p.receiverAddress.landmark ? ` (${p.receiverAddress.landmark})` : ''}
-                            {p.receiverAddress.npWarehouseNum ? ` (НП №${p.receiverAddress.npWarehouseNum})` : ''}
+                            {pt.receiver.address.landmark ? ` (${pt.receiver.address.landmark})` : ''}
+                            {pt.receiver.address.npWarehouseNum ? ` (НП №${pt.receiver.address.npWarehouseNum})` : ''}
                           </div>
                         )}
                         <div className="text-sm mt-1">
                           <span className="text-gray-500 font-medium">Від кого:</span>{' '}
-                          <span>{p.sender.lastName} {p.sender.firstName}</span>
-                          <span className="text-gray-400 ml-1">{p.sender.phone}</span>
+                          <span>{pt.sender.lastName} {pt.sender.firstName}</span>
+                          <span className="text-gray-400 ml-1">{pt.sender.phone}</span>
                         </div>
-                        {p.senderAddress && (
+                        {pt.sender.address && (
                           <div className="text-xs text-gray-500">
                             <span className="text-gray-400">Звідки:</span>{' '}
-                            {p.senderAddress.city}
-                            {p.senderAddress.street ? `, ${p.senderAddress.street}` : ''}
-                            {p.senderAddress.building ? ` ${p.senderAddress.building}` : ''}
+                            {pt.sender.address.city}
+                            {pt.sender.address.street ? `, ${pt.sender.address.street}` : ''}
+                            {pt.sender.address.building ? ` ${pt.sender.address.building}` : ''}
                             {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
-                            {p.senderAddress.postalCode ? `, ${p.senderAddress.postalCode}` : ''}
+                            {pt.sender.address.postalCode ? `, ${pt.sender.address.postalCode}` : ''}
                             {/* ТЗ docx 02.07.26 (D1): орієнтир (коли вказано). */}
-                            {p.senderAddress.landmark ? ` (${p.senderAddress.landmark})` : ''}
-                            {p.senderAddress.npWarehouseNum ? ` (НП №${p.senderAddress.npWarehouseNum})` : ''}
+                            {pt.sender.address.landmark ? ` (${pt.sender.address.landmark})` : ''}
+                            {pt.sender.address.npWarehouseNum ? ` (НП №${pt.sender.address.npWarehouseNum})` : ''}
                           </div>
                         )}
                         {/* ТЗ — поряд з посилкою показуємо хто її прийняв

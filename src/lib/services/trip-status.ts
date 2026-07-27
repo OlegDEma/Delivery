@@ -22,7 +22,10 @@ export async function applyTripStatusCascade(
     const parcels = await prisma.parcel.findMany({
       where: {
         tripId,
-        status: { notIn: [newParcelStatus, 'delivered_ua', 'delivered_eu', 'not_received', 'refused', 'returned'] },
+        // ТЗ docx 26.07.26: НЕ чіпаємо «Створена» (draft) — непринята посилка не
+        // має авто-заморожуватись у «в дорозі» при старті рейсу; її спершу треба
+        // явно «Прийняти до перевезення».
+        status: { notIn: [newParcelStatus, 'draft', 'delivered_ua', 'delivered_eu', 'not_received', 'refused', 'returned'] },
       },
       select: { id: true, collectedAt: true, collectionMethod: true, direction: true },
     });

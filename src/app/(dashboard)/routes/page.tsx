@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDate, formatDateWithWeekday } from '@/lib/utils/format';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
 
 interface PartyAddr {
   country: string | null;
@@ -37,6 +38,9 @@ interface RouteItem {
   receiver: { firstName: string; lastName: string; phone: string };
   senderAddress: PartyAddr | null;
   receiverAddress: PartyAddr | null;
+  // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
+  senderSnapshot: unknown;
+  receiverSnapshot: unknown;
   routeTaskStatus: string | null;
   routeTaskFailReason: string | null;
   routeTaskReschedDate: string | null;
@@ -93,9 +97,15 @@ function journeyLabel(j: JourneyOption): string {
  */
 function euDestParty(p: RouteItem) {
   const showSender = p.direction === 'eu_to_ua';
-  return showSender
-    ? { roleLabel: 'Відправник', name: `${p.sender.lastName} ${p.sender.firstName}`, phone: p.sender.phone, addr: p.senderAddress }
-    : { roleLabel: 'Отримувач', name: `${p.receiver.lastName} ${p.receiver.firstName}`, phone: p.receiver.phone, addr: p.receiverAddress };
+  // ТЗ docx 26.07.26 (п.1): для accepted+ беремо сторону зі знімка, не з живих даних.
+  const pt = parcelParties(p);
+  const party = showSender ? pt.sender : pt.receiver;
+  return {
+    roleLabel: showSender ? 'Відправник' : 'Отримувач',
+    name: `${party.lastName} ${party.firstName}`,
+    phone: party.phone,
+    addr: party.address,
+  };
 }
 
 export default function RoutesPage() {
@@ -149,8 +159,10 @@ export default function RoutesPage() {
       .then(data => {
         if (!active) return;
         if (data?.parcels) {
-          // ТЗ: сортуємо за поштовим індексом сторони в країні призначення.
-          const sorted = (data.parcels as RouteItem[]).sort((a, b) => {
+          // ТЗ docx 26.07.26: у маршрутний лист не потрапляють «Створена» —
+          // лише прийняті до перевезення посилки. Сортуємо за індексом сторони
+          // в країні призначення.
+          const sorted = (data.parcels as RouteItem[]).filter(p => p.status !== 'draft').sort((a, b) => {
             const ca = euDestParty(a).addr?.postalCode || '';
             const cb = euDestParty(b).addr?.postalCode || '';
             return ca.localeCompare(cb);

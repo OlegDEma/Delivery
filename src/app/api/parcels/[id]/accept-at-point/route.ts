@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireStaff } from '@/lib/auth/guards';
+import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
 import { isUuid } from '@/lib/validators/common';
 
 /**
@@ -61,10 +62,16 @@ export async function POST(
     return NextResponse.json({ error: 'Пункт збору не знайдено' }, { status: 404 });
   }
 
+  // ТЗ docx 26.07.26 (п.1): при виході з «Створена» заморожуємо знімок сторін.
+  const partySnapshot = parcel.status === 'draft'
+    ? await snapshotParcelParties(prisma, id)
+    : null;
+
   const updated = await prisma.parcel.update({
     where: { id },
     data: {
       status: 'at_collection_point',
+      ...(partySnapshot ?? {}),
       collectionPointId,
       collectionMethod: parcel.collectionMethod ?? 'pickup_point',
       collectedAt: new Date(),

@@ -7,7 +7,7 @@ import { createParcel } from '@/lib/services/parcel-creation';
 import { logger } from '@/lib/logger';
 import { kyivDateRange } from '@/lib/utils/tz';
 import type { Prisma } from '@/generated/prisma/client';
-import type { Country, DeliveryMethod } from '@/generated/prisma/enums';
+import type { Country, DeliveryMethod, ParcelStatus } from '@/generated/prisma/enums';
 
 /**
  * Upsert a ClientAddress for parcel creation.
@@ -307,9 +307,11 @@ export async function POST(request: NextRequest) {
     if (!senderExists) return NextResponse.json({ error: 'Відправника не знайдено' }, { status: 404 });
     if (!receiverExists) return NextResponse.json({ error: 'Отримувача не знайдено' }, { status: 404 });
 
-    const initialStatus = parsed.direction === 'eu_to_ua'
-      ? 'accepted_for_transport_to_ua'
-      : 'accepted_for_transport_to_eu';
+    // ТЗ docx 26.07.26 (рішення власника): staff-посилка створюється у статусі
+    // «Створена» (draft). Оператор перевіряє дані і лише потім натискає
+    // «Прийняти до перевезення» (draft → accepted_for_transport_* за напрямком),
+    // що й робить знімок даних. Так у нього є вікно на редагування до прийняття.
+    const initialStatus: ParcelStatus = 'draft';
 
     // Per ТЗ: «лише номер телефону» — if worker edited phone inline, update
     // the client record so next parcel pre-fills with the new number.

@@ -2232,6 +2232,8 @@ export const ParcelScalarFieldEnum = {
   senderAddressId: 'senderAddressId',
   receiverId: 'receiverId',
   receiverAddressId: 'receiverAddressId',
+  senderSnapshot: 'senderSnapshot',
+  receiverSnapshot: 'receiverSnapshot',
   tripId: 'tripId',
   shipmentType: 'shipmentType',
   description: 'description',
@@ -2736,6 +2738,20 @@ export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMo
 
 
 /**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
  * Reference to a field of type 'ShipmentType'
  */
 export type EnumShipmentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShipmentType'>
@@ -2830,20 +2846,6 @@ export type EnumWeightTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'WeightType[]'
  */
 export type ListEnumWeightTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WeightType[]'>
-    
-
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 

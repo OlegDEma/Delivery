@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import type { ParcelStatus } from '@/generated/prisma/client';
 import { requireStaff } from '@/lib/auth/guards';
 import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transitions';
+import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
 import type { ParcelStatusType } from '@/lib/constants/statuses';
 import { ROLES } from '@/lib/constants/roles';
 import { logger } from '@/lib/logger';
@@ -64,6 +65,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // ТЗ docx 26.07.26 (п.1): для посилок, що виходять зі статусу «Створена»,
+  // заморожуємо знімок сторін ПЕРЕД транзакцією (по одному запиту на чернетку).
+  const snaps = new Map<string, Awaited<ReturnType<typeof snapshotParcelParties>>>();
+  for (const id of parcelIds as string[]) {
+    if (currentMap.get(id) === 'draft') snaps.set(id, await snapshotParcelParties(prisma, id));
+  }
+
   // Update all parcels and create status history entries
   const results = await prisma.$transaction(
     parcelIds.map((id: string) =>
@@ -71,6 +79,7 @@ export async function POST(request: NextRequest) {
         where: { id },
         data: {
           status: status as ParcelStatus,
+          ...(snaps.get(id) ?? {}),
           statusHistory: {
             create: {
               status: status as ParcelStatus,
