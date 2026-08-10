@@ -468,7 +468,9 @@ export default function TripsPage() {
                       <div className="text-xs text-gray-400">
                         {trip._count.passengers}/{trip.passengerCapacity} пасаж.
                       </div>
-                      {/* ТЗ docx 01.07.26: inline «Редагувати(дата)»/«Видалити». */}
+                      {/* ТЗ docx 01.07.26: inline «Редагувати(дата)»/«Видалити».
+                          ТЗ docx 08.08.26: ЗАВЕРШЕНИЙ рейс редагувати/видаляти заборонено. */}
+                      {trip.status !== 'completed' && (
                       <div className="flex flex-col items-end gap-0.5 mt-1">
                         <button
                           type="button"
@@ -485,6 +487,7 @@ export default function TripsPage() {
                           Видалити
                         </button>
                       </div>
+                      )}
                     </div>
                   </div>
                 ))}

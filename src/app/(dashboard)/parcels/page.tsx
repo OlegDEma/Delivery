@@ -13,6 +13,7 @@ import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/const
 import { statusLabel } from '@/lib/parcels/status-label';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { formatDate } from '@/lib/utils/format';
+import { tripRouteLabel } from '@/lib/constants/countries';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
 import { X } from 'lucide-react';
@@ -36,7 +37,8 @@ interface ParcelListItem {
   // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
   senderSnapshot: unknown;
   receiverSnapshot: unknown;
-  trip?: { id: string; country: string | null } | null;
+  // ТЗ docx 08.08.26 (G7): помітка «яким рейсом їхала» — потрібні напрямок+дата.
+  trip?: { id: string; country: string | null; direction: string | null; departureDate: string | null } | null;
   /** Хто прийняв посилку (collectedBy) — для відображення поряд з посилкою. */
   collectedBy?: { id: string; fullName: string } | null;
   /** Хто призначений на доставку (assignedCourier) — для контексту. */
@@ -403,6 +405,13 @@ function ParcelsContent() {
                             {statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction })}
                           </Badge>
                           {p.isPaid && <Badge className="text-xs bg-green-100 text-green-800">Оплачено</Badge>}
+                          {/* ТЗ docx 08.08.26 (G7): помітка — яким рейсом посилка перевозилася. */}
+                          {p.trip && (
+                            <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                              🚌 {tripRouteLabel(p.trip.country ?? '', p.trip.direction ?? '', { mode: 'code' })}
+                              {p.trip.departureDate ? ` · ${formatDate(p.trip.departureDate)}` : ''}
+                            </Badge>
+                          )}
                         </div>
                         {/* Receiver block first per ТЗ: Кому/Куди → Від кого/Звідки */}
                         <div className="text-sm">

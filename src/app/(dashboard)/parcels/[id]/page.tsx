@@ -27,6 +27,7 @@ import { InvoiceHistory } from '@/components/parcels/invoice-history';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
 import { ShareButton } from '@/components/shared/share-button';
+import { PartyShareButtons } from '@/components/shared/party-share-buttons';
 import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
 import { ParcelPaymentCard } from '@/components/parcels/parcel-payment-card';
 import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
@@ -268,6 +269,24 @@ export default function ParcelDetailPage() {
   const parties = parcelParties(parcel);
   const isDraft = parcel.status === 'draft';
 
+  // ТЗ docx 08.08.26: текст ПІДТВЕРДЖЕННЯ (зведення посилки) для WhatsApp/Viber —
+  // ЛИШЕ деталі відправлення (сторони, місця, вартість, напрямок), БЕЗ блоку
+  // оплати/кур'єра/історії статусів (див. зображення у ТЗ).
+  const trackingUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/tracking?q=${encodeURIComponent(parcel.itn)}`
+    : '';
+  const confirmationMessage = [
+    `📦 Посилка ${parcel.internalNumber}`,
+    `ІТН: ${parcel.itn}${parcel.npTtn ? ` · ТТН: ${parcel.npTtn}` : ''}`,
+    `Отримувач: ${parties.receiver.lastName} ${parties.receiver.firstName}, ${parties.receiver.phone}`,
+    `Відправник: ${parties.sender.lastName} ${parties.sender.firstName}, ${parties.sender.phone}`,
+    `Місць: ${parcel.totalPlacesCount}${parcel.totalWeight ? `, вага ${Number(parcel.totalWeight).toFixed(1)} кг` : ''}`,
+    parcel.totalCost ? `Вартість: ${Number(parcel.totalCost).toFixed(2)} EUR` : '',
+    `Напрямок: ${parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}`,
+    parcel.description ? `Опис: ${parcel.description}` : '',
+    trackingUrl ? `Відстежити: ${trackingUrl}` : '',
+  ].filter(Boolean).join('\n');
+
   const isClientOrderPending =
     parcel.status === 'draft' &&
     (parcel.createdSource === 'client_web' || parcel.createdSource === 'client_telegram');
@@ -468,6 +487,8 @@ export default function ParcelDetailPage() {
             <span className="font-medium">{parties.receiver.lastName} {parties.receiver.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
             <PhoneLink phone={parties.receiver.phone} />
+            {/* ТЗ docx 08.08.26: WhatsApp/Viber — надіслати підтвердження Отримувачу. */}
+            <PartyShareButtons phone={parties.receiver.phone} message={confirmationMessage} className="ml-1.5" />
             {parties.receiver.address && (() => {
               // ТЗ docx 15.07.26 (п.2): у підсумку — ЛИШЕ дані поточного способу
               // доставки. ТЗ docx 26.07.26 (п.1): для accepted+ — зі знімка.
@@ -506,6 +527,8 @@ export default function ParcelDetailPage() {
             <span className="font-medium">{parties.sender.lastName} {parties.sender.firstName}</span>
             <span className="text-gray-400 mx-1">·</span>
             <PhoneLink phone={parties.sender.phone} />
+            {/* ТЗ docx 08.08.26: WhatsApp/Viber — надіслати підтвердження Відправнику. */}
+            <PartyShareButtons phone={parties.sender.phone} message={confirmationMessage} className="ml-1.5" />
             {parties.sender.address && (() => {
               // ТЗ docx 15.07.26 (п.2): лише дані поточного способу; країну UA у
               // Відправника не показуємо. ТЗ docx 26.07.26 (п.1): accepted+ — зі знімка.

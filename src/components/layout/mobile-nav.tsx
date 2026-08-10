@@ -45,7 +45,6 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Посилки', href: '/parcels', icon: Package, roles: ['super_admin', 'admin', 'cashier', 'warehouse_worker'] },
       { label: 'Мої посилки', href: '/my-parcels', icon: Truck, roles: ['driver_courier'] },
       { label: 'Пасажири', href: '/passengers', icon: Users2, roles: ['super_admin', 'admin', 'driver_courier'] },
-      { label: 'Клієнти', href: '/clients', icon: Users, roles: ['super_admin', 'admin', 'cashier'] },
     ],
   },
   {
@@ -77,6 +76,8 @@ const NAV_GROUPS: NavGroup[] = [
     roles: ['super_admin', 'admin'],
     items: [
       { label: 'Користувачі', href: '/admin/users', icon: UserCog, roles: ['super_admin'] },
+      // ТЗ docx 08.08.26: «Клієнти» перенесено з «Замовлення» в «Адміністрування».
+      { label: 'Клієнти', href: '/clients', icon: Users, roles: ['super_admin', 'admin', 'cashier'] },
       { label: 'Тарифи', href: '/admin/pricing', icon: Tags },
       { label: 'Статуси', href: '/admin/statuses', icon: ListChecks, roles: ['super_admin', 'admin'] },
     ],

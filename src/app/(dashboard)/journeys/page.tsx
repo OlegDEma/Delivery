@@ -63,7 +63,7 @@ const EU_COUNTRY_LABELS: Record<string, string> = { NL: 'Нідерланди', 
  *  2) інакше — найближча МАЙБУТНЯ (найменший departure ≥ сьогодні);
  *  3) інакше (усі в минулому) — найсвіжіша МИНУЛА.
  */
-function pickFocusJourneyId(list: { id: string; departureDate: string; euReturnDate: string | null; endDate: string | null }[]): string | null {
+function pickOneFocusId(list: { id: string; departureDate: string; euReturnDate: string | null; endDate: string | null }[]): string | null {
   if (list.length === 0) return null;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const t0 = today.getTime();
@@ -90,6 +90,25 @@ function pickFocusJourneyId(list: { id: string; departureDate: string; euReturnD
     if (dep !== null && dep < t0 && dep > pastBest) { pastBest = dep; pastId = j.id; }
   }
   return pastId;
+}
+
+/**
+ * ТЗ docx 08.08.26: підсвічувати поточну/найближчу поїздку ОКРЕМО для КОЖНОЇ
+ * країни (AT, NL і будь-яка третя), а не одну на весь список.
+ */
+function pickFocusJourneyIds(list: { id: string; country: string; departureDate: string; euReturnDate: string | null; endDate: string | null }[]): Set<string> {
+  const byCountry = new Map<string, typeof list>();
+  for (const j of list) {
+    const arr = byCountry.get(j.country) ?? [];
+    arr.push(j);
+    byCountry.set(j.country, arr);
+  }
+  const ids = new Set<string>();
+  for (const group of byCountry.values()) {
+    const id = pickOneFocusId(group);
+    if (id) ids.add(id);
+  }
+  return ids;
 }
 
 export default function JourneysPage() {
@@ -323,18 +342,20 @@ export default function JourneysPage() {
   // ТЗ docx 09.07.26: спершу застосовуємо ФІЛЬТР країни (ховає інші), потім
   // (за потреби) групуємо відфільтрований список.
   const filteredJourneys = filterCountry ? journeys.filter(j => j.country === filterCountry) : journeys;
-  // ТЗ docx 26.07.26 (п.2): id поїздки для авто-фокусу/підсвітки (над видимим списком).
-  const focusJourneyId = useMemo(() => pickFocusJourneyId(filteredJourneys), [filteredJourneys]);
+  // ТЗ docx 08.08.26: набір id поїздок для підсвітки — поточна/найближча ОКРЕМО
+  // для кожної країни. Скрол — до однієї найрелевантнішої (по всьому списку).
+  const focusIds = useMemo(() => pickFocusJourneyIds(filteredJourneys), [filteredJourneys]);
+  const scrollFocusId = useMemo(() => pickOneFocusId(filteredJourneys), [filteredJourneys]);
   // Одноразовий авто-скрол у центр на поточну/найближчу поїздку при відкритті.
   // setTimeout (не rAF — призупинений у прихованій вкладці) + behavior:'auto'.
   useEffect(() => {
-    if (loading || filteredJourneys.length === 0 || didInitialFocus.current || !focusJourneyId) return;
+    if (loading || filteredJourneys.length === 0 || didInitialFocus.current || !scrollFocusId) return;
     didInitialFocus.current = true;
     setTimeout(() => {
-      const el = rowRefs.current.get(focusJourneyId);
+      const el = rowRefs.current.get(scrollFocusId);
       if (el) el.scrollIntoView({ behavior: 'auto', block: 'center' });
     }, 60);
-  }, [loading, filteredJourneys, focusJourneyId]);
+  }, [loading, filteredJourneys, scrollFocusId]);
   // Групування за країною (ТЗ D10: у Поїздок немає напрямку → групуємо за країною).
   const journeyGroups: { key: string; label: string; items: Journey[] }[] = groupByCountry
     ? (() => {
@@ -536,14 +557,18 @@ export default function JourneysPage() {
                 </div>
               )}
               <div className="space-y-3">
-          {group.items.map(j => (
+          {group.items.map(j => {
+            // ТЗ docx 08.08.26: «завершена» поїздка = всі її рейси завершені (Journey.status
+            // не авто-просувається) — таку редагувати/видаляти заборонено.
+            const isJourneyCompleted = j.trips.length > 0 && j.trips.every(t => t.status === 'completed');
+            return (
             <div
               key={j.id}
               ref={(el) => { if (el) rowRefs.current.set(j.id, el); else rowRefs.current.delete(j.id); }}
               className={cn(
                 'rounded-lg border overflow-hidden transition-colors',
-                // ТЗ docx 26.07.26 (п.2): поточна/найближча поїздка — кольоровий фон + рамка.
-                j.id === focusJourneyId
+                // ТЗ docx 08.08.26: поточна/найближча поїздка (окремо по кожній країні) — фон+рамка.
+                focusIds.has(j.id)
                   ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-400 ring-offset-1 shadow-sm'
                   : 'bg-white'
               )}
@@ -559,13 +584,9 @@ export default function JourneysPage() {
                     <span className="font-semibold">
                       🚐 UA → {COUNTRY_LABELS[j.country as CountryCode]} → UA
                     </span>
-                    <Badge className={STATUS_MAP[j.status]?.color || ''}>
-                      {STATUS_MAP[j.status]?.label || j.status}
-                    </Badge>
-                    {/* ТЗ docx 26.07.26 (п.2): маркер поточної/найближчої поїздки. */}
-                    {j.id === focusJourneyId && (
-                      <Badge className="bg-amber-500 text-white">Зараз / найближча</Badge>
-                    )}
+                    {/* ТЗ docx 08.08.26: прибрано бейджі «Заплановано» (голубий) та
+                        «Зараз / найближча» (оранжевий) — стан передають кольорові
+                        статуси рейсів нижче + підсвітка самої картки. */}
                   </div>
                   {/* ТЗ L1: день тижня + дата. */}
                   <div className="text-xs text-gray-500 space-x-1">
@@ -581,7 +602,9 @@ export default function JourneysPage() {
                   {j.vehicleInfo && <div className="text-xs text-gray-500 mt-0.5">🚛 {j.vehicleInfo}</div>}
                   {j.notes && <div className="text-xs text-gray-400 italic mt-0.5">{j.notes}</div>}
                 </div>
-                {/* ТЗ docx 20.06.26: «Видалити» під «Редагувати». */}
+                {/* ТЗ docx 08.08.26: ЗАВЕРШЕНУ поїздку редагувати/видаляти заборонено.
+                    ТЗ docx 20.06.26: «Видалити» під «Редагувати». */}
+                {!isJourneyCompleted && (
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <button
                     type="button"
@@ -598,11 +621,15 @@ export default function JourneysPage() {
                     Видалити
                   </button>
                 </div>
+                )}
               </div>
 
               {/* Child trips */}
               <div className="divide-y border-t">
-                {j.trips.map(t => (
+                {/* ТЗ docx 08.08.26: першим завжди рейс З України (ua_to_eu), потім — ДО України. */}
+                {[...j.trips]
+                  .sort((a, b) => (a.direction === 'ua_to_eu' ? 0 : 1) - (b.direction === 'ua_to_eu' ? 0 : 1))
+                  .map(t => (
                   <Link
                     key={t.id}
                     href={`/trips/${t.id}`}
@@ -611,16 +638,20 @@ export default function JourneysPage() {
                     <div className="flex items-center gap-2">
                       <span>{tripLabel(t.direction, j.country)}</span>
                       <span className="text-xs text-gray-400">{formatDateWithWeekday(t.departureDate)}</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {STATUS_MAP[t.status]?.label || t.status}
-                      </Badge>
+                      {/* ТЗ docx 08.08.26: статус рейсу — КОЛЬОРОВИМ надписом; «Заплановано»
+                          не показуємо (сам факт наявності у списку = заплановано). */}
+                      {t.status !== 'planned' && (
+                        <Badge className={cn('text-xs', STATUS_MAP[t.status]?.color || '')}>
+                          {STATUS_MAP[t.status]?.label || t.status}
+                        </Badge>
+                      )}
                     </div>
                     <span className="text-xs text-gray-500">📦 {t._count.parcels}</span>
                   </Link>
                 ))}
               </div>
             </div>
-          ))}
+          ); })}
               </div>
             </div>
           ))}

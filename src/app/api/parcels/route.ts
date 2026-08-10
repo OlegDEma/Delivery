@@ -265,8 +265,8 @@ export async function GET(request: NextRequest) {
           orderBy: { placeNumber: 'asc' },
           select: { id: true, placeNumber: true, weight: true, volumetricWeight: true, itnPlace: true },
         },
-        // Для динамічного лейблу статусу («В дорозі до …»).
-        trip: { select: { id: true, country: true, departureDate: true } },
+        // Для динамічного лейблу статусу («В дорозі до …») + помітки рейсу (ТЗ docx 08.08.26 G7).
+        trip: { select: { id: true, country: true, direction: true, departureDate: true } },
         // ТЗ — фільтр по кур'єру, який приймав посилку: показуємо також у
         // списку, щоб оператор бачив контекст без переходу в деталі.
         collectedBy: { select: { id: true, fullName: true } },

@@ -162,6 +162,16 @@ export async function PATCH(request: NextRequest) {
   let body;
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
+
+  // ТЗ docx 08.08.26: ЗАВЕРШЕНУ поїздку (усі рейси завершені) редагувати заборонено.
+  const JOURNEY_EDIT_FIELDS = ['assignedCourierId', 'secondCourierId', 'euArrivalDate', 'euReturnDate', 'endDate', 'vehicleInfo', 'notes'];
+  if (JOURNEY_EDIT_FIELDS.some((f) => body[f] !== undefined)) {
+    const jTrips = await prisma.trip.findMany({ where: { journeyId: id }, select: { status: true } });
+    if (jTrips.length > 0 && jTrips.every((t) => t.status === 'completed')) {
+      return NextResponse.json({ error: 'Завершену поїздку редагувати заборонено' }, { status: 403 });
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = {};
   if (body.status !== undefined) data.status = body.status as TripStatus;
@@ -213,7 +223,11 @@ export async function DELETE(request: NextRequest) {
   const journey = await prisma.journey.findUnique({ where: { id }, select: { id: true } });
   if (!journey) return NextResponse.json({ error: 'Поїздку не знайдено' }, { status: 404 });
 
-  const trips = await prisma.trip.findMany({ where: { journeyId: id }, select: { id: true } });
+  const trips = await prisma.trip.findMany({ where: { journeyId: id }, select: { id: true, status: true } });
+  // ТЗ docx 08.08.26: завершену поїздку (усі рейси завершені) видаляти заборонено.
+  if (trips.length > 0 && trips.every((t) => t.status === 'completed')) {
+    return NextResponse.json({ error: 'Завершену поїздку видаляти заборонено' }, { status: 403 });
+  }
   const tripIds = trips.map(t => t.id);
 
   await prisma.$transaction(async (tx) => {

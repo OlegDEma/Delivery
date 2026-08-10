@@ -14,6 +14,8 @@ import { toast } from 'sonner';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { formatCurrency } from '@/lib/utils/format';
+import { tripRouteLabel } from '@/lib/constants/countries';
+import { MinibusSeating } from '@/components/passengers/minibus-seating';
 
 interface TripSummary {
   id: string;
@@ -55,10 +57,6 @@ interface TripDetail {
   assignedCourier: { fullName: string } | null;
 }
 
-const DIR_LABEL: Record<string, string> = {
-  eu_to_ua: 'ЄС → Україна',
-  ua_to_eu: 'Україна → ЄС',
-};
 
 export default function PassengersPage() {
   const [trips, setTrips] = useState<TripSummary[]>([]);
@@ -164,6 +162,10 @@ export default function PassengersPage() {
     const capacity = trip?.passengerCapacity || 0;
     const occupied = passengers.length;
     const free = Math.max(0, capacity - occupied);
+    // ТЗ docx 08.08.26: зайняті місця (для плану мікроавтобуса) — щоб їх заблокувати.
+    const occupiedSeats = passengers
+      .map((p) => p.seatNumber)
+      .filter((n): n is number => typeof n === 'number');
 
     return (
       <div>
@@ -177,7 +179,8 @@ export default function PassengersPage() {
           <>
             <div className="mb-4">
               <h1 className="text-2xl font-bold">
-                Рейс {DIR_LABEL[trip.direction] || trip.direction} · {trip.country}
+                {/* ТЗ docx 08.08.26: назва рейсу — лише країни виїзду→приїзду (без «ЄС»/«Європа»). */}
+                Рейс {tripRouteLabel(trip.country, trip.direction)}
               </h1>
               <p className="text-sm text-gray-500">
                 Відправлення: {new Date(trip.departureDate).toLocaleDateString('uk-UA')}
@@ -229,9 +232,21 @@ export default function PassengersPage() {
                       onChange={(v) => setForm({ ...form, phone: v })}
                       defaultCountry="UA"
                     />
+                    {/* ТЗ docx 08.08.26: вибір місця кліком по схематичному плану салону. */}
+                    <div>
+                      <Label className="text-xs">Місце в салоні</Label>
+                      <div className="mt-1">
+                        <MinibusSeating
+                          capacity={capacity}
+                          occupiedSeats={occupiedSeats}
+                          value={form.seatNumber ? Number(form.seatNumber) : null}
+                          onChange={(seat) => setForm({ ...form, seatNumber: String(seat) })}
+                        />
+                      </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <Label className="text-xs">Місце №</Label>
+                        <Label className="text-xs">Місце № (вручну)</Label>
                         <Input
                           type="number" min={1} max={capacity || 99}
                           value={form.seatNumber}
@@ -365,7 +380,8 @@ export default function PassengersPage() {
               <CardHeader className="py-3 px-4">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="text-base">
-                    {DIR_LABEL[t.direction] || t.direction} · {t.country}
+                    {/* ТЗ docx 08.08.26: назва рейсу — лише країни (без «ЄС»/«Європа»). */}
+                    {tripRouteLabel(t.country, t.direction)}
                   </CardTitle>
                   <Badge className="text-xs">{t.status}</Badge>
                 </div>

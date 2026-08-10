@@ -209,6 +209,9 @@ export default function TripDetailPage() {
             </Button>
           </div>
 
+          {/* ТЗ docx 08.08.26: ЗАВЕРШЕНИЙ рейс редагувати(дати/місця) або видаляти
+              заборонено — лишаємо тільки зміну статусу (ручне виправлення). */}
+          {trip.status !== 'completed' && (<>
           {/* Дати рейсу — редагування (ТЗ docx 29.06.26 «Рейси» §2) */}
           <div className="flex gap-2 items-end border-t pt-3">
             <div className="flex-1">
@@ -257,6 +260,7 @@ export default function TripDetailPage() {
               маршрутні задачі та пасажирів — видалено.
             </p>
           </div>
+          </>)}
         </CardContent>
       </Card>
 

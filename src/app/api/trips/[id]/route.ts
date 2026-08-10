@@ -56,6 +56,16 @@ export async function PATCH(
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
+  // ТЗ docx 08.08.26: ЗАВЕРШЕНИЙ рейс редагувати заборонено (дати/місця/нотатки/водії).
+  // Зміну статусу (ручне виправлення) лишаємо дозволеною.
+  const EDIT_FIELDS = ['departureDate', 'arrivalDate', 'passengerCapacity', 'notes', 'assignedCourierId', 'secondCourierId'];
+  if (EDIT_FIELDS.some((f) => body[f] !== undefined)) {
+    const cur = await prisma.trip.findUnique({ where: { id }, select: { status: true } });
+    if (cur?.status === 'completed') {
+      return NextResponse.json({ error: 'Завершений рейс редагувати заборонено' }, { status: 403 });
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = {};
   if (body.status !== undefined) {
@@ -145,8 +155,12 @@ export async function DELETE(
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
-  const trip = await prisma.trip.findUnique({ where: { id }, select: { id: true } });
+  const trip = await prisma.trip.findUnique({ where: { id }, select: { id: true, status: true } });
   if (!trip) return NextResponse.json({ error: 'Рейс не знайдено' }, { status: 404 });
+  // ТЗ docx 08.08.26: завершений рейс видаляти заборонено.
+  if (trip.status === 'completed') {
+    return NextResponse.json({ error: 'Завершений рейс видаляти заборонено' }, { status: 403 });
+  }
 
   await prisma.$transaction([
     prisma.parcel.updateMany({ where: { tripId: id }, data: { tripId: null } }),
