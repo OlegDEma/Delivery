@@ -34,6 +34,8 @@ interface Stats {
   unpaidTotal: number;
   pendingOrders: number;
   upcomingTrip: { id: string; departureDate: string; country: string; direction: string; _count: { parcels: number } } | null;
+  // ТЗ docx 08.08.26: для Водія — «Найближчі рейси» (обидва рейси його поїздки).
+  upcomingFlights?: { id: string; direction: string; country: string; departureDate: string; status: string; parcels: number }[];
   recentParcels: {
     id: string;
     internalNumber: string;
@@ -104,7 +106,21 @@ export default function DashboardPage() {
             </Link>
           )}
 
-          {showUpcomingTrip && stats.upcomingTrip && (
+          {/* ТЗ docx 08.08.26: Водій бачить «Найближчі рейси» (обидва рейси його поїздки),
+              перехід по стрілці на Рейси/Деталі рейсу — заборонено (без Link). */}
+          {isDriver && stats.upcomingFlights && stats.upcomingFlights.length > 0 ? (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="font-medium text-blue-900 mb-1.5">Найближчі рейси</div>
+              <div className="space-y-1">
+                {stats.upcomingFlights.map(f => (
+                  <div key={f.id} className="flex items-center justify-between text-sm">
+                    <span className="text-blue-900">{tripRouteLabel(f.country, f.direction)}</span>
+                    <span className="text-xs text-blue-700">{formatDate(f.departureDate)} • {f.parcels} посилок</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : showUpcomingTrip && stats.upcomingTrip && (
             <Link href={`/trips/${stats.upcomingTrip.id}`} className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3 hover:bg-blue-100 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center text-blue-800 font-bold">{stats.upcomingTrip._count.parcels}</div>

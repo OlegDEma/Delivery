@@ -13,6 +13,48 @@ export async function GET() {
   // would not count as "today" until 02:00/03:00 UTC rolled over.
   const today = startOfKyivToday();
 
+  // ТЗ docx 08.08.26: для Водія вся статистика — по його найближчій/текучій поїздці,
+  // а «Найближчі рейси» = обидва рейси саме цієї поїздки.
+  const profile = await prisma.profile.findUnique({ where: { id: user.id }, select: { role: true } });
+  if (profile?.role === 'driver_courier') {
+    const journey = await prisma.journey.findFirst({
+      where: {
+        status: { in: ['planned', 'in_progress'] },
+        OR: [{ assignedCourierId: user.id }, { secondCourierId: user.id }],
+      },
+      orderBy: { departureDate: 'asc' },
+      include: {
+        trips: { select: { id: true, direction: true, country: true, departureDate: true, status: true, _count: { select: { parcels: true } } } },
+      },
+    });
+    const tripIds = journey?.trips.map((t) => t.id) ?? [];
+    const scope = { deletedAt: null, tripId: { in: tripIds } };
+    const [dTotal, dToday, dWarehouse, dTransit] = await Promise.all([
+      prisma.parcel.count({ where: scope }),
+      prisma.parcel.count({ where: { ...scope, createdAt: { gte: today } } }),
+      prisma.parcel.count({ where: { ...scope, status: { in: ['at_lviv_warehouse', 'at_eu_warehouse'] } } }),
+      prisma.parcel.count({ where: { ...scope, status: { in: ['in_transit_to_ua', 'in_transit_to_eu'] } } }),
+    ]);
+    const dRecentParcels = tripIds.length ? await prisma.parcel.findMany({
+      where: scope, take: 5, orderBy: { createdAt: 'desc' },
+      select: { id: true, internalNumber: true, status: true, createdAt: true, receiver: { select: { lastName: true, firstName: true, phone: true } }, senderSnapshot: true, receiverSnapshot: true },
+    }) : [];
+    const dRecentActivity = tripIds.length ? await prisma.parcelStatusHistory.findMany({
+      where: { parcel: { tripId: { in: tripIds } } }, take: 10, orderBy: { changedAt: 'desc' },
+      include: { parcel: { select: { internalNumber: true, id: true } }, changedBy: { select: { fullName: true } } },
+    }) : [];
+    const flights = (journey?.trips ?? []).slice().sort((a, b) => (a.direction === 'ua_to_eu' ? 0 : 1) - (b.direction === 'ua_to_eu' ? 0 : 1));
+    return NextResponse.json({
+      totalParcels: dTotal, todayParcels: dToday, atWarehouse: dWarehouse, inTransit: dTransit,
+      delivered: 0, totalClients: 0, activeTrips: tripIds.length, unpaidCount: 0, unpaidTotal: 0, pendingOrders: 0,
+      upcomingTrip: journey ? { id: journey.id, departureDate: journey.departureDate, country: journey.country, direction: 'ua_to_eu', _count: { parcels: dTotal } } : null,
+      // ТЗ docx 08.08.26: «Найближчі рейси» — обидва рейси поїздки (ua_to_eu першим).
+      upcomingFlights: flights.map((t) => ({ id: t.id, direction: t.direction, country: t.country, departureDate: t.departureDate, status: t.status, parcels: t._count.parcels })),
+      recentParcels: dRecentParcels,
+      recentActivity: dRecentActivity.map((a) => ({ id: a.id, parcelId: a.parcel.id, parcelNumber: a.parcel.internalNumber, status: a.status, changedBy: a.changedBy?.fullName || 'Система', changedAt: a.changedAt, notes: a.notes })),
+    });
+  }
+
   const [
     totalParcels,
     todayParcels,

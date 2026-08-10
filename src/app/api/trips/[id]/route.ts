@@ -48,6 +48,10 @@ export async function PATCH(
 ) {
   const guard = await requireRole(LOGISTICS_ROLES);
   if (!guard.ok) return guard.response;
+  // ТЗ docx 08.08.26: Водію заборонено редагувати рейси.
+  if (guard.user.role === 'driver_courier') {
+    return NextResponse.json({ error: 'Водію заборонено редагувати рейси' }, { status: 403 });
+  }
   const user = { id: guard.user.userId };
 
   const { id } = await params;
@@ -151,6 +155,10 @@ export async function DELETE(
 ) {
   const guard = await requireRole(LOGISTICS_ROLES);
   if (!guard.ok) return guard.response;
+  // ТЗ docx 08.08.26: Водію заборонено видаляти рейси.
+  if (guard.user.role === 'driver_courier') {
+    return NextResponse.json({ error: 'Водію заборонено видаляти рейси' }, { status: 403 });
+  }
 
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });

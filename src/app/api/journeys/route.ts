@@ -13,7 +13,17 @@ export async function GET() {
   // ТЗ L3e: авто-перехід статусів рейсів за датою перед видачею.
   await autoAdvanceTrips();
 
+  // ТЗ docx 08.08.26: Водій бачить лише СВОЇ майбутні/текучі поїздки (не завершені).
+  const isDriver = guard.user.role === 'driver_courier';
+  const driverWhere = isDriver
+    ? {
+        status: { in: ['planned', 'in_progress'] as TripStatus[] },
+        OR: [{ assignedCourierId: guard.user.userId }, { secondCourierId: guard.user.userId }],
+      }
+    : {};
+
   const journeys = await prisma.journey.findMany({
+    where: driverWhere,
     include: {
       assignedCourier: { select: { id: true, fullName: true } },
       secondCourier: { select: { id: true, fullName: true } },
@@ -57,6 +67,10 @@ const CYCLIC_WEEKS: Record<string, number> = { '3m': 13, '6m': 26, '1y': 52 };
 export async function POST(request: NextRequest) {
   const guard = await requireRole(LOGISTICS_ROLES);
   if (!guard.ok) return guard.response;
+  // ТЗ docx 08.08.26: Водію заборонено створювати/редагувати/видаляти поїздки.
+  if (guard.user.role === 'driver_courier') {
+    return NextResponse.json({ error: 'Водію заборонено змінювати поїздки' }, { status: 403 });
+  }
   const user = { id: guard.user.userId };
 
   let body;
@@ -154,6 +168,10 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   const guard = await requireRole(LOGISTICS_ROLES);
   if (!guard.ok) return guard.response;
+  // ТЗ docx 08.08.26: Водію заборонено створювати/редагувати/видаляти поїздки.
+  if (guard.user.role === 'driver_courier') {
+    return NextResponse.json({ error: 'Водію заборонено змінювати поїздки' }, { status: 403 });
+  }
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
@@ -233,6 +251,10 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const guard = await requireRole(LOGISTICS_ROLES);
   if (!guard.ok) return guard.response;
+  // ТЗ docx 08.08.26: Водію заборонено створювати/редагувати/видаляти поїздки.
+  if (guard.user.role === 'driver_courier') {
+    return NextResponse.json({ error: 'Водію заборонено змінювати поїздки' }, { status: 403 });
+  }
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');

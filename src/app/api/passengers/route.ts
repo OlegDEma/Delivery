@@ -75,13 +75,18 @@ export async function GET(request: NextRequest) {
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
+  const baseOr = [
+    { departureDate: { gte: new Date() } },
+    { passengers: { some: { deletedAt: null } }, departureDate: { gte: weekAgo } },
+  ];
+  // ТЗ docx 08.08.26: Водій бачить лише рейси СВОЇХ поїздок.
+  const isDriver = guard.user.role === 'driver_courier';
+  const where = isDriver
+    ? { AND: [{ OR: baseOr }, { OR: [{ assignedCourierId: guard.user.userId }, { secondCourierId: guard.user.userId }] }] }
+    : { OR: baseOr };
+
   const trips = await prisma.trip.findMany({
-    where: {
-      OR: [
-        { departureDate: { gte: new Date() } },
-        { passengers: { some: { deletedAt: null } }, departureDate: { gte: weekAgo } },
-      ],
-    },
+    where,
     orderBy: { departureDate: 'asc' },
     select: {
       id: true, direction: true, country: true,

@@ -21,6 +21,12 @@ export async function GET(request: NextRequest) {
   if (status) where.status = status;
   if (country) where.country = country;
 
+  // ТЗ docx 08.08.26: Водій бачить лише СВОЇ майбутні/текучі рейси.
+  if (guard.user.role === 'driver_courier') {
+    where.status = { in: ['planned', 'in_progress'] };
+    where.OR = [{ assignedCourierId: guard.user.userId }, { secondCourierId: guard.user.userId }];
+  }
+
   const trips = await prisma.trip.findMany({
     where,
     include: {
@@ -40,6 +46,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const guard = await requireRole(LOGISTICS_ROLES);
   if (!guard.ok) return guard.response;
+  // ТЗ docx 08.08.26: Водію заборонено створювати рейси.
+  if (guard.user.role === 'driver_courier') {
+    return NextResponse.json({ error: 'Водію заборонено створювати рейси' }, { status: 403 });
+  }
   const userId = guard.user.userId;
 
   let body;
