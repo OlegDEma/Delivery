@@ -164,7 +164,7 @@ export async function PATCH(request: NextRequest) {
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
   // ТЗ docx 08.08.26: ЗАВЕРШЕНУ поїздку (усі рейси завершені) редагувати заборонено.
-  const JOURNEY_EDIT_FIELDS = ['assignedCourierId', 'secondCourierId', 'euArrivalDate', 'euReturnDate', 'endDate', 'vehicleInfo', 'notes'];
+  const JOURNEY_EDIT_FIELDS = ['assignedCourierId', 'secondCourierId', 'euArrivalDate', 'euReturnDate', 'endDate', 'vehicleInfo', 'vehicleId', 'notes'];
   if (JOURNEY_EDIT_FIELDS.some((f) => body[f] !== undefined)) {
     const jTrips = await prisma.trip.findMany({ where: { journeyId: id }, select: { status: true } });
     if (jTrips.length > 0 && jTrips.every((t) => t.status === 'completed')) {
@@ -182,6 +182,18 @@ export async function PATCH(request: NextRequest) {
   if (body.endDate !== undefined) data.endDate = body.endDate ? new Date(body.endDate) : null;
   // ТЗ L3d: транспорт — «друга частина», вноситься при редагуванні поїздки.
   if (body.vehicleInfo !== undefined) data.vehicleInfo = body.vehicleInfo || null;
+  // ТЗ docx 08.08.26: вибір ТЗ зі списку — зберігаємо vehicleId + виводимо vehicleInfo.
+  if (body.vehicleId !== undefined) {
+    if (body.vehicleId) {
+      const v = await prisma.vehicle.findUnique({ where: { id: body.vehicleId }, select: { brand: true, model: true, regNumber: true } });
+      if (!v) return NextResponse.json({ error: 'Транспорт не знайдено' }, { status: 404 });
+      data.vehicleId = body.vehicleId;
+      data.vehicleInfo = `${v.brand} ${v.model} · ${v.regNumber}`;
+    } else {
+      data.vehicleId = null;
+      data.vehicleInfo = null;
+    }
+  }
   if (body.notes !== undefined) data.notes = body.notes || null;
 
   const updated = await prisma.journey.update({
@@ -193,13 +205,19 @@ export async function PATCH(request: NextRequest) {
   // Синк статус/водіїв/транспорту на дочірні рейси.
   if (
     body.status !== undefined || body.assignedCourierId !== undefined ||
-    body.secondCourierId !== undefined || body.vehicleInfo !== undefined
+    body.secondCourierId !== undefined || body.vehicleInfo !== undefined ||
+    body.vehicleId !== undefined
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tripSync: any = {};
     if (body.assignedCourierId !== undefined) tripSync.assignedCourierId = body.assignedCourierId || null;
     if (body.secondCourierId !== undefined) tripSync.secondCourierId = body.secondCourierId || null;
     if (body.vehicleInfo !== undefined) tripSync.vehicleInfo = body.vehicleInfo || null;
+    // ТЗ docx 08.08.26: синк вибраного ТЗ (id + похідний текст) на рейси.
+    if (body.vehicleId !== undefined) {
+      tripSync.vehicleId = data.vehicleId ?? null;
+      tripSync.vehicleInfo = data.vehicleInfo ?? null;
+    }
     if (Object.keys(tripSync).length > 0) {
       await prisma.trip.updateMany({ where: { journeyId: id }, data: tripSync });
     }

@@ -266,6 +266,8 @@ model Journey {
   assignedCourierId  String?    @map("assigned_courier_id") @db.Uuid
   secondCourierId    String?    @map("second_courier_id") @db.Uuid
   vehicleInfo        String?    @map("vehicle_info")
+  // ТЗ docx 08.08.26: транспортний засіб як сутність (окрім legacy-тексту vehicleInfo).
+  vehicleId          String?    @map("vehicle_id") @db.Uuid
   notes              String?
   createdById        String?    @map("created_by") @db.Uuid
   createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz
@@ -274,6 +276,7 @@ model Journey {
   assignedCourier Profile? @relation("JourneyAssignedCourier", fields: [assignedCourierId], references: [id])
   secondCourier   Profile? @relation("JourneySecondCourier", fields: [secondCourierId], references: [id])
   createdBy       Profile? @relation("JourneyCreatedBy", fields: [createdById], references: [id])
+  vehicle         Vehicle? @relation(fields: [vehicleId], references: [id])
   trips           Trip[]
 
   @@index([departureDate])
@@ -292,6 +295,8 @@ model Trip {
   assignedCourierId        String?    @map("assigned_courier_id") @db.Uuid
   secondCourierId          String?    @map("second_courier_id") @db.Uuid
   vehicleInfo              String?    @map("vehicle_info")
+  // ТЗ docx 08.08.26: транспортний засіб як сутність.
+  vehicleId                String?    @map("vehicle_id") @db.Uuid
   maxWeight                Decimal?   @map("max_weight") @db.Decimal(8, 2)
   notes                    String?
   shortNumberCounterNl     Int        @default(0) @map("short_number_counter_nl")
@@ -311,6 +316,7 @@ model Trip {
   secondCourier    Profile?    @relation("TripSecondCourier", fields: [secondCourierId], references: [id])
   createdBy        Profile?    @relation("TripCreatedBy", fields: [createdById], references: [id])
   journey          Journey?    @relation(fields: [journeyId], references: [id])
+  vehicle          Vehicle?    @relation(fields: [vehicleId], references: [id])
   parcels          Parcel[]
   routeTasks       RouteTask[]
   passengers       Passenger[]
@@ -350,6 +356,31 @@ model Passenger {
   @@index([tripId])
   @@index([phoneNormalized])
   @@map("passengers")
+}
+
+/// ТЗ docx 08.08.26: транспортний засіб (для поїздок/рейсів). Доступний для вибору
+/// у випадаючому меню. Зберігаємо документи (ОСЦПВ, Зелена карта, техогляд) з датами.
+model Vehicle {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  brand                  String                                                   // Марка
+  model                  String                                                   // Модель
+  regNumber              String    @map("reg_number")                             // Реєстраційний номер
+  techPassportPhoto      String?   @map("tech_passport_photo")                    // Фото техпаспорта (URL)
+  oscpvStart             DateTime? @map("oscpv_start") @db.Date                   // ОСЦПВ — початок
+  oscpvEnd               DateTime? @map("oscpv_end") @db.Date                     // ОСЦПВ — кінець
+  greenCardStart         DateTime? @map("green_card_start") @db.Date              // Зелена карта — початок
+  greenCardEnd           DateTime? @map("green_card_end") @db.Date                // Зелена карта — кінець
+  techInspectionDate     DateTime? @map("tech_inspection_date") @db.Date          // Техогляд — дата
+  nextTechInspectionDate DateTime? @map("next_tech_inspection_date") @db.Date     // Наступний техогляд
+  notes                  String?
+  isActive               Boolean   @default(true) @map("is_active")
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  journeys Journey[]
+  trips    Trip[]
+
+  @@map("vehicles")
 }
 
 model Parcel {

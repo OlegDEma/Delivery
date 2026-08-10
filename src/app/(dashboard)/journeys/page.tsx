@@ -42,6 +42,7 @@ interface Journey {
   endDate: string | null;
   status: string;
   vehicleInfo: string | null;
+  vehicleId: string | null;
   notes: string | null;
   assignedCourier: { id: string; fullName: string } | null;
   secondCourier: { id: string; fullName: string } | null;
@@ -114,6 +115,8 @@ function pickFocusJourneyIds(list: { id: string; country: string; departureDate:
 export default function JourneysPage() {
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [couriers, setCouriers] = useState<Courier[]>([]);
+  // ТЗ docx 08.08.26: список транспортних засобів для дропдауну у формі поїздки.
+  const [vehicles, setVehicles] = useState<{ id: string; brand: string; model: string; regNumber: string; isActive: boolean }[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -140,7 +143,7 @@ export default function JourneysPage() {
   const [editJourney, setEditJourney] = useState<Journey | null>(null);
   const [editCourier1, setEditCourier1] = useState('');
   const [editCourier2, setEditCourier2] = useState('');
-  const [editVehicle, setEditVehicle] = useState('');
+  const [editVehicleId, setEditVehicleId] = useState('');
   const [editNotes, setEditNotes] = useState('');
   const [editSaving, setEditSaving] = useState(false);
 
@@ -169,6 +172,8 @@ export default function JourneysPage() {
 
   useEffect(() => {
     fetchJourneys();
+    // ТЗ docx 08.08.26: транспортні засоби для дропдауну.
+    fetch('/api/vehicles').then(r => r.ok ? r.json() : []).then((v) => { if (Array.isArray(v)) setVehicles(v); }).catch(() => {});
     fetch('/api/users').then(r => r.ok ? r.json() : []).then((users: Courier[]) => {
       setCouriers(users.filter(u => u.role === 'driver_courier'));
     });
@@ -226,7 +231,7 @@ export default function JourneysPage() {
     setEditJourney(j);
     setEditCourier1(j.assignedCourier?.id || '');
     setEditCourier2(j.secondCourier?.id || '');
-    setEditVehicle(j.vehicleInfo || '');
+    setEditVehicleId(j.vehicleId || '');
     setEditNotes(j.notes || '');
   }
 
@@ -240,7 +245,8 @@ export default function JourneysPage() {
       body: JSON.stringify({
         assignedCourierId: editCourier1 || null,
         secondCourierId: editCourier2 || null,
-        vehicleInfo: editVehicle || null,
+        // ТЗ docx 08.08.26: обираємо ТЗ зі списку (id); vehicleInfo сервер виведе сам.
+        vehicleId: editVehicleId || null,
         notes: editNotes || null,
       }),
     });
@@ -700,7 +706,26 @@ export default function JourneysPage() {
               </div>
               <div>
                 <Label className="text-xs">Транспорт</Label>
-                <Input value={editVehicle} onChange={(e) => setEditVehicle(e.target.value)} placeholder="Мерседес Спринтер АА1234ВВ" />
+                {/* ТЗ docx 08.08.26: вибір ТЗ зі списку зареєстрованих транспортних засобів. */}
+                <Select value={editVehicleId || '_none'} onValueChange={(v) => setEditVehicleId(v === '_none' ? '' : (v ?? ''))}>
+                  <SelectTrigger>
+                    <SelectValue>
+                      {(() => {
+                        const v = vehicles.find(x => x.id === editVehicleId);
+                        return v ? `${v.brand} ${v.model} · ${v.regNumber}` : 'Не вибрано';
+                      })()}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">Не вибрано</SelectItem>
+                    {vehicles.filter(v => v.isActive || v.id === editVehicleId).map(v => (
+                      <SelectItem key={v.id} value={v.id}>{v.brand} {v.model} · {v.regNumber}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {vehicles.length === 0 && (
+                  <p className="text-[10px] text-gray-400 mt-0.5">Додайте транспорт у розділі «Транспортні засоби».</p>
+                )}
               </div>
               <div>
                 <Label className="text-xs">Примітки</Label>

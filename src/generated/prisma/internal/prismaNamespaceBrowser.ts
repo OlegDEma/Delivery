@@ -57,6 +57,7 @@ export const ModelName = {
   Journey: 'Journey',
   Trip: 'Trip',
   Passenger: 'Passenger',
+  Vehicle: 'Vehicle',
   Parcel: 'Parcel',
   ParcelPlace: 'ParcelPlace',
   ParcelStatusHistory: 'ParcelStatusHistory',
@@ -161,6 +162,7 @@ export const JourneyScalarFieldEnum = {
   assignedCourierId: 'assignedCourierId',
   secondCourierId: 'secondCourierId',
   vehicleInfo: 'vehicleInfo',
+  vehicleId: 'vehicleId',
   notes: 'notes',
   createdById: 'createdById',
   createdAt: 'createdAt',
@@ -181,6 +183,7 @@ export const TripScalarFieldEnum = {
   assignedCourierId: 'assignedCourierId',
   secondCourierId: 'secondCourierId',
   vehicleInfo: 'vehicleInfo',
+  vehicleId: 'vehicleId',
   maxWeight: 'maxWeight',
   notes: 'notes',
   shortNumberCounterNl: 'shortNumberCounterNl',
@@ -218,6 +221,27 @@ export const PassengerScalarFieldEnum = {
 } as const
 
 export type PassengerScalarFieldEnum = (typeof PassengerScalarFieldEnum)[keyof typeof PassengerScalarFieldEnum]
+
+
+export const VehicleScalarFieldEnum = {
+  id: 'id',
+  brand: 'brand',
+  model: 'model',
+  regNumber: 'regNumber',
+  techPassportPhoto: 'techPassportPhoto',
+  oscpvStart: 'oscpvStart',
+  oscpvEnd: 'oscpvEnd',
+  greenCardStart: 'greenCardStart',
+  greenCardEnd: 'greenCardEnd',
+  techInspectionDate: 'techInspectionDate',
+  nextTechInspectionDate: 'nextTechInspectionDate',
+  notes: 'notes',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VehicleScalarFieldEnum = (typeof VehicleScalarFieldEnum)[keyof typeof VehicleScalarFieldEnum]
 
 
 export const ParcelScalarFieldEnum = {

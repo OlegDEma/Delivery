@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Home, ScanLine, Package, Truck, Users,
-  Route, Calendar, Map, Warehouse,
+  Route, Calendar, Map, Warehouse, Bus,
   Wallet, AlertCircle, BarChart3, FileText,
   UserCog, Tags, MapPin,
   Users2, ListChecks,
@@ -57,6 +57,8 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Пункти збору', href: '/collection-points', icon: MapPin, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
       { label: 'Календар', href: '/calendar', icon: Calendar, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
       { label: 'Склад', href: '/warehouse', icon: Warehouse, roles: ['super_admin', 'admin', 'warehouse_worker'] },
+      // ТЗ docx 08.08.26: вкладка «Транспортні засоби» у Логістиці (Суперадмін).
+      { label: 'Транспортні засоби', href: '/admin/vehicles', icon: Bus, roles: ['super_admin'] },
     ],
   },
   {

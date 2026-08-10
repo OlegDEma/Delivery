@@ -50,6 +50,12 @@ export type Trip = Prisma.TripModel
  */
 export type Passenger = Prisma.PassengerModel
 /**
+ * Model Vehicle
+ * ТЗ docx 08.08.26: транспортний засіб (для поїздок/рейсів). Доступний для вибору
+ * у випадаючому меню. Зберігаємо документи (ОСЦПВ, Зелена карта, техогляд) з датами.
+ */
+export type Vehicle = Prisma.VehicleModel
+/**
  * Model Parcel
  * 
  */
