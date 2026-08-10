@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDate, formatDateWithWeekday } from '@/lib/utils/format';
@@ -121,6 +122,12 @@ export default function RoutesPage() {
   const [selectedCourierId, setSelectedCourierId] = useState('');
   const [selectedParcelIds, setSelectedParcelIds] = useState<Set<string>>(new Set());
   const [assigning, setAssigning] = useState(false);
+  // ТЗ docx 08.08.26: Маршрутні листи за датами (RouteTask як маркер «посилка на листі дати X»).
+  const [routeTasks, setRouteTasks] = useState<{ id: string; parcelId: string | null; taskDate: string }[]>([]);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetDate, setSheetDate] = useState('');
+  const [sheetSel, setSheetSel] = useState<Set<string>>(new Set());
+  const [creatingSheet, setCreatingSheet] = useState(false);
 
   // Завантажуємо поїздки; дефолт — ?journeyId з URL або найближча до сьогодні.
   useEffect(() => {
@@ -154,15 +161,20 @@ export default function RoutesPage() {
   useEffect(() => {
     if (!selectedJourneyId) return;
     let active = true;
+    // ТЗ docx 08.08.26: задачі маршрутних листів (за датами) цієї поїздки.
+    fetch(`/api/route-tasks?journeyId=${selectedJourneyId}`)
+      .then(r => (r.ok ? r.json() : []))
+      .then(d => { if (active && Array.isArray(d)) setRouteTasks(d); })
+      .catch(() => {});
     fetch(`/api/parcels?journeyId=${selectedJourneyId}&limit=100`)
       .then(r => (r.ok ? r.json() : null))
       .then(data => {
         if (!active) return;
         if (data?.parcels) {
-          // ТЗ docx 26.07.26: у маршрутний лист не потрапляють «Створена» —
-          // лише прийняті до перевезення посилки. Сортуємо за індексом сторони
-          // в країні призначення.
-          const sorted = (data.parcels as RouteItem[]).filter(p => p.status !== 'draft').sort((a, b) => {
+          // ТЗ docx 08.08.26: у Маршрутному листі водій бачить УСІ посилки поїздки —
+          // незалежно від статусу (раніше «Створена» ховались). Сортуємо за індексом
+          // сторони в країні призначення.
+          const sorted = (data.parcels as RouteItem[]).slice().sort((a, b) => {
             const ca = euDestParty(a).addr?.postalCode || '';
             const cb = euDestParty(b).addr?.postalCode || '';
             return ca.localeCompare(cb);
@@ -227,6 +239,29 @@ export default function RoutesPage() {
     setReload(n => n + 1);
   }
 
+  // ТЗ docx 08.08.26: створити Маршрутний лист на дату — додати обрані посилки.
+  async function handleCreateSheet() {
+    if (!sheetDate || sheetSel.size === 0) return;
+    setCreatingSheet(true);
+    const res = await fetch('/api/route-tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ taskDate: sheetDate, parcelIds: Array.from(sheetSel) }),
+    });
+    setCreatingSheet(false);
+    if (res.ok) {
+      setSheetOpen(false);
+      setSheetSel(new Set());
+      setSheetDate('');
+      setReload(n => n + 1);
+    }
+  }
+
+  async function handleRemoveFromSheet(taskId: string) {
+    await fetch(`/api/route-tasks/${taskId}`, { method: 'DELETE' });
+    setReload(n => n + 1);
+  }
+
   function updateTaskStatus(parcelId: string, status: TaskStatus) {
     setTaskStatuses(prev => ({ ...prev, [parcelId]: status }));
     fetch(`/api/parcels/${parcelId}`, {
@@ -260,6 +295,22 @@ export default function RoutesPage() {
 
   const TASK_LABELS = TASK_STATUS_LABELS;
 
+  // ТЗ docx 08.08.26: групуємо задачі за ДАТОЮ — кожна дата = окремий Маршрутний лист.
+  const parcelById = new Map(parcels.map(p => [p.id, p]));
+  const sheets = (() => {
+    const map = new Map<string, typeof routeTasks>();
+    for (const t of routeTasks) {
+      const key = (t.taskDate || '').slice(0, 10);
+      if (!key) continue;
+      const arr = map.get(key) ?? [];
+      arr.push(t);
+      map.set(key, arr);
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, tasks]) => ({ date, tasks }));
+  })();
+
   const selectedJourney = journeys.find(j => j.id === selectedJourneyId) || null;
   // ТЗ docx 21.07.26 (п.3): показуємо саме «прізвища водіїв». Profile має лише
   // fullName у форматі «Ім'я Прізвище» (напр. «Руслан Волошин»), тож прізвище —
@@ -282,16 +333,26 @@ export default function RoutesPage() {
               номер машини (саме в цьому порядку). Видимі й у друку. */}
           {selectedJourney && (
             <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+              {/* ТЗ docx 08.08.26: країни поїздки (UA → країна → UA). */}
               <span>
-                <span className="text-gray-500">Дата поїздки:</span>{' '}
-                <span className="font-medium">{formatDateWithWeekday(selectedJourney.departureDate)}</span>
+                <span className="text-gray-500">Країни:</span>{' '}
+                <span className="font-medium">UA → {COUNTRY_LABELS[selectedJourney.country as CountryCode] || selectedJourney.country} → UA</span>
+              </span>
+              {/* ТЗ docx 08.08.26: дати поїздки — виїзд → повернення. */}
+              <span>
+                <span className="text-gray-500">Поїздка:</span>{' '}
+                <span className="font-medium">
+                  {formatDateWithWeekday(selectedJourney.departureDate)}
+                  {(selectedJourney.endDate || selectedJourney.euReturnDate) &&
+                    ` → ${formatDateWithWeekday((selectedJourney.endDate || selectedJourney.euReturnDate)!)}`}
+                </span>
               </span>
               <span>
                 <span className="text-gray-500">Водії:</span>{' '}
                 <span className="font-medium">{drivers || '—'}</span>
               </span>
               <span>
-                <span className="text-gray-500">Машина:</span>{' '}
+                <span className="text-gray-500">Транспорт:</span>{' '}
                 <span className="font-medium">{selectedJourney.vehicleInfo || '—'}</span>
               </span>
             </div>
@@ -345,6 +406,103 @@ export default function RoutesPage() {
           </Button>
         </div>
       </div>
+
+      {/* ТЗ docx 08.08.26: Маршрутні листи за датами — кілька листів на поїздку.
+          Відкритий лист показує країну/дату/водія/ТЗ + свої адреси. */}
+      {selectedJourney && (
+        <div className="mb-4 print:hidden">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold flex items-center gap-1.5">📋 Маршрутні листи (за датами)</h2>
+            <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
+              <DialogTrigger render={<Button size="sm" variant="outline">+ Створити Маршрутний лист</Button>} />
+              <DialogContent className="max-h-[90vh] overflow-y-auto">
+                <DialogHeader><DialogTitle>Новий Маршрутний лист</DialogTitle></DialogHeader>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-gray-500">Дата листа</label>
+                    <Input type="date" value={sheetDate} onChange={(e) => setSheetDate(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Адреси (посилки) на цю дату ({sheetSel.size})</label>
+                    <div className="mt-1 max-h-72 overflow-y-auto border rounded divide-y">
+                      {parcels.map(p => {
+                        const d = euDestParty(p);
+                        return (
+                          <label key={p.id} className="flex items-center gap-2 p-2 text-sm cursor-pointer hover:bg-gray-50">
+                            <Checkbox
+                              checked={sheetSel.has(p.id)}
+                              onCheckedChange={() => setSheetSel(prev => {
+                                const n = new Set(prev);
+                                if (n.has(p.id)) n.delete(p.id); else n.add(p.id);
+                                return n;
+                              })}
+                            />
+                            <span className="font-mono text-xs shrink-0">{p.internalNumber}</span>
+                            <span className="truncate">{d.name}{d.addr?.city ? ` · ${d.addr.city}` : ''}</span>
+                          </label>
+                        );
+                      })}
+                      {parcels.length === 0 && <div className="p-3 text-xs text-gray-400">Немає посилок у поїздці</div>}
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" onClick={() => setSheetOpen(false)}>Скасувати</Button>
+                    <Button onClick={handleCreateSheet} disabled={!sheetDate || sheetSel.size === 0 || creatingSheet}>
+                      {creatingSheet ? 'Створення…' : `Створити (${sheetSel.size})`}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+          {sheets.length === 0 ? (
+            <div className="text-xs text-gray-400 border rounded-lg p-3 bg-gray-50">
+              Ще немає створених листів. Натисніть «Створити Маршрутний лист» і додайте адреси на конкретну дату.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {sheets.map(sheet => (
+                <div key={sheet.date} className="border rounded-lg bg-white overflow-hidden">
+                  <div className="px-3 py-2 border-b bg-gray-50 flex items-center justify-between text-sm gap-2">
+                    <div className="min-w-0">
+                      <span className="font-semibold">Лист на {formatDateWithWeekday(sheet.date)}</span>
+                      <span className="ml-2 text-gray-500">
+                        · UA → {COUNTRY_LABELS[selectedJourney.country as CountryCode] || selectedJourney.country}
+                        · {drivers || '—'} · {selectedJourney.vehicleInfo || '—'}
+                      </span>
+                    </div>
+                    <span className="text-xs text-gray-400 shrink-0">{sheet.tasks.length} адрес</span>
+                  </div>
+                  <div className="divide-y">
+                    {sheet.tasks.map(t => {
+                      const p = t.parcelId ? parcelById.get(t.parcelId) : null;
+                      const d = p ? euDestParty(p) : null;
+                      return (
+                        <div key={t.id} className="px-3 py-2 flex items-center justify-between gap-2 text-sm">
+                          <div className="min-w-0">
+                            {p ? (
+                              <>
+                                <Link href={`/parcels/${p.id}`} className="font-mono text-xs hover:text-blue-600">{p.internalNumber}</Link>
+                                <span className="ml-2">{d?.name}</span>
+                                {d?.addr && (
+                                  <span className="text-xs text-gray-400 ml-1">
+                                    · {d.addr.postalCode ? `${d.addr.postalCode} ` : ''}{d.addr.city}{d.addr.street ? `, ${d.addr.street}` : ''}
+                                  </span>
+                                )}
+                              </>
+                            ) : <span className="text-gray-400 text-xs">Посилку прибрано з поїздки</span>}
+                          </div>
+                          <button type="button" onClick={() => handleRemoveFromSheet(t.id)} className="text-xs text-red-500 hover:text-red-700 shrink-0">Прибрати</button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <div className="text-center py-12 text-gray-500">Завантаження...</div>
