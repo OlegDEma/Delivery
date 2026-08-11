@@ -176,11 +176,11 @@ export async function GET(request: NextRequest) {
   } else if (tripId) {
     where.tripId = tripId;
   }
-  // ТЗ docx 08.08.26 (розд. «Водій», п.2): для Водія «Мої посилки» = ВСІ посилки його
-  // поїздки (обидва кур'єри, клієнтські, будь-який статус). Тому courierId=self від Водія
-  // НЕ має додатково звужувати до assignedCourierId=self — інакше другий кур'єр поїздки
-  // бачив би 0. Скоуп нижче (driverScope: tripId ∈ моїх рейсів) уже коректно обмежує.
-  // Для НЕ-Водія (працівник/касир) — стара поведінка звуження по кур'єру.
+  // ТЗ docx 08.08.26 (розд. «Водій», п.2): «Мої посилки» водія = ЛИШЕ посилки його
+  // поїздки (рейсів) — обидва кур'єри, клієнтські, будь-який статус, БЕЗ власних
+  // поза-поїздкових. Тому courierId=self від Водія не звужуємо до assignedCourierId=self;
+  // натомість нижче (у блоці Водія) ставимо жорсткий скоуп tripId ∈ його рейси.
+  // Для НЕ-Водія (працівник/касир, звіти) — стара поведінка звуження по кур'єру.
   const narrowByCourier = courierId && !(currentRole === ROLES.DRIVER_COURIER && courierId === currentUserId);
   if (narrowByCourier) where.assignedCourierId = courierId;
   if (unassigned === '1') where.assignedCourierId = null;
@@ -207,6 +207,13 @@ export async function GET(request: NextRequest) {
       select: { id: true },
     });
     const myTripIds = myTrips.map(t => t.id);
+
+    // ТЗ р.211: «Мої посилки» (courierId=self) — ЛИШЕ посилки поїздки = посилки рейсів
+    // водія (порожньо, якщо рейсів немає). Не чіпаємо, якщо вже задано journeyId/tripId.
+    if (courierId === currentUserId && where.tripId === undefined) {
+      where.tripId = { in: myTripIds };
+    }
+
     driverScope.push(
       { assignedCourierId: currentUserId },
       { createdById: currentUserId },
