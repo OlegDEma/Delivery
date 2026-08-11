@@ -103,10 +103,18 @@ export default function RoutesPage() {
   const [reschedDates, setReschedDates] = useState<Record<string, string>>({});
   // ТЗ docx 08.08.26 (v12): вибір адрес у загальному списку → для нового Маршрутного листа.
   const [selectedParcelIds, setSelectedParcelIds] = useState<Set<string>>(new Set());
-  // ТЗ docx 08.08.26: Маршрутні листи за датами (RouteTask як маркер «посилка на листі дати X»).
-  const [routeTasks, setRouteTasks] = useState<{ id: string; parcelId: string | null; taskDate: string }[]>([]);
+  // ТЗ docx 08.08.26 (v12): RouteTask — адреса на маршруті (посилка або ручна).
+  const [routeTasks, setRouteTasks] = useState<{
+    id: string; parcelId: string | null; taskDate: string | null;
+    addressText: string | null; postalCode: string | null;
+    manualName: string | null; manualPhone: string | null; manualDirection: string | null; manualCity: string | null;
+  }[]>([]);
   const [sheetDate, setSheetDate] = useState('');
   const [creatingSheet, setCreatingSheet] = useState(false);
+  // ТЗ docx 08.08.26 (v12): «Додати адресу» — ручний ввід довільної адреси.
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manualForm, setManualForm] = useState({ addressText: '', postalCode: '', manualCity: '', manualName: '', manualPhone: '', manualDirection: '' });
+  const [addingManual, setAddingManual] = useState(false);
   // ТЗ docx 08.08.26 (v12): групування списку адрес — за номером/індексом/містом.
   const [groupMode, setGroupMode] = useState<'number' | 'postal' | 'city'>('number');
 
@@ -197,19 +205,40 @@ export default function RoutesPage() {
   }
 
   // ТЗ docx 08.08.26 (v12): «Створити Маршрутний лист» — відмічені у списку адреси
-  // переміщуються у лист на обрану дату (зникають із загального списку).
+  // (посилки + ручні) переміщуються у лист на обрану дату (зникають із загального списку).
   async function handleCreateSheet() {
     if (!sheetDate || selectedParcelIds.size === 0) return;
+    // Ручні адреси у виборі позначені префіксом «m:» (task id), решта — id посилок.
+    const sel = Array.from(selectedParcelIds);
+    const parcelIds = sel.filter(id => !id.startsWith('m:'));
+    const taskIds = sel.filter(id => id.startsWith('m:')).map(id => id.slice(2));
     setCreatingSheet(true);
     const res = await fetch('/api/route-tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ taskDate: sheetDate, parcelIds: Array.from(selectedParcelIds) }),
+      body: JSON.stringify({ taskDate: sheetDate, parcelIds, taskIds }),
     });
     setCreatingSheet(false);
     if (res.ok) {
       setSelectedParcelIds(new Set());
       setSheetDate('');
+      setReload(n => n + 1);
+    }
+  }
+
+  // ТЗ docx 08.08.26 (v12): додати довільну адресу вручну (без посилки) у загальний список.
+  async function handleAddManual() {
+    if (!selectedJourneyId || !manualForm.addressText.trim()) return;
+    setAddingManual(true);
+    const res = await fetch('/api/route-tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ manual: true, journeyId: selectedJourneyId, ...manualForm }),
+    });
+    setAddingManual(false);
+    if (res.ok) {
+      setManualOpen(false);
+      setManualForm({ addressText: '', postalCode: '', manualCity: '', manualName: '', manualPhone: '', manualDirection: '' });
       setReload(n => n + 1);
     }
   }
@@ -271,6 +300,8 @@ export default function RoutesPage() {
     routeTasks.filter(t => t.taskDate && t.parcelId).map(t => t.parcelId as string),
   );
   const generalParcels = parcels.filter(p => !sheetedParcelIds.has(p.id));
+  // ТЗ docx 08.08.26 (v12): ручні адреси (без посилки), ще не переміщені в лист (taskDate=null).
+  const manualGeneral = routeTasks.filter(t => !t.parcelId && !t.taskDate);
 
   // ТЗ docx 08.08.26 (v12): групування загального списку за номером/індексом/містом.
   const groupedGeneral = (() => {
@@ -439,14 +470,15 @@ export default function RoutesPage() {
             ? 'Немає активних поїздок. Створіть поїздку у розділі «Поїздки».'
             : 'Виберіть поїздку, щоб побачити маршрутний лист.'}
         </div>
-      ) : generalParcels.length === 0 ? (
-        <div className="text-center py-8 text-gray-500 border rounded-lg bg-white">
-          {parcels.length === 0 ? 'У цій поїздці ще немає посилок' : 'Усі адреси поїздки вже у Маршрутних листах'}
-        </div>
       ) : (
-        // ТЗ docx 08.08.26 (v12): загальний список адрес (ще не в листах). Кожен запис —
-        // 2 рядки: [№ + адреса в країні перебування + чекбокс справа] / [клієнт · тел · напрямок].
+        // ТЗ docx 08.08.26 (v12): загальний список адрес (посилки + ручні), ще не в листах.
+        // Кожен запис — 2 рядки: [№ + адреса в країні перебування + чекбокс справа] / [клієнт · тел · напрямок].
         <div className="space-y-3">
+          {generalParcels.length === 0 && manualGeneral.length === 0 && (
+            <div className="text-center py-8 text-gray-500 border rounded-lg bg-white">
+              {parcels.length === 0 ? 'У цій поїздці ще немає посилок' : 'Усі адреси поїздки вже у Маршрутних листах'}
+            </div>
+          )}
           {groupedGeneral.map((grp, gi) => (
             <div key={grp.key || `g${gi}`}>
               {grp.key && <div className="text-xs font-semibold text-gray-500 mb-1 px-1">{groupMode === 'postal' ? 'Індекс' : 'Місто'}: {grp.key}</div>}
@@ -479,6 +511,56 @@ export default function RoutesPage() {
               </div>
             </div>
           ))}
+
+          {/* ТЗ docx 08.08.26 (v12): ручні адреси (додані Водієм) у загальному списку. */}
+          {manualGeneral.length > 0 && (
+            <div className="bg-white rounded-lg border divide-y">
+              {manualGeneral.map((t, idx) => {
+                const selId = `m:${t.id}`;
+                return (
+                  <div key={t.id} className="px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-amber-500 font-mono shrink-0">✎{idx + 1}.</span>
+                      <Link href="/parcels/new" className="min-w-0 flex-1 text-sm truncate hover:text-blue-600">
+                        {t.postalCode ? `${t.postalCode} ` : ''}{t.manualCity || ''}{t.addressText ? `${t.manualCity ? ', ' : ''}${t.addressText}` : ''}
+                      </Link>
+                      <div className="shrink-0">
+                        <Checkbox checked={selectedParcelIds.has(selId)} onCheckedChange={() => toggleParcelSelection(selId)} />
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5 ml-5 flex items-center gap-1">
+                      <span className="text-amber-600">Ручна адреса</span>
+                      {t.manualName ? ` · ${t.manualName}` : ''}{t.manualPhone ? ` · ${t.manualPhone}` : ''}{t.manualDirection ? ` · ${t.manualDirection}` : ''}
+                      <button type="button" onClick={() => handleRemoveFromSheet(t.id)} className="ml-auto text-red-500 hover:text-red-700 print:hidden">Видалити</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ТЗ docx 08.08.26 (v12): «Додати адресу» — завжди під останнім записом. */}
+          {!manualOpen ? (
+            <Button variant="outline" size="sm" onClick={() => setManualOpen(true)} className="print:hidden">+ Додати адресу</Button>
+          ) : (
+            <div className="border rounded-lg p-3 bg-amber-50/40 space-y-2 print:hidden">
+              <div className="text-xs font-semibold text-gray-600">Нова адреса на маршруті (вручну або copy-paste)</div>
+              <Input placeholder="Адреса: індекс, місто, вулиця, будинок" value={manualForm.addressText} onChange={(e) => setManualForm(f => ({ ...f, addressText: e.target.value }))} className="h-8 text-sm" />
+              <div className="grid grid-cols-2 gap-2">
+                <Input placeholder="Індекс" value={manualForm.postalCode} onChange={(e) => setManualForm(f => ({ ...f, postalCode: e.target.value }))} className="h-8 text-sm" />
+                <Input placeholder="Місто" value={manualForm.manualCity} onChange={(e) => setManualForm(f => ({ ...f, manualCity: e.target.value }))} className="h-8 text-sm" />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <Input placeholder="Клієнт (необовʼязково)" value={manualForm.manualName} onChange={(e) => setManualForm(f => ({ ...f, manualName: e.target.value }))} className="h-8 text-sm" />
+                <Input placeholder="Телефон" value={manualForm.manualPhone} onChange={(e) => setManualForm(f => ({ ...f, manualPhone: e.target.value }))} className="h-8 text-sm" />
+                <Input placeholder="Напрямок (UA-NL)" value={manualForm.manualDirection} onChange={(e) => setManualForm(f => ({ ...f, manualDirection: e.target.value }))} className="h-8 text-sm" />
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleAddManual} disabled={!manualForm.addressText.trim() || addingManual}>{addingManual ? 'Додавання…' : 'Додати'}</Button>
+                <Button size="sm" variant="ghost" onClick={() => setManualOpen(false)}>Скасувати</Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -44,6 +44,10 @@ export type RouteTaskMinAggregateOutputType = {
   addressId: string | null
   addressText: string | null
   postalCode: string | null
+  manualName: string | null
+  manualPhone: string | null
+  manualDirection: string | null
+  manualCity: string | null
   assignedCourierId: string | null
   status: $Enums.RouteTaskStatus | null
   rescheduleDate: Date | null
@@ -66,6 +70,10 @@ export type RouteTaskMaxAggregateOutputType = {
   addressId: string | null
   addressText: string | null
   postalCode: string | null
+  manualName: string | null
+  manualPhone: string | null
+  manualDirection: string | null
+  manualCity: string | null
   assignedCourierId: string | null
   status: $Enums.RouteTaskStatus | null
   rescheduleDate: Date | null
@@ -88,6 +96,10 @@ export type RouteTaskCountAggregateOutputType = {
   addressId: number
   addressText: number
   postalCode: number
+  manualName: number
+  manualPhone: number
+  manualDirection: number
+  manualCity: number
   assignedCourierId: number
   status: number
   rescheduleDate: number
@@ -120,6 +132,10 @@ export type RouteTaskMinAggregateInputType = {
   addressId?: true
   addressText?: true
   postalCode?: true
+  manualName?: true
+  manualPhone?: true
+  manualDirection?: true
+  manualCity?: true
   assignedCourierId?: true
   status?: true
   rescheduleDate?: true
@@ -142,6 +158,10 @@ export type RouteTaskMaxAggregateInputType = {
   addressId?: true
   addressText?: true
   postalCode?: true
+  manualName?: true
+  manualPhone?: true
+  manualDirection?: true
+  manualCity?: true
   assignedCourierId?: true
   status?: true
   rescheduleDate?: true
@@ -164,6 +184,10 @@ export type RouteTaskCountAggregateInputType = {
   addressId?: true
   addressText?: true
   postalCode?: true
+  manualName?: true
+  manualPhone?: true
+  manualDirection?: true
+  manualCity?: true
   assignedCourierId?: true
   status?: true
   rescheduleDate?: true
@@ -268,11 +292,15 @@ export type RouteTaskGroupByOutputType = {
   tripId: string
   parcelId: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date
+  taskDate: Date | null
   clientId: string | null
   addressId: string | null
   addressText: string | null
   postalCode: string | null
+  manualName: string | null
+  manualPhone: string | null
+  manualDirection: string | null
+  manualCity: string | null
   assignedCourierId: string | null
   status: $Enums.RouteTaskStatus
   rescheduleDate: Date | null
@@ -313,11 +341,15 @@ export type RouteTaskWhereInput = {
   tripId?: Prisma.UuidFilter<"RouteTask"> | string
   parcelId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   taskType?: Prisma.EnumRouteTaskTypeFilter<"RouteTask"> | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFilter<"RouteTask"> | Date | string
+  taskDate?: Prisma.DateTimeNullableFilter<"RouteTask"> | Date | string | null
   clientId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressText?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualPhone?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualDirection?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualCity?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   assignedCourierId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   status?: Prisma.EnumRouteTaskStatusFilter<"RouteTask"> | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.DateTimeNullableFilter<"RouteTask"> | Date | string | null
@@ -340,11 +372,15 @@ export type RouteTaskOrderByWithRelationInput = {
   tripId?: Prisma.SortOrder
   parcelId?: Prisma.SortOrderInput | Prisma.SortOrder
   taskType?: Prisma.SortOrder
-  taskDate?: Prisma.SortOrder
+  taskDate?: Prisma.SortOrderInput | Prisma.SortOrder
   clientId?: Prisma.SortOrderInput | Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
   addressText?: Prisma.SortOrderInput | Prisma.SortOrder
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualName?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualDirection?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualCity?: Prisma.SortOrderInput | Prisma.SortOrder
   assignedCourierId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   rescheduleDate?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -370,11 +406,15 @@ export type RouteTaskWhereUniqueInput = Prisma.AtLeast<{
   tripId?: Prisma.UuidFilter<"RouteTask"> | string
   parcelId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   taskType?: Prisma.EnumRouteTaskTypeFilter<"RouteTask"> | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFilter<"RouteTask"> | Date | string
+  taskDate?: Prisma.DateTimeNullableFilter<"RouteTask"> | Date | string | null
   clientId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressText?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualPhone?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualDirection?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualCity?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   assignedCourierId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   status?: Prisma.EnumRouteTaskStatusFilter<"RouteTask"> | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.DateTimeNullableFilter<"RouteTask"> | Date | string | null
@@ -397,11 +437,15 @@ export type RouteTaskOrderByWithAggregationInput = {
   tripId?: Prisma.SortOrder
   parcelId?: Prisma.SortOrderInput | Prisma.SortOrder
   taskType?: Prisma.SortOrder
-  taskDate?: Prisma.SortOrder
+  taskDate?: Prisma.SortOrderInput | Prisma.SortOrder
   clientId?: Prisma.SortOrderInput | Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
   addressText?: Prisma.SortOrderInput | Prisma.SortOrder
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualName?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualDirection?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualCity?: Prisma.SortOrderInput | Prisma.SortOrder
   assignedCourierId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   rescheduleDate?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -427,11 +471,15 @@ export type RouteTaskScalarWhereWithAggregatesInput = {
   tripId?: Prisma.UuidWithAggregatesFilter<"RouteTask"> | string
   parcelId?: Prisma.UuidNullableWithAggregatesFilter<"RouteTask"> | string | null
   taskType?: Prisma.EnumRouteTaskTypeWithAggregatesFilter<"RouteTask"> | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeWithAggregatesFilter<"RouteTask"> | Date | string
+  taskDate?: Prisma.DateTimeNullableWithAggregatesFilter<"RouteTask"> | Date | string | null
   clientId?: Prisma.UuidNullableWithAggregatesFilter<"RouteTask"> | string | null
   addressId?: Prisma.UuidNullableWithAggregatesFilter<"RouteTask"> | string | null
   addressText?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
+  manualName?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
+  manualPhone?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
+  manualDirection?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
+  manualCity?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
   assignedCourierId?: Prisma.UuidNullableWithAggregatesFilter<"RouteTask"> | string | null
   status?: Prisma.EnumRouteTaskStatusWithAggregatesFilter<"RouteTask"> | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.DateTimeNullableWithAggregatesFilter<"RouteTask"> | Date | string | null
@@ -447,9 +495,13 @@ export type RouteTaskScalarWhereWithAggregatesInput = {
 export type RouteTaskCreateInput = {
   id?: string
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
   failureReason?: string | null
@@ -471,11 +523,15 @@ export type RouteTaskUncheckedCreateInput = {
   tripId: string
   parcelId?: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   assignedCourierId?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
@@ -491,9 +547,13 @@ export type RouteTaskUncheckedCreateInput = {
 export type RouteTaskUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -515,11 +575,15 @@ export type RouteTaskUncheckedUpdateInput = {
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -537,11 +601,15 @@ export type RouteTaskCreateManyInput = {
   tripId: string
   parcelId?: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   assignedCourierId?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
@@ -557,9 +625,13 @@ export type RouteTaskCreateManyInput = {
 export type RouteTaskUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -576,11 +648,15 @@ export type RouteTaskUncheckedUpdateManyInput = {
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -613,6 +689,10 @@ export type RouteTaskCountOrderByAggregateInput = {
   addressId?: Prisma.SortOrder
   addressText?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
+  manualName?: Prisma.SortOrder
+  manualPhone?: Prisma.SortOrder
+  manualDirection?: Prisma.SortOrder
+  manualCity?: Prisma.SortOrder
   assignedCourierId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   rescheduleDate?: Prisma.SortOrder
@@ -639,6 +719,10 @@ export type RouteTaskMaxOrderByAggregateInput = {
   addressId?: Prisma.SortOrder
   addressText?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
+  manualName?: Prisma.SortOrder
+  manualPhone?: Prisma.SortOrder
+  manualDirection?: Prisma.SortOrder
+  manualCity?: Prisma.SortOrder
   assignedCourierId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   rescheduleDate?: Prisma.SortOrder
@@ -661,6 +745,10 @@ export type RouteTaskMinOrderByAggregateInput = {
   addressId?: Prisma.SortOrder
   addressText?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
+  manualName?: Prisma.SortOrder
+  manualPhone?: Prisma.SortOrder
+  manualDirection?: Prisma.SortOrder
+  manualCity?: Prisma.SortOrder
   assignedCourierId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   rescheduleDate?: Prisma.SortOrder
@@ -898,9 +986,13 @@ export type EnumRouteTaskStatusFieldUpdateOperationsInput = {
 export type RouteTaskCreateWithoutAssignedCourierInput = {
   id?: string
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
   failureReason?: string | null
@@ -921,11 +1013,15 @@ export type RouteTaskUncheckedCreateWithoutAssignedCourierInput = {
   tripId: string
   parcelId?: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
   failureReason?: string | null
@@ -971,11 +1067,15 @@ export type RouteTaskScalarWhereInput = {
   tripId?: Prisma.UuidFilter<"RouteTask"> | string
   parcelId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   taskType?: Prisma.EnumRouteTaskTypeFilter<"RouteTask"> | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFilter<"RouteTask"> | Date | string
+  taskDate?: Prisma.DateTimeNullableFilter<"RouteTask"> | Date | string | null
   clientId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressText?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualPhone?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualDirection?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualCity?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   assignedCourierId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   status?: Prisma.EnumRouteTaskStatusFilter<"RouteTask"> | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.DateTimeNullableFilter<"RouteTask"> | Date | string | null
@@ -991,9 +1091,13 @@ export type RouteTaskScalarWhereInput = {
 export type RouteTaskCreateWithoutClientInput = {
   id?: string
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
   failureReason?: string | null
@@ -1014,10 +1118,14 @@ export type RouteTaskUncheckedCreateWithoutClientInput = {
   tripId: string
   parcelId?: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   addressId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   assignedCourierId?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
@@ -1059,9 +1167,13 @@ export type RouteTaskUpdateManyWithWhereWithoutClientInput = {
 export type RouteTaskCreateWithoutAddressInput = {
   id?: string
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
   failureReason?: string | null
@@ -1082,10 +1194,14 @@ export type RouteTaskUncheckedCreateWithoutAddressInput = {
   tripId: string
   parcelId?: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   clientId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   assignedCourierId?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
@@ -1127,9 +1243,13 @@ export type RouteTaskUpdateManyWithWhereWithoutAddressInput = {
 export type RouteTaskCreateWithoutTripInput = {
   id?: string
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
   failureReason?: string | null
@@ -1149,11 +1269,15 @@ export type RouteTaskUncheckedCreateWithoutTripInput = {
   id?: string
   parcelId?: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   assignedCourierId?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
@@ -1195,9 +1319,13 @@ export type RouteTaskUpdateManyWithWhereWithoutTripInput = {
 export type RouteTaskCreateWithoutParcelInput = {
   id?: string
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
   failureReason?: string | null
@@ -1217,11 +1345,15 @@ export type RouteTaskUncheckedCreateWithoutParcelInput = {
   id?: string
   tripId: string
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   assignedCourierId?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
@@ -1265,11 +1397,15 @@ export type RouteTaskCreateManyAssignedCourierInput = {
   tripId: string
   parcelId?: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
   failureReason?: string | null
@@ -1284,9 +1420,13 @@ export type RouteTaskCreateManyAssignedCourierInput = {
 export type RouteTaskUpdateWithoutAssignedCourierInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1307,11 +1447,15 @@ export type RouteTaskUncheckedUpdateWithoutAssignedCourierInput = {
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1328,11 +1472,15 @@ export type RouteTaskUncheckedUpdateManyWithoutAssignedCourierInput = {
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1349,10 +1497,14 @@ export type RouteTaskCreateManyClientInput = {
   tripId: string
   parcelId?: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   addressId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   assignedCourierId?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
@@ -1368,9 +1520,13 @@ export type RouteTaskCreateManyClientInput = {
 export type RouteTaskUpdateWithoutClientInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1391,10 +1547,14 @@ export type RouteTaskUncheckedUpdateWithoutClientInput = {
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1412,10 +1572,14 @@ export type RouteTaskUncheckedUpdateManyWithoutClientInput = {
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1433,10 +1597,14 @@ export type RouteTaskCreateManyAddressInput = {
   tripId: string
   parcelId?: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   clientId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   assignedCourierId?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
@@ -1452,9 +1620,13 @@ export type RouteTaskCreateManyAddressInput = {
 export type RouteTaskUpdateWithoutAddressInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1475,10 +1647,14 @@ export type RouteTaskUncheckedUpdateWithoutAddressInput = {
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1496,10 +1672,14 @@ export type RouteTaskUncheckedUpdateManyWithoutAddressInput = {
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1516,11 +1696,15 @@ export type RouteTaskCreateManyTripInput = {
   id?: string
   parcelId?: string | null
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   assignedCourierId?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
@@ -1536,9 +1720,13 @@ export type RouteTaskCreateManyTripInput = {
 export type RouteTaskUpdateWithoutTripInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1558,11 +1746,15 @@ export type RouteTaskUncheckedUpdateWithoutTripInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1579,11 +1771,15 @@ export type RouteTaskUncheckedUpdateManyWithoutTripInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1600,11 +1796,15 @@ export type RouteTaskCreateManyParcelInput = {
   id?: string
   tripId: string
   taskType: $Enums.RouteTaskType
-  taskDate: Date | string
+  taskDate?: Date | string | null
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
   postalCode?: string | null
+  manualName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
   assignedCourierId?: string | null
   status?: $Enums.RouteTaskStatus
   rescheduleDate?: Date | string | null
@@ -1620,9 +1820,13 @@ export type RouteTaskCreateManyParcelInput = {
 export type RouteTaskUpdateWithoutParcelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1642,11 +1846,15 @@ export type RouteTaskUncheckedUpdateWithoutParcelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1663,11 +1871,15 @@ export type RouteTaskUncheckedUpdateManyWithoutParcelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
-  taskDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
   rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1692,6 +1904,10 @@ export type RouteTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   addressId?: boolean
   addressText?: boolean
   postalCode?: boolean
+  manualName?: boolean
+  manualPhone?: boolean
+  manualDirection?: boolean
+  manualCity?: boolean
   assignedCourierId?: boolean
   status?: boolean
   rescheduleDate?: boolean
@@ -1719,6 +1935,10 @@ export type RouteTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   addressId?: boolean
   addressText?: boolean
   postalCode?: boolean
+  manualName?: boolean
+  manualPhone?: boolean
+  manualDirection?: boolean
+  manualCity?: boolean
   assignedCourierId?: boolean
   status?: boolean
   rescheduleDate?: boolean
@@ -1746,6 +1966,10 @@ export type RouteTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   addressId?: boolean
   addressText?: boolean
   postalCode?: boolean
+  manualName?: boolean
+  manualPhone?: boolean
+  manualDirection?: boolean
+  manualCity?: boolean
   assignedCourierId?: boolean
   status?: boolean
   rescheduleDate?: boolean
@@ -1773,6 +1997,10 @@ export type RouteTaskSelectScalar = {
   addressId?: boolean
   addressText?: boolean
   postalCode?: boolean
+  manualName?: boolean
+  manualPhone?: boolean
+  manualDirection?: boolean
+  manualCity?: boolean
   assignedCourierId?: boolean
   status?: boolean
   rescheduleDate?: boolean
@@ -1785,7 +2013,7 @@ export type RouteTaskSelectScalar = {
   updatedAt?: boolean
 }
 
-export type RouteTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tripId" | "parcelId" | "taskType" | "taskDate" | "clientId" | "addressId" | "addressText" | "postalCode" | "assignedCourierId" | "status" | "rescheduleDate" | "failureReason" | "sortOrder" | "estimatedArrivalStart" | "estimatedArrivalEnd" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["routeTask"]>
+export type RouteTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tripId" | "parcelId" | "taskType" | "taskDate" | "clientId" | "addressId" | "addressText" | "postalCode" | "manualName" | "manualPhone" | "manualDirection" | "manualCity" | "assignedCourierId" | "status" | "rescheduleDate" | "failureReason" | "sortOrder" | "estimatedArrivalStart" | "estimatedArrivalEnd" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["routeTask"]>
 export type RouteTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
   parcel?: boolean | Prisma.RouteTask$parcelArgs<ExtArgs>
@@ -1822,11 +2050,15 @@ export type $RouteTaskPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     tripId: string
     parcelId: string | null
     taskType: $Enums.RouteTaskType
-    taskDate: Date
+    taskDate: Date | null
     clientId: string | null
     addressId: string | null
     addressText: string | null
     postalCode: string | null
+    manualName: string | null
+    manualPhone: string | null
+    manualDirection: string | null
+    manualCity: string | null
     assignedCourierId: string | null
     status: $Enums.RouteTaskStatus
     rescheduleDate: Date | null
@@ -2274,6 +2506,10 @@ export interface RouteTaskFieldRefs {
   readonly addressId: Prisma.FieldRef<"RouteTask", 'String'>
   readonly addressText: Prisma.FieldRef<"RouteTask", 'String'>
   readonly postalCode: Prisma.FieldRef<"RouteTask", 'String'>
+  readonly manualName: Prisma.FieldRef<"RouteTask", 'String'>
+  readonly manualPhone: Prisma.FieldRef<"RouteTask", 'String'>
+  readonly manualDirection: Prisma.FieldRef<"RouteTask", 'String'>
+  readonly manualCity: Prisma.FieldRef<"RouteTask", 'String'>
   readonly assignedCourierId: Prisma.FieldRef<"RouteTask", 'String'>
   readonly status: Prisma.FieldRef<"RouteTask", 'RouteTaskStatus'>
   readonly rescheduleDate: Prisma.FieldRef<"RouteTask", 'DateTime'>

@@ -677,11 +677,17 @@ model RouteTask {
   tripId                String          @map("trip_id") @db.Uuid
   parcelId              String?         @map("parcel_id") @db.Uuid
   taskType              RouteTaskType   @map("task_type")
-  taskDate              DateTime        @map("task_date") @db.Date
+  // ТЗ docx 08.08.26 (v12): taskDate NULL = адреса ще в ЗАГАЛЬНОМУ списку (не в листі).
+  taskDate              DateTime?       @map("task_date") @db.Date
   clientId              String?         @map("client_id") @db.Uuid
   addressId             String?         @map("address_id") @db.Uuid
   addressText           String?         @map("address_text")
   postalCode            String?         @map("postal_code")
+  // ТЗ docx 08.08.26 (v12): довільна адреса, додана Водієм вручну (без посилки).
+  manualName            String?         @map("manual_name")
+  manualPhone           String?         @map("manual_phone")
+  manualDirection       String?         @map("manual_direction")
+  manualCity            String?         @map("manual_city")
   assignedCourierId     String?         @map("assigned_courier_id") @db.Uuid
   status                RouteTaskStatus @default(pending)
   rescheduleDate        DateTime?       @map("reschedule_date") @db.Date
