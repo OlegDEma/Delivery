@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COUNTRY_LABELS, tripRouteLabel, type CountryCode } from '@/lib/constants/countries';
 import { formatDateWithWeekday } from '@/lib/utils/format';
+import { useAuth } from '@/lib/hooks/use-auth';
+import { ROLES } from '@/lib/constants/roles';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
 
@@ -61,6 +63,9 @@ export default function TripsPage() {
   const [editDep, setEditDep] = useState('');
   const [editArr, setEditArr] = useState('');
   const [editSaving, setEditSaving] = useState(false);
+  // ТЗ docx 08.08.26: Водію заборонено створювати/редагувати/видаляти рейси — ховаємо кнопки.
+  const { role } = useAuth();
+  const isDriver = role === ROLES.DRIVER_COURIER;
 
   // ТЗ docx 02.07.26 (D11): груповий вибір + групування + масова «кількість місць».
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -294,7 +299,8 @@ export default function TripsPage() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Рейси</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger render={<Button>+ Новий рейс</Button>} />
+          {/* ТЗ docx 08.08.26: Водію заборонено створювати рейси. */}
+          {!isDriver && <DialogTrigger render={<Button>+ Новий рейс</Button>} />}
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Новий рейс</DialogTitle>
@@ -401,7 +407,7 @@ export default function TripsPage() {
               </SelectContent>
             </Select>
           </div>
-          {selectedIds.size > 0 && (
+          {selectedIds.size > 0 && !isDriver && (
             <div className="flex items-center gap-2 ml-auto">
               <Button size="sm" variant="outline" onClick={() => { setBulkCapacity(''); setCapDialogOpen(true); }} disabled={bulkSaving}>
                 Задати місця
@@ -469,8 +475,8 @@ export default function TripsPage() {
                         {trip._count.passengers}/{trip.passengerCapacity} пасаж.
                       </div>
                       {/* ТЗ docx 01.07.26: inline «Редагувати(дата)»/«Видалити».
-                          ТЗ docx 08.08.26: ЗАВЕРШЕНИЙ рейс редагувати/видаляти заборонено. */}
-                      {trip.status !== 'completed' && (
+                          ТЗ docx 08.08.26: ЗАВЕРШЕНИЙ рейс — заборонено; Водію — теж заборонено. */}
+                      {trip.status !== 'completed' && !isDriver && (
                       <div className="flex flex-col items-end gap-0.5 mt-1">
                         <button
                           type="button"

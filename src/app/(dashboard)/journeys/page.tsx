@@ -16,6 +16,8 @@ import {
 import { WEEKDAYS, WEEKDAY_LABELS_FULL } from '@/lib/constants/collection';
 import { formatDateWithWeekday } from '@/lib/utils/format';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/hooks/use-auth';
+import { ROLES } from '@/lib/constants/roles';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
 
@@ -113,6 +115,9 @@ function pickFocusJourneyIds(list: { id: string; country: string; departureDate:
 }
 
 export default function JourneysPage() {
+  // ТЗ docx 08.08.26: Водію заборонено створювати/редагувати/видаляти поїздки — ховаємо кнопки.
+  const { role } = useAuth();
+  const isDriver = role === ROLES.DRIVER_COURIER;
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [couriers, setCouriers] = useState<Courier[]>([]);
   // ТЗ docx 08.08.26: список транспортних засобів для дропдауну у формі поїздки.
@@ -385,7 +390,8 @@ export default function JourneysPage() {
           <p className="text-sm text-gray-500">Повний цикл: UA → країна → UA</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger render={<Button>+ Нова поїздка</Button>} />
+          {/* ТЗ docx 08.08.26: Водію заборонено створювати поїздки. */}
+          {!isDriver && <DialogTrigger render={<Button>+ Нова поїздка</Button>} />}
           <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Нова поїздка</DialogTitle>
@@ -608,9 +614,9 @@ export default function JourneysPage() {
                   {j.vehicleInfo && <div className="text-xs text-gray-500 mt-0.5">🚛 {j.vehicleInfo}</div>}
                   {j.notes && <div className="text-xs text-gray-400 italic mt-0.5">{j.notes}</div>}
                 </div>
-                {/* ТЗ docx 08.08.26: ЗАВЕРШЕНУ поїздку редагувати/видаляти заборонено.
-                    ТЗ docx 20.06.26: «Видалити» під «Редагувати». */}
-                {!isJourneyCompleted && (
+                {/* ТЗ docx 08.08.26: ЗАВЕРШЕНУ поїздку — ред./видал. заборонено;
+                    Водію — теж заборонено. ТЗ docx 20.06.26: «Видалити» під «Редагувати». */}
+                {!isJourneyCompleted && !isDriver && (
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <button
                     type="button"
