@@ -106,6 +106,13 @@ export async function DELETE(
   });
   if (!journey) return NextResponse.json({ error: 'Поїздку не знайдено' }, { status: 404 });
 
+  // ТЗ docx 08.08.26: ЗАВЕРШЕНУ поїздку (усі рейси завершені) видаляти заборонено
+  // (як і рейси — симетрично до заборони редагування завершеного).
+  const allCompleted = journey.trips.length > 0 && journey.trips.every((t) => t.status === 'completed');
+  if (allCompleted) {
+    return NextResponse.json({ error: 'Завершену поїздку видаляти заборонено' }, { status: 403 });
+  }
+
   // Block hard delete if any trip has parcels — caller should reassign first.
   const tripsWithParcels = journey.trips.filter(t => t._count.parcels > 0);
   if (tripsWithParcels.length > 0) {

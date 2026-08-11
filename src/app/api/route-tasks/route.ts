@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     orderBy: [{ taskDate: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
     select: {
       id: true, tripId: true, parcelId: true, taskDate: true, taskType: true,
-      status: true, sortOrder: true, createdAt: true,
+      status: true, failureReason: true, sortOrder: true, createdAt: true,
       addressText: true, postalCode: true,
       manualName: true, manualPhone: true, manualDirection: true, manualCity: true,
     },

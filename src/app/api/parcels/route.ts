@@ -176,7 +176,13 @@ export async function GET(request: NextRequest) {
   } else if (tripId) {
     where.tripId = tripId;
   }
-  if (courierId) where.assignedCourierId = courierId;
+  // ТЗ docx 08.08.26 (розд. «Водій», п.2): для Водія «Мої посилки» = ВСІ посилки його
+  // поїздки (обидва кур'єри, клієнтські, будь-який статус). Тому courierId=self від Водія
+  // НЕ має додатково звужувати до assignedCourierId=self — інакше другий кур'єр поїздки
+  // бачив би 0. Скоуп нижче (driverScope: tripId ∈ моїх рейсів) уже коректно обмежує.
+  // Для НЕ-Водія (працівник/касир) — стара поведінка звуження по кур'єру.
+  const narrowByCourier = courierId && !(currentRole === ROLES.DRIVER_COURIER && courierId === currentUserId);
+  if (narrowByCourier) where.assignedCourierId = courierId;
   if (unassigned === '1') where.assignedCourierId = null;
   if (acceptedById) where.collectedById = acceptedById;
   if (acceptedUnassigned === '1') where.collectedById = null;

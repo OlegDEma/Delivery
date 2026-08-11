@@ -106,9 +106,14 @@ export default function RoutesPage() {
   // ТЗ docx 08.08.26 (v12): RouteTask — адреса на маршруті (посилка або ручна).
   const [routeTasks, setRouteTasks] = useState<{
     id: string; parcelId: string | null; taskDate: string | null;
+    status: string | null; failureReason: string | null;
     addressText: string | null; postalCode: string | null;
     manualName: string | null; manualPhone: string | null; manualDirection: string | null; manualCity: string | null;
   }[]>([]);
+  // ТЗ docx 08.08.26 (v12): операційне вікно для РУЧНИХ адрес у листі (статус/причина
+  // зберігаються на самому RouteTask, бо посилки немає). Ключ — id задачі.
+  const [manualStatuses, setManualStatuses] = useState<Record<string, TaskStatus>>({});
+  const [manualReasons, setManualReasons] = useState<Record<string, string>>({});
   const [sheetDate, setSheetDate] = useState('');
   const [creatingSheet, setCreatingSheet] = useState(false);
   // ТЗ docx 08.08.26 (v12): «Додати адресу» — ручний ввід довільної адреси.
@@ -153,7 +158,20 @@ export default function RoutesPage() {
     // ТЗ docx 08.08.26: задачі маршрутних листів (за датами) цієї поїздки.
     fetch(`/api/route-tasks?journeyId=${selectedJourneyId}`)
       .then(r => (r.ok ? r.json() : []))
-      .then(d => { if (active && Array.isArray(d)) setRouteTasks(d); })
+      .then(d => {
+        if (!active || !Array.isArray(d)) return;
+        setRouteTasks(d);
+        // Сідимо статуси/причини РУЧНИХ задач (без посилки) з даних сервера.
+        const ms: Record<string, TaskStatus> = {};
+        const mr: Record<string, string> = {};
+        for (const t of d) {
+          if (t.parcelId) continue;
+          ms[t.id] = (t.status as TaskStatus) || 'pending';
+          if (t.failureReason) mr[t.id] = t.failureReason;
+        }
+        setManualStatuses(ms);
+        setManualReasons(mr);
+      })
       .catch(() => {});
     fetch(`/api/parcels?journeyId=${selectedJourneyId}&limit=100`)
       .then(r => (r.ok ? r.json() : null))
@@ -272,6 +290,35 @@ export default function RoutesPage() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ routeTaskReschedDate: date || null }),
+    });
+  }
+
+  // ТЗ docx 08.08.26 (v12): «Перенести» — адреса переміщується у Маршрутний лист
+  // обраної дати (змінюємо taskDate задачі → вона зникає з поточного листа і
+  // з'являється в цільовому). Порожня дата = скасувати (лишити де є).
+  async function handleRescheduleTask(taskId: string, date: string) {
+    if (!date) return;
+    await fetch(`/api/route-tasks/${taskId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ taskDate: date }),
+    });
+    setReload(n => n + 1);
+  }
+
+  // Операційний статус/причина РУЧНОЇ адреси в листі (зберігаються на RouteTask).
+  function updateManualStatus(taskId: string, status: TaskStatus) {
+    setManualStatuses(prev => ({ ...prev, [taskId]: status }));
+    fetch(`/api/route-tasks/${taskId}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+  }
+  function updateManualReason(taskId: string, reason: string) {
+    setManualReasons(prev => ({ ...prev, [taskId]: reason }));
+    fetch(`/api/route-tasks/${taskId}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ failureReason: reason }),
     });
   }
 
@@ -415,9 +462,14 @@ export default function RoutesPage() {
               <div className="divide-y">
                 {sheet.tasks.map(t => {
                   const p = t.parcelId ? parcelById.get(t.parcelId) : null;
+                  const isManual = !t.parcelId;
                   const d = p ? euDestParty(p) : null;
-                  const ts = (p && taskStatuses[p.id]) || 'pending';
                   const a = d?.addr;
+                  // Статус: посилка → parcel.routeTaskStatus (taskStatuses); ручна → RouteTask.status.
+                  const ts: TaskStatus = (p ? taskStatuses[p.id] : manualStatuses[t.id]) || 'pending';
+                  const onStatus = (v: string | null) => (p
+                    ? updateTaskStatus(p.id, (v ?? 'pending') as TaskStatus)
+                    : updateManualStatus(t.id, (v ?? 'pending') as TaskStatus));
                   return (
                     <div key={t.id} className="px-3 py-2 text-sm">
                       <div className="flex items-start justify-between gap-2">
@@ -428,13 +480,22 @@ export default function RoutesPage() {
                             </div>
                             <div className="text-xs text-gray-500"><span className="font-mono mr-1">{p.internalNumber}</span>{d?.name} · {d?.phone} · {p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`}</div>
                           </Link>
+                        ) : isManual ? (
+                          // ТЗ docx 08.08.26 (v12): ручна адреса в листі — повноцінний запис (не «прибрано»).
+                          <Link href="/parcels/new" className="min-w-0">
+                            <div className="text-gray-700">
+                              <span className="text-amber-500 mr-1">✎</span>
+                              {t.postalCode ? `${t.postalCode} ` : ''}{t.manualCity || ''}{t.addressText ? `${t.manualCity ? ', ' : ''}${t.addressText}` : ''}
+                            </div>
+                            <div className="text-xs text-amber-600">Ручна адреса{t.manualName ? ` · ${t.manualName}` : ''}{t.manualPhone ? ` · ${t.manualPhone}` : ''}{t.manualDirection ? ` · ${t.manualDirection}` : ''}</div>
+                          </Link>
                         ) : <span className="text-gray-400 text-xs">Посилку прибрано з поїздки</span>}
                         <button type="button" onClick={() => handleRemoveFromSheet(t.id)} className="text-xs text-red-500 hover:text-red-700 shrink-0 print:hidden">Прибрати</button>
                       </div>
-                      {/* ТЗ docx 08.08.26 (v12): операційне вікно статусу адреси в листі. */}
-                      {p && (
+                      {/* ТЗ docx 08.08.26 (v12): операційне вікно статусу адреси в листі (посилки і ручні). */}
+                      {(p || isManual) && (
                         <div className="mt-1 flex flex-wrap gap-1 print:hidden">
-                          <Select value={ts} onValueChange={(v) => updateTaskStatus(p.id, (v ?? 'pending') as TaskStatus)}>
+                          <Select value={ts} onValueChange={onStatus}>
                             <SelectTrigger className="h-7 text-xs w-44"><SelectValue>{TASK_LABELS[ts]}</SelectValue></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="pending">Очікує</SelectItem>
@@ -446,10 +507,14 @@ export default function RoutesPage() {
                             </SelectContent>
                           </Select>
                           {ts === 'not_completed' && (
-                            <Input className="h-7 text-xs w-40" placeholder="Причина..." value={failureReasons[p.id] || ''} onChange={(e) => updateFailReason(p.id, e.target.value)} />
+                            <Input className="h-7 text-xs w-40" placeholder="Причина..."
+                              value={(p ? failureReasons[p.id] : manualReasons[t.id]) || ''}
+                              onChange={(e) => (p ? updateFailReason(p.id, e.target.value) : updateManualReason(t.id, e.target.value))} />
                           )}
                           {ts === 'rescheduled' && (
-                            <Input type="date" className="h-7 text-xs w-36" value={reschedDates[p.id] || ''} onChange={(e) => updateReschedDate(p.id, e.target.value)} />
+                            <Input type="date" className="h-7 text-xs w-36" title="Оберіть дату — адреса переміститься у відповідний лист"
+                              value={(p ? reschedDates[p.id] : '') || ''}
+                              onChange={(e) => { if (p) updateReschedDate(p.id, e.target.value); handleRescheduleTask(t.id, e.target.value); }} />
                           )}
                         </div>
                       )}
