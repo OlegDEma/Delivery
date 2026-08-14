@@ -14,7 +14,7 @@ import {
   COUNTRY_LABELS, COUNTRY_LABELS_ACCUSATIVE, COUNTRY_LABELS_GENITIVE, tripRouteLabel, type CountryCode,
 } from '@/lib/constants/countries';
 import { WEEKDAYS, WEEKDAY_LABELS_FULL } from '@/lib/constants/collection';
-import { formatDateWithWeekday } from '@/lib/utils/format';
+import { formatDateWithWeekday, formatDateShortWeekday } from '@/lib/utils/format';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
@@ -117,7 +117,8 @@ function pickFocusJourneyIds(list: { id: string; country: string; departureDate:
 export default function JourneysPage() {
   // ТЗ docx 08.08.26: Водію заборонено створювати/редагувати/видаляти поїздки — ховаємо кнопки.
   const { role } = useAuth();
-  const isDriver = role === ROLES.DRIVER_COURIER;
+  // ТЗ docx 11.08.26 (N6): створювати/редагувати/видаляти поїздки може ЛИШЕ Суперадмін.
+  const isSuperAdmin = role === ROLES.SUPER_ADMIN;
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [couriers, setCouriers] = useState<Courier[]>([]);
   // ТЗ docx 08.08.26: список транспортних засобів для дропдауну у формі поїздки.
@@ -391,7 +392,7 @@ export default function JourneysPage() {
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           {/* ТЗ docx 08.08.26: Водію заборонено створювати поїздки. */}
-          {!isDriver && <DialogTrigger render={<Button>+ Нова поїздка</Button>} />}
+          {isSuperAdmin && <DialogTrigger render={<Button>+ Нова поїздка</Button>} />}
           <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Нова поїздка</DialogTitle>
@@ -592,18 +593,22 @@ export default function JourneysPage() {
                   <Checkbox checked={selectedIds.has(j.id)} onCheckedChange={() => toggleSelect(j.id)} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold">
-                      🚐 UA → {COUNTRY_LABELS[j.country as CountryCode]} → UA
-                    </span>
-                    {/* ТЗ docx 08.08.26: прибрано бейджі «Заплановано» (голубий) та
-                        «Зараз / найближча» (оранжевий) — стан передають кольорові
-                        статуси рейсів нижче + підсвітка самої картки. */}
+                  {/* ТЗ docx 11.08.26 (N5.2): замість «UA-Нідерланди-UA» — два рядки рейсів
+                      з кодами країн + день тижня + дата (рейс З України — першим). */}
+                  <div className="mb-1">
+                    {[...j.trips]
+                      .sort((a, b) => (a.direction === 'ua_to_eu' ? 0 : 1) - (b.direction === 'ua_to_eu' ? 0 : 1))
+                      .map((t, ti) => (
+                        <div key={t.id} className="font-semibold text-sm leading-tight">
+                          {ti === 0 ? '🚐 ' : ''}
+                          {t.direction === 'ua_to_eu' ? `UA-${j.country}` : `${j.country}-UA`} {formatDateShortWeekday(t.departureDate)}
+                        </div>
+                      ))}
                   </div>
-                  {/* ТЗ L1: день тижня + дата. */}
-                  <div className="text-xs text-gray-500 space-x-1">
-                    <span>Виїзд: {formatDateWithWeekday(j.departureDate)}</span>
-                    {j.endDate && <span>→ Повернення: {formatDateWithWeekday(j.endDate)}</span>}
+                  {/* ТЗ docx 11.08.26 (N5.1): проміжок поїздки без слів «Виїзд/Повернення». */}
+                  <div className="text-xs text-gray-500">
+                    {formatDateShortWeekday(j.departureDate)}
+                    {j.endDate && ` - ${formatDateShortWeekday(j.endDate)}`}
                   </div>
                   {j.assignedCourier && (
                     <div className="text-xs text-gray-600 mt-0.5">
@@ -616,7 +621,7 @@ export default function JourneysPage() {
                 </div>
                 {/* ТЗ docx 08.08.26: ЗАВЕРШЕНУ поїздку — ред./видал. заборонено;
                     Водію — теж заборонено. ТЗ docx 20.06.26: «Видалити» під «Редагувати». */}
-                {!isJourneyCompleted && !isDriver && (
+                {!isJourneyCompleted && isSuperAdmin && (
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <button
                     type="button"

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import type { Country, TripStatus } from '@/generated/prisma/client';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
-import { LOGISTICS_ROLES } from '@/lib/constants/roles';
+import { JOURNEY_TRIP_MUTATION_ROLES } from '@/lib/constants/roles';
 import { autoAdvanceTrips } from '@/lib/services/trip-status';
 
 // GET /api/journeys — staff only
@@ -65,7 +65,7 @@ const CYCLIC_WEEKS: Record<string, number> = { '3m': 13, '6m': 26, '1y': 52 };
 
 // POST /api/journeys — create journey(s) + auto-create 2 trips each (logistics roles)
 export async function POST(request: NextRequest) {
-  const guard = await requireRole(LOGISTICS_ROLES);
+  const guard = await requireRole(JOURNEY_TRIP_MUTATION_ROLES);
   if (!guard.ok) return guard.response;
   // ТЗ docx 08.08.26: Водію заборонено створювати/редагувати/видаляти поїздки.
   if (guard.user.role === 'driver_courier') {
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
 
 // PATCH /api/journeys?id=xxx — logistics roles only
 export async function PATCH(request: NextRequest) {
-  const guard = await requireRole(LOGISTICS_ROLES);
+  const guard = await requireRole(JOURNEY_TRIP_MUTATION_ROLES);
   if (!guard.ok) return guard.response;
   // ТЗ docx 08.08.26: Водію заборонено створювати/редагувати/видаляти поїздки.
   if (guard.user.role === 'driver_courier') {
@@ -249,7 +249,7 @@ export async function PATCH(request: NextRequest) {
 // рейсів (tripId=null), щоб не втратити дані. RouteTask/Passenger рейсу
 // (обов'язковий FK) видаляються разом з рейсами.
 export async function DELETE(request: NextRequest) {
-  const guard = await requireRole(LOGISTICS_ROLES);
+  const guard = await requireRole(JOURNEY_TRIP_MUTATION_ROLES);
   if (!guard.ok) return guard.response;
   // ТЗ docx 08.08.26: Водію заборонено створювати/редагувати/видаляти поїздки.
   if (guard.user.role === 'driver_courier') {

@@ -42,12 +42,19 @@ export const OPERATIONS_ROLES: Role[] = [
   ROLES.DRIVER_COURIER,
 ];
 
-/** Can manage trips, journeys, routes */
+/** Can VIEW trips, journeys, routes (мутації — див. JOURNEY_TRIP_MUTATION_ROLES) */
 export const LOGISTICS_ROLES: Role[] = [
   ROLES.SUPER_ADMIN,
   ROLES.ADMIN,
   ROLES.DRIVER_COURIER,
 ];
+
+/**
+ * ТЗ docx 11.08.26 (N6): міняти / редагувати / видаляти / створювати ПОЇЗДКИ та РЕЙСИ
+ * може ЛИШЕ Суперадмін (поки що). Ні водій, ні працівник складу, ні касир, ні адмін.
+ * Перегляд лишається за LOGISTICS_ROLES.
+ */
+export const JOURNEY_TRIP_MUTATION_ROLES: Role[] = [ROLES.SUPER_ADMIN];
 
 /** Warehouse operations */
 export const WAREHOUSE_ROLES: Role[] = [

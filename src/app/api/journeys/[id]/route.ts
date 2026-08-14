@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth/guards';
-import { LOGISTICS_ROLES, ADMIN_ROLES } from '@/lib/constants/roles';
+import { LOGISTICS_ROLES, JOURNEY_TRIP_MUTATION_ROLES } from '@/lib/constants/roles';
 import { isUuid } from '@/lib/validators/common';
 import { logger } from '@/lib/logger';
 import type { TripStatus } from '@/generated/prisma/enums';
@@ -39,7 +39,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const guard = await requireRole(LOGISTICS_ROLES);
+  // ТЗ docx 11.08.26 (N6): редагувати поїздку може ЛИШЕ Суперадмін.
+  const guard = await requireRole(JOURNEY_TRIP_MUTATION_ROLES);
   if (!guard.ok) return guard.response;
 
   const { id } = await params;
@@ -93,7 +94,8 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const guard = await requireRole(ADMIN_ROLES);
+  // ТЗ docx 11.08.26 (N6): видаляти поїздку може ЛИШЕ Суперадмін.
+  const guard = await requireRole(JOURNEY_TRIP_MUTATION_ROLES);
   if (!guard.ok) return guard.response;
   const userId = guard.user.userId;
 

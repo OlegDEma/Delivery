@@ -65,7 +65,8 @@ export default function TripsPage() {
   const [editSaving, setEditSaving] = useState(false);
   // ТЗ docx 08.08.26: Водію заборонено створювати/редагувати/видаляти рейси — ховаємо кнопки.
   const { role } = useAuth();
-  const isDriver = role === ROLES.DRIVER_COURIER;
+  // ТЗ docx 11.08.26 (N6): створювати/редагувати/видаляти рейси може ЛИШЕ Суперадмін.
+  const isSuperAdmin = role === ROLES.SUPER_ADMIN;
 
   // ТЗ docx 02.07.26 (D11): груповий вибір + групування + масова «кількість місць».
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -300,7 +301,7 @@ export default function TripsPage() {
         <h1 className="text-2xl font-bold">Рейси</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           {/* ТЗ docx 08.08.26: Водію заборонено створювати рейси. */}
-          {!isDriver && <DialogTrigger render={<Button>+ Новий рейс</Button>} />}
+          {isSuperAdmin && <DialogTrigger render={<Button>+ Новий рейс</Button>} />}
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Новий рейс</DialogTitle>
@@ -407,7 +408,7 @@ export default function TripsPage() {
               </SelectContent>
             </Select>
           </div>
-          {selectedIds.size > 0 && !isDriver && (
+          {selectedIds.size > 0 && isSuperAdmin && (
             <div className="flex items-center gap-2 ml-auto">
               <Button size="sm" variant="outline" onClick={() => { setBulkCapacity(''); setCapDialogOpen(true); }} disabled={bulkSaving}>
                 Задати місця
@@ -476,7 +477,7 @@ export default function TripsPage() {
                       </div>
                       {/* ТЗ docx 01.07.26: inline «Редагувати(дата)»/«Видалити».
                           ТЗ docx 08.08.26: ЗАВЕРШЕНИЙ рейс — заборонено; Водію — теж заборонено. */}
-                      {trip.status !== 'completed' && !isDriver && (
+                      {trip.status !== 'completed' && isSuperAdmin && (
                       <div className="flex flex-col items-end gap-0.5 mt-1">
                         <button
                           type="button"

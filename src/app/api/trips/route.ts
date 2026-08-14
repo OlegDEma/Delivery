@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
-import { LOGISTICS_ROLES } from '@/lib/constants/roles';
+import { JOURNEY_TRIP_MUTATION_ROLES } from '@/lib/constants/roles';
 import { autoAdvanceTrips } from '@/lib/services/trip-status';
 
 // GET /api/trips — staff can view
@@ -44,12 +44,10 @@ export async function GET(request: NextRequest) {
 
 // POST /api/trips — admins and drivers (logistics roles)
 export async function POST(request: NextRequest) {
-  const guard = await requireRole(LOGISTICS_ROLES);
+  // ТЗ docx 11.08.26 (N6): створювати рейси може ЛИШЕ Суперадмін
+  // (ні водій, ні працівник складу, ні касир, ні адмін).
+  const guard = await requireRole(JOURNEY_TRIP_MUTATION_ROLES);
   if (!guard.ok) return guard.response;
-  // ТЗ docx 08.08.26: Водію заборонено створювати рейси.
-  if (guard.user.role === 'driver_courier') {
-    return NextResponse.json({ error: 'Водію заборонено створювати рейси' }, { status: 403 });
-  }
   const userId = guard.user.userId;
 
   let body;

@@ -2,23 +2,21 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mail } from 'lucide-react';
 
 interface ShareButtonProps {
   parcelNumber: string;
-  /** PЇБ отримувача — підставляється в Gmail subject і body як адресат */
+  /** ПІБ отримувача — підставляється у привітання. */
   receiverName?: string;
-  /** Телефон отримувача у форматі E.164 — використовується як адресат WhatsApp/Viber */
+  /** Телефон отримувача у форматі E.164 — адресат WhatsApp/Viber/SMS. */
   receiverPhone?: string;
   className?: string;
 }
 
 /**
- * «Поділитись» за ТЗ: 3 месенджери (Gmail, WhatsApp, Viber). За замовчуванням
- * кожен відкривається з попередньо заповненим контактом Отримувача.
- * - Gmail: компоновочний лінк до Gmail web — mailto fallback.
- * - WhatsApp: wa.me/<phone>?text= — якщо телефон валідний.
- * - Viber: viber://chat?number=<phone>&text= — підтримується на мобільних.
+ * «Поділитись» за ТЗ docx 11.08.26: месенджери WhatsApp / Viber / SMS (email прибрано).
+ * За замовчуванням кожен відкривається з попередньо заповненим контактом Отримувача
+ * і текстом. Реалізовано через <a> (не window.open) — схеми viber:// та sms: через
+ * window.open('_blank') відкривали порожню вкладку і застосунок не запускався.
  */
 export function ShareButton({ parcelNumber, receiverName, receiverPhone, className }: ShareButtonProps) {
   const [shared, setShared] = useState(false);
@@ -26,10 +24,17 @@ export function ShareButton({ parcelNumber, receiverName, receiverPhone, classNa
   const trackingUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/tracking?q=${encodeURIComponent(parcelNumber)}`
     : `/tracking?q=${encodeURIComponent(parcelNumber)}`;
-  const message = `Ваша посилка ${parcelNumber} — відстежити: ${trackingUrl}`;
+  const message = receiverName
+    ? `${receiverName}, ваша посилка ${parcelNumber} — відстежити: ${trackingUrl}`
+    : `Ваша посилка ${parcelNumber} — відстежити: ${trackingUrl}`;
+  const text = encodeURIComponent(message);
 
-  // Нормалізований телефон без '+', пробілів і дефісів — для wa.me / viber.
+  // Нормалізований телефон без '+', пробілів і дефісів — для wa.me / viber / sms.
   const phoneDigits = (receiverPhone || '').replace(/\D+/g, '');
+
+  const waUrl = phoneDigits ? `https://wa.me/${phoneDigits}?text=${text}` : `https://wa.me/?text=${text}`;
+  const viberUrl = phoneDigits ? `viber://chat?number=%2B${phoneDigits}&text=${text}` : `viber://forward?text=${text}`;
+  const smsUrl = phoneDigits ? `sms:+${phoneDigits}?body=${text}` : `sms:?body=${text}`;
 
   async function handleNative() {
     if (navigator.share) {
@@ -43,56 +48,23 @@ export function ShareButton({ parcelNumber, receiverName, receiverPhone, classNa
     setTimeout(() => setShared(false), 3000);
   }
 
-  function openGmail() {
-    const subject = `Посилка ${parcelNumber}`;
-    const body = receiverName
-      ? `${receiverName},\n\n${message}`
-      : message;
-    // Gmail web compose — якщо не залогінений, відкриється login.
-    // Тримаємо mailto як fallback для desktop-клієнтів.
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(gmailUrl, '_blank');
-  }
-
-  function openWhatsApp() {
-    // Якщо телефон є — пишемо напряму отримувачу, інакше відкриваємо selector.
-    const url = phoneDigits
-      ? `https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`
-      : `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
-  }
-
-  function openViber() {
-    // Viber deep-link. На desktop без клієнта — не спрацює, тоді fallback-forward.
-    const url = phoneDigits
-      ? `viber://chat?number=%2B${phoneDigits}&text=${encodeURIComponent(message)}`
-      : `viber://forward?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
-  }
+  const badge = (color: string) =>
+    `text-xs font-bold ${color} px-2 h-8 inline-flex items-center rounded-md border no-underline`;
 
   return (
-    <div className={`flex gap-1 ${className || ''}`}>
+    <div className={`flex gap-1 items-center ${className || ''}`}>
       <Button variant="outline" size="sm" onClick={handleNative} className="text-xs">
         {shared ? '✓ Скопійовано' : 'Поділитись'}
       </Button>
-      <Button
-        variant="ghost" size="sm" onClick={openGmail}
-        className="text-xs text-red-600 px-2 h-8" title="Gmail — надіслати листом"
-      >
-        <Mail className="w-3.5 h-3.5" />
-      </Button>
-      <Button
-        variant="ghost" size="sm" onClick={openWhatsApp}
-        className="text-xs text-green-600 px-2 h-8" title="WhatsApp"
-      >
-        WA
-      </Button>
-      <Button
-        variant="ghost" size="sm" onClick={openViber}
-        className="text-xs text-purple-600 px-2 h-8" title="Viber"
-      >
-        Vb
-      </Button>
+      {/* WhatsApp — https, нова вкладка. */}
+      <a href={waUrl} target="_blank" rel="noopener noreferrer" title="WhatsApp"
+        className={badge('text-green-600 border-green-200 hover:text-green-700')}>WA</a>
+      {/* Viber — власна схема, без target=_blank. */}
+      <a href={viberUrl} title="Viber"
+        className={badge('text-purple-600 border-purple-200 hover:text-purple-700')}>Vb</a>
+      {/* SMS — власна схема, без target=_blank. */}
+      <a href={smsUrl} title="SMS"
+        className={badge('text-blue-600 border-blue-200 hover:text-blue-700')}>SMS</a>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
-import { LOGISTICS_ROLES } from '@/lib/constants/roles';
+import { JOURNEY_TRIP_MUTATION_ROLES } from '@/lib/constants/roles';
 import { isUuid } from '@/lib/validators/common';
 import { applyTripStatusCascade } from '@/lib/services/trip-status';
 
@@ -46,12 +46,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const guard = await requireRole(LOGISTICS_ROLES);
+  // ТЗ docx 11.08.26 (N6): редагувати рейси може ЛИШЕ Суперадмін.
+  const guard = await requireRole(JOURNEY_TRIP_MUTATION_ROLES);
   if (!guard.ok) return guard.response;
-  // ТЗ docx 08.08.26: Водію заборонено редагувати рейси.
-  if (guard.user.role === 'driver_courier') {
-    return NextResponse.json({ error: 'Водію заборонено редагувати рейси' }, { status: 403 });
-  }
   const user = { id: guard.user.userId };
 
   const { id } = await params;
@@ -153,12 +150,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const guard = await requireRole(LOGISTICS_ROLES);
+  // ТЗ docx 11.08.26 (N6): видаляти рейси може ЛИШЕ Суперадмін.
+  const guard = await requireRole(JOURNEY_TRIP_MUTATION_ROLES);
   if (!guard.ok) return guard.response;
-  // ТЗ docx 08.08.26: Водію заборонено видаляти рейси.
-  if (guard.user.role === 'driver_courier') {
-    return NextResponse.json({ error: 'Водію заборонено видаляти рейси' }, { status: 403 });
-  }
 
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });

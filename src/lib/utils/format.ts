@@ -26,6 +26,17 @@ export function formatDateWithWeekday(date: Date | string): string {
 }
 
 /**
+ * ТЗ docx 11.08.26 (Поїздки): компактний формат «Вт 11.08.26» — скорочений день
+ * тижня + ДД.ММ.РР (2 цифри року, без коми). Без слів «Виїзд/Повернення».
+ */
+export function formatDateShortWeekday(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const wd = d.toLocaleDateString('uk-UA', { weekday: 'short' }).replace(/\.$/, '');
+  const dmy = d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  return `${wd.charAt(0).toUpperCase()}${wd.slice(1)} ${dmy}`;
+}
+
+/**
  * Format date with time
  */
 export function formatDateTime(date: Date | string): string {
