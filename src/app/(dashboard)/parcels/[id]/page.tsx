@@ -534,6 +534,7 @@ export default function ParcelDetailPage() {
               <ParcelPartyEdit
                 parcelId={parcel.id}
                 role="receiver"
+                direction={parcel.direction as 'eu_to_ua' | 'ua_to_eu'}
                 party={parcel.receiver}
                 address={parcel.receiverAddress ? { ...parcel.receiverAddress, id: parcel.receiverAddressId } : null}
                 onSaved={fetchParcel}
@@ -571,6 +572,7 @@ export default function ParcelDetailPage() {
               <ParcelPartyEdit
                 parcelId={parcel.id}
                 role="sender"
+                direction={parcel.direction as 'eu_to_ua' | 'ua_to_eu'}
                 party={parcel.sender}
                 address={parcel.senderAddress ? { ...parcel.senderAddress, id: parcel.senderAddressId } : null}
                 onSaved={fetchParcel}
@@ -691,7 +693,7 @@ export default function ParcelDetailPage() {
             <div className="mt-3 space-y-2 border-t pt-3">
               <TripSelector
                 trips={trips}
-                direction={parcel.direction}
+                direction={parcel.direction as 'eu_to_ua' | 'ua_to_eu'}
                 selectedTripId={parcel.trip?.id || ''}
                 onChange={(tripId) => handleAssignTrip(tripId)}
                 compact
