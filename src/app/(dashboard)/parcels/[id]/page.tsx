@@ -26,7 +26,6 @@ import { SendInvoiceButton } from '@/components/parcels/send-invoice-button';
 import { InvoiceHistory } from '@/components/parcels/invoice-history';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
-import { ShareButton } from '@/components/shared/share-button';
 import { PartyShareButtons } from '@/components/shared/party-share-buttons';
 import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
 import { ParcelPaymentCard } from '@/components/parcels/parcel-payment-card';
@@ -429,11 +428,9 @@ export default function ParcelDetailPage() {
           <Link href={`/parcels/new?repeat=${parcel.id}`}>
             <Button variant="outline" size="sm">Повторити</Button>
           </Link>
-          <ShareButton
-            parcelNumber={parcel.internalNumber}
-            receiverName={`${parties.receiver.lastName} ${parties.receiver.firstName}`}
-            receiverPhone={parties.receiver.phone}
-          />
+          {/* ТЗ docx 17.08.26: верхню кнопку «Поділитись WA Vb SMS» прибрано як
+              непотрібну — підтвердження надсилається месенджерами біля кожної
+              сторони (Отримувач/Відправник) нижче. */}
         </div>
       </div>
 
