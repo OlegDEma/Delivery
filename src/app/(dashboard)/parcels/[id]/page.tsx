@@ -274,12 +274,16 @@ export default function ParcelDetailPage() {
   const trackingUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/tracking?q=${encodeURIComponent(parcel.itn)}`
     : '';
-  // ТЗ docx 17.08.26 (Частина третя): формат підтвердження —
+  // ТЗ docx 17.08.26 (Частина третя, за фото): формат підтвердження —
+  //   Посилка <номер без суфікса місць «1/2»>
   //   Рейс: <дата>(<КОД>)
   //   ІТН: … / Отримувач / Відправник / Місць: N   (без ваги, без ТТН)
   //   <порожній рядок>
   //   Вартість / Напрямок / Опис / Відстежити
+  // Суфікс кількості місць («135 Amstetten 1/2, …» → «135 Amstetten, …») прибираємо.
+  const parcelLabel = parcel.internalNumber.replace(/\s\d+(?:\/\d+)?,/, ',');
   const confirmationMessage = [
+    `Посилка ${parcelLabel}`,
     parcel.trip ? `Рейс: ${formatDate(parcel.trip.departureDate)}(${parcel.trip.country})` : null,
     `ІТН: ${parcel.itn}`,
     `Отримувач: ${parties.receiver.lastName} ${parties.receiver.firstName}, ${parties.receiver.phone}`,
