@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { suggestCitiesFromDictionary } from '@/lib/data/cities';
+import { searchCities } from '@/lib/nova-poshta/client';
 
 /**
  * GET /api/addresses/suggest?field=city|street&country=NL&q=Am
@@ -50,13 +52,30 @@ export async function GET(request: NextRequest) {
 
   const seen = new Set<string>();
   const result: string[] = [];
-  for (const r of rows) {
-    const v = (field === 'city' ? r.city : r.street) ?? '';
-    const trimmed = v.trim();
+  const push = (raw: string | null | undefined) => {
+    const trimmed = (raw ?? '').trim();
     if (trimmed && !seen.has(trimmed.toLowerCase())) {
       seen.add(trimmed.toLowerCase());
       result.push(trimmed);
     }
+  };
+
+  // 1) Історія адрес — найрелевантніше (реально використані значення).
+  for (const r of rows) push(field === 'city' ? r.city : r.street);
+
+  // ТЗ docx 17.08.26 (Частина перша): для МІСТА додаємо канонічні підказки —
+  // щоб ловити опечатки («Amshtetten» → «Amstetten») навіть без історії.
+  if (field === 'city') {
+    // 2) Nova Poshta — повний реєстр населених пунктів України (лише коли є ключ).
+    if (country === 'UA' && process.env.NP_API_KEY) {
+      try {
+        const np = await searchCities(q, 10);
+        if (np.success) for (const s of np.data) push(s.Description);
+      } catch { /* НП недоступна — тихо пропускаємо, є словник+історія */ }
+    }
+    // 3) Вивірений словник міст/містечок (UA + NL/AT/DE).
+    for (const c of suggestCitiesFromDictionary(country, q, 12)) push(c);
   }
-  return NextResponse.json(result);
+
+  return NextResponse.json(result.slice(0, 12));
 }
