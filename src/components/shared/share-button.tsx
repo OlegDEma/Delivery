@@ -33,7 +33,8 @@ export function ShareButton({ parcelNumber, receiverName, receiverPhone, classNa
   const phoneDigits = (receiverPhone || '').replace(/\D+/g, '');
 
   const waUrl = phoneDigits ? `https://wa.me/${phoneDigits}?text=${text}` : `https://wa.me/?text=${text}`;
-  const viberUrl = phoneDigits ? `viber://chat?number=%2B${phoneDigits}&text=${text}` : `viber://forward?text=${text}`;
+  // ТЗ docx 17.08.26: Viber тільки `forward?text=` формує текст (chat?number його ігнорує).
+  const viberUrl = `viber://forward?text=${text}`;
   const smsUrl = phoneDigits ? `sms:+${phoneDigits}?body=${text}` : `sms:?body=${text}`;
 
   async function handleNative() {

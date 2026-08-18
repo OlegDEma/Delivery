@@ -16,7 +16,7 @@ import { canEditParcelData } from '@/lib/parcels/edit-lock';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { Camera, StickyNote, Lock, Pencil } from 'lucide-react';
-import { formatDateTime } from '@/lib/utils/format';
+import { formatDateTime, formatDate } from '@/lib/utils/format';
 import { summarizePartyAddress } from '@/lib/utils/address-summary';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
@@ -275,17 +275,34 @@ export default function ParcelDetailPage() {
   const trackingUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/tracking?q=${encodeURIComponent(parcel.itn)}`
     : '';
+  // ТЗ docx 17.08.26 (Частина третя): формат підтвердження —
+  //   Рейс: <дата>(<КОД>)
+  //   ІТН: … / Отримувач / Відправник / Місць: N   (без ваги, без ТТН)
+  //   <порожній рядок>
+  //   Вартість / Напрямок / Опис / Відстежити
   const confirmationMessage = [
-    `📦 Посилка ${parcel.internalNumber}`,
-    `ІТН: ${parcel.itn}${parcel.npTtn ? ` · ТТН: ${parcel.npTtn}` : ''}`,
+    parcel.trip ? `Рейс: ${formatDate(parcel.trip.departureDate)}(${parcel.trip.country})` : null,
+    `ІТН: ${parcel.itn}`,
     `Отримувач: ${parties.receiver.lastName} ${parties.receiver.firstName}, ${parties.receiver.phone}`,
     `Відправник: ${parties.sender.lastName} ${parties.sender.firstName}, ${parties.sender.phone}`,
-    `Місць: ${parcel.totalPlacesCount}${parcel.totalWeight ? `, вага ${Number(parcel.totalWeight).toFixed(1)} кг` : ''}`,
-    parcel.totalCost ? `Вартість: ${Number(parcel.totalCost).toFixed(2)} EUR` : '',
+    `Місць: ${parcel.totalPlacesCount}`,
+    '', // порожній рядок за ТЗ
+    parcel.totalCost ? `Вартість: ${Number(parcel.totalCost).toFixed(2)} EUR` : null,
     `Напрямок: ${parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}`,
-    parcel.description ? `Опис: ${parcel.description}` : '',
-    trackingUrl ? `Відстежити: ${trackingUrl}` : '',
-  ].filter(Boolean).join('\n');
+    parcel.description ? `Опис: ${parcel.description}` : null,
+    trackingUrl ? `Відстежити: ${trackingUrl}` : null,
+  ].filter((l) => l !== null).join('\n');
+
+  // ТЗ docx 17.08.26 (Частина перша): шапка посилки — після номера/міста йде код
+  // країни доставки, кількість місць та прив'язка до рейсу. Код країни доставки:
+  // eu_to_ua → UA; ua_to_eu → країна рейсу (NL/AT/DE).
+  const destCC = parcel.direction === 'eu_to_ua' ? 'UA' : (parcel.trip?.country || '');
+  const placesLabel = (n: number) => {
+    const m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return `${n} місце`;
+    if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return `${n} місця`;
+    return `${n} місць`;
+  };
 
   const isClientOrderPending =
     parcel.status === 'draft' &&
@@ -332,6 +349,17 @@ export default function ParcelDetailPage() {
           <Badge className={STATUS_COLORS[parcel.status]}>
             {statusLabel(parcel.status, { tripCountry: parcel.trip?.country, direction: parcel.direction })}
           </Badge>
+        </div>
+        {/* ТЗ docx 17.08.26 (Частина перша): код країни доставки · кількість місць · рейс. */}
+        <div className="text-sm text-gray-700 mb-1 flex items-center gap-1.5 flex-wrap">
+          {destCC && <><span className="font-medium">{destCC}</span><span className="text-gray-300">·</span></>}
+          <span>{placesLabel(parcel.totalPlacesCount)}</span>
+          {parcel.trip && (
+            <>
+              <span className="text-gray-300">·</span>
+              <span>Рейс: {formatDate(parcel.trip.departureDate)}({parcel.trip.country})</span>
+            </>
+          )}
         </div>
         <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
           <span>ІТН: <span className="font-mono">{parcel.itn}</span></span>

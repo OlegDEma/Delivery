@@ -24,8 +24,11 @@ export function PartyShareButtons({ phone, message, className }: PartyShareButto
 
   // WhatsApp: https-лінк wa.me (працює і на мобільному, і у WhatsApp Web).
   const waUrl = digits ? `https://wa.me/${digits}?text=${text}` : `https://wa.me/?text=${text}`;
-  // Viber: chat з номером + текст (мобільний); без номера — forward із текстом.
-  const viberUrl = digits ? `viber://chat?number=%2B${digits}&text=${text}` : `viber://forward?text=${text}`;
+  // Viber: ТЗ docx 17.08.26 — раніше `chat?number=…&text=…` відкривав чат, але ТЕКСТ
+  // не формувався (Viber ігнорує &text у chat-схемі). Єдина схема, що вставляє текст, —
+  // `forward?text=…`: Viber відкриває пересилання з готовим текстом, контакт обираємо вручну
+  // (Viber технічно НЕ вміє одночасно номер+текст, на відміну від WhatsApp/SMS).
+  const viberUrl = `viber://forward?text=${text}`;
   // SMS: номер у адресному рядку + текст у тілі (RFC 5724 ?body=).
   const smsUrl = digits ? `sms:+${digits}?body=${text}` : `sms:?body=${text}`;
 
