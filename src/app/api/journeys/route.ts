@@ -18,7 +18,13 @@ export async function GET() {
   const driverWhere = isDriver
     ? {
         status: { in: ['planned', 'in_progress'] as TripStatus[] },
-        OR: [{ assignedCourierId: guard.user.userId }, { secondCourierId: guard.user.userId }],
+        // ТЗ docx 18.08.26: водій, закріплений за РЕЙСОМ поїздки, теж бачить цю поїздку —
+        // консистентно зі скоупом «Рейси» (той фільтрує за кур'єрами рейсу, а не поїздки).
+        OR: [
+          { assignedCourierId: guard.user.userId },
+          { secondCourierId: guard.user.userId },
+          { trips: { some: { OR: [{ assignedCourierId: guard.user.userId }, { secondCourierId: guard.user.userId }] } } },
+        ],
       }
     : {};
 

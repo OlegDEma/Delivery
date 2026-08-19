@@ -20,7 +20,13 @@ export async function GET() {
     const journey = await prisma.journey.findFirst({
       where: {
         status: { in: ['planned', 'in_progress'] },
-        OR: [{ assignedCourierId: user.id }, { secondCourierId: user.id }],
+        // ТЗ docx 18.08.26: водій, закріплений за РЕЙСОМ поїздки (кур'єр рейсу), теж
+        // бачить цю поїздку і «Найближчі рейси» — консистентно зі скоупом «Рейси».
+        OR: [
+          { assignedCourierId: user.id },
+          { secondCourierId: user.id },
+          { trips: { some: { OR: [{ assignedCourierId: user.id }, { secondCourierId: user.id }] } } },
+        ],
       },
       orderBy: { departureDate: 'asc' },
       include: {
