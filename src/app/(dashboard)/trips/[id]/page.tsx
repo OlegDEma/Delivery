@@ -15,6 +15,8 @@ import { tripRouteLabel } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatDateWithWeekday, formatWeight } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { useAuth } from '@/lib/hooks/use-auth';
+import { ROLES } from '@/lib/constants/roles';
 
 const TRIP_STATUSES: Record<string, { label: string; color: string }> = {
   planned: { label: 'Заплановано', color: 'bg-blue-100 text-blue-800' },
@@ -62,6 +64,10 @@ interface TripDetail {
 
 export default function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
+  // ТЗ docx 18.08.26 / docx13 (N6): керувати рейсом (статус/дати/місткість/видалення)
+  // може ЛИШЕ Суперадмін. Водій та інші ролі бачать рейс і його посилки, але не блок керування.
+  const { role } = useAuth();
+  const isSuperAdmin = role === ROLES.SUPER_ADMIN;
   const router = useRouter();
   const [trip, setTrip] = useState<TripDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -184,7 +190,8 @@ export default function TripDetailPage() {
       {/* ТЗ docx 02.07.26 (D12): картку «Митна декларація» прибрано (ті самі
           показники лишились у зведенні «Summary» нижче). */}
 
-      {/* Керування рейсом — статус, дати, видалення (ТЗ docx 29.06.26 «Рейси») */}
+      {/* ТЗ docx 18.08.26: керування рейсом — лише Суперадмін (водію/іншим — сховано). */}
+      {isSuperAdmin && (
       <Card>
         <CardHeader className="py-2 px-3">
           <CardTitle className="text-sm">Керування рейсом</CardTitle>
@@ -263,6 +270,7 @@ export default function TripDetailPage() {
           </>)}
         </CardContent>
       </Card>
+      )}
 
       {/* Summary */}
       <div className="grid grid-cols-3 gap-3">

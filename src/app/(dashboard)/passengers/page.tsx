@@ -16,6 +16,8 @@ import { PhoneInput } from '@/components/shared/phone-input';
 import { formatCurrency } from '@/lib/utils/format';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { MinibusSeating } from '@/components/passengers/minibus-seating';
+import { useAuth } from '@/lib/hooks/use-auth';
+import { ROLES } from '@/lib/constants/roles';
 
 interface TripSummary {
   id: string;
@@ -59,6 +61,10 @@ interface TripDetail {
 
 
 export default function PassengersPage() {
+  // ТЗ docx 18.08.26: Водію заборонено видаляти пасажирів (API вже 403 —
+  // ховаємо й кнопку). Видаляти може лише адмін/суперадмін.
+  const { role } = useAuth();
+  const canDeletePassenger = role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN;
   const [trips, setTrips] = useState<TripSummary[]>([]);
   const [loadingTrips, setLoadingTrips] = useState(true);
 
@@ -337,13 +343,15 @@ export default function PassengersPage() {
                       {p.price != null && (
                         <div className="text-sm font-medium">{formatCurrency(p.price, p.currency)}</div>
                       )}
-                      <Button
-                        variant="ghost" size="sm"
-                        onClick={() => handleDelete(p.id)}
-                        className="text-red-600 hover:text-red-800 hover:bg-red-50 h-7 px-2 mt-1"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
+                      {canDeletePassenger && (
+                        <Button
+                          variant="ghost" size="sm"
+                          onClick={() => handleDelete(p.id)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50 h-7 px-2 mt-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
