@@ -505,6 +505,8 @@ export const SmsLogScalarFieldEnum = {
   toParty: 'toParty',
   toPhone: 'toPhone',
   body: 'body',
+  channel: 'channel',
+  kind: 'kind',
   provider: 'provider',
   status: 'status',
   errorMessage: 'errorMessage',

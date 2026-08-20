@@ -21,10 +21,13 @@ export async function GET(
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
+  // ТЗ docx 18.08.26: один лог обслуговує рахунки і підтвердження — фільтруємо за kind.
+  const kind = _request.nextUrl.searchParams.get('kind'); // 'invoice' | 'confirmation' | null(усі)
+
   // Cap at 20 to keep the panel scan-able. Realistically there's <5 entries
   // per parcel; older sends fall off gracefully.
   const rows = await prisma.smsLog.findMany({
-    where: { parcelId: id },
+    where: { parcelId: id, ...(kind ? { kind } : {}) },
     orderBy: { createdAt: 'desc' },
     take: 20,
   });
@@ -46,6 +49,8 @@ export async function GET(
       id: r.id,
       toParty: r.toParty,
       toPhone: r.toPhone,
+      kind: r.kind,
+      channel: r.channel,
       provider: r.provider,
       status: r.status,
       errorMessage: r.errorMessage,

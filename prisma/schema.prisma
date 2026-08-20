@@ -797,7 +797,11 @@ model SmsLog {
   toParty      String   @map("to_party") // 'sender' | 'receiver'
   toPhone      String   @map("to_phone")
   body         String
-  /// Provider name once we wire one up (e.g. «twilio», «turbosms»). Null
+  /// ТЗ docx 18.08.26: канал доставки — 'sms' | 'whatsapp' | 'viber'.
+  channel      String   @default("sms")
+  /// Вид повідомлення — 'invoice' (рахунок) | 'confirmation' (підтвердження посилки).
+  kind         String   @default("invoice")
+  /// Provider name once we wire one up (e.g. «turbosms», «smsclub», «twilio»). Null
   /// while we still run the stub-only sender (logs without external call).
   provider     String?
   status       String   // 'queued' | 'sent' | 'failed'

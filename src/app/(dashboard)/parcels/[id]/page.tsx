@@ -153,6 +153,8 @@ export default function ParcelDetailPage() {
   // Bumped after a successful send-invoice click — triggers <InvoiceHistory>
   // refetch without depending on the parent fetchParcel call.
   const [invoiceRefreshKey, setInvoiceRefreshKey] = useState(0);
+  // ТЗ docx 18.08.26: оновлення історії «Надіслані підтвердження» після відправки.
+  const [confirmRefreshKey, setConfirmRefreshKey] = useState(0);
 
   useEffect(() => {
     fetch('/api/trips').then(r => r.ok ? r.json() : []).then(setTrips);
@@ -517,7 +519,7 @@ export default function ParcelDetailPage() {
             <span className="text-gray-400 mx-1">·</span>
             <PhoneLink phone={parties.receiver.phone} />
             {/* ТЗ docx 08.08.26: WhatsApp/Viber — надіслати підтвердження Отримувачу. */}
-            <PartyShareButtons phone={parties.receiver.phone} message={confirmationMessage} className="ml-1.5" />
+            <PartyShareButtons parcelId={parcel.id} toParty="receiver" phone={parties.receiver.phone} message={confirmationMessage} onSent={() => setConfirmRefreshKey((n) => n + 1)} className="ml-1.5" />
             {parties.receiver.address && (() => {
               // ТЗ docx 15.07.26 (п.2): у підсумку — ЛИШЕ дані поточного способу
               // доставки. ТЗ docx 26.07.26 (п.1): для accepted+ — зі знімка.
@@ -558,7 +560,7 @@ export default function ParcelDetailPage() {
             <span className="text-gray-400 mx-1">·</span>
             <PhoneLink phone={parties.sender.phone} />
             {/* ТЗ docx 08.08.26: WhatsApp/Viber — надіслати підтвердження Відправнику. */}
-            <PartyShareButtons phone={parties.sender.phone} message={confirmationMessage} className="ml-1.5" />
+            <PartyShareButtons parcelId={parcel.id} toParty="sender" phone={parties.sender.phone} message={confirmationMessage} onSent={() => setConfirmRefreshKey((n) => n + 1)} className="ml-1.5" />
             {parties.sender.address && (() => {
               // ТЗ docx 15.07.26 (п.2): лише дані поточного способу; країну UA у
               // Відправника не показуємо. ТЗ docx 26.07.26 (п.1): accepted+ — зі знімка.
@@ -654,7 +656,9 @@ export default function ParcelDetailPage() {
       <ParcelPaymentCard parcel={parcel} onUpdate={fetchParcel} />
 
       {/* Invoice history — only renders when ≥1 SMS sent for this parcel. */}
-      <InvoiceHistory parcelId={parcel.id} refreshKey={invoiceRefreshKey} />
+      <InvoiceHistory parcelId={parcel.id} kind="invoice" refreshKey={invoiceRefreshKey} />
+      {/* ТЗ docx 18.08.26: історія надісланих підтверджень (SMS/Viber/WhatsApp). */}
+      <InvoiceHistory parcelId={parcel.id} kind="confirmation" refreshKey={confirmRefreshKey} />
 
       {/* «Вікно доставки (4 години)» прибрано — за ТЗ це поле
           потрібне лише в Маршрутах, а не в тілі посилки. */}

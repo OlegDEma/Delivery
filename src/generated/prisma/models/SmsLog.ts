@@ -33,6 +33,8 @@ export type SmsLogMinAggregateOutputType = {
   toParty: string | null
   toPhone: string | null
   body: string | null
+  channel: string | null
+  kind: string | null
   provider: string | null
   status: string | null
   errorMessage: string | null
@@ -46,6 +48,8 @@ export type SmsLogMaxAggregateOutputType = {
   toParty: string | null
   toPhone: string | null
   body: string | null
+  channel: string | null
+  kind: string | null
   provider: string | null
   status: string | null
   errorMessage: string | null
@@ -59,6 +63,8 @@ export type SmsLogCountAggregateOutputType = {
   toParty: number
   toPhone: number
   body: number
+  channel: number
+  kind: number
   provider: number
   status: number
   errorMessage: number
@@ -74,6 +80,8 @@ export type SmsLogMinAggregateInputType = {
   toParty?: true
   toPhone?: true
   body?: true
+  channel?: true
+  kind?: true
   provider?: true
   status?: true
   errorMessage?: true
@@ -87,6 +95,8 @@ export type SmsLogMaxAggregateInputType = {
   toParty?: true
   toPhone?: true
   body?: true
+  channel?: true
+  kind?: true
   provider?: true
   status?: true
   errorMessage?: true
@@ -100,6 +110,8 @@ export type SmsLogCountAggregateInputType = {
   toParty?: true
   toPhone?: true
   body?: true
+  channel?: true
+  kind?: true
   provider?: true
   status?: true
   errorMessage?: true
@@ -186,6 +198,8 @@ export type SmsLogGroupByOutputType = {
   toParty: string
   toPhone: string
   body: string
+  channel: string
+  kind: string
   provider: string | null
   status: string
   errorMessage: string | null
@@ -220,6 +234,8 @@ export type SmsLogWhereInput = {
   toParty?: Prisma.StringFilter<"SmsLog"> | string
   toPhone?: Prisma.StringFilter<"SmsLog"> | string
   body?: Prisma.StringFilter<"SmsLog"> | string
+  channel?: Prisma.StringFilter<"SmsLog"> | string
+  kind?: Prisma.StringFilter<"SmsLog"> | string
   provider?: Prisma.StringNullableFilter<"SmsLog"> | string | null
   status?: Prisma.StringFilter<"SmsLog"> | string
   errorMessage?: Prisma.StringNullableFilter<"SmsLog"> | string | null
@@ -233,6 +249,8 @@ export type SmsLogOrderByWithRelationInput = {
   toParty?: Prisma.SortOrder
   toPhone?: Prisma.SortOrder
   body?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
   provider?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   errorMessage?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -249,6 +267,8 @@ export type SmsLogWhereUniqueInput = Prisma.AtLeast<{
   toParty?: Prisma.StringFilter<"SmsLog"> | string
   toPhone?: Prisma.StringFilter<"SmsLog"> | string
   body?: Prisma.StringFilter<"SmsLog"> | string
+  channel?: Prisma.StringFilter<"SmsLog"> | string
+  kind?: Prisma.StringFilter<"SmsLog"> | string
   provider?: Prisma.StringNullableFilter<"SmsLog"> | string | null
   status?: Prisma.StringFilter<"SmsLog"> | string
   errorMessage?: Prisma.StringNullableFilter<"SmsLog"> | string | null
@@ -262,6 +282,8 @@ export type SmsLogOrderByWithAggregationInput = {
   toParty?: Prisma.SortOrder
   toPhone?: Prisma.SortOrder
   body?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
   provider?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   errorMessage?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -281,6 +303,8 @@ export type SmsLogScalarWhereWithAggregatesInput = {
   toParty?: Prisma.StringWithAggregatesFilter<"SmsLog"> | string
   toPhone?: Prisma.StringWithAggregatesFilter<"SmsLog"> | string
   body?: Prisma.StringWithAggregatesFilter<"SmsLog"> | string
+  channel?: Prisma.StringWithAggregatesFilter<"SmsLog"> | string
+  kind?: Prisma.StringWithAggregatesFilter<"SmsLog"> | string
   provider?: Prisma.StringNullableWithAggregatesFilter<"SmsLog"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"SmsLog"> | string
   errorMessage?: Prisma.StringNullableWithAggregatesFilter<"SmsLog"> | string | null
@@ -294,6 +318,8 @@ export type SmsLogCreateInput = {
   toParty: string
   toPhone: string
   body: string
+  channel?: string
+  kind?: string
   provider?: string | null
   status: string
   errorMessage?: string | null
@@ -307,6 +333,8 @@ export type SmsLogUncheckedCreateInput = {
   toParty: string
   toPhone: string
   body: string
+  channel?: string
+  kind?: string
   provider?: string | null
   status: string
   errorMessage?: string | null
@@ -320,6 +348,8 @@ export type SmsLogUpdateInput = {
   toParty?: Prisma.StringFieldUpdateOperationsInput | string
   toPhone?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -333,6 +363,8 @@ export type SmsLogUncheckedUpdateInput = {
   toParty?: Prisma.StringFieldUpdateOperationsInput | string
   toPhone?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -346,6 +378,8 @@ export type SmsLogCreateManyInput = {
   toParty: string
   toPhone: string
   body: string
+  channel?: string
+  kind?: string
   provider?: string | null
   status: string
   errorMessage?: string | null
@@ -359,6 +393,8 @@ export type SmsLogUpdateManyMutationInput = {
   toParty?: Prisma.StringFieldUpdateOperationsInput | string
   toPhone?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -372,6 +408,8 @@ export type SmsLogUncheckedUpdateManyInput = {
   toParty?: Prisma.StringFieldUpdateOperationsInput | string
   toPhone?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -385,6 +423,8 @@ export type SmsLogCountOrderByAggregateInput = {
   toParty?: Prisma.SortOrder
   toPhone?: Prisma.SortOrder
   body?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
   provider?: Prisma.SortOrder
   status?: Prisma.SortOrder
   errorMessage?: Prisma.SortOrder
@@ -398,6 +438,8 @@ export type SmsLogMaxOrderByAggregateInput = {
   toParty?: Prisma.SortOrder
   toPhone?: Prisma.SortOrder
   body?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
   provider?: Prisma.SortOrder
   status?: Prisma.SortOrder
   errorMessage?: Prisma.SortOrder
@@ -411,6 +453,8 @@ export type SmsLogMinOrderByAggregateInput = {
   toParty?: Prisma.SortOrder
   toPhone?: Prisma.SortOrder
   body?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
   provider?: Prisma.SortOrder
   status?: Prisma.SortOrder
   errorMessage?: Prisma.SortOrder
@@ -426,6 +470,8 @@ export type SmsLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   toParty?: boolean
   toPhone?: boolean
   body?: boolean
+  channel?: boolean
+  kind?: boolean
   provider?: boolean
   status?: boolean
   errorMessage?: boolean
@@ -439,6 +485,8 @@ export type SmsLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   toParty?: boolean
   toPhone?: boolean
   body?: boolean
+  channel?: boolean
+  kind?: boolean
   provider?: boolean
   status?: boolean
   errorMessage?: boolean
@@ -452,6 +500,8 @@ export type SmsLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   toParty?: boolean
   toPhone?: boolean
   body?: boolean
+  channel?: boolean
+  kind?: boolean
   provider?: boolean
   status?: boolean
   errorMessage?: boolean
@@ -465,6 +515,8 @@ export type SmsLogSelectScalar = {
   toParty?: boolean
   toPhone?: boolean
   body?: boolean
+  channel?: boolean
+  kind?: boolean
   provider?: boolean
   status?: boolean
   errorMessage?: boolean
@@ -472,7 +524,7 @@ export type SmsLogSelectScalar = {
   createdAt?: boolean
 }
 
-export type SmsLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parcelId" | "toParty" | "toPhone" | "body" | "provider" | "status" | "errorMessage" | "sentById" | "createdAt", ExtArgs["result"]["smsLog"]>
+export type SmsLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parcelId" | "toParty" | "toPhone" | "body" | "channel" | "kind" | "provider" | "status" | "errorMessage" | "sentById" | "createdAt", ExtArgs["result"]["smsLog"]>
 
 export type $SmsLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SmsLog"
@@ -484,7 +536,15 @@ export type $SmsLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     toPhone: string
     body: string
     /**
-     * Provider name once we wire one up (e.g. «twilio», «turbosms»). Null
+     * ТЗ docx 18.08.26: канал доставки — 'sms' | 'whatsapp' | 'viber'.
+     */
+    channel: string
+    /**
+     * Вид повідомлення — 'invoice' (рахунок) | 'confirmation' (підтвердження посилки).
+     */
+    kind: string
+    /**
+     * Provider name once we wire one up (e.g. «turbosms», «smsclub», «twilio»). Null
      * while we still run the stub-only sender (logs without external call).
      */
     provider: string | null
@@ -920,6 +980,8 @@ export interface SmsLogFieldRefs {
   readonly toParty: Prisma.FieldRef<"SmsLog", 'String'>
   readonly toPhone: Prisma.FieldRef<"SmsLog", 'String'>
   readonly body: Prisma.FieldRef<"SmsLog", 'String'>
+  readonly channel: Prisma.FieldRef<"SmsLog", 'String'>
+  readonly kind: Prisma.FieldRef<"SmsLog", 'String'>
   readonly provider: Prisma.FieldRef<"SmsLog", 'String'>
   readonly status: Prisma.FieldRef<"SmsLog", 'String'>
   readonly errorMessage: Prisma.FieldRef<"SmsLog", 'String'>
