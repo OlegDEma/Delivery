@@ -9,10 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users2, ArrowLeft, UserPlus, Phone, Trash2 } from 'lucide-react';
+import { Users2, ArrowLeft, UserPlus, Phone, Trash2, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { PhoneInput } from '@/components/shared/phone-input';
+import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { formatCurrency } from '@/lib/utils/format';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { MinibusSeating } from '@/components/passengers/minibus-seating';
@@ -76,6 +77,8 @@ export default function PassengersPage() {
 
   // Add form
   const [formOpen, setFormOpen] = useState(false);
+  // ТЗ docx 20.08.26: режим редагування пасажира (null = додавання).
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     firstName: '', lastName: '', phone: '',
@@ -110,6 +113,7 @@ export default function PassengersPage() {
   }, [selectedTripId, fetchTrips, fetchTripDetail]);
 
   function resetForm() {
+    setEditingId(null);
     setForm({
       firstName: '', lastName: '', phone: '',
       seatNumber: '', pickupAddress: '', dropoffAddress: '',
@@ -118,39 +122,57 @@ export default function PassengersPage() {
   }
 
   async function handleCreate() {
-    if (!selectedTripId) return;
+    if (!editingId && !selectedTripId) return;
     if (!form.firstName.trim() || !form.lastName.trim() || !form.phone.trim()) {
       toast.error('Імʼя, прізвище і телефон обовʼязкові');
       return;
     }
     setSaving(true);
-    const res = await fetch('/api/passengers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        tripId: selectedTripId,
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        phone: form.phone.trim(),
-        seatNumber: form.seatNumber ? Number(form.seatNumber) : null,
-        pickupAddress: form.pickupAddress.trim() || null,
-        dropoffAddress: form.dropoffAddress.trim() || null,
-        price: form.price ? Number(form.price) : null,
-        currency: form.currency,
-        isPaid: form.isPaid,
-        notes: form.notes.trim() || null,
-      }),
-    });
+    // Спільне тіло; при створенні додаємо tripId.
+    const payload = {
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      phone: form.phone.trim(),
+      seatNumber: form.seatNumber ? Number(form.seatNumber) : null,
+      pickupAddress: form.pickupAddress.trim() || null,
+      dropoffAddress: form.dropoffAddress.trim() || null,
+      price: form.price ? Number(form.price) : null,
+      currency: form.currency,
+      isPaid: form.isPaid,
+      notes: form.notes.trim() || null,
+    };
+    // ТЗ docx 20.08.26: редагування наявного пасажира (PATCH) або додавання (POST).
+    const res = editingId
+      ? await fetch(`/api/passengers?id=${editingId}`, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+        })
+      : await fetch('/api/passengers', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tripId: selectedTripId, ...payload }),
+        });
     setSaving(false);
     if (res.ok) {
-      toast.success('Пасажира додано');
+      toast.success(editingId ? 'Пасажира оновлено' : 'Пасажира додано');
       resetForm();
       setFormOpen(false);
-      fetchTripDetail(selectedTripId);
+      if (selectedTripId) fetchTripDetail(selectedTripId);
     } else {
       const data = await res.json().catch(() => ({}));
-      toast.error(data.error || 'Помилка створення');
+      toast.error(data.error || 'Помилка');
     }
+  }
+
+  // ТЗ docx 20.08.26: відкрити форму в режимі редагування, заповнену даними пасажира.
+  function openEdit(p: Passenger) {
+    setEditingId(p.id);
+    setForm({
+      firstName: p.firstName, lastName: p.lastName, phone: p.phone,
+      seatNumber: p.seatNumber != null ? String(p.seatNumber) : '',
+      pickupAddress: p.pickupAddress || '', dropoffAddress: p.dropoffAddress || '',
+      price: p.price != null ? String(p.price) : '', currency: p.currency || 'EUR',
+      isPaid: p.isPaid, notes: p.notes || '',
+    });
+    setFormOpen(true);
   }
 
   async function handleDelete(id: string) {
@@ -211,7 +233,7 @@ export default function PassengersPage() {
 
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-lg font-semibold">Пасажири ({occupied})</h2>
-              <Dialog open={formOpen} onOpenChange={setFormOpen}>
+              <Dialog open={formOpen} onOpenChange={(o) => { setFormOpen(o); if (!o) resetForm(); }}>
                 <DialogTrigger render={
                   <Button disabled={capacity === 0 && free <= 0}>
                     <UserPlus className="w-4 h-4 mr-1" /> Додати пасажира
@@ -219,17 +241,18 @@ export default function PassengersPage() {
                 } />
                 <DialogContent className="max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Новий пасажир</DialogTitle>
+                    <DialogTitle>{editingId ? 'Редагувати пасажира' : 'Новий пасажир'}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <Label className="text-xs">Прізвище</Label>
-                        <Input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+                        {/* ТЗ docx 20.08.26: ПІБ пасажира — з великої літери за замовчуванням. */}
+                        <CapitalizeInput value={form.lastName} onChange={(v) => setForm({ ...form, lastName: v })} />
                       </div>
                       <div>
                         <Label className="text-xs">Імʼя</Label>
-                        <Input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+                        <CapitalizeInput value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} />
                       </div>
                     </div>
                     <PhoneInput
@@ -344,13 +367,24 @@ export default function PassengersPage() {
                         <div className="text-sm font-medium">{formatCurrency(p.price, p.currency)}</div>
                       )}
                       {canDeletePassenger && (
-                        <Button
-                          variant="ghost" size="sm"
-                          onClick={() => handleDelete(p.id)}
-                          className="text-red-600 hover:text-red-800 hover:bg-red-50 h-7 px-2 mt-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
+                        <div className="flex items-center gap-1 mt-1 justify-end">
+                          {/* ТЗ docx 20.08.26: редагування наявного пасажира (admin). */}
+                          <Button
+                            variant="ghost" size="sm"
+                            onClick={() => openEdit(p)}
+                            title="Редагувати пасажира"
+                            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 h-7 px-2"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost" size="sm"
+                            onClick={() => handleDelete(p.id)}
+                            className="text-red-600 hover:text-red-800 hover:bg-red-50 h-7 px-2"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>

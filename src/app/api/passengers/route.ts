@@ -23,6 +23,9 @@ const passengerCreateSchema = z.object({
   notes: z.string().trim().max(1000).nullable().optional(),
 });
 
+// ТЗ docx 20.08.26: редагування наявного пасажира (усі поля опційні).
+const passengerUpdateSchema = passengerCreateSchema.omit({ tripId: true }).partial();
+
 // GET /api/passengers?tripId=...
 // За замовчуванням повертає пасажирів майбутніх та нещодавніх рейсів.
 export async function GET(request: NextRequest) {
@@ -166,6 +169,61 @@ export async function POST(request: NextRequest) {
     ...passenger,
     price: passenger.price != null ? Number(passenger.price) : null,
   }, { status: 201 });
+}
+
+// PATCH /api/passengers?id=... — редагувати пасажира (ТЗ docx 20.08.26: admin only + аудит).
+export async function PATCH(request: NextRequest) {
+  const guard = await requireRole(ADMIN_ROLES);
+  if (!guard.ok) return guard.response;
+
+  const id = new URL(request.url).searchParams.get('id');
+  if (!id || !isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+
+  const parsed = await parseBody(request, passengerUpdateSchema);
+  if (parsed instanceof NextResponse) return parsed;
+  const body = parsed;
+
+  const existing = await prisma.passenger.findFirst({
+    where: { id, deletedAt: null },
+    select: { id: true, tripId: true },
+  });
+  if (!existing) return NextResponse.json({ error: 'Пасажира не знайдено' }, { status: 404 });
+
+  // Якщо змінюють місце — перевіряємо, що воно не зайняте ІНШИМ пасажиром рейсу.
+  if (body.seatNumber != null) {
+    const trip = await prisma.trip.findUnique({ where: { id: existing.tripId }, select: { passengerCapacity: true } });
+    if (trip && body.seatNumber > trip.passengerCapacity) {
+      return NextResponse.json({ error: `Місце ${body.seatNumber} перевищує місткість (${trip.passengerCapacity})` }, { status: 400 });
+    }
+    const taken = await prisma.passenger.findFirst({
+      where: { tripId: existing.tripId, seatNumber: body.seatNumber, deletedAt: null, id: { not: id } },
+    });
+    if (taken) return NextResponse.json({ error: `Місце ${body.seatNumber} вже зайняте` }, { status: 409 });
+  }
+
+  const updated = await prisma.passenger.update({
+    where: { id },
+    data: {
+      ...(body.firstName !== undefined ? { firstName: capitalize(body.firstName) } : {}),
+      ...(body.lastName !== undefined ? { lastName: capitalize(body.lastName) } : {}),
+      ...(body.phone !== undefined ? { phone: body.phone, phoneNormalized: normalizePhone(body.phone) } : {}),
+      ...(body.seatNumber !== undefined ? { seatNumber: body.seatNumber } : {}),
+      ...(body.pickupAddress !== undefined ? { pickupAddress: body.pickupAddress || null } : {}),
+      ...(body.dropoffAddress !== undefined ? { dropoffAddress: body.dropoffAddress || null } : {}),
+      ...(body.price !== undefined ? { price: body.price ?? null } : {}),
+      ...(body.currency !== undefined ? { currency: body.currency } : {}),
+      ...(body.isPaid !== undefined ? { isPaid: body.isPaid } : {}),
+      ...(body.notes !== undefined ? { notes: body.notes || null } : {}),
+    },
+  });
+
+  // ТЗ docx 20.08.26: фіксація «що і коли» — аудит-лог із переліком змінених полів.
+  logger.audit('passenger.updated', {
+    passengerId: id, tripId: existing.tripId, userId: guard.user.userId,
+    changedFields: Object.keys(body),
+  });
+
+  return NextResponse.json({ ...updated, price: updated.price != null ? Number(updated.price) : null });
 }
 
 // DELETE /api/passengers?id=... — soft delete (admin only)
