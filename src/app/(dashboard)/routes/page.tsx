@@ -10,6 +10,8 @@ import { type ParcelStatusType } from '@/lib/constants/statuses';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { formatDate, formatDateWithWeekday } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { useAuth } from '@/lib/hooks/use-auth';
+import { ROLES } from '@/lib/constants/roles';
 
 interface PartyAddr {
   country: string | null;
@@ -93,6 +95,9 @@ function euDestParty(p: RouteItem) {
 }
 
 export default function RoutesPage() {
+  // ТЗ docx 21.08.26: селектор поїздок — лише Суперадміну; водій бачить текучу поїздку.
+  const { role } = useAuth();
+  const isSuperAdmin = role === ROLES.SUPER_ADMIN;
   const [journeys, setJourneys] = useState<JourneyOption[]>([]);
   const [selectedJourneyId, setSelectedJourneyId] = useState('');
   const [journeysLoaded, setJourneysLoaded] = useState(false);
@@ -402,7 +407,9 @@ export default function RoutesPage() {
         <Button variant="outline" size="sm" onClick={() => window.print()}>Друкувати</Button>
       </div>
 
-      {/* Вибір поїздки — лист показує посилки ОБОХ її рейсів. */}
+      {/* ТЗ docx 21.08.26: селектор поїздок — лише Суперадміну (бачить усі поїздки).
+          Водій бачить лише ТЕКУЧУ поїздку (авто-вибір найближчої), тож селектор прибрано. */}
+      {isSuperAdmin && (
       <div className="flex gap-2 mb-4 print:hidden">
         <Select value={selectedJourneyId} onValueChange={(v) => { setSelectedJourneyId(v ?? ''); setLoading(true); }}>
           <SelectTrigger className="w-96 h-9 text-sm">
@@ -417,6 +424,7 @@ export default function RoutesPage() {
           </SelectContent>
         </Select>
       </div>
+      )}
 
       {/* ТЗ docx 08.08.26 (v12): панель формування Маршрутного листа —
           групування списку + дата + кнопка «Створити» (з відмічених адрес). */}
