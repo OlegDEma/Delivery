@@ -12,6 +12,7 @@ import { formatDate, formatDateWithWeekday } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
+import { ContactIcons } from '@/components/shared/contact-icons';
 
 interface PartyAddr {
   country: string | null;
@@ -573,11 +574,14 @@ export default function RoutesPage() {
                           <Checkbox checked={selectedParcelIds.has(p.id)} onCheckedChange={() => toggleParcelSelection(p.id)} />
                         </div>
                       </div>
-                      {/* Нижній рядок: клієнт · телефон · напрямок */}
-                      <Link href={`/parcels/${p.id}`} className="block text-xs text-gray-500 mt-0.5 ml-5">
-                        <span className="font-mono text-gray-400 mr-1">{p.internalNumber}</span>
-                        {d.name} · {d.phone} · {p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`}
-                      </Link>
+                      {/* Нижній рядок: клієнт · телефон · напрямок + ТЗ 21.08.26 контакт-іконки. */}
+                      <div className="flex items-center gap-2 mt-0.5 ml-5">
+                        <Link href={`/parcels/${p.id}`} className="block text-xs text-gray-500 min-w-0 truncate">
+                          <span className="font-mono text-gray-400 mr-1">{p.internalNumber}</span>
+                          {d.name} · {d.phone} · {p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`}
+                        </Link>
+                        <ContactIcons phone={d.phone} className="shrink-0 print:hidden" />
+                      </div>
                     </div>
                   );
                 })}
@@ -604,6 +608,7 @@ export default function RoutesPage() {
                     <div className="text-xs text-gray-500 mt-0.5 ml-5 flex items-center gap-1">
                       <span className="text-amber-600">Ручна адреса</span>
                       {t.manualName ? ` · ${t.manualName}` : ''}{t.manualPhone ? ` · ${t.manualPhone}` : ''}{t.manualDirection ? ` · ${t.manualDirection}` : ''}
+                      {t.manualPhone && <ContactIcons phone={t.manualPhone} className="ml-2 print:hidden" />}
                       <button type="button" onClick={() => handleRemoveFromSheet(t.id)} className="ml-auto text-red-500 hover:text-red-700 print:hidden">Видалити</button>
                     </div>
                   </div>
