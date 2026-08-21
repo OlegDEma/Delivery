@@ -353,7 +353,11 @@ export default function JourneysPage() {
 
   // ТЗ docx 09.07.26: спершу застосовуємо ФІЛЬТР країни (ховає інші), потім
   // (за потреби) групуємо відфільтрований список.
-  const filteredJourneys = filterCountry ? journeys.filter(j => j.country === filterCountry) : journeys;
+  // ТЗ docx 20.08.26: хронологічний порядок — раніші поїздки ВГОРІ (прокрутити),
+  // пізніші НИЖЧЕ; поточна/найближча авто-скролиться у верх екрана (див. нижче).
+  const filteredJourneys = (filterCountry ? journeys.filter(j => j.country === filterCountry) : journeys)
+    .slice()
+    .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
   // ТЗ docx 08.08.26: набір id поїздок для підсвітки — поточна/найближча ОКРЕМО
   // для кожної країни. Скрол — до однієї найрелевантнішої (по всьому списку).
   const focusIds = useMemo(() => pickFocusJourneyIds(filteredJourneys), [filteredJourneys]);
@@ -365,7 +369,8 @@ export default function JourneysPage() {
     didInitialFocus.current = true;
     setTimeout(() => {
       const el = rowRefs.current.get(scrollFocusId);
-      if (el) el.scrollIntoView({ behavior: 'auto', block: 'center' });
+      // ТЗ docx 20.08.26: поточна/найближча — вгорі екрана (не в центрі).
+      if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
     }, 60);
   }, [loading, filteredJourneys, scrollFocusId]);
   // Групування за країною (ТЗ D10: у Поїздок немає напрямку → групуємо за країною).

@@ -116,7 +116,7 @@ export default function TripsPage() {
     if (!id) return;
     const el = rowRefs.current.get(id);
     if (!el) return;
-    el.scrollIntoView({ behavior: 'auto', block: 'center' });
+    el.scrollIntoView({ behavior: 'auto', block: 'start' }); // ТЗ docx 20.08.26: вгору екрана
     el.classList.add('ring-2', 'ring-blue-400', 'ring-offset-1');
     setTimeout(() => el.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-1'), 2200);
   }
@@ -275,7 +275,8 @@ export default function TripsPage() {
   const filteredTrips = trips.filter(t =>
     (!filterCountry || t.country === filterCountry) &&
     (!filterDirection || t.direction === filterDirection)
-  );
+  // ТЗ docx 20.08.26: хронологічний порядок — раніші рейси вгорі, пізніші нижче.
+  ).sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
   const groups: { key: string; label: string; items: Trip[] }[] = (() => {
     if (groupBy === 'none') return [{ key: '', label: '', items: filteredTrips }];
     const map = new Map<string, Trip[]>();
