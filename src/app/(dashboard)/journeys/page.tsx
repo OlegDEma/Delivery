@@ -45,6 +45,7 @@ interface Journey {
   status: string;
   vehicleInfo: string | null;
   vehicleId: string | null;
+  passengerCapacity: number;
   notes: string | null;
   assignedCourier: { id: string; fullName: string } | null;
   secondCourier: { id: string; fullName: string } | null;
@@ -144,12 +145,15 @@ export default function JourneysPage() {
   // ТЗ L3c: циклічність — щотижневе повторення протягом періоду.
   const [cyclic, setCyclic] = useState(false);
   const [cyclicPeriod, setCyclicPeriod] = useState<'3m' | '6m' | '1y'>('3m');
+  // ТЗ docx 21.08.26: пасажирські (посадкові) місця — на поїздку.
+  const [passengerCapacity, setPassengerCapacity] = useState('');
 
   // ── Діалог РЕДАГУВАННЯ (ТЗ L3d «друга частина»): водії/транспорт/примітки ──
   const [editJourney, setEditJourney] = useState<Journey | null>(null);
   const [editCourier1, setEditCourier1] = useState('');
   const [editCourier2, setEditCourier2] = useState('');
   const [editVehicleId, setEditVehicleId] = useState('');
+  const [editPassengerCapacity, setEditPassengerCapacity] = useState('');
   const [editNotes, setEditNotes] = useState('');
   const [editSaving, setEditSaving] = useState(false);
 
@@ -211,6 +215,8 @@ export default function JourneysPage() {
         // циклічність
         cyclic,
         cyclicPeriod: cyclic ? cyclicPeriod : undefined,
+        // ТЗ docx 21.08.26: пасажирські місця — на поїздку.
+        passengerCapacity: passengerCapacity ? Number(passengerCapacity) : 0,
       }),
     });
 
@@ -219,7 +225,7 @@ export default function JourneysPage() {
       setDialogOpen(false);
       setDepartureDate(''); setEuArrivalDate(''); setEuReturnDate(''); setEndDate('');
       setWeekdayStart(''); setWdDeparture(''); setWdEuArrival(''); setWdEuReturn(''); setWdEnd('');
-      setCyclic(false); setScheduleMode('dates');
+      setCyclic(false); setScheduleMode('dates'); setPassengerCapacity('');
       toast.success(
         data.count > 1
           ? `Створено ${data.count} поїздок (по 2 рейси кожна)`
@@ -238,6 +244,7 @@ export default function JourneysPage() {
     setEditCourier1(j.assignedCourier?.id || '');
     setEditCourier2(j.secondCourier?.id || '');
     setEditVehicleId(j.vehicleId || '');
+    setEditPassengerCapacity(j.passengerCapacity ? String(j.passengerCapacity) : '');
     setEditNotes(j.notes || '');
   }
 
@@ -253,6 +260,8 @@ export default function JourneysPage() {
         secondCourierId: editCourier2 || null,
         // ТЗ docx 08.08.26: обираємо ТЗ зі списку (id); vehicleInfo сервер виведе сам.
         vehicleId: editVehicleId || null,
+        // ТЗ docx 21.08.26: пасажирські місця поїздки (синкнуться на обидва рейси).
+        passengerCapacity: editPassengerCapacity ? Number(editPassengerCapacity) : 0,
         notes: editNotes || null,
       }),
     });
@@ -501,6 +510,18 @@ export default function JourneysPage() {
                 )}
               </div>
 
+              {/* ТЗ docx 21.08.26: пасажирські місця задаються на поїздку (успадковуються рейсами). */}
+              <div className="border-t pt-3">
+                <Label className="text-xs">Пасажирських місць (опціонально)</Label>
+                <Input
+                  type="number" min={0} max={99}
+                  value={passengerCapacity}
+                  onChange={(e) => setPassengerCapacity(e.target.value)}
+                  placeholder="0 — пасажирів не возимо"
+                />
+                <p className="text-[10px] text-gray-400 mt-0.5">Можна змінити пізніше при редагуванні поїздки.</p>
+              </div>
+
               <p className="text-xs text-gray-400">
                 Автоматично створиться 2 рейси на поїздку: UA→{country} та {country}→UA.
                 {' '}Водіїв і транспорт можна вказати пізніше, відкривши поїздку («Редагувати»).
@@ -742,6 +763,20 @@ export default function JourneysPage() {
                 {vehicles.length === 0 && (
                   <p className="text-[10px] text-gray-400 mt-0.5">Додайте транспорт у розділі «Транспортні засоби».</p>
                 )}
+              </div>
+              {/* ТЗ docx 21.08.26: пасажирські місця — на поїздку (спільні для обох рейсів). */}
+              <div>
+                <Label className="text-xs">Пасажирських місць</Label>
+                <Input
+                  type="number" min={0} max={99}
+                  value={editPassengerCapacity}
+                  onChange={(e) => setEditPassengerCapacity(e.target.value)}
+                  placeholder="0 — пасажирів не возимо"
+                />
+                <p className="text-[10px] text-gray-400 mt-0.5">
+                  Задається на поїздку — обидва рейси успадкують це число. Місце водія завжди зайняте;
+                  недоступні місця = загальні місця транспорту − пасажирські.
+                </p>
               </div>
               <div>
                 <Label className="text-xs">Примітки</Label>

@@ -56,7 +56,6 @@ export default function TripsPage() {
   const [country, setCountry] = useState('NL');
   const [departureDate, setDepartureDate] = useState('');
   const [notes, setNotes] = useState('');
-  const [passengerCapacity, setPassengerCapacity] = useState('');
 
   // ТЗ docx 01.07.26: inline «Редагувати(дата)»/«Видалити» на кожному рейсі.
   const [editTrip, setEditTrip] = useState<Trip | null>(null);
@@ -80,8 +79,6 @@ export default function TripsPage() {
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const didInitialFocus = useRef(false);
   const pendingFocusId = useRef<string | null>(null);
-  const [capDialogOpen, setCapDialogOpen] = useState(false);
-  const [bulkCapacity, setBulkCapacity] = useState('');
   const [bulkSaving, setBulkSaving] = useState(false);
 
   async function fetchTrips() {
@@ -214,38 +211,8 @@ export default function TripsPage() {
     fetchTrips();
   }
 
-  async function handleBulkSetCapacity(e: React.FormEvent) {
-    e.preventDefault();
-    if (selectedTrips.length === 0) return;
-    const cap = Number(bulkCapacity);
-    if (!Number.isFinite(cap) || cap < 0) { toast.error('Вкажіть невідʼємне число місць'); return; }
-    // ТЗ docx 02.07.26 (D11): попереджаємо (але дозволяємо), якщо занижуємо нижче
-    // вже призначених пасажирів у якомусь із рейсів.
-    const conflicting = selectedTrips.filter(t => cap < t._count.passengers);
-    if (conflicting.length > 0) {
-      const ok = confirm(
-        `У ${conflicting.length} рейс(ах) уже призначено більше пасажирів, ніж ${cap} місць. ` +
-        `Все одно встановити ${cap}? (наявні пасажири залишаться, але місць буде менше)`
-      );
-      if (!ok) return;
-    }
-    setBulkSaving(true);
-    const results = await Promise.all(selectedTrips.map(t =>
-      fetch(`/api/trips/${t.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passengerCapacity: cap }),
-      }).then(r => r.ok).catch(() => false)
-    ));
-    setBulkSaving(false);
-    const ok = results.filter(Boolean).length;
-    if (ok === results.length) toast.success(`Оновлено місць у рейсах: ${ok}`);
-    else toast.error(`Оновлено ${ok}/${results.length}`);
-    setCapDialogOpen(false);
-    setBulkCapacity('');
-    clearSelection();
-    fetchTrips();
-  }
+  // ТЗ docx 21.08.26: масове «Задати місця» на рейси прибрано — місткість тепер
+  // задається на ПОЇЗДКУ (розділ «Поїздки» → «Редагувати»).
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -257,12 +224,11 @@ export default function TripsPage() {
       body: JSON.stringify({
         direction, country, departureDate,
         notes: notes || undefined,
-        passengerCapacity: passengerCapacity ? Number(passengerCapacity) : 0,
       }),
     });
     if (res.ok) {
       setDialogOpen(false);
-      setDepartureDate(''); setNotes(''); setPassengerCapacity('');
+      setDepartureDate(''); setNotes('');
       fetchTrips();
     } else {
       const data = await res.json();
@@ -333,15 +299,8 @@ export default function TripsPage() {
                 <Label>Дата відправлення</Label>
                 <Input type="date" value={departureDate} onChange={(e) => setDepartureDate(e.target.value)} required />
               </div>
-              <div>
-                <Label>Місткість пасажирів</Label>
-                <Input
-                  type="number" min={0} max={99}
-                  value={passengerCapacity}
-                  onChange={(e) => setPassengerCapacity(e.target.value)}
-                  placeholder="0 — не возимо пасажирів"
-                />
-              </div>
+              {/* ТЗ docx 21.08.26: пасажирські місця задаються на ПОЇЗДКУ, не на рейс.
+                  Тут поле прибрано — рейс успадковує місткість своєї поїздки. */}
               <div>
                 <Label>Примітки</Label>
                 <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
@@ -411,9 +370,7 @@ export default function TripsPage() {
           </div>
           {selectedIds.size > 0 && isSuperAdmin && (
             <div className="flex items-center gap-2 ml-auto">
-              <Button size="sm" variant="outline" onClick={() => { setBulkCapacity(''); setCapDialogOpen(true); }} disabled={bulkSaving}>
-                Задати місця
-              </Button>
+              {/* ТЗ docx 21.08.26: «Задати місця» прибрано — місткість задається на поїздку. */}
               <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={handleBulkDelete} disabled={bulkSaving}>
                 Видалити вибрані
               </Button>
@@ -536,32 +493,6 @@ export default function TripsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ТЗ docx 02.07.26 (D11): масове задання кількості місць для пасажирів. */}
-      <Dialog open={capDialogOpen} onOpenChange={setCapDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Кількість місць для пасажирів</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleBulkSetCapacity} className="space-y-3">
-            <p className="text-sm text-gray-500">
-              Застосувати до вибраних рейсів: {selectedTrips.length}
-            </p>
-            <div>
-              <Label className="text-xs">Кількість місць</Label>
-              <Input
-                type="number" min={0} max={99}
-                value={bulkCapacity}
-                onChange={(e) => setBulkCapacity(e.target.value)}
-                placeholder="0 — не возимо пасажирів"
-                autoFocus
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={bulkSaving || bulkCapacity === ''}>
-              {bulkSaving ? 'Збереження…' : 'Застосувати'}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -93,6 +93,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Невалідна країна (UA/NL/AT/DE)' }, { status: 400 });
   }
 
+  // ТЗ docx 21.08.26: пасажирські місця задаються на поїздку (успадковуються рейсами).
+  const passengerCapacity = Math.max(0, Math.trunc(Number(body.passengerCapacity)) || 0);
+
   // ── Базовий тиждень: 4 дати (виїзд UA → приїзд EU → виїзд EU → приїзд UA) ──
   let baseDeparture: Date;
   let baseEuArrival: Date | null = null;
@@ -155,13 +158,14 @@ export async function POST(request: NextRequest) {
         euArrivalDate: euArr,
         euReturnDate: euRet,
         endDate: end,
+        passengerCapacity,
         createdById: user.id,
       },
     });
     await prisma.trip.createMany({
       data: [
-        { direction: 'ua_to_eu', country: country as Country, departureDate: dep, arrivalDate: euArr, journeyId: journey.id, createdById: user.id },
-        { direction: 'eu_to_ua', country: country as Country, departureDate: euRet ?? dep, arrivalDate: end, journeyId: journey.id, createdById: user.id },
+        { direction: 'ua_to_eu', country: country as Country, departureDate: dep, arrivalDate: euArr, journeyId: journey.id, passengerCapacity, createdById: user.id },
+        { direction: 'eu_to_ua', country: country as Country, departureDate: euRet ?? dep, arrivalDate: end, journeyId: journey.id, passengerCapacity, createdById: user.id },
       ],
     });
     created.push(journey);
@@ -188,7 +192,7 @@ export async function PATCH(request: NextRequest) {
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
   // ТЗ docx 08.08.26: ЗАВЕРШЕНУ поїздку (усі рейси завершені) редагувати заборонено.
-  const JOURNEY_EDIT_FIELDS = ['assignedCourierId', 'secondCourierId', 'euArrivalDate', 'euReturnDate', 'endDate', 'vehicleInfo', 'vehicleId', 'notes'];
+  const JOURNEY_EDIT_FIELDS = ['assignedCourierId', 'secondCourierId', 'euArrivalDate', 'euReturnDate', 'endDate', 'vehicleInfo', 'vehicleId', 'passengerCapacity', 'notes'];
   if (JOURNEY_EDIT_FIELDS.some((f) => body[f] !== undefined)) {
     const jTrips = await prisma.trip.findMany({ where: { journeyId: id }, select: { status: true } });
     if (jTrips.length > 0 && jTrips.every((t) => t.status === 'completed')) {
@@ -218,6 +222,8 @@ export async function PATCH(request: NextRequest) {
       data.vehicleInfo = null;
     }
   }
+  // ТЗ docx 21.08.26: пасажирські місця — на поїздку (синкаються на рейси нижче).
+  if (body.passengerCapacity !== undefined) data.passengerCapacity = Math.max(0, Math.trunc(Number(body.passengerCapacity)) || 0);
   if (body.notes !== undefined) data.notes = body.notes || null;
 
   const updated = await prisma.journey.update({
@@ -230,7 +236,7 @@ export async function PATCH(request: NextRequest) {
   if (
     body.status !== undefined || body.assignedCourierId !== undefined ||
     body.secondCourierId !== undefined || body.vehicleInfo !== undefined ||
-    body.vehicleId !== undefined
+    body.vehicleId !== undefined || body.passengerCapacity !== undefined
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tripSync: any = {};
@@ -242,6 +248,8 @@ export async function PATCH(request: NextRequest) {
       tripSync.vehicleId = data.vehicleId ?? null;
       tripSync.vehicleInfo = data.vehicleInfo ?? null;
     }
+    // ТЗ docx 21.08.26: місткість поїздки успадковується кожним рейсом.
+    if (body.passengerCapacity !== undefined) tripSync.passengerCapacity = data.passengerCapacity;
     if (Object.keys(tripSync).length > 0) {
       await prisma.trip.updateMany({ where: { journeyId: id }, data: tripSync });
     }

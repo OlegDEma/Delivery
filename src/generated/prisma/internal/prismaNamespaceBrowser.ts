@@ -163,6 +163,7 @@ export const JourneyScalarFieldEnum = {
   secondCourierId: 'secondCourierId',
   vehicleInfo: 'vehicleInfo',
   vehicleId: 'vehicleId',
+  passengerCapacity: 'passengerCapacity',
   notes: 'notes',
   createdById: 'createdById',
   createdAt: 'createdAt',

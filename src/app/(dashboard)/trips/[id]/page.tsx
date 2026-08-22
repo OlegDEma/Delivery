@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
-import { formatDate, formatDateWithWeekday, formatWeight } from '@/lib/utils/format';
+import { formatDateWithWeekday, formatWeight } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
@@ -77,8 +77,6 @@ export default function TripDetailPage() {
   const [depDate, setDepDate] = useState('');
   const [arrDate, setArrDate] = useState('');
   const [deleting, setDeleting] = useState(false);
-  // ТЗ docx 02.07.26 (D12): кількість місць для пасажирів у Керуванні рейсом.
-  const [capacity, setCapacity] = useState('');
 
   async function fetchTrip() {
     const res = await fetch(`/api/trips/${id}`);
@@ -87,22 +85,8 @@ export default function TripDetailPage() {
       setTrip(data);
       setDepDate(data.departureDate ? String(data.departureDate).slice(0, 10) : '');
       setArrDate(data.arrivalDate ? String(data.arrivalDate).slice(0, 10) : '');
-      setCapacity(String(data.passengerCapacity ?? 0));
     }
     setLoading(false);
-  }
-
-  // ТЗ docx 02.07.26 (D12): зберегти кількість місць для пасажирів.
-  async function handleSaveCapacity() {
-    setSaving(true);
-    const res = await fetch(`/api/trips/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ passengerCapacity: Number(capacity) || 0 }),
-    });
-    if (res.ok) { toast.success('Кількість місць оновлено'); await fetchTrip(); }
-    else { const d = await res.json().catch(() => ({})); toast.error(d.error || 'Помилка'); }
-    setSaving(false);
   }
 
   async function handleSaveDates() {
@@ -234,21 +218,11 @@ export default function TripDetailPage() {
             </Button>
           </div>
 
-          {/* ТЗ docx 02.07.26 (D12): кількість місць для пасажирів (стеля пасажирів). */}
-          <div className="flex gap-2 items-end border-t pt-3">
-            <div className="flex-1">
-              <Label className="text-xs">Кількість місць (пасажири)</Label>
-              <Input
-                type="number"
-                min={0}
-                value={capacity}
-                onChange={(e) => setCapacity(e.target.value)}
-                placeholder="0 — не возимо пасажирів"
-              />
-            </div>
-            <Button onClick={handleSaveCapacity} disabled={saving} size="sm" variant="outline">
-              Зберегти
-            </Button>
+          {/* ТЗ docx 21.08.26: пасажирські місця задаються на ПОЇЗДКУ (не на рейс) —
+              тут лише показуємо успадковане число (редагувати — у розділі «Поїздки»). */}
+          <div className="border-t pt-3">
+            <Label className="text-xs text-gray-500">Пасажирських місць (задано на поїздку)</Label>
+            <p className="text-sm font-medium">{trip.passengerCapacity}</p>
           </div>
 
           {/* Видалення рейсу (ТЗ docx 29.06.26 «Рейси» §2: видалити будь-який) */}
