@@ -144,6 +144,33 @@ export default function NewParcelPage() {
   useEffect(() => {
     window.localStorage.setItem('parcel:lastDirection', direction);
   }, [direction]);
+
+  // ТЗ docx 21.08.26: префіл із Маршрутного листа («Створити посилку» по ручній адресі).
+  // Переносимо адресу/телефон/напрямок у сторону Відправника або Отримувача (за ?role).
+  // Клієнта (ПІБ) водій дозаповнює сам. Запускається один раз при монтуванні.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get('role');
+    if (role !== 'sender' && role !== 'receiver') return;
+    const dir = params.get('dir');
+    if (dir === 'eu_to_ua' || dir === 'ua_to_eu') setDirection(dir);
+    const city = params.get('city') || '';
+    const postalCode = params.get('postalCode') || '';
+    const address = params.get('address') || '';
+    const phone = params.get('phone') || '';
+    if (role === 'sender') {
+      if (city) setSenderCity(city);
+      if (postalCode) setSenderPostalCode(postalCode);
+      if (address) setSenderStreet(address);
+      if (phone) setSenderPhoneOverride(phone);
+    } else {
+      if (city) setRecvCity(city);
+      if (postalCode) setRecvPostalCode(postalCode);
+      if (address) setRecvStreet(address);
+      if (phone) setRecvPhoneOverride(phone);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [shipmentType, setShipmentType] = useState<string>('parcels_cargo');
   const [description, setDescription] = useState('');
 

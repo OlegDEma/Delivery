@@ -77,13 +77,13 @@ function journeyLabel(j: JourneyOption): string {
 }
 
 /**
- * ТЗ docx 21.07.26 (п.3): у Маршрутному листі показуємо сторону в країні
- * ПРИЗНАЧЕННЯ поїздки (EU). Посилка EU→UA (eu_to_ua) → Відправник у EU;
- * посилка UA→EU (ua_to_eu) → Отримувач у EU. UA-сторону видно лише при
- * відкритті конкретної посилки.
+ * ТЗ docx 21.08.26: у Маршрутному листі показуємо сторону в обраній «країні
+ * перебування». За замовчуванням — країна призначення поїздки (EU): посилка
+ * EU→UA → Відправник у EU; UA→EU → Отримувач у EU. Якщо перемкнути на UA —
+ * показуємо українську сторону (EU→UA → Отримувач; UA→EU → Відправник).
  */
-function euDestParty(p: RouteItem) {
-  const showSender = p.direction === 'eu_to_ua';
+function partyInCountry(p: RouteItem, showUA: boolean) {
+  const showSender = showUA ? p.direction === 'ua_to_eu' : p.direction === 'eu_to_ua';
   // ТЗ docx 26.07.26 (п.1): для accepted+ беремо сторону зі знімка, не з живих даних.
   const pt = parcelParties(p);
   const party = showSender ? pt.sender : pt.receiver;
@@ -125,9 +125,14 @@ export default function RoutesPage() {
   // ТЗ docx 08.08.26 (v12): «Додати адресу» — ручний ввід довільної адреси.
   const [manualOpen, setManualOpen] = useState(false);
   const [manualForm, setManualForm] = useState({ addressText: '', postalCode: '', manualCity: '', manualName: '', manualPhone: '', manualDirection: '' });
+  // ТЗ docx 21.08.26: «Статус клієнта» (Відправник/Отримувач/Пасажир) — визначає напрямок.
+  const [clientStatus, setClientStatus] = useState('');
   const [addingManual, setAddingManual] = useState(false);
   // ТЗ docx 08.08.26 (v12): групування списку адрес — за номером/індексом/містом.
   const [groupMode, setGroupMode] = useState<'number' | 'postal' | 'city'>('number');
+  // ТЗ docx 21.08.26: «Країна перебування» — яку сторону адрес показувати. Порожньо =
+  // країна призначення поїздки (EU); 'UA' = українська сторона.
+  const [stayCountry, setStayCountry] = useState('');
 
   // Завантажуємо поїздки; дефолт — ?journeyId з URL або найближча до сьогодні.
   useEffect(() => {
@@ -188,8 +193,8 @@ export default function RoutesPage() {
           // незалежно від статусу (раніше «Створена» ховались). Сортуємо за індексом
           // сторони в країні призначення.
           const sorted = (data.parcels as RouteItem[]).slice().sort((a, b) => {
-            const ca = euDestParty(a).addr?.postalCode || '';
-            const cb = euDestParty(b).addr?.postalCode || '';
+            const ca = partyInCountry(a, false).addr?.postalCode || '';
+            const cb = partyInCountry(b, false).addr?.postalCode || '';
             return ca.localeCompare(cb);
           });
           setParcels(sorted);
@@ -263,6 +268,7 @@ export default function RoutesPage() {
     if (res.ok) {
       setManualOpen(false);
       setManualForm({ addressText: '', postalCode: '', manualCity: '', manualName: '', manualPhone: '', manualDirection: '' });
+      setClientStatus('');
       setReload(n => n + 1);
     }
   }
@@ -355,12 +361,14 @@ export default function RoutesPage() {
   const generalParcels = parcels.filter(p => !sheetedParcelIds.has(p.id));
   // ТЗ docx 08.08.26 (v12): ручні адреси (без посилки), ще не переміщені в лист (taskDate=null).
   const manualGeneral = routeTasks.filter(t => !t.parcelId && !t.taskDate);
+  // ТЗ docx 21.08.26: обрана «країна перебування» = UA → показуємо українську сторону.
+  const showUA = stayCountry === 'UA';
 
   // ТЗ docx 08.08.26 (v12): групування загального списку за номером/індексом/містом.
   const groupedGeneral = (() => {
     const keyOf = (p: RouteItem) => {
-      if (groupMode === 'postal') return euDestParty(p).addr?.postalCode || 'Без індексу';
-      if (groupMode === 'city') return euDestParty(p).addr?.city || 'Без міста';
+      if (groupMode === 'postal') return partyInCountry(p, showUA).addr?.postalCode || 'Без індексу';
+      if (groupMode === 'city') return partyInCountry(p, showUA).addr?.city || 'Без міста';
       return ''; // 'number' — без груп (єдиний список за номером)
     };
     if (groupMode === 'number') {
@@ -381,6 +389,31 @@ export default function RoutesPage() {
   const drivers = [selectedJourney?.assignedCourier?.fullName, selectedJourney?.secondCourier?.fullName]
     .filter(Boolean)
     .join(', ');
+
+  // ТЗ docx 21.08.26: авто-напрямок посилки за «Статусом клієнта» + країною перебування.
+  // Тут — країна перебування; other — протилежна сторона поїздки.
+  const stayHere = showUA ? 'UA' : (selectedJourney?.country || '');
+  const stayOther = showUA ? (selectedJourney?.country || '') : 'UA';
+  const autoDirection = (status: string) =>
+    status === 'sender' ? `${stayHere}-${stayOther}`
+      : status === 'receiver' ? `${stayOther}-${stayHere}`
+        : '';
+  // Дані ручної адреси → префіл форми створення посилки (ТЗ 21.08 «Створити посилку»).
+  function createParcelHref(rec: { manualCity?: string | null; postalCode?: string | null; addressText?: string | null; manualName?: string | null; manualPhone?: string | null; manualDirection?: string | null }) {
+    const dirText = rec.manualDirection || '';
+    const isSender = dirText.startsWith(stayHere + '-');
+    const params = new URLSearchParams();
+    if (selectedJourney) params.set('journeyId', selectedJourney.id);
+    params.set('role', isSender ? 'sender' : 'receiver');
+    // Форм-напрямок: «UA-XX» → ua_to_eu; інакше (XX-UA) → eu_to_ua.
+    if (dirText) params.set('dir', dirText.startsWith('UA-') ? 'ua_to_eu' : 'eu_to_ua');
+    if (rec.manualName) params.set('name', rec.manualName);
+    if (rec.manualPhone) params.set('phone', rec.manualPhone);
+    if (rec.manualCity) params.set('city', rec.manualCity);
+    if (rec.postalCode) params.set('postalCode', rec.postalCode);
+    if (rec.addressText) params.set('address', rec.addressText);
+    return `/parcels/new?${params.toString()}`;
+  }
 
   return (
     <div>
@@ -425,6 +458,26 @@ export default function RoutesPage() {
           </SelectContent>
         </Select>
       </div>
+      )}
+
+      {/* ТЗ docx 21.08.26: «Країна перебування» — перше, що обираємо. Визначає, адреси
+          якої країни (сторони) показувати у Маршрутному листі. Дефолт — країна поїздки (EU). */}
+      {selectedJourney && (
+        <div className="flex items-center gap-2 mb-3 text-sm print:hidden">
+          <span className="text-gray-500">Країна перебування:</span>
+          <Select value={stayCountry || selectedJourney.country} onValueChange={(v) => setStayCountry((v ?? '') === selectedJourney.country ? '' : (v ?? ''))}>
+            <SelectTrigger className="h-8 w-48 text-sm">
+              <SelectValue>
+                {(stayCountry || selectedJourney.country) === 'UA' ? 'Україна' : (COUNTRY_LABELS[selectedJourney.country as CountryCode] || selectedJourney.country)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={selectedJourney.country}>{COUNTRY_LABELS[selectedJourney.country as CountryCode] || selectedJourney.country}</SelectItem>
+              <SelectItem value="UA">Україна</SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-xs text-gray-400">показуються адреси цієї країни</span>
+        </div>
       )}
 
       {/* ТЗ docx 08.08.26 (v12): панель формування Маршрутного листа —
@@ -472,7 +525,7 @@ export default function RoutesPage() {
                 {sheet.tasks.map(t => {
                   const p = t.parcelId ? parcelById.get(t.parcelId) : null;
                   const isManual = !t.parcelId;
-                  const d = p ? euDestParty(p) : null;
+                  const d = p ? partyInCountry(p, showUA) : null;
                   const a = d?.addr;
                   // Статус: посилка → parcel.routeTaskStatus (taskStatuses); ручна → RouteTask.status.
                   const ts: TaskStatus = (p ? taskStatuses[p.id] : manualStatuses[t.id]) || 'pending';
@@ -483,21 +536,29 @@ export default function RoutesPage() {
                     <div key={t.id} className="px-3 py-2 text-sm">
                       <div className="flex items-start justify-between gap-2">
                         {p ? (
-                          <Link href={`/parcels/${p.id}`} className="min-w-0">
-                            <div className="text-gray-700">
+                          // ТЗ docx 21.08.26: адреса — Link; телефон+іконки контакту — окремим
+                          // рядком (не вкладаємо <a> в <a>). Три способи звʼязку біля номера.
+                          <div className="min-w-0">
+                            <Link href={`/parcels/${p.id}`} className="block text-gray-700 hover:text-blue-600">
                               {a ? <>{a.postalCode ? `${a.postalCode} ` : ''}{a.city}{a.street ? `, ${a.street}` : ''}{a.building ? ` ${a.building}` : ''}</> : 'Адресу не вказано'}
+                            </Link>
+                            <div className="text-xs text-gray-500 flex items-center gap-1 flex-wrap">
+                              <span className="font-mono mr-1">{p.internalNumber}</span>{d?.name} · {d?.phone} · {p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`}
+                              {d?.phone && <ContactIcons phone={d.phone} className="print:hidden" />}
                             </div>
-                            <div className="text-xs text-gray-500"><span className="font-mono mr-1">{p.internalNumber}</span>{d?.name} · {d?.phone} · {p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`}</div>
-                          </Link>
+                          </div>
                         ) : isManual ? (
                           // ТЗ docx 08.08.26 (v12): ручна адреса в листі — повноцінний запис (не «прибрано»).
-                          <Link href="/parcels/new" className="min-w-0">
+                          <div className="min-w-0">
                             <div className="text-gray-700">
                               <span className="text-amber-500 mr-1">✎</span>
                               {t.postalCode ? `${t.postalCode} ` : ''}{t.manualCity || ''}{t.addressText ? `${t.manualCity ? ', ' : ''}${t.addressText}` : ''}
                             </div>
-                            <div className="text-xs text-amber-600">Ручна адреса{t.manualName ? ` · ${t.manualName}` : ''}{t.manualPhone ? ` · ${t.manualPhone}` : ''}{t.manualDirection ? ` · ${t.manualDirection}` : ''}</div>
-                          </Link>
+                            <div className="text-xs text-amber-600 flex items-center gap-1 flex-wrap">
+                              Ручна адреса{t.manualName ? ` · ${t.manualName}` : ''}{t.manualPhone ? ` · ${t.manualPhone}` : ''}{t.manualDirection ? ` · ${t.manualDirection}` : ''}
+                              {t.manualPhone && <ContactIcons phone={t.manualPhone} className="print:hidden" />}
+                            </div>
+                          </div>
                         ) : <span className="text-gray-400 text-xs">Посилку прибрано з поїздки</span>}
                         <button type="button" onClick={() => handleRemoveFromSheet(t.id)} className="text-xs text-red-500 hover:text-red-700 shrink-0 print:hidden">Прибрати</button>
                       </div>
@@ -558,7 +619,7 @@ export default function RoutesPage() {
               {grp.key && <div className="text-xs font-semibold text-gray-500 mb-1 px-1">{groupMode === 'postal' ? 'Індекс' : 'Місто'}: {grp.key}</div>}
               <div className="bg-white rounded-lg border divide-y">
                 {grp.items.map((p, idx) => {
-                  const d = euDestParty(p);
+                  const d = partyInCountry(p, showUA);
                   const a = d.addr;
                   return (
                     <div key={p.id} className="px-3 py-2">
@@ -598,18 +659,21 @@ export default function RoutesPage() {
                   <div key={t.id} className="px-3 py-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-amber-500 font-mono shrink-0">✎{idx + 1}.</span>
-                      <Link href="/parcels/new" className="min-w-0 flex-1 text-sm truncate hover:text-blue-600">
+                      {/* ТЗ docx 21.08.26: клік по ручній адресі → форма створення посилки з префілом. */}
+                      <Link href={createParcelHref(t)} className="min-w-0 flex-1 text-sm truncate hover:text-blue-600">
                         {t.postalCode ? `${t.postalCode} ` : ''}{t.manualCity || ''}{t.addressText ? `${t.manualCity ? ', ' : ''}${t.addressText}` : ''}
                       </Link>
                       <div className="shrink-0">
                         <Checkbox checked={selectedParcelIds.has(selId)} onCheckedChange={() => toggleParcelSelection(selId)} />
                       </div>
                     </div>
-                    <div className="text-xs text-gray-500 mt-0.5 ml-5 flex items-center gap-1">
+                    <div className="text-xs text-gray-500 mt-0.5 ml-5 flex items-center gap-1 flex-wrap">
                       <span className="text-amber-600">Ручна адреса</span>
                       {t.manualName ? ` · ${t.manualName}` : ''}{t.manualPhone ? ` · ${t.manualPhone}` : ''}{t.manualDirection ? ` · ${t.manualDirection}` : ''}
-                      {t.manualPhone && <ContactIcons phone={t.manualPhone} className="ml-2 print:hidden" />}
-                      <button type="button" onClick={() => handleRemoveFromSheet(t.id)} className="ml-auto text-red-500 hover:text-red-700 print:hidden">Видалити</button>
+                      {t.manualPhone && <ContactIcons phone={t.manualPhone} className="ml-1 print:hidden" />}
+                      {/* ТЗ docx 21.08.26: «Створити посилку» — префіл даних цієї адреси у форму. */}
+                      <Link href={createParcelHref(t)} className="ml-auto text-blue-600 hover:text-blue-800 font-medium print:hidden">+ Створити посилку</Link>
+                      <button type="button" onClick={() => handleRemoveFromSheet(t.id)} className="text-red-500 hover:text-red-700 print:hidden">Видалити</button>
                     </div>
                   </div>
                 );
@@ -622,7 +686,29 @@ export default function RoutesPage() {
             <Button variant="outline" size="sm" onClick={() => setManualOpen(true)} className="print:hidden">+ Додати адресу</Button>
           ) : (
             <div className="border rounded-lg p-3 bg-amber-50/40 space-y-2 print:hidden">
-              <div className="text-xs font-semibold text-gray-600">Нова адреса на маршруті (вручну або copy-paste)</div>
+              {/* ТЗ docx 21.08.26: «Статус клієнта» — першим; за ним система визначає напрямок. */}
+              <div>
+                <label className="text-xs text-gray-600">Статус клієнта</label>
+                <Select value={clientStatus || '_none'} onValueChange={(v) => {
+                  const s = (v ?? '') === '_none' ? '' : (v ?? '');
+                  setClientStatus(s);
+                  setManualForm(f => ({ ...f, manualDirection: autoDirection(s) || f.manualDirection }));
+                }}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue>
+                      {clientStatus === 'sender' ? 'Відправник' : clientStatus === 'receiver' ? 'Отримувач' : clientStatus === 'passenger' ? 'Пасажир' : 'Оберіть статус'}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sender">Відправник</SelectItem>
+                    <SelectItem value="receiver">Отримувач</SelectItem>
+                    <SelectItem value="passenger">Пасажир</SelectItem>
+                  </SelectContent>
+                </Select>
+                {clientStatus && clientStatus !== 'passenger' && (
+                  <p className="text-[10px] text-gray-500 mt-0.5">Напрямок визначено автоматично: <span className="font-medium">{autoDirection(clientStatus)}</span></p>
+                )}
+              </div>
               <Input placeholder="Адреса: індекс, місто, вулиця, будинок" value={manualForm.addressText} onChange={(e) => setManualForm(f => ({ ...f, addressText: e.target.value }))} className="h-8 text-sm" />
               <div className="grid grid-cols-2 gap-2">
                 <Input placeholder="Індекс" value={manualForm.postalCode} onChange={(e) => setManualForm(f => ({ ...f, postalCode: e.target.value }))} className="h-8 text-sm" />
@@ -631,11 +717,11 @@ export default function RoutesPage() {
               <div className="grid grid-cols-3 gap-2">
                 <Input placeholder="Клієнт (необовʼязково)" value={manualForm.manualName} onChange={(e) => setManualForm(f => ({ ...f, manualName: e.target.value }))} className="h-8 text-sm" />
                 <Input placeholder="Телефон" value={manualForm.manualPhone} onChange={(e) => setManualForm(f => ({ ...f, manualPhone: e.target.value }))} className="h-8 text-sm" />
-                <Input placeholder="Напрямок (UA-NL)" value={manualForm.manualDirection} onChange={(e) => setManualForm(f => ({ ...f, manualDirection: e.target.value }))} className="h-8 text-sm" />
+                <Input placeholder="Напрямок" value={manualForm.manualDirection} onChange={(e) => setManualForm(f => ({ ...f, manualDirection: e.target.value }))} className="h-8 text-sm" />
               </div>
               <div className="flex gap-2">
                 <Button size="sm" onClick={handleAddManual} disabled={!manualForm.addressText.trim() || addingManual}>{addingManual ? 'Додавання…' : 'Додати'}</Button>
-                <Button size="sm" variant="ghost" onClick={() => setManualOpen(false)}>Скасувати</Button>
+                <Button size="sm" variant="ghost" onClick={() => { setManualOpen(false); setClientStatus(''); }}>Скасувати</Button>
               </div>
             </div>
           )}
