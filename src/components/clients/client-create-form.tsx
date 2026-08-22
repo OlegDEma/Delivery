@@ -100,6 +100,20 @@ interface ClientCreateFormProps {
       usageCount: number;
     }[];
   };
+  /**
+   * ТЗ docx 21.08.26: дані ручної адреси, введеної у Маршрутному листі —
+   * переносяться у форму при створенні посилки кнопкою «Створити посилку».
+   * Це НЕ режим редагування (клієнта ще немає) — лише початкові значення.
+   */
+  prefillAddress?: {
+    firstName?: string;
+    lastName?: string;
+    country?: string;
+    city?: string;
+    street?: string;
+    building?: string;
+    postalCode?: string;
+  };
 }
 
 function getDefaultCountry(
@@ -126,10 +140,13 @@ export function ClientCreateForm({
   role,
   defaultCountry,
   initialData,
+  prefillAddress,
 }: ClientCreateFormProps) {
   const isEditMode = !!initialData;
+  // ТЗ docx 21.08.26: країна з ручної адреси МЛ має пріоритет над дефолтом за напрямком.
   const initialCountry: CountryCode = (initialData?.addresses[0]?.country as CountryCode)
     || (initialData?.country as CountryCode)
+    || (prefillAddress?.country as CountryCode)
     || getDefaultCountry(direction, role, defaultCountry);
   // For eu_to_ua + receiver — country is locked to UA per ТЗ.
   const countryLocked = direction === 'eu_to_ua' && role === 'receiver';
@@ -138,17 +155,17 @@ export function ClientCreateForm({
     | undefined;
 
   const [phone, setPhone] = useState(initialData?.phone || initialPhone || '');
-  const [firstName, setFirstName] = useState(initialData?.firstName || '');
-  const [lastName, setLastName] = useState(initialData?.lastName || '');
+  const [firstName, setFirstName] = useState(initialData?.firstName || prefillAddress?.firstName || '');
+  const [lastName, setLastName] = useState(initialData?.lastName || prefillAddress?.lastName || '');
   const [middleName, setMiddleName] = useState(initialData?.middleName || '');
   const [country, setCountry] = useState<CountryCode>(initialCountry);
   const [deliveryMethod, setDeliveryMethod] = useState<'address' | 'np_warehouse' | 'pickup_point'>(
     (initialAddr?.deliveryMethod as 'address' | 'np_warehouse' | 'pickup_point') || 'address'
   );
-  const [postalCode, setPostalCode] = useState(initialAddr?.postalCode || '');
-  const [city, setCity] = useState(initialAddr?.city || '');
-  const [street, setStreet] = useState(initialAddr?.street || '');
-  const [building, setBuilding] = useState(initialAddr?.building || '');
+  const [postalCode, setPostalCode] = useState(initialAddr?.postalCode || prefillAddress?.postalCode || '');
+  const [city, setCity] = useState(initialAddr?.city || prefillAddress?.city || '');
+  const [street, setStreet] = useState(initialAddr?.street || prefillAddress?.street || '');
+  const [building, setBuilding] = useState(initialAddr?.building || prefillAddress?.building || '');
   const [landmark, setLandmark] = useState(initialAddr?.landmark || '');
   const [npWarehouseNum, setNpWarehouseNum] = useState(initialAddr?.npWarehouseNum || '');
   const [pickupPointText, setPickupPointText] = useState(initialAddr?.pickupPointText || '');

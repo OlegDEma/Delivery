@@ -145,29 +145,40 @@ export default function NewParcelPage() {
     window.localStorage.setItem('parcel:lastDirection', direction);
   }, [direction]);
 
-  // ТЗ docx 21.08.26: префіл із Маршрутного листа («Створити посилку» по ручній адресі).
-  // Переносимо адресу/телефон/напрямок у сторону Відправника або Отримувача (за ?role).
-  // Клієнта (ПІБ) водій дозаповнює сам. Запускається один раз при монтуванні.
+  // ТЗ docx 21.08.26: префіл із Маршрутного листа («Створити посилку» по ручній
+  // адресі). Дані адреси йдуть у ClientSearch → форма клієнта відкривається
+  // автоматично вже заповненою (ПІБ/решту працівник дозаповнює). Читаємо query
+  // синхронно (без ефекту) — на сервері window немає, тому lazy-ініціалізатор.
+  const [routePrefill] = useState<null | {
+    role: 'sender' | 'receiver';
+    dir?: string;
+    phone?: string; firstName?: string; lastName?: string;
+    country?: string; city?: string; street?: string; postalCode?: string;
+  }>(() => {
+    if (typeof window === 'undefined') return null;
+    const p = new URLSearchParams(window.location.search);
+    const r = p.get('role');
+    if (r !== 'sender' && r !== 'receiver') return null;
+    // «Прізвище Ім'я» з запису МЛ (може бути лише прізвище).
+    const name = (p.get('name') || '').trim();
+    const [lastName, ...restName] = name ? name.split(/\s+/) : [];
+    return {
+      role: r,
+      dir: p.get('dir') || undefined,
+      phone: p.get('phone') || undefined,
+      lastName: lastName || undefined,
+      firstName: restName.length ? restName.join(' ') : undefined,
+      country: p.get('country') || undefined,
+      city: p.get('city') || undefined,
+      street: p.get('address') || undefined,
+      postalCode: p.get('postalCode') || undefined,
+    };
+  });
+
+  // Напрямок із префілу МЛ має пріоритет над збереженим у localStorage.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const role = params.get('role');
-    if (role !== 'sender' && role !== 'receiver') return;
-    const dir = params.get('dir');
-    if (dir === 'eu_to_ua' || dir === 'ua_to_eu') setDirection(dir);
-    const city = params.get('city') || '';
-    const postalCode = params.get('postalCode') || '';
-    const address = params.get('address') || '';
-    const phone = params.get('phone') || '';
-    if (role === 'sender') {
-      if (city) setSenderCity(city);
-      if (postalCode) setSenderPostalCode(postalCode);
-      if (address) setSenderStreet(address);
-      if (phone) setSenderPhoneOverride(phone);
-    } else {
-      if (city) setRecvCity(city);
-      if (postalCode) setRecvPostalCode(postalCode);
-      if (address) setRecvStreet(address);
-      if (phone) setRecvPhoneOverride(phone);
+    if (routePrefill?.dir === 'eu_to_ua' || routePrefill?.dir === 'ua_to_eu') {
+      setDirection(routePrefill.dir);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -580,6 +591,8 @@ export default function NewParcelPage() {
           <CardContent className="px-4 pb-4 pt-0 space-y-2 overflow-visible">
             <ClientSearch
               label="Пошук отримувача (телефон або прізвище)"
+              // ТЗ docx 21.08.26: дані ручної адреси з МЛ (якщо прийшли звідти).
+              prefill={routePrefill?.role === 'receiver' ? routePrefill : null}
               onSelect={handleReceiverSelect}
               onClear={() => { setReceiver(null); setReceiverAddressId(''); setRecvPostalCode(''); setRecvCity(''); setRecvStreet(''); setRecvBuilding(''); setRecvNpWarehouse(''); setRecvLandmark(''); setRecvPickupPointText(''); setRecvDeliveryMethod('address'); }}
               selected={receiver}
@@ -608,6 +621,8 @@ export default function NewParcelPage() {
           <CardContent className="px-4 pb-4 pt-0 space-y-2 overflow-visible">
             <ClientSearch
               label="Пошук відправника (телефон або прізвище)"
+              // ТЗ docx 21.08.26: дані ручної адреси з МЛ (якщо прийшли звідти).
+              prefill={routePrefill?.role === 'sender' ? routePrefill : null}
               onSelect={handleSenderSelect}
               onClear={() => { setSender(null); setSenderAddressId(''); setSenderPostalCode(''); setSenderCity(''); setSenderStreet(''); setSenderBuilding(''); setSenderNpWarehouse(''); setSenderLandmark(''); setSenderPickupPointText(''); setSenderDeliveryMethod('address'); }}
               selected={sender}

@@ -54,9 +54,24 @@ interface ClientSearchProps {
    * посилки». Рендериться ВСЕРЕДИНІ голубого поля, відразу після рядка адреси.
    */
   summaryFooter?: React.ReactNode;
+  /**
+   * ТЗ docx 21.08.26 («Створити посилку» з Маршрутного листа): дані ручної
+   * адреси з МЛ. Форма клієнта відкривається автоматично, вже заповнена цими
+   * даними — працівникові лишається дозаповнити те, чого бракує.
+   */
+  prefill?: {
+    phone?: string;
+    firstName?: string;
+    lastName?: string;
+    country?: string;
+    city?: string;
+    street?: string;
+    building?: string;
+    postalCode?: string;
+  } | null;
 }
 
-export function ClientSearch({ label, onSelect, onClear, selected, direction, role, onPhoneEdit, summaryFooter }: ClientSearchProps) {
+export function ClientSearch({ label, onSelect, onClear, selected, direction, role, onPhoneEdit, summaryFooter, prefill }: ClientSearchProps) {
   const [editingPhone, setEditingPhone] = useState(false);
   const [phoneDraft, setPhoneDraft] = useState('');
   const [query, setQuery] = useState('');
@@ -81,6 +96,15 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // ТЗ docx 21.08.26: прийшли з Маршрутного листа по кнопці «Створити посилку» —
+  // одразу відкриваємо форму клієнта, заповнену даними адреси з МЛ.
+  const prefillOpenedRef = useRef(false);
+  useEffect(() => {
+    if (!prefill || prefillOpenedRef.current || selected) return;
+    prefillOpenedRef.current = true;
+    setShowCreateDialog(true);
+  }, [prefill, selected]);
 
   function handleSearch(value: string) {
     setQuery(value);
@@ -367,9 +391,11 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
           <ClientCreateForm
             onSuccess={handleClientCreated}
             onCancel={() => setShowCreateDialog(false)}
-            initialPhone={getInitialPhone()}
+            initialPhone={prefill?.phone || getInitialPhone()}
             direction={direction}
             role={role}
+            // ТЗ docx 21.08.26: дані ручної адреси з Маршрутного листа.
+            prefillAddress={prefill || undefined}
           />
         </DialogContent>
       </Dialog>

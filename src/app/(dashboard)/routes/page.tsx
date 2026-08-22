@@ -428,6 +428,8 @@ export default function RoutesPage() {
     params.set('role', isSender ? 'sender' : 'receiver');
     // Форм-напрямок: «UA-XX» → ua_to_eu; інакше (XX-UA) → eu_to_ua.
     if (dirText) params.set('dir', dirText.startsWith('UA-') ? 'ua_to_eu' : 'eu_to_ua');
+    // Країна адреси = поточна країна перебування (адреса саме звідти).
+    if (stayHere) params.set('country', stayHere);
     if (rec.manualName) params.set('name', rec.manualName);
     if (rec.manualPhone) params.set('phone', rec.manualPhone);
     if (rec.manualCity) params.set('city', rec.manualCity);
@@ -695,10 +697,12 @@ export default function RoutesPage() {
                   <div key={t.id} className="px-3 py-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-amber-500 font-mono shrink-0">✎{idx + 1}.</span>
-                      {/* ТЗ docx 21.08.26: клік по ручній адресі → форма створення посилки з префілом. */}
-                      <Link href={createParcelHref(t)} className="min-w-0 flex-1 text-sm truncate hover:text-blue-600">
+                      {/* ТЗ docx 21.08.26: клік по ручній адресі → форма створення посилки з префілом.
+                          Звичайний <a> (не <Link>): потрібне повне завантаження сторінки, щоб форма
+                          перечитала префіл-параметри з URL, а не лишилась у попередньому стані. */}
+                      <a href={createParcelHref(t)} className="min-w-0 flex-1 text-sm truncate hover:text-blue-600">
                         {t.postalCode ? `${t.postalCode} ` : ''}{t.manualCity || ''}{t.addressText ? `${t.manualCity ? ', ' : ''}${t.addressText}` : ''}
-                      </Link>
+                      </a>
                       <div className="shrink-0">
                         <Checkbox checked={selectedParcelIds.has(selId)} onCheckedChange={() => toggleParcelSelection(selId)} />
                       </div>
@@ -707,8 +711,9 @@ export default function RoutesPage() {
                       <span className="text-amber-600">Ручна адреса</span>
                       {t.manualName ? ` · ${t.manualName}` : ''}{t.manualPhone ? ` · ${t.manualPhone}` : ''}{t.manualDirection ? ` · ${t.manualDirection}` : ''}
                       {t.manualPhone && <ContactIcons phone={t.manualPhone} className="ml-1 print:hidden" />}
-                      {/* ТЗ docx 21.08.26: «Створити посилку» — префіл даних цієї адреси у форму. */}
-                      <Link href={createParcelHref(t)} className="ml-auto text-blue-600 hover:text-blue-800 font-medium print:hidden">+ Створити посилку</Link>
+                      {/* ТЗ docx 21.08.26: «Створити посилку» — префіл даних цієї адреси у форму
+                          (звичайний <a> — щоб форма перечитала параметри при повному завантаженні). */}
+                      <a href={createParcelHref(t)} className="ml-auto text-blue-600 hover:text-blue-800 font-medium print:hidden">+ Створити посилку</a>
                       <button type="button" onClick={() => handleRemoveFromSheet(t.id)} className="text-red-500 hover:text-red-700 print:hidden">Видалити</button>
                     </div>
                   </div>
