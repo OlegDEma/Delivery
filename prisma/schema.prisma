@@ -368,7 +368,14 @@ model Vehicle {
   brand                  String                                                   // Марка
   model                  String                                                   // Модель
   regNumber              String    @map("reg_number")                             // Реєстраційний номер
-  techPassportPhoto      String?   @map("tech_passport_photo")                    // Фото техпаспорта (URL)
+  // ТЗ docx 21.08.26: загальна к-сть місць у мікроавтобусі (включно з водієм).
+  totalSeats             Int?      @map("total_seats")
+  techPassportPhoto      String?   @map("tech_passport_photo")                    // Техпаспорт стор.1 (URL)
+  // ТЗ docx 21.08.26: додаткові документи-фото (видаляються/замінюються окремо).
+  techPassportPhoto2     String?   @map("tech_passport_photo_2")                  // Техпаспорт стор.2
+  greenCardPhoto         String?   @map("green_card_photo")                       // Зелена карта
+  oscpvPhoto             String?   @map("oscpv_photo")                            // ОСЦПВ
+  techInspectionPhoto    String?   @map("tech_inspection_photo")                  // Техогляд
   oscpvStart             DateTime? @map("oscpv_start") @db.Date                   // ОСЦПВ — початок
   oscpvEnd               DateTime? @map("oscpv_end") @db.Date                     // ОСЦПВ — кінець
   greenCardStart         DateTime? @map("green_card_start") @db.Date              // Зелена карта — початок

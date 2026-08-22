@@ -5,13 +5,38 @@ import { requireRole } from '@/lib/auth/guards';
 import { ADMIN_ROLES } from '@/lib/constants/roles';
 import { isUuid } from '@/lib/validators/common';
 
-// POST /api/vehicles/[id]/photo — завантажити фото техпаспорта (ТЗ docx 08.08.26).
+// ТЗ docx 21.08.26: кілька документів-фото транспорту. Кожен слот → своя колонка.
+const SLOT_TO_COLUMN = {
+  techPassport: 'techPassportPhoto',
+  techPassport2: 'techPassportPhoto2',
+  greenCard: 'greenCardPhoto',
+  oscpv: 'oscpvPhoto',
+  techInspection: 'techInspectionPhoto',
+} as const;
+type Slot = keyof typeof SLOT_TO_COLUMN;
+
+function resolveSlot(request: NextRequest): Slot {
+  const raw = new URL(request.url).searchParams.get('slot');
+  // Дефолт — техпаспорт стор.1 (беквфіл сумісності зі старим одно-фото ендпоінтом).
+  return raw && raw in SLOT_TO_COLUMN ? (raw as Slot) : 'techPassport';
+}
+
+/** Витягуємо storage-шлях із public URL (…/object/public/photos/<path>). */
+function storagePathFromUrl(url: string | null): string | null {
+  if (!url) return null;
+  const m = url.match(/\/photos\/(.+)$/);
+  return m ? m[1] : null;
+}
+
+// POST /api/vehicles/[id]/photo?slot=<slot> — завантажити/замінити фото документа.
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const guard = await requireRole(ADMIN_ROLES);
   if (!guard.ok) return guard.response;
 
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+  const slot = resolveSlot(request);
+  const column = SLOT_TO_COLUMN[slot];
 
   const formData = await request.formData();
   const file = formData.get('file') as File;
@@ -28,7 +53,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const serviceClient = await createServiceClient();
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80);
-  const fileName = `vehicles/${id}/${Date.now()}-${safeName}`;
+  const fileName = `vehicles/${id}/${slot}-${Date.now()}-${safeName}`;
 
   const { error: uploadError } = await serviceClient.storage
     .from('photos')
@@ -46,9 +71,38 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
   }
 
+  // Старе фото цього слота — прибираємо зі storage (заміна), щоб не накопичувати сміття.
+  const prev = await prisma.vehicle.findUnique({ where: { id }, select: { [column]: true } as never });
+  const prevPath = storagePathFromUrl((prev as Record<string, string | null> | null)?.[column] ?? null);
+  if (prevPath && prevPath !== fileName) {
+    await serviceClient.storage.from('photos').remove([prevPath]).catch(() => {});
+  }
+
   const { data: urlData } = serviceClient.storage.from('photos').getPublicUrl(fileName);
   const photoUrl = urlData.publicUrl;
 
-  await prisma.vehicle.update({ where: { id }, data: { techPassportPhoto: photoUrl } });
-  return NextResponse.json({ url: photoUrl });
+  await prisma.vehicle.update({ where: { id }, data: { [column]: photoUrl } });
+  return NextResponse.json({ url: photoUrl, slot });
+}
+
+// DELETE /api/vehicles/[id]/photo?slot=<slot> — видалити фото документа.
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const guard = await requireRole(ADMIN_ROLES);
+  if (!guard.ok) return guard.response;
+
+  const { id } = await params;
+  if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+  const slot = resolveSlot(request);
+  const column = SLOT_TO_COLUMN[slot];
+
+  const current = await prisma.vehicle.findUnique({ where: { id }, select: { [column]: true } as never });
+  if (!current) return NextResponse.json({ error: 'Транспорт не знайдено' }, { status: 404 });
+
+  const path = storagePathFromUrl((current as Record<string, string | null>)[column] ?? null);
+  if (path) {
+    const serviceClient = await createServiceClient();
+    await serviceClient.storage.from('photos').remove([path]).catch(() => {});
+  }
+  await prisma.vehicle.update({ where: { id }, data: { [column]: null } });
+  return NextResponse.json({ success: true, slot });
 }

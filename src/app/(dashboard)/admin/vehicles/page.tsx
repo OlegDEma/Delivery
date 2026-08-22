@@ -16,7 +16,12 @@ interface Vehicle {
   brand: string;
   model: string;
   regNumber: string;
+  totalSeats: number | null;
   techPassportPhoto: string | null;
+  techPassportPhoto2: string | null;
+  greenCardPhoto: string | null;
+  oscpvPhoto: string | null;
+  techInspectionPhoto: string | null;
   oscpvStart: string | null;
   oscpvEnd: string | null;
   greenCardStart: string | null;
@@ -27,8 +32,17 @@ interface Vehicle {
   isActive: boolean;
 }
 
+// ТЗ docx 21.08.26: іменовані слоти документів-фото транспорту.
+const PHOTO_SLOTS = [
+  { slot: 'techPassport', label: 'Техпаспорт (стор. 1)', field: 'techPassportPhoto' },
+  { slot: 'techPassport2', label: 'Техпаспорт (стор. 2)', field: 'techPassportPhoto2' },
+  { slot: 'greenCard', label: 'Зелена карта', field: 'greenCardPhoto' },
+  { slot: 'oscpv', label: 'ОСЦПВ', field: 'oscpvPhoto' },
+  { slot: 'techInspection', label: 'Техогляд', field: 'techInspectionPhoto' },
+] as const;
+
 type FormState = {
-  brand: string; model: string; regNumber: string;
+  brand: string; model: string; regNumber: string; totalSeats: string;
   oscpvStart: string; oscpvEnd: string;
   greenCardStart: string; greenCardEnd: string;
   techInspectionDate: string; nextTechInspectionDate: string;
@@ -36,7 +50,7 @@ type FormState = {
 };
 
 const EMPTY_FORM: FormState = {
-  brand: '', model: '', regNumber: '',
+  brand: '', model: '', regNumber: '', totalSeats: '',
   oscpvStart: '', oscpvEnd: '', greenCardStart: '', greenCardEnd: '',
   techInspectionDate: '', nextTechInspectionDate: '', notes: '', isActive: true,
 };
@@ -53,7 +67,8 @@ export default function VehiclesAdminPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  // ТЗ docx 21.08.26: per-slot індикатор завантаження (кілька фото-документів).
+  const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -75,6 +90,7 @@ export default function VehiclesAdminPage() {
     setEditId(v.id);
     setForm({
       brand: v.brand, model: v.model, regNumber: v.regNumber,
+      totalSeats: v.totalSeats != null ? String(v.totalSeats) : '',
       oscpvStart: toInputDate(v.oscpvStart), oscpvEnd: toInputDate(v.oscpvEnd),
       greenCardStart: toInputDate(v.greenCardStart), greenCardEnd: toInputDate(v.greenCardEnd),
       techInspectionDate: toInputDate(v.techInspectionDate), nextTechInspectionDate: toInputDate(v.nextTechInspectionDate),
@@ -118,22 +134,38 @@ export default function VehiclesAdminPage() {
     else toast.error('Не вдалося видалити');
   }
 
-  async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handlePhoto(slot: string, e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !editId) return;
-    setUploading(true);
+    setUploadingSlot(slot);
     try {
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetch(`/api/vehicles/${editId}/photo`, { method: 'POST', body: fd });
+      const res = await fetch(`/api/vehicles/${editId}/photo?slot=${slot}`, { method: 'POST', body: fd });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Помилка завантаження');
-      toast.success('Фото техпаспорта завантажено');
+      toast.success('Фото завантажено');
       load();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Помилка');
     } finally {
-      setUploading(false);
+      setUploadingSlot(null);
       e.target.value = '';
+    }
+  }
+
+  async function handleDeletePhoto(slot: string, label: string) {
+    if (!editId) return;
+    if (!confirm(`Видалити фото «${label}»?`)) return;
+    setUploadingSlot(slot);
+    try {
+      const res = await fetch(`/api/vehicles/${editId}/photo?slot=${slot}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Помилка видалення');
+      toast.success('Фото видалено');
+      load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Помилка');
+    } finally {
+      setUploadingSlot(null);
     }
   }
 
@@ -166,6 +198,19 @@ export default function VehiclesAdminPage() {
               <div>
                 <Label className="text-xs">Реєстраційний номер *</Label>
                 <Input value={form.regNumber} onChange={(e) => setForm({ ...form, regNumber: e.target.value })} placeholder="ВС1274ТВ" />
+              </div>
+              {/* ТЗ docx 21.08.26: загальна к-сть місць (включно з водієм). */}
+              <div>
+                <Label className="text-xs">Загальна к-сть місць (включно з водієм)</Label>
+                <Input
+                  type="number" min={1} max={99}
+                  value={form.totalSeats}
+                  onChange={(e) => setForm({ ...form, totalSeats: e.target.value })}
+                  placeholder="напр. 8"
+                />
+                <p className="text-[10px] text-gray-400 mt-0.5">
+                  Пасажирські місця задаються на поїздці; недоступні = загальні − пасажирські (з місця водія).
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2 border-t pt-2">
@@ -207,23 +252,44 @@ export default function VehiclesAdminPage() {
                 Активний (доступний для вибору)
               </label>
 
-              {/* Фото техпаспорта — лише в режимі редагування (потрібен id). */}
+              {/* ТЗ docx 21.08.26: документи-фото (зелена карта, ОСЦПВ, техогляд, 2 стор.
+                  техпаспорта) — завантаження/заміна/видалення. Лише в режимі редагування. */}
               {editId && (
-                <div className="border-t pt-2">
-                  <Label className="text-xs">Фото техпаспорта</Label>
-                  {editingVehicle?.techPassportPhoto && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={editingVehicle.techPassportPhoto} alt="Техпаспорт" className="mt-1 max-h-40 rounded border" />
-                  )}
-                  <label className="mt-2 inline-flex items-center gap-2 text-sm text-blue-600 cursor-pointer">
-                    <Camera className="w-4 h-4" />
-                    {uploading ? 'Завантаження…' : (editingVehicle?.techPassportPhoto ? 'Замінити фото' : 'Додати фото')}
-                    <input type="file" accept="image/*" className="hidden" onChange={handlePhoto} disabled={uploading} />
-                  </label>
+                <div className="border-t pt-2 space-y-2">
+                  <Label className="text-xs">Документи (фото)</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {PHOTO_SLOTS.map(({ slot, label, field }) => {
+                      const url = editingVehicle ? editingVehicle[field] : null;
+                      const busy = uploadingSlot === slot;
+                      return (
+                        <div key={slot} className="border rounded p-2">
+                          <div className="text-[11px] font-medium text-gray-600 mb-1">{label}</div>
+                          {url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={url} alt={label} className="mb-1 h-24 w-full object-cover rounded border" />
+                          ) : (
+                            <div className="mb-1 h-24 w-full rounded border border-dashed bg-gray-50 flex items-center justify-center text-[10px] text-gray-400">немає</div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <label className="inline-flex items-center gap-1 text-xs text-blue-600 cursor-pointer">
+                              <Camera className="w-3.5 h-3.5" />
+                              {busy ? '…' : (url ? 'Замінити' : 'Додати')}
+                              <input type="file" accept="image/*" className="hidden" onChange={(e) => handlePhoto(slot, e)} disabled={busy} />
+                            </label>
+                            {url && !busy && (
+                              <button type="button" onClick={() => handleDeletePhoto(slot, label)} className="text-xs text-red-500 hover:text-red-700 ml-auto">
+                                Видалити
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
               {!editId && (
-                <p className="text-xs text-gray-400 border-t pt-2">Фото техпаспорта можна додати після збереження.</p>
+                <p className="text-xs text-gray-400 border-t pt-2">Документи-фото можна додати після збереження.</p>
               )}
 
               <div className="flex justify-end gap-2 pt-2">
@@ -257,10 +323,14 @@ export default function VehiclesAdminPage() {
                 </div>
               </div>
               <div className="mt-2 text-xs text-gray-500 space-y-0.5">
+                {v.totalSeats != null && <div>Місць усього: <span className="font-medium text-gray-700">{v.totalSeats}</span> (з водієм)</div>}
                 {(v.oscpvStart || v.oscpvEnd) && <div>ОСЦПВ: {v.oscpvStart ? formatDate(v.oscpvStart) : '—'} → {v.oscpvEnd ? formatDate(v.oscpvEnd) : '—'}</div>}
                 {(v.greenCardStart || v.greenCardEnd) && <div>Зелена карта: {v.greenCardStart ? formatDate(v.greenCardStart) : '—'} → {v.greenCardEnd ? formatDate(v.greenCardEnd) : '—'}</div>}
                 {v.techInspectionDate && <div>Техогляд: {formatDate(v.techInspectionDate)}{v.nextTechInspectionDate ? ` → наступний ${formatDate(v.nextTechInspectionDate)}` : ''}</div>}
-                {v.techPassportPhoto && <div className="text-blue-600">📷 Фото техпаспорта є</div>}
+                {(() => {
+                  const docs = [v.techPassportPhoto, v.techPassportPhoto2, v.greenCardPhoto, v.oscpvPhoto, v.techInspectionPhoto].filter(Boolean).length;
+                  return docs > 0 ? <div className="text-blue-600">📷 Документів: {docs}/5</div> : null;
+                })()}
               </div>
             </div>
           ))}

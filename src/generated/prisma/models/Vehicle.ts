@@ -21,8 +21,18 @@ export type VehicleModel = runtime.Types.Result.DefaultSelection<Prisma.$Vehicle
 
 export type AggregateVehicle = {
   _count: VehicleCountAggregateOutputType | null
+  _avg: VehicleAvgAggregateOutputType | null
+  _sum: VehicleSumAggregateOutputType | null
   _min: VehicleMinAggregateOutputType | null
   _max: VehicleMaxAggregateOutputType | null
+}
+
+export type VehicleAvgAggregateOutputType = {
+  totalSeats: number | null
+}
+
+export type VehicleSumAggregateOutputType = {
+  totalSeats: number | null
 }
 
 export type VehicleMinAggregateOutputType = {
@@ -30,7 +40,12 @@ export type VehicleMinAggregateOutputType = {
   brand: string | null
   model: string | null
   regNumber: string | null
+  totalSeats: number | null
   techPassportPhoto: string | null
+  techPassportPhoto2: string | null
+  greenCardPhoto: string | null
+  oscpvPhoto: string | null
+  techInspectionPhoto: string | null
   oscpvStart: Date | null
   oscpvEnd: Date | null
   greenCardStart: Date | null
@@ -48,7 +63,12 @@ export type VehicleMaxAggregateOutputType = {
   brand: string | null
   model: string | null
   regNumber: string | null
+  totalSeats: number | null
   techPassportPhoto: string | null
+  techPassportPhoto2: string | null
+  greenCardPhoto: string | null
+  oscpvPhoto: string | null
+  techInspectionPhoto: string | null
   oscpvStart: Date | null
   oscpvEnd: Date | null
   greenCardStart: Date | null
@@ -66,7 +86,12 @@ export type VehicleCountAggregateOutputType = {
   brand: number
   model: number
   regNumber: number
+  totalSeats: number
   techPassportPhoto: number
+  techPassportPhoto2: number
+  greenCardPhoto: number
+  oscpvPhoto: number
+  techInspectionPhoto: number
   oscpvStart: number
   oscpvEnd: number
   greenCardStart: number
@@ -81,12 +106,25 @@ export type VehicleCountAggregateOutputType = {
 }
 
 
+export type VehicleAvgAggregateInputType = {
+  totalSeats?: true
+}
+
+export type VehicleSumAggregateInputType = {
+  totalSeats?: true
+}
+
 export type VehicleMinAggregateInputType = {
   id?: true
   brand?: true
   model?: true
   regNumber?: true
+  totalSeats?: true
   techPassportPhoto?: true
+  techPassportPhoto2?: true
+  greenCardPhoto?: true
+  oscpvPhoto?: true
+  techInspectionPhoto?: true
   oscpvStart?: true
   oscpvEnd?: true
   greenCardStart?: true
@@ -104,7 +142,12 @@ export type VehicleMaxAggregateInputType = {
   brand?: true
   model?: true
   regNumber?: true
+  totalSeats?: true
   techPassportPhoto?: true
+  techPassportPhoto2?: true
+  greenCardPhoto?: true
+  oscpvPhoto?: true
+  techInspectionPhoto?: true
   oscpvStart?: true
   oscpvEnd?: true
   greenCardStart?: true
@@ -122,7 +165,12 @@ export type VehicleCountAggregateInputType = {
   brand?: true
   model?: true
   regNumber?: true
+  totalSeats?: true
   techPassportPhoto?: true
+  techPassportPhoto2?: true
+  greenCardPhoto?: true
+  oscpvPhoto?: true
+  techInspectionPhoto?: true
   oscpvStart?: true
   oscpvEnd?: true
   greenCardStart?: true
@@ -174,6 +222,18 @@ export type VehicleAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: VehicleAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: VehicleSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: VehicleMinAggregateInputType
@@ -204,6 +264,8 @@ export type VehicleGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: VehicleCountAggregateInputType | true
+  _avg?: VehicleAvgAggregateInputType
+  _sum?: VehicleSumAggregateInputType
   _min?: VehicleMinAggregateInputType
   _max?: VehicleMaxAggregateInputType
 }
@@ -213,7 +275,12 @@ export type VehicleGroupByOutputType = {
   brand: string
   model: string
   regNumber: string
+  totalSeats: number | null
   techPassportPhoto: string | null
+  techPassportPhoto2: string | null
+  greenCardPhoto: string | null
+  oscpvPhoto: string | null
+  techInspectionPhoto: string | null
   oscpvStart: Date | null
   oscpvEnd: Date | null
   greenCardStart: Date | null
@@ -225,6 +292,8 @@ export type VehicleGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   _count: VehicleCountAggregateOutputType | null
+  _avg: VehicleAvgAggregateOutputType | null
+  _sum: VehicleSumAggregateOutputType | null
   _min: VehicleMinAggregateOutputType | null
   _max: VehicleMaxAggregateOutputType | null
 }
@@ -252,7 +321,12 @@ export type VehicleWhereInput = {
   brand?: Prisma.StringFilter<"Vehicle"> | string
   model?: Prisma.StringFilter<"Vehicle"> | string
   regNumber?: Prisma.StringFilter<"Vehicle"> | string
+  totalSeats?: Prisma.IntNullableFilter<"Vehicle"> | number | null
   techPassportPhoto?: Prisma.StringNullableFilter<"Vehicle"> | string | null
+  techPassportPhoto2?: Prisma.StringNullableFilter<"Vehicle"> | string | null
+  greenCardPhoto?: Prisma.StringNullableFilter<"Vehicle"> | string | null
+  oscpvPhoto?: Prisma.StringNullableFilter<"Vehicle"> | string | null
+  techInspectionPhoto?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   oscpvStart?: Prisma.DateTimeNullableFilter<"Vehicle"> | Date | string | null
   oscpvEnd?: Prisma.DateTimeNullableFilter<"Vehicle"> | Date | string | null
   greenCardStart?: Prisma.DateTimeNullableFilter<"Vehicle"> | Date | string | null
@@ -272,7 +346,12 @@ export type VehicleOrderByWithRelationInput = {
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   regNumber?: Prisma.SortOrder
+  totalSeats?: Prisma.SortOrderInput | Prisma.SortOrder
   techPassportPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
+  techPassportPhoto2?: Prisma.SortOrderInput | Prisma.SortOrder
+  greenCardPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
+  oscpvPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
+  techInspectionPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
   oscpvStart?: Prisma.SortOrderInput | Prisma.SortOrder
   oscpvEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   greenCardStart?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -295,7 +374,12 @@ export type VehicleWhereUniqueInput = Prisma.AtLeast<{
   brand?: Prisma.StringFilter<"Vehicle"> | string
   model?: Prisma.StringFilter<"Vehicle"> | string
   regNumber?: Prisma.StringFilter<"Vehicle"> | string
+  totalSeats?: Prisma.IntNullableFilter<"Vehicle"> | number | null
   techPassportPhoto?: Prisma.StringNullableFilter<"Vehicle"> | string | null
+  techPassportPhoto2?: Prisma.StringNullableFilter<"Vehicle"> | string | null
+  greenCardPhoto?: Prisma.StringNullableFilter<"Vehicle"> | string | null
+  oscpvPhoto?: Prisma.StringNullableFilter<"Vehicle"> | string | null
+  techInspectionPhoto?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   oscpvStart?: Prisma.DateTimeNullableFilter<"Vehicle"> | Date | string | null
   oscpvEnd?: Prisma.DateTimeNullableFilter<"Vehicle"> | Date | string | null
   greenCardStart?: Prisma.DateTimeNullableFilter<"Vehicle"> | Date | string | null
@@ -315,7 +399,12 @@ export type VehicleOrderByWithAggregationInput = {
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   regNumber?: Prisma.SortOrder
+  totalSeats?: Prisma.SortOrderInput | Prisma.SortOrder
   techPassportPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
+  techPassportPhoto2?: Prisma.SortOrderInput | Prisma.SortOrder
+  greenCardPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
+  oscpvPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
+  techInspectionPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
   oscpvStart?: Prisma.SortOrderInput | Prisma.SortOrder
   oscpvEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   greenCardStart?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -327,8 +416,10 @@ export type VehicleOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.VehicleCountOrderByAggregateInput
+  _avg?: Prisma.VehicleAvgOrderByAggregateInput
   _max?: Prisma.VehicleMaxOrderByAggregateInput
   _min?: Prisma.VehicleMinOrderByAggregateInput
+  _sum?: Prisma.VehicleSumOrderByAggregateInput
 }
 
 export type VehicleScalarWhereWithAggregatesInput = {
@@ -339,7 +430,12 @@ export type VehicleScalarWhereWithAggregatesInput = {
   brand?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string
   model?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string
   regNumber?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string
+  totalSeats?: Prisma.IntNullableWithAggregatesFilter<"Vehicle"> | number | null
   techPassportPhoto?: Prisma.StringNullableWithAggregatesFilter<"Vehicle"> | string | null
+  techPassportPhoto2?: Prisma.StringNullableWithAggregatesFilter<"Vehicle"> | string | null
+  greenCardPhoto?: Prisma.StringNullableWithAggregatesFilter<"Vehicle"> | string | null
+  oscpvPhoto?: Prisma.StringNullableWithAggregatesFilter<"Vehicle"> | string | null
+  techInspectionPhoto?: Prisma.StringNullableWithAggregatesFilter<"Vehicle"> | string | null
   oscpvStart?: Prisma.DateTimeNullableWithAggregatesFilter<"Vehicle"> | Date | string | null
   oscpvEnd?: Prisma.DateTimeNullableWithAggregatesFilter<"Vehicle"> | Date | string | null
   greenCardStart?: Prisma.DateTimeNullableWithAggregatesFilter<"Vehicle"> | Date | string | null
@@ -357,7 +453,12 @@ export type VehicleCreateInput = {
   brand: string
   model: string
   regNumber: string
+  totalSeats?: number | null
   techPassportPhoto?: string | null
+  techPassportPhoto2?: string | null
+  greenCardPhoto?: string | null
+  oscpvPhoto?: string | null
+  techInspectionPhoto?: string | null
   oscpvStart?: Date | string | null
   oscpvEnd?: Date | string | null
   greenCardStart?: Date | string | null
@@ -377,7 +478,12 @@ export type VehicleUncheckedCreateInput = {
   brand: string
   model: string
   regNumber: string
+  totalSeats?: number | null
   techPassportPhoto?: string | null
+  techPassportPhoto2?: string | null
+  greenCardPhoto?: string | null
+  oscpvPhoto?: string | null
+  techInspectionPhoto?: string | null
   oscpvStart?: Date | string | null
   oscpvEnd?: Date | string | null
   greenCardStart?: Date | string | null
@@ -397,7 +503,12 @@ export type VehicleUpdateInput = {
   brand?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
   regNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  totalSeats?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   techPassportPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techPassportPhoto2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  greenCardPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oscpvPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techInspectionPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oscpvStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oscpvEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   greenCardStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -417,7 +528,12 @@ export type VehicleUncheckedUpdateInput = {
   brand?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
   regNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  totalSeats?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   techPassportPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techPassportPhoto2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  greenCardPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oscpvPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techInspectionPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oscpvStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oscpvEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   greenCardStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -437,7 +553,12 @@ export type VehicleCreateManyInput = {
   brand: string
   model: string
   regNumber: string
+  totalSeats?: number | null
   techPassportPhoto?: string | null
+  techPassportPhoto2?: string | null
+  greenCardPhoto?: string | null
+  oscpvPhoto?: string | null
+  techInspectionPhoto?: string | null
   oscpvStart?: Date | string | null
   oscpvEnd?: Date | string | null
   greenCardStart?: Date | string | null
@@ -455,7 +576,12 @@ export type VehicleUpdateManyMutationInput = {
   brand?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
   regNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  totalSeats?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   techPassportPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techPassportPhoto2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  greenCardPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oscpvPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techInspectionPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oscpvStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oscpvEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   greenCardStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -473,7 +599,12 @@ export type VehicleUncheckedUpdateManyInput = {
   brand?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
   regNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  totalSeats?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   techPassportPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techPassportPhoto2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  greenCardPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oscpvPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techInspectionPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oscpvStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oscpvEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   greenCardStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -496,7 +627,12 @@ export type VehicleCountOrderByAggregateInput = {
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   regNumber?: Prisma.SortOrder
+  totalSeats?: Prisma.SortOrder
   techPassportPhoto?: Prisma.SortOrder
+  techPassportPhoto2?: Prisma.SortOrder
+  greenCardPhoto?: Prisma.SortOrder
+  oscpvPhoto?: Prisma.SortOrder
+  techInspectionPhoto?: Prisma.SortOrder
   oscpvStart?: Prisma.SortOrder
   oscpvEnd?: Prisma.SortOrder
   greenCardStart?: Prisma.SortOrder
@@ -509,12 +645,21 @@ export type VehicleCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type VehicleAvgOrderByAggregateInput = {
+  totalSeats?: Prisma.SortOrder
+}
+
 export type VehicleMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   regNumber?: Prisma.SortOrder
+  totalSeats?: Prisma.SortOrder
   techPassportPhoto?: Prisma.SortOrder
+  techPassportPhoto2?: Prisma.SortOrder
+  greenCardPhoto?: Prisma.SortOrder
+  oscpvPhoto?: Prisma.SortOrder
+  techInspectionPhoto?: Prisma.SortOrder
   oscpvStart?: Prisma.SortOrder
   oscpvEnd?: Prisma.SortOrder
   greenCardStart?: Prisma.SortOrder
@@ -532,7 +677,12 @@ export type VehicleMinOrderByAggregateInput = {
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   regNumber?: Prisma.SortOrder
+  totalSeats?: Prisma.SortOrder
   techPassportPhoto?: Prisma.SortOrder
+  techPassportPhoto2?: Prisma.SortOrder
+  greenCardPhoto?: Prisma.SortOrder
+  oscpvPhoto?: Prisma.SortOrder
+  techInspectionPhoto?: Prisma.SortOrder
   oscpvStart?: Prisma.SortOrder
   oscpvEnd?: Prisma.SortOrder
   greenCardStart?: Prisma.SortOrder
@@ -543,6 +693,10 @@ export type VehicleMinOrderByAggregateInput = {
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type VehicleSumOrderByAggregateInput = {
+  totalSeats?: Prisma.SortOrder
 }
 
 export type VehicleCreateNestedOneWithoutJourneysInput = {
@@ -582,7 +736,12 @@ export type VehicleCreateWithoutJourneysInput = {
   brand: string
   model: string
   regNumber: string
+  totalSeats?: number | null
   techPassportPhoto?: string | null
+  techPassportPhoto2?: string | null
+  greenCardPhoto?: string | null
+  oscpvPhoto?: string | null
+  techInspectionPhoto?: string | null
   oscpvStart?: Date | string | null
   oscpvEnd?: Date | string | null
   greenCardStart?: Date | string | null
@@ -601,7 +760,12 @@ export type VehicleUncheckedCreateWithoutJourneysInput = {
   brand: string
   model: string
   regNumber: string
+  totalSeats?: number | null
   techPassportPhoto?: string | null
+  techPassportPhoto2?: string | null
+  greenCardPhoto?: string | null
+  oscpvPhoto?: string | null
+  techInspectionPhoto?: string | null
   oscpvStart?: Date | string | null
   oscpvEnd?: Date | string | null
   greenCardStart?: Date | string | null
@@ -636,7 +800,12 @@ export type VehicleUpdateWithoutJourneysInput = {
   brand?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
   regNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  totalSeats?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   techPassportPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techPassportPhoto2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  greenCardPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oscpvPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techInspectionPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oscpvStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oscpvEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   greenCardStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -655,7 +824,12 @@ export type VehicleUncheckedUpdateWithoutJourneysInput = {
   brand?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
   regNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  totalSeats?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   techPassportPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techPassportPhoto2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  greenCardPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oscpvPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techInspectionPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oscpvStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oscpvEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   greenCardStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -674,7 +848,12 @@ export type VehicleCreateWithoutTripsInput = {
   brand: string
   model: string
   regNumber: string
+  totalSeats?: number | null
   techPassportPhoto?: string | null
+  techPassportPhoto2?: string | null
+  greenCardPhoto?: string | null
+  oscpvPhoto?: string | null
+  techInspectionPhoto?: string | null
   oscpvStart?: Date | string | null
   oscpvEnd?: Date | string | null
   greenCardStart?: Date | string | null
@@ -693,7 +872,12 @@ export type VehicleUncheckedCreateWithoutTripsInput = {
   brand: string
   model: string
   regNumber: string
+  totalSeats?: number | null
   techPassportPhoto?: string | null
+  techPassportPhoto2?: string | null
+  greenCardPhoto?: string | null
+  oscpvPhoto?: string | null
+  techInspectionPhoto?: string | null
   oscpvStart?: Date | string | null
   oscpvEnd?: Date | string | null
   greenCardStart?: Date | string | null
@@ -728,7 +912,12 @@ export type VehicleUpdateWithoutTripsInput = {
   brand?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
   regNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  totalSeats?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   techPassportPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techPassportPhoto2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  greenCardPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oscpvPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techInspectionPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oscpvStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oscpvEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   greenCardStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -747,7 +936,12 @@ export type VehicleUncheckedUpdateWithoutTripsInput = {
   brand?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
   regNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  totalSeats?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   techPassportPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techPassportPhoto2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  greenCardPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oscpvPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  techInspectionPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oscpvStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oscpvEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   greenCardStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -806,7 +1000,12 @@ export type VehicleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   brand?: boolean
   model?: boolean
   regNumber?: boolean
+  totalSeats?: boolean
   techPassportPhoto?: boolean
+  techPassportPhoto2?: boolean
+  greenCardPhoto?: boolean
+  oscpvPhoto?: boolean
+  techInspectionPhoto?: boolean
   oscpvStart?: boolean
   oscpvEnd?: boolean
   greenCardStart?: boolean
@@ -827,7 +1026,12 @@ export type VehicleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   brand?: boolean
   model?: boolean
   regNumber?: boolean
+  totalSeats?: boolean
   techPassportPhoto?: boolean
+  techPassportPhoto2?: boolean
+  greenCardPhoto?: boolean
+  oscpvPhoto?: boolean
+  techInspectionPhoto?: boolean
   oscpvStart?: boolean
   oscpvEnd?: boolean
   greenCardStart?: boolean
@@ -845,7 +1049,12 @@ export type VehicleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   brand?: boolean
   model?: boolean
   regNumber?: boolean
+  totalSeats?: boolean
   techPassportPhoto?: boolean
+  techPassportPhoto2?: boolean
+  greenCardPhoto?: boolean
+  oscpvPhoto?: boolean
+  techInspectionPhoto?: boolean
   oscpvStart?: boolean
   oscpvEnd?: boolean
   greenCardStart?: boolean
@@ -863,7 +1072,12 @@ export type VehicleSelectScalar = {
   brand?: boolean
   model?: boolean
   regNumber?: boolean
+  totalSeats?: boolean
   techPassportPhoto?: boolean
+  techPassportPhoto2?: boolean
+  greenCardPhoto?: boolean
+  oscpvPhoto?: boolean
+  techInspectionPhoto?: boolean
   oscpvStart?: boolean
   oscpvEnd?: boolean
   greenCardStart?: boolean
@@ -876,7 +1090,7 @@ export type VehicleSelectScalar = {
   updatedAt?: boolean
 }
 
-export type VehicleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "brand" | "model" | "regNumber" | "techPassportPhoto" | "oscpvStart" | "oscpvEnd" | "greenCardStart" | "greenCardEnd" | "techInspectionDate" | "nextTechInspectionDate" | "notes" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicle"]>
+export type VehicleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "brand" | "model" | "regNumber" | "totalSeats" | "techPassportPhoto" | "techPassportPhoto2" | "greenCardPhoto" | "oscpvPhoto" | "techInspectionPhoto" | "oscpvStart" | "oscpvEnd" | "greenCardStart" | "greenCardEnd" | "techInspectionDate" | "nextTechInspectionDate" | "notes" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicle"]>
 export type VehicleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   journeys?: boolean | Prisma.Vehicle$journeysArgs<ExtArgs>
   trips?: boolean | Prisma.Vehicle$tripsArgs<ExtArgs>
@@ -896,7 +1110,12 @@ export type $VehiclePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     brand: string
     model: string
     regNumber: string
+    totalSeats: number | null
     techPassportPhoto: string | null
+    techPassportPhoto2: string | null
+    greenCardPhoto: string | null
+    oscpvPhoto: string | null
+    techInspectionPhoto: string | null
     oscpvStart: Date | null
     oscpvEnd: Date | null
     greenCardStart: Date | null
@@ -1336,7 +1555,12 @@ export interface VehicleFieldRefs {
   readonly brand: Prisma.FieldRef<"Vehicle", 'String'>
   readonly model: Prisma.FieldRef<"Vehicle", 'String'>
   readonly regNumber: Prisma.FieldRef<"Vehicle", 'String'>
+  readonly totalSeats: Prisma.FieldRef<"Vehicle", 'Int'>
   readonly techPassportPhoto: Prisma.FieldRef<"Vehicle", 'String'>
+  readonly techPassportPhoto2: Prisma.FieldRef<"Vehicle", 'String'>
+  readonly greenCardPhoto: Prisma.FieldRef<"Vehicle", 'String'>
+  readonly oscpvPhoto: Prisma.FieldRef<"Vehicle", 'String'>
+  readonly techInspectionPhoto: Prisma.FieldRef<"Vehicle", 'String'>
   readonly oscpvStart: Prisma.FieldRef<"Vehicle", 'DateTime'>
   readonly oscpvEnd: Prisma.FieldRef<"Vehicle", 'DateTime'>
   readonly greenCardStart: Prisma.FieldRef<"Vehicle", 'DateTime'>
