@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,6 +129,12 @@ export default function RoutesPage() {
   // ТЗ docx 21.08.26: «Статус клієнта» (Відправник/Отримувач/Пасажир) — визначає напрямок.
   const [clientStatus, setClientStatus] = useState('');
   const [addingManual, setAddingManual] = useState(false);
+  // ТЗ docx 21.08.26: форма «Додати адресу» автоматично прокручується у верх екрану.
+  const manualFormRef = useRef<HTMLDivElement>(null);
+  function openManualForm() {
+    setManualOpen(true);
+    setTimeout(() => manualFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  }
   // ТЗ docx 08.08.26 (v12): групування списку адрес — за номером/індексом/містом.
   const [groupMode, setGroupMode] = useState<'number' | 'postal' | 'city'>('number');
   // ТЗ docx 21.08.26: «Країна перебування» — яку сторону адрес показувати. Порожньо =
@@ -713,9 +719,9 @@ export default function RoutesPage() {
 
           {/* ТЗ docx 08.08.26 (v12): «Додати адресу» — завжди під останнім записом. */}
           {!manualOpen ? (
-            <Button variant="outline" size="sm" onClick={() => setManualOpen(true)} className="print:hidden">+ Додати адресу</Button>
+            <Button variant="outline" size="sm" onClick={openManualForm} className="print:hidden">+ Додати адресу</Button>
           ) : (
-            <div className="border rounded-lg p-3 bg-amber-50/40 space-y-2 print:hidden">
+            <div ref={manualFormRef} className="border rounded-lg p-3 bg-amber-50/40 space-y-2 print:hidden scroll-mt-4">
               {/* ТЗ docx 21.08.26: «Статус клієнта» — першим; за ним система визначає напрямок. */}
               <div>
                 <label className="text-xs text-gray-600">Статус клієнта</label>
