@@ -13,6 +13,7 @@ import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
 import { ContactIcons } from '@/components/shared/contact-icons';
+import { toast } from 'sonner';
 
 interface PartyAddr {
   country: string | null;
@@ -133,6 +134,9 @@ export default function RoutesPage() {
   // ТЗ docx 21.08.26: «Країна перебування» — яку сторону адрес показувати. Порожньо =
   // країна призначення поїздки (EU); 'UA' = українська сторона.
   const [stayCountry, setStayCountry] = useState('');
+  // ТЗ docx 21.08.26: МЛ показуються згорнутими кнопками; клік розгортає один лист
+  // (тоді ховаємо загальний список). null = бачимо лише кнопки МЛ + загальний список.
+  const [expandedSheet, setExpandedSheet] = useState<string | null>(null);
 
   // Завантажуємо поїздки; дефолт — ?journeyId з URL або найближча до сьогодні.
   useEffect(() => {
@@ -310,6 +314,17 @@ export default function RoutesPage() {
   // з'являється в цільовому). Порожня дата = скасувати (лишити де є).
   async function handleRescheduleTask(taskId: string, date: string) {
     if (!date) return;
+    // ТЗ docx 21.08.26: обрана дата має попадати в діапазон якоїсь зареєстрованої
+    // поїздки (цієї або іншої). Якщо ні — попередження, перенесення не відбувається.
+    const inSomeJourney = journeys.some(j => {
+      const start = j.departureDate?.slice(0, 10);
+      const end = (j.endDate || j.euReturnDate || j.departureDate)?.slice(0, 10);
+      return !!start && !!end && date >= start && date <= end;
+    });
+    if (!inSomeJourney) {
+      toast.error('Поїздки на таку дату не існує. Виберіть іншу');
+      return;
+    }
     await fetch(`/api/route-tasks/${taskId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -506,10 +521,16 @@ export default function RoutesPage() {
           країна · дата · відповідальний водій · транспорт · Друк + адреси зі статусами. */}
       {selectedJourney && sheets.length > 0 && (
         <div className="mb-4 space-y-2">
-          {sheets.map((sheet, si) => (
+          {sheets.map((sheet, si) => {
+            // ТЗ docx 21.08.26: розгорнутий лист бачимо повністю; згорнутий — лише кнопка.
+            const isExpanded = expandedSheet === sheet.date;
+            return (
             <div key={sheet.date} className="border rounded-lg bg-white overflow-hidden">
-              <div className="px-3 py-2 border-b bg-blue-50/60 flex items-center justify-between text-sm gap-2">
+              {/* Клік по шапці — розгорнути/згорнути цей МЛ. */}
+              <button type="button" onClick={() => setExpandedSheet(isExpanded ? null : sheet.date)}
+                className="w-full px-3 py-2 border-b bg-blue-50/60 flex items-center justify-between text-sm gap-2 text-left hover:bg-blue-100/60">
                 <div className="min-w-0">
+                  <span className="text-gray-400 mr-1">{isExpanded ? '▾' : '▸'}</span>
                   <span className="font-semibold">Маршрутний лист {si + 1} · {formatDateWithWeekday(sheet.date)}</span>
                   <span className="ml-2 text-gray-600 text-xs">
                     {COUNTRY_LABELS[selectedJourney.country as CountryCode] || selectedJourney.country}
@@ -518,10 +539,13 @@ export default function RoutesPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs text-gray-400">{sheet.tasks.length} адрес</span>
-                  <Button variant="ghost" size="sm" className="h-7 text-xs print:hidden" onClick={() => window.print()}>🖨 Друкувати</Button>
+                  {isExpanded && (
+                    <span role="button" tabIndex={0} className="h-7 px-2 flex items-center text-xs text-gray-600 hover:text-gray-900 print:hidden"
+                      onClick={(e) => { e.stopPropagation(); window.print(); }}>🖨 Друкувати</span>
+                  )}
                 </div>
-              </div>
-              <div className="divide-y">
+              </button>
+              <div className={`divide-y ${isExpanded ? '' : 'hidden'}`}>
                 {sheet.tasks.map(t => {
                   const p = t.parcelId ? parcelById.get(t.parcelId) : null;
                   const isManual = !t.parcelId;
@@ -593,7 +617,8 @@ export default function RoutesPage() {
                 })}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -604,6 +629,11 @@ export default function RoutesPage() {
           {journeysLoaded && journeys.length === 0
             ? 'Немає активних поїздок. Створіть поїздку у розділі «Поїздки».'
             : 'Виберіть поїздку, щоб побачити маршрутний лист.'}
+        </div>
+      ) : expandedSheet ? (
+        // ТЗ docx 21.08.26: відкрито конкретний МЛ — загальний список не показуємо.
+        <div className="text-center py-6 text-gray-400 text-sm print:hidden">
+          Відкрито Маршрутний лист. Згорніть його (клік по шапці), щоб побачити загальний список адрес поїздки.
         </div>
       ) : (
         // ТЗ docx 08.08.26 (v12): загальний список адрес (посилки + ручні), ще не в листах.
