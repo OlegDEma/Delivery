@@ -172,6 +172,9 @@ export default function JourneysPage() {
   // ТЗ docx 26.07.26 (п.2): авто-фокус + підсвітка поточної/найближчої поїздки.
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const didInitialFocus = useRef(false);
+  // ТЗ docx 23.08.26: після виходу з форми редагування повертаємось саме до тієї
+  // поїздки, яку редагували (а не до найближчої за датою).
+  const pendingFocusId = useRef<string | null>(null);
 
   async function fetchJourneys() {
     setLoading(true);
@@ -267,6 +270,8 @@ export default function JourneysPage() {
     });
     setEditSaving(false);
     if (res.ok) {
+      // ТЗ docx 23.08.26: після виходу з редагування — курсор на цю ж поїздку.
+      pendingFocusId.current = editJourney.id;
       toast.success('Збережено');
       setEditJourney(null);
       fetchJourneys();
@@ -382,6 +387,29 @@ export default function JourneysPage() {
       if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
     }, 60);
   }, [loading, filteredJourneys, scrollFocusId]);
+
+  // ТЗ docx 23.08.26: після збереження змін список перезавантажується — повертаємо
+  // «курсор» саме на відредаговану поїздку (щоб вона була на екрані).
+  useEffect(() => {
+    const id = pendingFocusId.current;
+    if (!id || !journeys.some(j => j.id === id)) return;
+    pendingFocusId.current = null;
+    const scrollToRow = () => {
+      const el = rowRefs.current.get(id);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'auto', block: 'start' });
+    };
+    setTimeout(() => {
+      scrollToRow();
+      const el = rowRefs.current.get(id);
+      if (!el) return;
+      el.classList.add('ring-2', 'ring-blue-400', 'ring-offset-1');
+      // Список дорендерюється після першого скролу (висоти рядків міняються) —
+      // повторюємо, щоб поїздка стала саме вгорі екрана.
+      setTimeout(scrollToRow, 350);
+      setTimeout(() => el.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-1'), 2200);
+    }, 60);
+  }, [journeys]);
   // Групування за країною (ТЗ D10: у Поїздок немає напрямку → групуємо за країною).
   const journeyGroups: { key: string; label: string; items: Journey[] }[] = groupByCountry
     ? (() => {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireStaff, requireRole } from '@/lib/auth/guards';
-import { ADMIN_ROLES } from '@/lib/constants/roles';
+import { ADMIN_ROLES, PAYMENT_ACCEPT_ROLES } from '@/lib/constants/roles';
 import { normalizePhone } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
 import { z } from 'zod';
@@ -171,9 +171,14 @@ export async function POST(request: NextRequest) {
   }, { status: 201 });
 }
 
-// PATCH /api/passengers?id=... — редагувати пасажира (ТЗ docx 20.08.26: admin only + аудит).
+/**
+ * PATCH /api/passengers?id=... — редагувати пасажира.
+ * ТЗ docx 20.08.26: повне редагування — лише адмін/суперадмін (+ аудит).
+ * ТЗ docx 23.08.26 (п.4): Водій має право ПРИЙНЯТИ ОПЛАТУ — тобто змінити лише
+ * `isPaid`; решта полів для нього лишається закритою.
+ */
 export async function PATCH(request: NextRequest) {
-  const guard = await requireRole(ADMIN_ROLES);
+  const guard = await requireStaff();
   if (!guard.ok) return guard.response;
 
   const id = new URL(request.url).searchParams.get('id');
@@ -182,6 +187,19 @@ export async function PATCH(request: NextRequest) {
   const parsed = await parseBody(request, passengerUpdateSchema);
   if (parsed instanceof NextResponse) return parsed;
   const body = parsed;
+
+  const isAdmin = (ADMIN_ROLES as string[]).includes(guard.user.role);
+  if (!isAdmin) {
+    const keys = Object.keys(body);
+    const onlyPayment = keys.length > 0 && keys.every((k) => k === 'isPaid');
+    const canAcceptPayment = (PAYMENT_ACCEPT_ROLES as string[]).includes(guard.user.role);
+    if (!onlyPayment || !canAcceptPayment) {
+      return NextResponse.json(
+        { error: 'Змінювати дані пасажира може лише адміністратор. Водію доступна лише оплата.' },
+        { status: 403 },
+      );
+    }
+  }
 
   const existing = await prisma.passenger.findFirst({
     where: { id, deletedAt: null },

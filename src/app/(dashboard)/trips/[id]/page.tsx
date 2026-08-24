@@ -157,7 +157,10 @@ export default function TripDetailPage() {
           {/* ТЗ docx 01.07.26: поруч з датами відправлення/прибуття — день тижня. */}
           Відправлення: {formatDateWithWeekday(trip.departureDate)}
           {trip.arrivalDate && ` | Прибуття: ${formatDateWithWeekday(trip.arrivalDate)}`}
-          {trip.assignedCourier && ` | ${trip.assignedCourier.fullName}`}
+          {/* ТЗ docx 23.08.26: показуємо ВСІХ водіїв рейсу (як у Поїздках), а не лише першого. */}
+          {(trip.assignedCourier || trip.secondCourier) && ` | 👤 ${
+            [trip.assignedCourier?.fullName, trip.secondCourier?.fullName].filter(Boolean).join(' + ')
+          }`}
         </div>
         {trip.notes && <div className="text-sm text-gray-400 mt-1">{trip.notes}</div>}
         <div className="flex gap-2 mt-2">

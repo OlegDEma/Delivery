@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireStaff } from '@/lib/auth/guards';
 import { isUuid } from '@/lib/validators/common';
-import { sendConfirmation, type MessageChannel } from '@/lib/services/messaging';
+import { sendConfirmation, configuredChannels, type MessageChannel } from '@/lib/services/messaging';
 import { logger } from '@/lib/logger';
 
 /**
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
-  let body: { toParty?: string; channel?: string };
+  let body: { toParty?: string; channel?: string; mode?: string };
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
@@ -33,6 +33,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       toParty: body.toParty,
       channel: body.channel as MessageChannel,
       sentById: guard.user.userId,
+      // ТЗ docx 23.08.26: manual — працівник надіслав сам через месенджер (deep-link).
+      mode: body.mode === 'manual' ? 'manual' : 'auto',
     });
     return NextResponse.json(result);
   } catch (err) {
@@ -42,4 +44,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     logger.error('parcel.send_confirmation.failed', err, { parcelId: id });
     return NextResponse.json({ error: 'Помилка надсилання підтвердження' }, { status: 500 });
   }
+}
+
+/**
+ * GET /api/parcels/[id]/send-confirmation — які канали мають РЕАЛЬНОГО провайдера.
+ * ТЗ docx 23.08.26: якщо провайдера немає, інтерфейс не пише «у черзі», а відкриває
+ * сам застосунок (WhatsApp/Viber/SMS) з готовим текстом і логує факт відправки.
+ */
+export async function GET() {
+  const guard = await requireStaff();
+  if (!guard.ok) return guard.response;
+  return NextResponse.json({ configured: configuredChannels() });
 }

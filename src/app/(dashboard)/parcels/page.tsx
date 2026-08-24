@@ -99,7 +99,7 @@ function ParcelsContent() {
   // За ТЗ клієнта: замість фільтра «дата/вага/номер» — фільтр «по кур'єру,
   // який приймав посилку». Дефолт — «Без кур'єра» (прибрати розгорнутий
   // загальний список, показувати ще не прив'язані).
-  const [courierFilter, setCourierFilter] = useState<string>(COURIER_UNASSIGNED);
+  const [courierFilter, setCourierFilter] = useState<string>(COURIER_ALL);
   const [couriers, setCouriers] = useState<{ id: string; fullName: string }[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkStatus, setBulkStatus] = useState<string>('');
@@ -262,7 +262,7 @@ function ParcelsContent() {
         // «що зараз включено», як вимагає клієнт.
         const isStatusActive = statusFilter !== 'all';
         const isDateActive = !!dateFrom;
-        const isCourierActive = courierFilter !== COURIER_UNASSIGNED; // дефолт — unassigned
+        const isCourierActive = courierFilter !== COURIER_ALL; // ТЗ docx 23.08.26: дефолт — «Всі посилки»
         const activeCls = 'ring-2 ring-blue-200 border-blue-400';
         return (
           <div className="flex flex-col md:flex-row gap-2 mb-4">
@@ -324,8 +324,8 @@ function ParcelsContent() {
 
             {/* ТЗ: фільтр «по кур'єру, який приймав посилку» — це хто фізично
                 забрав посилку (collectedBy), не призначений на доставку.
-                Дефолт — «Не прийняті» (collectedById IS NULL). */}
-            <Select value={courierFilter} onValueChange={(v) => { setCourierFilter(v ?? COURIER_UNASSIGNED); setPage(1); }}>
+                ТЗ docx 23.08.26: дефолт — «Всі посилки» (раніше було «Не прийняті кур'єром» — клієнт просив змінити). */}
+            <Select value={courierFilter} onValueChange={(v) => { setCourierFilter(v ?? COURIER_ALL); setPage(1); }}>
               <SelectTrigger className={cn('md:w-64', isCourierActive && activeCls)}>
                 <SelectValue>{
                   courierFilter === COURIER_UNASSIGNED

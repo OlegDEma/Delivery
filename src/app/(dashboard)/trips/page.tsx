@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -90,6 +91,53 @@ export default function TripsPage() {
 
   useEffect(() => { fetchTrips(); }, []);
 
+  /**
+   * ТЗ docx 23.08.26: рейси підсвічуються і виділяються так само, як Поїздки —
+   * поточний/найближчий ОКРЕМО для кожної країни: 1) що триває зараз;
+   * 2) інакше найближчий майбутній; 3) інакше найсвіжіший минулий.
+   */
+  function pickFocusTripIds(list: Trip[]): Set<string> {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const t0 = today.getTime();
+    const day = (s: string | null | undefined) => {
+      if (!s) return null;
+      const d = new Date(s); d.setHours(0, 0, 0, 0);
+      return Number.isNaN(d.getTime()) ? null : d.getTime();
+    };
+    const byCountry = new Map<string, Trip[]>();
+    for (const t of list) {
+      const arr = byCountry.get(t.country) ?? [];
+      arr.push(t);
+      byCountry.set(t.country, arr);
+    }
+    const ids = new Set<string>();
+    for (const group of byCountry.values()) {
+      let picked: string | null = null;
+      for (const t of group) {
+        const dep = day(t.departureDate);
+        if (dep === null) continue;
+        const end = day(t.arrivalDate) ?? dep;
+        if (dep <= t0 && t0 <= end) { picked = t.id; break; }
+      }
+      if (!picked) {
+        let best = Infinity;
+        for (const t of group) {
+          const dep = day(t.departureDate);
+          if (dep !== null && dep >= t0 && dep < best) { best = dep; picked = t.id; }
+        }
+      }
+      if (!picked) {
+        let best = -Infinity;
+        for (const t of group) {
+          const dep = day(t.departureDate);
+          if (dep !== null && dep < t0 && dep > best) { best = dep; picked = t.id; }
+        }
+      }
+      if (picked) ids.add(picked);
+    }
+    return ids;
+  }
+
   // ── ТЗ docx 09.07.26: авто-фокус на найближчий рейс ─────────────
   // Рейс, найближчий до сьогодні за датою виїзду (серед переданого списку).
   function nearestTripId(list: Trip[]): string | null {
@@ -124,7 +172,15 @@ export default function TripsPage() {
   useEffect(() => {
     if (loading || trips.length === 0 || didInitialFocus.current) return;
     didInitialFocus.current = true;
-    setTimeout(() => focusRow(nearestTripId(trips)), 60);
+    // ТЗ docx 23.08.26: якщо повернулись зі сторінки конкретного рейсу — курсор
+    // саме на нього (а не на найближчий за датою).
+    let target: string | null = null;
+    try {
+      const last = window.sessionStorage.getItem('trips:lastVisited');
+      if (last && trips.some(t => t.id === last)) target = last;
+      window.sessionStorage.removeItem('trips:lastVisited');
+    } catch { /* sessionStorage недоступний — не критично */ }
+    setTimeout(() => focusRow(target ?? nearestTripId(trips)), 60);
   }, [loading, trips]);
 
   // Після редагування дат рейсу список перезавантажується — повертаємо
@@ -261,6 +317,8 @@ export default function TripsPage() {
   })();
 
   const allSelected = filteredTrips.length > 0 && filteredTrips.every(t => selectedIds.has(t.id));
+  // ТЗ docx 23.08.26: підсвітка поточного/найближчого рейсу по кожній країні.
+  const focusTripIds = pickFocusTripIds(filteredTrips);
 
   return (
     <div>
@@ -402,14 +460,25 @@ export default function TripsPage() {
                   <div
                     key={trip.id}
                     ref={(el) => { if (el) rowRefs.current.set(trip.id, el); else rowRefs.current.delete(trip.id); }}
-                    className="p-3 hover:bg-gray-50 flex items-start gap-2 rounded transition-shadow"
+                    className={cn(
+                      'p-3 flex items-start gap-2 rounded transition-shadow',
+                      // ТЗ docx 23.08.26: поточний/найближчий рейс виділяємо як у Поїздках.
+                      focusTripIds.has(trip.id)
+                        ? 'bg-amber-50 border border-amber-400 ring-2 ring-amber-400 ring-offset-1 shadow-sm'
+                        : 'hover:bg-gray-50'
+                    )}
                   >
                     {/* ТЗ docx 02.07.26 (D11): чекбокс вибору рядка. */}
                     <div className="pt-0.5">
                       <Checkbox checked={selectedIds.has(trip.id)} onCheckedChange={() => toggleSelect(trip.id)} />
                     </div>
                     {/* Клікабельна частина — деталі рейсу. */}
-                    <Link href={`/trips/${trip.id}`} className="min-w-0 flex-1">
+                    {/* ТЗ docx 23.08.26: памʼятаємо рейс, щоб повернутись саме до нього. */}
+                    <Link
+                      href={`/trips/${trip.id}`}
+                      className="min-w-0 flex-1"
+                      onClick={() => { try { window.sessionStorage.setItem('trips:lastVisited', trip.id); } catch { /* noop */ } }}
+                    >
                       <div className="flex items-center gap-2 mb-0.5">
                         <span className="font-medium">
                           {tripRouteLabel(trip.country, trip.direction)}

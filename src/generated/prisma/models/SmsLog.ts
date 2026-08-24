@@ -30,6 +30,7 @@ export type AggregateSmsLog = {
 export type SmsLogMinAggregateOutputType = {
   id: string | null
   parcelId: string | null
+  passengerId: string | null
   toParty: string | null
   toPhone: string | null
   body: string | null
@@ -45,6 +46,7 @@ export type SmsLogMinAggregateOutputType = {
 export type SmsLogMaxAggregateOutputType = {
   id: string | null
   parcelId: string | null
+  passengerId: string | null
   toParty: string | null
   toPhone: string | null
   body: string | null
@@ -60,6 +62,7 @@ export type SmsLogMaxAggregateOutputType = {
 export type SmsLogCountAggregateOutputType = {
   id: number
   parcelId: number
+  passengerId: number
   toParty: number
   toPhone: number
   body: number
@@ -77,6 +80,7 @@ export type SmsLogCountAggregateOutputType = {
 export type SmsLogMinAggregateInputType = {
   id?: true
   parcelId?: true
+  passengerId?: true
   toParty?: true
   toPhone?: true
   body?: true
@@ -92,6 +96,7 @@ export type SmsLogMinAggregateInputType = {
 export type SmsLogMaxAggregateInputType = {
   id?: true
   parcelId?: true
+  passengerId?: true
   toParty?: true
   toPhone?: true
   body?: true
@@ -107,6 +112,7 @@ export type SmsLogMaxAggregateInputType = {
 export type SmsLogCountAggregateInputType = {
   id?: true
   parcelId?: true
+  passengerId?: true
   toParty?: true
   toPhone?: true
   body?: true
@@ -195,6 +201,7 @@ export type SmsLogGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 export type SmsLogGroupByOutputType = {
   id: string
   parcelId: string | null
+  passengerId: string | null
   toParty: string
   toPhone: string
   body: string
@@ -231,6 +238,7 @@ export type SmsLogWhereInput = {
   NOT?: Prisma.SmsLogWhereInput | Prisma.SmsLogWhereInput[]
   id?: Prisma.UuidFilter<"SmsLog"> | string
   parcelId?: Prisma.UuidNullableFilter<"SmsLog"> | string | null
+  passengerId?: Prisma.UuidNullableFilter<"SmsLog"> | string | null
   toParty?: Prisma.StringFilter<"SmsLog"> | string
   toPhone?: Prisma.StringFilter<"SmsLog"> | string
   body?: Prisma.StringFilter<"SmsLog"> | string
@@ -246,6 +254,7 @@ export type SmsLogWhereInput = {
 export type SmsLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   parcelId?: Prisma.SortOrderInput | Prisma.SortOrder
+  passengerId?: Prisma.SortOrderInput | Prisma.SortOrder
   toParty?: Prisma.SortOrder
   toPhone?: Prisma.SortOrder
   body?: Prisma.SortOrder
@@ -264,6 +273,7 @@ export type SmsLogWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.SmsLogWhereInput[]
   NOT?: Prisma.SmsLogWhereInput | Prisma.SmsLogWhereInput[]
   parcelId?: Prisma.UuidNullableFilter<"SmsLog"> | string | null
+  passengerId?: Prisma.UuidNullableFilter<"SmsLog"> | string | null
   toParty?: Prisma.StringFilter<"SmsLog"> | string
   toPhone?: Prisma.StringFilter<"SmsLog"> | string
   body?: Prisma.StringFilter<"SmsLog"> | string
@@ -279,6 +289,7 @@ export type SmsLogWhereUniqueInput = Prisma.AtLeast<{
 export type SmsLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   parcelId?: Prisma.SortOrderInput | Prisma.SortOrder
+  passengerId?: Prisma.SortOrderInput | Prisma.SortOrder
   toParty?: Prisma.SortOrder
   toPhone?: Prisma.SortOrder
   body?: Prisma.SortOrder
@@ -300,6 +311,7 @@ export type SmsLogScalarWhereWithAggregatesInput = {
   NOT?: Prisma.SmsLogScalarWhereWithAggregatesInput | Prisma.SmsLogScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"SmsLog"> | string
   parcelId?: Prisma.UuidNullableWithAggregatesFilter<"SmsLog"> | string | null
+  passengerId?: Prisma.UuidNullableWithAggregatesFilter<"SmsLog"> | string | null
   toParty?: Prisma.StringWithAggregatesFilter<"SmsLog"> | string
   toPhone?: Prisma.StringWithAggregatesFilter<"SmsLog"> | string
   body?: Prisma.StringWithAggregatesFilter<"SmsLog"> | string
@@ -315,6 +327,7 @@ export type SmsLogScalarWhereWithAggregatesInput = {
 export type SmsLogCreateInput = {
   id?: string
   parcelId?: string | null
+  passengerId?: string | null
   toParty: string
   toPhone: string
   body: string
@@ -330,6 +343,7 @@ export type SmsLogCreateInput = {
 export type SmsLogUncheckedCreateInput = {
   id?: string
   parcelId?: string | null
+  passengerId?: string | null
   toParty: string
   toPhone: string
   body: string
@@ -345,6 +359,7 @@ export type SmsLogUncheckedCreateInput = {
 export type SmsLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passengerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toParty?: Prisma.StringFieldUpdateOperationsInput | string
   toPhone?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
@@ -360,6 +375,7 @@ export type SmsLogUpdateInput = {
 export type SmsLogUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passengerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toParty?: Prisma.StringFieldUpdateOperationsInput | string
   toPhone?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
@@ -375,6 +391,7 @@ export type SmsLogUncheckedUpdateInput = {
 export type SmsLogCreateManyInput = {
   id?: string
   parcelId?: string | null
+  passengerId?: string | null
   toParty: string
   toPhone: string
   body: string
@@ -390,6 +407,7 @@ export type SmsLogCreateManyInput = {
 export type SmsLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passengerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toParty?: Prisma.StringFieldUpdateOperationsInput | string
   toPhone?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
@@ -405,6 +423,7 @@ export type SmsLogUpdateManyMutationInput = {
 export type SmsLogUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passengerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toParty?: Prisma.StringFieldUpdateOperationsInput | string
   toPhone?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
@@ -420,6 +439,7 @@ export type SmsLogUncheckedUpdateManyInput = {
 export type SmsLogCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   parcelId?: Prisma.SortOrder
+  passengerId?: Prisma.SortOrder
   toParty?: Prisma.SortOrder
   toPhone?: Prisma.SortOrder
   body?: Prisma.SortOrder
@@ -435,6 +455,7 @@ export type SmsLogCountOrderByAggregateInput = {
 export type SmsLogMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   parcelId?: Prisma.SortOrder
+  passengerId?: Prisma.SortOrder
   toParty?: Prisma.SortOrder
   toPhone?: Prisma.SortOrder
   body?: Prisma.SortOrder
@@ -450,6 +471,7 @@ export type SmsLogMaxOrderByAggregateInput = {
 export type SmsLogMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   parcelId?: Prisma.SortOrder
+  passengerId?: Prisma.SortOrder
   toParty?: Prisma.SortOrder
   toPhone?: Prisma.SortOrder
   body?: Prisma.SortOrder
@@ -467,6 +489,7 @@ export type SmsLogMinOrderByAggregateInput = {
 export type SmsLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   parcelId?: boolean
+  passengerId?: boolean
   toParty?: boolean
   toPhone?: boolean
   body?: boolean
@@ -482,6 +505,7 @@ export type SmsLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type SmsLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   parcelId?: boolean
+  passengerId?: boolean
   toParty?: boolean
   toPhone?: boolean
   body?: boolean
@@ -497,6 +521,7 @@ export type SmsLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type SmsLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   parcelId?: boolean
+  passengerId?: boolean
   toParty?: boolean
   toPhone?: boolean
   body?: boolean
@@ -512,6 +537,7 @@ export type SmsLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type SmsLogSelectScalar = {
   id?: boolean
   parcelId?: boolean
+  passengerId?: boolean
   toParty?: boolean
   toPhone?: boolean
   body?: boolean
@@ -524,7 +550,7 @@ export type SmsLogSelectScalar = {
   createdAt?: boolean
 }
 
-export type SmsLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parcelId" | "toParty" | "toPhone" | "body" | "channel" | "kind" | "provider" | "status" | "errorMessage" | "sentById" | "createdAt", ExtArgs["result"]["smsLog"]>
+export type SmsLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parcelId" | "passengerId" | "toParty" | "toPhone" | "body" | "channel" | "kind" | "provider" | "status" | "errorMessage" | "sentById" | "createdAt", ExtArgs["result"]["smsLog"]>
 
 export type $SmsLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SmsLog"
@@ -532,6 +558,10 @@ export type $SmsLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     parcelId: string | null
+    /**
+     * ТЗ docx 23.08.26: повідомлення пасажиру (підтвердження/рахунок) — замість parcelId.
+     */
+    passengerId: string | null
     toParty: string
     toPhone: string
     body: string
@@ -977,6 +1007,7 @@ export interface Prisma__SmsLogClient<T, Null = never, ExtArgs extends runtime.T
 export interface SmsLogFieldRefs {
   readonly id: Prisma.FieldRef<"SmsLog", 'String'>
   readonly parcelId: Prisma.FieldRef<"SmsLog", 'String'>
+  readonly passengerId: Prisma.FieldRef<"SmsLog", 'String'>
   readonly toParty: Prisma.FieldRef<"SmsLog", 'String'>
   readonly toPhone: Prisma.FieldRef<"SmsLog", 'String'>
   readonly body: Prisma.FieldRef<"SmsLog", 'String'>

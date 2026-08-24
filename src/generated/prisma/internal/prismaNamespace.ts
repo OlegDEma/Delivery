@@ -2583,6 +2583,7 @@ export type InvoiceSettingsScalarFieldEnum = (typeof InvoiceSettingsScalarFieldE
 export const SmsLogScalarFieldEnum = {
   id: 'id',
   parcelId: 'parcelId',
+  passengerId: 'passengerId',
   toParty: 'toParty',
   toPhone: 'toPhone',
   body: 'body',

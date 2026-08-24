@@ -70,6 +70,23 @@ function digits(phone: string): string {
 }
 
 /**
+ * ТЗ docx 23.08.26: чи підключено РЕАЛЬНОГО провайдера для каналу. Якщо ні —
+ * інтерфейс не показує «у черзі», а відкриває сам застосунок (deep-link) з
+ * готовим текстом, як описано в ТЗ 11.08/17.08 («відкривається відповідна
+ * програма з даними особи і формою у тілі повідомлення»).
+ */
+export function isChannelConfigured(channel: MessageChannel): boolean {
+  if (channel === 'whatsapp') return !!process.env.WHATSAPP_TOKEN;
+  const token = process.env.TURBOSMS_TOKEN;
+  const sender = channel === 'viber' ? process.env.TURBOSMS_VIBER_SENDER : process.env.TURBOSMS_SENDER;
+  return !!token && !!sender;
+}
+
+export function configuredChannels(): Record<MessageChannel, boolean> {
+  return { sms: isChannelConfigured('sms'), viber: isChannelConfigured('viber'), whatsapp: isChannelConfigured('whatsapp') };
+}
+
+/**
  * SMS та Viber через TurboSMS (той самий REST API). Коли ключа немає — STUB.
  * Документація: POST https://api.turbosms.ua/message/send.json,
  * Authorization: Basic <API_KEY>, body {recipients:[...], sms|viber:{sender,text}}.
@@ -126,6 +143,12 @@ export interface SendConfirmationArgs {
   toParty: 'sender' | 'receiver';
   channel: MessageChannel;
   sentById: string;
+  /**
+   * ТЗ docx 23.08.26: 'manual' — працівник надіслав сам із застосунку (WA/Viber/SMS
+   * відкрились deep-link'ом із готовим текстом). Зовнішній виклик не потрібен —
+   * лише фіксуємо факт у логу. 'auto' (дефолт) — сервер шле через провайдера.
+   */
+  mode?: 'auto' | 'manual';
 }
 
 /**
@@ -156,10 +179,15 @@ export async function sendConfirmation(args: SendConfirmationArgs): Promise<{
   const body = buildConfirmationBody(parcel);
 
   let result: SendResult;
-  try {
-    result = await dispatch(args.channel, phone, body);
-  } catch (err) {
-    result = { status: 'failed', provider: null, errorMessage: err instanceof Error ? err.message : 'send error' };
+  if (args.mode === 'manual') {
+    // Надіслано працівником вручну через месенджер — фіксуємо як відправлене.
+    result = { status: 'sent', provider: 'deeplink' };
+  } else {
+    try {
+      result = await dispatch(args.channel, phone, body);
+    } catch (err) {
+      result = { status: 'failed', provider: null, errorMessage: err instanceof Error ? err.message : 'send error' };
+    }
   }
 
   const log = await prisma.smsLog.create({

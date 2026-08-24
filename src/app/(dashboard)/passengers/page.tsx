@@ -17,6 +17,7 @@ import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { formatCurrency } from '@/lib/utils/format';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { MinibusSeating } from '@/components/passengers/minibus-seating';
+import { PassengerShareButtons } from '@/components/passengers/passenger-share-buttons';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
 
@@ -61,11 +62,68 @@ interface TripDetail {
 }
 
 
+const PASSENGER_COUNTRY_LABELS: Record<string, string> = { NL: 'Нідерланди', AT: 'Австрія', DE: 'Німеччина' };
+
+/**
+ * ТЗ docx 23.08.26 (п.2): рейси у вкладці «Пасажири» підсвічуються так само, як
+ * Поїздки — поточний/найближчий ОКРЕМО для кожної країни.
+ */
+function pickFocusPassengerTripIds(list: TripSummary[]): Set<string> {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const t0 = today.getTime();
+  const day = (s: string | null) => {
+    if (!s) return null;
+    const d = new Date(s); d.setHours(0, 0, 0, 0);
+    return Number.isNaN(d.getTime()) ? null : d.getTime();
+  };
+  const byCountry = new Map<string, TripSummary[]>();
+  for (const t of list) {
+    const arr = byCountry.get(t.country) ?? [];
+    arr.push(t);
+    byCountry.set(t.country, arr);
+  }
+  const ids = new Set<string>();
+  for (const group of byCountry.values()) {
+    let picked: string | null = null;
+    for (const t of group) {
+      const dep = day(t.departureDate);
+      if (dep === null) continue;
+      const end = day(t.arrivalDate) ?? dep;
+      if (dep <= t0 && t0 <= end) { picked = t.id; break; }
+    }
+    if (!picked) {
+      let best = Infinity;
+      for (const t of group) {
+        const dep = day(t.departureDate);
+        if (dep !== null && dep >= t0 && dep < best) { best = dep; picked = t.id; }
+      }
+    }
+    if (!picked) {
+      let best = -Infinity;
+      for (const t of group) {
+        const dep = day(t.departureDate);
+        if (dep !== null && dep < t0 && dep > best) { best = dep; picked = t.id; }
+      }
+    }
+    if (picked) ids.add(picked);
+  }
+  return ids;
+}
+
 export default function PassengersPage() {
   // ТЗ docx 18.08.26: Водію заборонено видаляти пасажирів (API вже 403 —
   // ховаємо й кнопку). Видаляти може лише адмін/суперадмін.
   const { role } = useAuth();
   const canDeletePassenger = role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN;
+  // ТЗ docx 23.08.26 (п.1): фільтри рейсів — для Суперадміна/Адміна.
+  const canFilterTrips = role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN;
+  // ТЗ docx 23.08.26 (п.4): Водій (як і касир/адмін) може прийняти оплату у пасажира.
+  const canAcceptPayment = role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN
+    || role === ROLES.CASHIER || role === ROLES.DRIVER_COURIER;
+  const [filterCountry, setFilterCountry] = useState<string>('');
+  const [filterDirection, setFilterDirection] = useState<string>('');
+  const [filterDateFrom, setFilterDateFrom] = useState<string>('');
+  const [filterDateTo, setFilterDateTo] = useState<string>('');
   const [trips, setTrips] = useState<TripSummary[]>([]);
   const [loadingTrips, setLoadingTrips] = useState(true);
 
@@ -123,8 +181,18 @@ export default function PassengersPage() {
 
   async function handleCreate() {
     if (!editingId && !selectedTripId) return;
-    if (!form.firstName.trim() || !form.lastName.trim() || !form.phone.trim()) {
-      toast.error('Імʼя, прізвище і телефон обовʼязкові');
+    // ТЗ docx 23.08.26 (п.3): обовʼязкові — Прізвище, Імʼя, телефон, місце,
+    // вартість, місце посадки, місце висадки.
+    const missing: string[] = [];
+    if (!form.lastName.trim()) missing.push('Прізвище');
+    if (!form.firstName.trim()) missing.push('Імʼя');
+    if (!form.phone.trim()) missing.push('Телефон');
+    if (!form.seatNumber) missing.push('Місце');
+    if (!form.price.trim()) missing.push('Вартість');
+    if (!form.pickupAddress.trim()) missing.push('Місце посадки');
+    if (!form.dropoffAddress.trim()) missing.push('Місце висадки');
+    if (missing.length > 0) {
+      toast.error(`Заповніть обовʼязкові поля: ${missing.join(', ')}`);
       return;
     }
     setSaving(true);
@@ -173,6 +241,27 @@ export default function PassengersPage() {
       isPaid: p.isPaid, notes: p.notes || '',
     });
     setFormOpen(true);
+  }
+
+  /**
+   * ТЗ docx 23.08.26 (п.4): прийом оплати у пасажира. Водію API дозволяє змінити
+   * лише `isPaid` — решта полів лишається за адміністратором.
+   */
+  async function togglePaid(p: Passenger) {
+    const next = !p.isPaid;
+    if (next && !confirm(`Підтвердити отримання оплати від ${p.lastName} ${p.firstName}?`)) return;
+    const res = await fetch(`/api/passengers?id=${p.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isPaid: next }),
+    });
+    if (res.ok) {
+      toast.success(next ? 'Оплату прийнято' : 'Позначку про оплату знято');
+      if (selectedTripId) fetchTripDetail(selectedTripId);
+    } else {
+      const d = await res.json().catch(() => ({}));
+      toast.error(d.error || 'Помилка');
+    }
   }
 
   async function handleDelete(id: string) {
@@ -246,24 +335,24 @@ export default function PassengersPage() {
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <Label className="text-xs">Прізвище</Label>
+                        <Label className="text-xs">Прізвище *</Label>
                         {/* ТЗ docx 20.08.26: ПІБ пасажира — з великої літери за замовчуванням. */}
                         <CapitalizeInput value={form.lastName} onChange={(v) => setForm({ ...form, lastName: v })} />
                       </div>
                       <div>
-                        <Label className="text-xs">Імʼя</Label>
+                        <Label className="text-xs">Імʼя *</Label>
                         <CapitalizeInput value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} />
                       </div>
                     </div>
                     <PhoneInput
-                      label="Телефон"
+                      label="Телефон *"
                       value={form.phone}
                       onChange={(v) => setForm({ ...form, phone: v })}
                       defaultCountry="UA"
                     />
                     {/* ТЗ docx 08.08.26: вибір місця кліком по схематичному плану салону. */}
                     <div>
-                      <Label className="text-xs">Місце в салоні</Label>
+                      <Label className="text-xs">Місце в салоні *</Label>
                       <div className="mt-1">
                         <MinibusSeating
                           capacity={capacity}
@@ -284,7 +373,7 @@ export default function PassengersPage() {
                         />
                       </div>
                       <div>
-                        <Label className="text-xs">Ціна</Label>
+                        <Label className="text-xs">Вартість *</Label>
                         <div className="flex gap-1">
                           <Input
                             type="number" min={0} step={0.01}
@@ -304,11 +393,11 @@ export default function PassengersPage() {
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs">Місце посадки</Label>
+                      <Label className="text-xs">Місце посадки *</Label>
                       <Input value={form.pickupAddress} onChange={(e) => setForm({ ...form, pickupAddress: e.target.value })} placeholder="Адреса / орієнтир" />
                     </div>
                     <div>
-                      <Label className="text-xs">Місце висадки</Label>
+                      <Label className="text-xs">Місце висадки *</Label>
                       <Input value={form.dropoffAddress} onChange={(e) => setForm({ ...form, dropoffAddress: e.target.value })} placeholder="Адреса / орієнтир" />
                     </div>
                     <div>
@@ -347,11 +436,29 @@ export default function PassengersPage() {
                         )}
                         <span className="font-medium">{p.lastName} {p.firstName}</span>
                         <PhoneLink phone={p.phone} />
-                        {p.isPaid ? (
+                        {/* ТЗ docx 23.08.26 (п.4): бейдж оплати клікабельний — прийом оплати. */}
+                        {canAcceptPayment ? (
+                          <button type="button" onClick={() => togglePaid(p)} title={p.isPaid ? 'Зняти позначку оплати' : 'Прийняти оплату'}>
+                            <Badge className={`text-xs cursor-pointer ${p.isPaid ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}`}>
+                              {p.isPaid ? 'Оплачено' : 'Прийняти оплату'}
+                            </Badge>
+                          </button>
+                        ) : p.isPaid ? (
                           <Badge className="text-xs bg-green-100 text-green-800">Оплачено</Badge>
                         ) : (
                           <Badge className="text-xs bg-yellow-100 text-yellow-800">Не оплачено</Badge>
                         )}
+                      </div>
+                      {/* ТЗ docx 23.08.26 (п.5-6): надіслати пасажиру підтвердження або рахунок. */}
+                      <div className="flex items-center gap-3 flex-wrap mt-1.5">
+                        <span className="inline-flex items-center gap-1">
+                          <span className="text-[11px] text-gray-500">Підтвердження:</span>
+                          <PassengerShareButtons passengerId={p.id} kind="confirmation" phone={p.phone} />
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="text-[11px] text-gray-500">Рахунок:</span>
+                          <PassengerShareButtons passengerId={p.id} kind="invoice" phone={p.phone} />
+                        </span>
                       </div>
                       {(p.pickupAddress || p.dropoffAddress) && (
                         <div className="text-xs text-gray-500 mt-1">
@@ -398,12 +505,68 @@ export default function PassengersPage() {
   }
 
   // ---------- LIST VIEW ----------
+  // ТЗ docx 23.08.26 (п.1-2): фільтри (дати/країни/напрямки) + хронологічне
+  // сортування і підсвітка поточного/найближчого рейсу — як у вкладці «Поїздки».
+  const filteredTrips = trips
+    .filter((t) => (!filterCountry || t.country === filterCountry)
+      && (!filterDirection || t.direction === filterDirection)
+      && (!filterDateFrom || String(t.departureDate).slice(0, 10) >= filterDateFrom)
+      && (!filterDateTo || String(t.departureDate).slice(0, 10) <= filterDateTo))
+    .slice()
+    .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+  const focusTripIds = pickFocusPassengerTripIds(filteredTrips);
+  const filtersActive = !!(filterCountry || filterDirection || filterDateFrom || filterDateTo);
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-1">Пасажири</h1>
       <p className="text-sm text-gray-500 mb-4">
         Перевезення пасажирів по рейсах. Натисніть на рейс щоб побачити пасажирів, вільні та зайняті місця.
       </p>
+
+      {/* ТЗ docx 23.08.26: фільтр рейсів по датах / країнах / напрямках. */}
+      {canFilterTrips && trips.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-4 text-sm">
+          <Select value={filterCountry || 'all'} onValueChange={(v) => setFilterCountry((v ?? 'all') === 'all' ? '' : (v ?? ''))}>
+            <SelectTrigger className="h-9 w-40">
+              <SelectValue>{filterCountry ? (PASSENGER_COUNTRY_LABELS[filterCountry] || filterCountry) : 'Усі країни'}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Усі країни</SelectItem>
+              <SelectItem value="NL">Нідерланди</SelectItem>
+              <SelectItem value="AT">Австрія</SelectItem>
+              <SelectItem value="DE">Німеччина</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={filterDirection || 'all'} onValueChange={(v) => setFilterDirection((v ?? 'all') === 'all' ? '' : (v ?? ''))}>
+            <SelectTrigger className="h-9 w-48">
+              <SelectValue>
+                {filterDirection === 'ua_to_eu' ? 'З України' : filterDirection === 'eu_to_ua' ? 'До України' : 'Усі напрямки'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Усі напрямки</SelectItem>
+              <SelectItem value="ua_to_eu">З України</SelectItem>
+              <SelectItem value="eu_to_ua">До України</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="flex items-center gap-1">
+            <span className="text-gray-500 text-xs">з</span>
+            <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="h-9 w-36" />
+            <span className="text-gray-500 text-xs">по</span>
+            <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="h-9 w-36" />
+          </div>
+          {filtersActive && (
+            <button
+              type="button"
+              onClick={() => { setFilterCountry(''); setFilterDirection(''); setFilterDateFrom(''); setFilterDateTo(''); }}
+              className="text-xs text-blue-600 hover:underline"
+            >
+              Скинути фільтри
+            </button>
+          )}
+        </div>
+      )}
 
       {loadingTrips ? (
         <div className="text-center py-12 text-gray-500">Завантаження...</div>
@@ -417,8 +580,20 @@ export default function PassengersPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {trips.map((t) => (
-            <Card key={t.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedTripId(t.id)}>
+          {filteredTrips.length === 0 && (
+            <div className="text-sm text-gray-500 py-6 text-center md:col-span-2">
+              Немає рейсів за обраними фільтрами.
+            </div>
+          )}
+          {filteredTrips.map((t) => (
+            <Card
+              key={t.id}
+              className={`cursor-pointer hover:shadow-md transition-shadow${
+                // ТЗ docx 23.08.26: поточний/найближчий рейс — виділений, як у Поїздках.
+                focusTripIds.has(t.id) ? ' bg-amber-50 border-amber-400 ring-2 ring-amber-400 ring-offset-1' : ''
+              }`}
+              onClick={() => setSelectedTripId(t.id)}
+            >
               <CardHeader className="py-3 px-4">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="text-base">
@@ -435,7 +610,7 @@ export default function PassengersPage() {
               <CardContent className="px-4 pb-4 pt-0">
                 {t.passengerCapacity === 0 ? (
                   <div className="text-xs text-gray-400">
-                    Місткість не задана. Встановіть у редагуванні рейсу.
+                    Місткість не задана. Встановіть кількість пасажирських місць у редагуванні ПОЇЗДКИ.
                   </div>
                 ) : (
                   <div className="flex items-center gap-3 text-sm">

@@ -804,6 +804,8 @@ model InvoiceSettings {
 model SmsLog {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   parcelId     String?  @map("parcel_id") @db.Uuid
+  /// ТЗ docx 23.08.26: повідомлення пасажиру (підтвердження/рахунок) — замість parcelId.
+  passengerId  String?  @map("passenger_id") @db.Uuid
   toParty      String   @map("to_party") // 'sender' | 'receiver'
   toPhone      String   @map("to_phone")
   body         String
@@ -820,6 +822,7 @@ model SmsLog {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([parcelId])
+  @@index([passengerId])
   @@index([createdAt])
   @@map("sms_log")
 }

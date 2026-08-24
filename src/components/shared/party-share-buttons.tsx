@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,9 @@ interface PartyShareButtonsProps {
   parcelId: string;
   /** Кому шлемо — визначає сторону й номер на сервері. */
   toParty: 'sender' | 'receiver';
-  /** Телефон сторони (для показу в діалозі). */
+  /** Телефон сторони (для показу в діалозі + deep-link). */
   phone?: string | null;
-  /** Готовий текст підтвердження — прев'ю в діалозі (сервер формує власний ідентичний). */
+  /** Готовий текст підтвердження — прев'ю в діалозі і тіло повідомлення. */
   message: string;
   /** Викликається після відправки — щоб оновити історію «Надіслані підтвердження». */
   onSent?: () => void;
@@ -24,29 +24,68 @@ const CHANNELS = [
   { key: 'sms', label: 'SMS', title: 'SMS', color: 'text-blue-600 hover:text-blue-700 border-blue-200' },
 ] as const;
 
+type Channel = (typeof CHANNELS)[number];
+
+/** Номер лише цифрами (для wa.me / tel). */
+function digitsOf(phone?: string | null): string {
+  return (phone || '').replace(/\D+/g, '');
+}
+
 /**
- * ТЗ docx 18.08.26: біля кожної сторони — іконки WhatsApp/Viber/SMS, які запускають
- * СЕРВЕРНУ авто-відправку підтвердження (сервер сам шле через провайдера і записує
- * факт у лог). Клік → діалог-прев'ю («перевіряю, відправляю», за ТЗ 17.08) → «Надіслати».
+ * ТЗ docx 11.08.26 / 17.08.26: «відкривається відповідна програма (WA, V, SMS) з даними
+ * цієї особи у адресному рядку і вищенаведеною формою у тілі повідомлення».
+ * Viber не вміє одночасно номер + текст, тому для нього використовуємо forward?text=
+ * (текст готовий, контакт обирається) — саме текст був проблемою в ТЗ 17.08.
+ */
+function deepLink(channel: Channel['key'], phone: string | null | undefined, body: string): string {
+  const d = digitsOf(phone);
+  const text = encodeURIComponent(body);
+  if (channel === 'whatsapp') return `https://wa.me/${d}?text=${text}`;
+  if (channel === 'viber') return `viber://forward?text=${text}`;
+  return `sms:+${d}?&body=${text}`;
+}
+
+/**
+ * Іконки WhatsApp/Viber/SMS біля сторони посилки.
+ * ТЗ docx 23.08.26: якщо СЕРВЕРНОГО провайдера не підключено — не показуємо «у черзі»,
+ * а відкриваємо сам застосунок із готовим текстом (як у ТЗ 11.08) і логуємо факт
+ * відправки, щоб на сайті було видно, що підтвердження вже надіслано.
  */
 export function PartyShareButtons({ parcelId, toParty, phone, message, onSent, className }: PartyShareButtonsProps) {
-  const [pending, setPending] = useState<(typeof CHANNELS)[number] | null>(null);
+  const [pending, setPending] = useState<Channel | null>(null);
   const [sending, setSending] = useState(false);
+  const [configured, setConfigured] = useState<Record<string, boolean>>({});
 
-  async function send() {
+  // Які канали має сервер (реальний провайдер) — визначає режим кнопки.
+  useEffect(() => {
+    let active = true;
+    fetch(`/api/parcels/${parcelId}/send-confirmation`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (active && d?.configured) setConfigured(d.configured); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [parcelId]);
+
+  /** Записуємо факт відправки в історію (для обох режимів). */
+  async function logSend(channel: Channel, mode: 'auto' | 'manual') {
+    const res = await fetch(`/api/parcels/${parcelId}/send-confirmation`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ toParty, channel: channel.key, mode }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Помилка надсилання');
+    return data;
+  }
+
+  // Режим «сервер шле сам» — лише коли провайдер підключено.
+  async function sendViaServer() {
     if (!pending) return;
     setSending(true);
     try {
-      const res = await fetch(`/api/parcels/${parcelId}/send-confirmation`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ toParty, channel: pending.key }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Помилка надсилання');
+      const data = await logSend(pending, 'auto');
       if (data.status === 'sent') toast.success(`${pending.title}: підтвердження надіслано`);
-      else if (data.status === 'queued') toast.info(`${pending.title}: у черзі — провайдер ще не підключено`);
-      else toast.error(`${pending.title}: ${data.errorMessage || 'помилка'}`);
+      else toast.error(`${pending.title}: ${data.errorMessage || 'не вдалося надіслати'}`);
       setPending(null);
       onSent?.();
     } catch (e) {
@@ -55,6 +94,22 @@ export function PartyShareButtons({ parcelId, toParty, phone, message, onSent, c
       setSending(false);
     }
   }
+
+  // Режим deep-link: застосунок відкриває сам <a>, ми лише фіксуємо факт.
+  function handleManualSent() {
+    if (!pending) return;
+    const ch = pending;
+    if (ch.key === 'viber') {
+      navigator.clipboard?.writeText(message).catch(() => {});
+      toast.info('Viber: текст скопійовано — оберіть контакт у Viber');
+    }
+    logSend(ch, 'manual')
+      .then(() => { toast.success(`${ch.title}: відмічено як надіслане`); onSent?.(); })
+      .catch(() => {});
+    setPending(null);
+  }
+
+  const isConfigured = pending ? !!configured[pending.key] : false;
 
   return (
     <span className={`inline-flex items-center gap-1 align-middle ${className || ''}`}>
@@ -80,9 +135,25 @@ export function PartyShareButtons({ parcelId, toParty, phone, message, onSent, c
             <span className="text-gray-400"> · {phone || '—'}</span>
           </div>
           <pre className="text-xs bg-gray-50 border rounded p-2 whitespace-pre-wrap max-h-60 overflow-y-auto font-sans">{message}</pre>
-          <div className="flex gap-2 justify-end pt-1">
+          <div className="flex gap-2 justify-end pt-1 items-center">
             <Button variant="outline" size="sm" onClick={() => setPending(null)} disabled={sending}>Скасувати</Button>
-            <Button size="sm" onClick={send} disabled={sending || !phone}>{sending ? 'Надсилання…' : 'Надіслати'}</Button>
+            {isConfigured ? (
+              <Button size="sm" onClick={sendViaServer} disabled={sending || !phone}>
+                {sending ? 'Надсилання…' : 'Надіслати'}
+              </Button>
+            ) : (
+              // Провайдера немає → відкриваємо застосунок. Саме <a>, щоб браузер
+              // відкрив нативно (програмний клік блокується як popup).
+              <a
+                href={pending ? deepLink(pending.key, phone, message) : '#'}
+                target={pending?.key === 'whatsapp' ? '_blank' : undefined}
+                rel={pending?.key === 'whatsapp' ? 'noopener noreferrer' : undefined}
+                onClick={handleManualSent}
+                className="inline-flex items-center justify-center h-8 px-3 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 no-underline"
+              >
+                Відкрити {pending?.title} і надіслати
+              </a>
+            )}
           </div>
         </DialogContent>
       </Dialog>

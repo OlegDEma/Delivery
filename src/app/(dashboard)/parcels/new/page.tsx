@@ -806,11 +806,8 @@ export default function NewParcelPage() {
               <CardTitle className="text-base">
                 Параметри відправлення <FieldHint text="Введіть загальні параметри (вага+об'єм+кількість місць) або детально по кожному місцю." />
               </CardTitle>
-              {!useGeneralParams && (
-                <Button type="button" variant="outline" size="sm" onClick={addPlace} disabled={places.length >= 10}>
-                  + Додати місце
-                </Button>
-              )}
+              {/* ТЗ docx 23.08.26: кнопку «+ Додати місце» перенесено ПІД останнє місце
+                  (див. нижче) — вона завжди йде відразу за місцем, яке заповнюють. */}
             </div>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-3">
@@ -896,6 +893,14 @@ export default function NewParcelPage() {
                         живе на parcel-рівні у блоці «Відправлення» вище. */}
                   </div>
                 ))}
+                {/* ТЗ docx 23.08.26: напис «+ Додати місце» ЗАВЖДИ знизу заповнюваного
+                    місця — при додаванні нового місця кнопка сама зсувається нижче. */}
+                <Button
+                  type="button" variant="outline" size="sm" onClick={addPlace}
+                  disabled={places.length >= 10} className="w-full"
+                >
+                  + Додати місце
+                </Button>
               </>
             )}
 

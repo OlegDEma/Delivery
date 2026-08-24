@@ -30,8 +30,19 @@ export const STAFF_ROLES: Role[] = [
   ROLES.DRIVER_COURIER,
 ];
 
-/** Can manage money: accept payments, see debts, see cash register */
+/** Can see money views: cash register, debts, financial reports */
 export const FINANCE_ROLES: Role[] = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.CASHIER];
+
+/**
+ * ТЗ docx 23.08.26: Водій приймає оплату (за посилку і за пасажира) — гроші він
+ * забирає особисто на адресі. Каса/борги/звіти лишаються за FINANCE_ROLES.
+ */
+export const PAYMENT_ACCEPT_ROLES: Role[] = [
+  ROLES.SUPER_ADMIN,
+  ROLES.ADMIN,
+  ROLES.CASHIER,
+  ROLES.DRIVER_COURIER,
+];
 
 /** Can see client database & create/edit parcels */
 export const OPERATIONS_ROLES: Role[] = [

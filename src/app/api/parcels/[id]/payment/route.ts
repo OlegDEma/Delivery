@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import type { PaymentMethod, CashPaymentType } from '@/generated/prisma/enums';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
-import { FINANCE_ROLES } from '@/lib/constants/roles';
+import { PAYMENT_ACCEPT_ROLES } from '@/lib/constants/roles';
 import { parseBody, acceptPaymentSchema } from '@/lib/validators';
 import { isUuid } from '@/lib/validators/common';
 import { logger } from '@/lib/logger';
@@ -12,12 +12,13 @@ import { logger } from '@/lib/logger';
 // { allowDeviation: true } — UI surfaces a confirm dialog for that.
 const PAYMENT_TOLERANCE = 0.5;
 
-// POST /api/parcels/[id]/payment — accept payment (FINANCE_ROLES)
+// POST /api/parcels/[id]/payment — прийняти оплату.
+// ТЗ docx 23.08.26: Водій теж має право приймати оплату (гроші бере на адресі).
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const guard = await requireRole(FINANCE_ROLES);
+  const guard = await requireRole(PAYMENT_ACCEPT_ROLES);
   if (!guard.ok) return guard.response;
   const userId = guard.user.userId;
 
@@ -96,12 +97,12 @@ export async function POST(
   return NextResponse.json({ success: true, cashEntry });
 }
 
-// DELETE /api/parcels/[id]/payment — cancel payment (FINANCE_ROLES)
+// DELETE /api/parcels/[id]/payment — скасувати оплату (ті самі ролі, що й приймають)
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const guard = await requireRole(FINANCE_ROLES);
+  const guard = await requireRole(PAYMENT_ACCEPT_ROLES);
   if (!guard.ok) return guard.response;
   const userId = guard.user.userId;
 
