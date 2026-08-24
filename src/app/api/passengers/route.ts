@@ -119,6 +119,21 @@ export async function POST(request: NextRequest) {
   if (parsed instanceof NextResponse) return parsed;
   const body = parsed;
 
+  // ТЗ docx 23.08.26 (п.3): обовʼязкові поля пасажира — Прізвище, Імʼя, телефон,
+  // місце, вартість, місце посадки, місце висадки. Перевіряємо і на сервері, щоб
+  // неповний запис не міг зʼявитись в обхід форми.
+  const missing: string[] = [];
+  if (body.seatNumber == null) missing.push('місце');
+  if (body.price == null) missing.push('вартість');
+  if (!body.pickupAddress) missing.push('місце посадки');
+  if (!body.dropoffAddress) missing.push('місце висадки');
+  if (missing.length > 0) {
+    return NextResponse.json(
+      { error: `Заповніть обовʼязкові поля: ${missing.join(', ')}` },
+      { status: 400 },
+    );
+  }
+
   // Перевіряємо що рейс існує і місце (якщо задано) не зайняте.
   const trip = await prisma.trip.findUnique({
     where: { id: body.tripId },
