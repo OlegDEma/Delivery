@@ -13,7 +13,7 @@ import { logger } from '@/lib/logger';
 import { writeAuditLog } from '@/lib/audit';
 import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transitions';
 import { isUuid } from '@/lib/validators/common';
-import { canEditParcelData, editLockReason } from '@/lib/parcels/edit-lock';
+import { canEditParcelData, canEditParcelParties, editLockReason } from '@/lib/parcels/edit-lock';
 import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
 
 // GET /api/parcels/[id]
@@ -132,11 +132,26 @@ export async function PATCH(
     'description', 'declaredValue', 'insuranceApplied', 'needsPackaging', 'doorstepDelivery',
     'parcelMoneyAmount', 'payer', 'paymentMethod', 'paymentInUkraine', 'shipmentType',
     'collectionMethod', 'collectionPointId', 'collectionDate', 'collectionAddress', 'isMultiParcelPickup',
-    'senderId', 'receiverId', 'senderAddressId', 'receiverAddressId', 'places',
+    'places',
   ] as const;
+  // ТЗ docx 25.08.26: дані Отримувача/Відправника (сторона + її адреса) редаговні
+  // у ВСІХ посилках, незалежно від статусу — тож виносимо їх з-під заморозки.
+  const PARTY_FIELDS = ['senderId', 'receiverId', 'senderAddressId', 'receiverAddressId'] as const;
+
   const touchesData = DATA_FIELDS.some((f) => body[f as keyof typeof body] !== undefined);
   if (touchesData && !canEditParcelData(parcel, guard.user)) {
     return NextResponse.json({ error: editLockReason() }, { status: 403 });
+  }
+  const touchesParties = PARTY_FIELDS.some((f) => body[f as keyof typeof body] !== undefined);
+  if (touchesParties) {
+    if (!canEditParcelParties(guard.user)) {
+      return NextResponse.json({ error: 'Немає прав редагувати дані сторін' }, { status: 403 });
+    }
+    // Клієнт просив «фіксацію що і коли» для правок — пишемо в аудит.
+    logger.audit('parcel.parties_edited', {
+      parcelId: id, userId: guard.user.userId, status: parcel.status,
+      changedFields: PARTY_FIELDS.filter((f) => body[f as keyof typeof body] !== undefined),
+    });
   }
 
   // Status-only change path (doesn't touch places, can be simple update).

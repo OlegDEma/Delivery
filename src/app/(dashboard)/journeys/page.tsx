@@ -653,9 +653,14 @@ export default function JourneysPage() {
                     {[...j.trips]
                       .sort((a, b) => (a.direction === 'ua_to_eu' ? 0 : 1) - (b.direction === 'ua_to_eu' ? 0 : 1))
                       .map((t, ti) => (
-                        <div key={t.id} className="font-semibold text-sm leading-tight">
-                          {ti === 0 ? '🚐 ' : ''}
-                          {t.direction === 'ua_to_eu' ? `UA-${j.country}` : `${j.country}-UA`} {formatDateShortWeekday(t.departureDate)}
+                        // ТЗ docx 23.08.26 (Поїздки, п.2): рейси у поїздці мають стояти
+                        // чітко один під другим. Емодзі 🚐 виносимо в окрему колонку
+                        // фіксованої ширини, інакше другий рядок «зʼїжджає» вліво.
+                        <div key={t.id} className="font-semibold text-sm leading-tight flex items-baseline gap-1">
+                          <span className="w-5 shrink-0">{ti === 0 ? '🚐' : ''}</span>
+                          <span>
+                            {t.direction === 'ua_to_eu' ? `UA-${j.country}` : `${j.country}-UA`} {formatDateShortWeekday(t.departureDate)}
+                          </span>
                         </div>
                       ))}
                   </div>

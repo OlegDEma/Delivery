@@ -413,7 +413,8 @@ export default function PassengersPage() {
                         Скасувати
                       </Button>
                       <Button onClick={handleCreate} disabled={saving}>
-                        {saving ? 'Збереження...' : 'Додати'}
+                        {/* У режимі редагування кнопка має називатись «Зберегти», а не «Додати». */}
+                        {saving ? 'Збереження...' : (editingId ? 'Зберегти' : 'Додати')}
                       </Button>
                     </div>
                   </div>

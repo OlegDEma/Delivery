@@ -13,6 +13,7 @@ import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
 import { ContactIcons } from '@/components/shared/contact-icons';
+import { PhoneInput } from '@/components/shared/phone-input';
 import { toast } from 'sonner';
 
 interface PartyAddr {
@@ -757,7 +758,14 @@ export default function RoutesPage() {
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <Input placeholder="Клієнт (необовʼязково)" value={manualForm.manualName} onChange={(e) => setManualForm(f => ({ ...f, manualName: e.target.value }))} className="h-8 text-sm" />
-                <Input placeholder="Телефон" value={manualForm.manualPhone} onChange={(e) => setManualForm(f => ({ ...f, manualPhone: e.target.value }))} className="h-8 text-sm" />
+                {/* ТЗ docx 25.08.26: при введенні телефона в Маршрутний лист має бути
+                    можливість вибрати префікс (код країни) — той самий PhoneInput,
+                    що й у формах клієнта/пасажира. Дефолт — країна перебування. */}
+                <PhoneInput
+                  value={manualForm.manualPhone}
+                  onChange={(v) => setManualForm(f => ({ ...f, manualPhone: v }))}
+                  defaultCountry={(showUA ? 'UA' : (selectedJourney?.country as CountryCode)) || 'UA'}
+                />
                 <Input placeholder="Напрямок" value={manualForm.manualDirection} onChange={(e) => setManualForm(f => ({ ...f, manualDirection: e.target.value }))} className="h-8 text-sm" />
               </div>
               <div className="flex gap-2">

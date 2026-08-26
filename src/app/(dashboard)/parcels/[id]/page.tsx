@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { STATUS_TRANSITIONS, isTerminal } from '@/lib/parcels/status-transitions';
 import { statusLabel } from '@/lib/parcels/status-label';
-import { canEditParcelData } from '@/lib/parcels/edit-lock';
+import { canEditParcelData, canEditParcelParties } from '@/lib/parcels/edit-lock';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { Camera, StickyNote, Lock, Pencil } from 'lucide-react';
@@ -265,6 +265,9 @@ export default function ParcelDetailPage() {
     { userId: user?.id ?? '', role: role ?? '' },
   );
   const isEditLocked = !canEdit;
+  // ТЗ docx 25.08.26: сторони (Отримувач/Відправник) редаговні у всіх посилках,
+  // незалежно від статусу — заморозка 26.07 на них більше не поширюється.
+  const canEditParties = canEditParcelParties({ role: role ?? '' });
   // ТЗ docx 26.07.26 (п.1): сторони для показу — зі знімка для accepted+, живі
   // для «Створена». Усі місця з ПІБ/тел/адресою беруть звідси.
   const parties = parcelParties(parcel);
@@ -530,10 +533,9 @@ export default function ParcelDetailPage() {
                 </span>
               );
             })()}
-            {/* ТЗ docx 26.07.26 (п.1): редагувати сторони можна лише поки
-                посилка «Створена» (і лише автором). Раніше олівець показувався
-                завжди — тепер гейтуємо за canEdit. */}
-            {canEdit && isDraft && (
+            {/* ТЗ docx 25.08.26: дані Отримувача/Відправника редаговні у ВСІХ посилках,
+                НЕЗАЛЕЖНО ВІД СТАТУСУ (правило заморозки 26.07 на сторони не діє). */}
+            {canEditParties && (
               <ParcelPartyEdit
                 parcelId={parcel.id}
                 role="receiver"
@@ -571,7 +573,8 @@ export default function ParcelDetailPage() {
                 </span>
               );
             })()}
-            {canEdit && isDraft && (
+            {/* ТЗ docx 25.08.26: те саме для Відправника — редагування без огляду на статус. */}
+            {canEditParties && (
               <ParcelPartyEdit
                 parcelId={parcel.id}
                 role="sender"
