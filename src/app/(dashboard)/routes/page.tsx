@@ -73,6 +73,19 @@ const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   rescheduled: 'Перенесено',
 };
 
+/**
+ * ТЗ docx 30.08.26: підпис кнопки Маршрутного листа — рівно у форматі, який
+ * клієнт показав у документі: «МЛ 1 - Чт, 13.08.26» (скорочено «МЛ», дефіс,
+ * день тижня з комою, рік двома цифрами).
+ */
+function sheetLabel(index: number, date: string): string {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return `МЛ ${index}`;
+  const wd = d.toLocaleDateString('uk-UA', { weekday: 'short' }).replace(/\.$/, '');
+  const dmy = d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  return `МЛ ${index} - ${wd.charAt(0).toUpperCase()}${wd.slice(1)}, ${dmy}`;
+}
+
 /** UA → {EU} → UA · дата — компактний лейбл поїздки для селектора. */
 function journeyLabel(j: JourneyOption): string {
   const c = COUNTRY_LABELS[j.country as CountryCode] || j.country;
@@ -142,7 +155,9 @@ export default function RoutesPage() {
   const manualFormRef = useRef<HTMLDivElement>(null);
   function openManualForm() {
     setManualOpen(true);
-    setTimeout(() => manualFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    // ТЗ docx 30.08.26: «Поле має автоматично розміщуватись вверху екрану». behavior:'auto'
+    // (не 'smooth') — миттєвий скрол спрацьовує надійно, зокрема у неактивній вкладці.
+    setTimeout(() => manualFormRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' }), 60);
   }
   // ТЗ docx 08.08.26 (v12): групування списку адрес — за номером/індексом/містом.
   const [groupMode, setGroupMode] = useState<'number' | 'postal' | 'city'>('number');
@@ -626,7 +641,7 @@ export default function RoutesPage() {
               <SelectContent>
                 {sheets.map((s, i) => (
                   <SelectItem key={s.date} value={s.date}>
-                    МЛ {i + 1} · {formatDateWithWeekday(s.date)}
+                    {sheetLabel(i + 1, s.date)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -652,7 +667,7 @@ export default function RoutesPage() {
                 className="w-full px-3 py-2 border-b bg-blue-50/60 flex items-center justify-between text-sm gap-2 text-left hover:bg-blue-100/60">
                 <div className="min-w-0">
                   <span className="text-gray-400 mr-1">{isExpanded ? '▾' : '▸'}</span>
-                  <span className="font-semibold">Маршрутний лист {si + 1} · {formatDateWithWeekday(sheet.date)}</span>
+                  <span className="font-semibold">{sheetLabel(si + 1, sheet.date)}</span>
                   <span className="ml-2 text-gray-600 text-xs">
                     {COUNTRY_LABELS[selectedJourney.country as CountryCode] || selectedJourney.country}
                     {drivers ? ` · ${drivers}` : ''}{selectedJourney.vehicleInfo ? ` · ${selectedJourney.vehicleInfo}` : ''}
@@ -691,7 +706,10 @@ export default function RoutesPage() {
                               {a ? <>{a.postalCode ? `${a.postalCode} ` : ''}{a.city}{a.street ? `, ${a.street}` : ''}{a.building ? ` ${a.building}` : ''}</> : 'Адресу не вказано'}
                             </Link>
                             <div className="text-xs text-gray-500 flex items-center gap-1 flex-wrap">
-                              <span className="font-mono mr-1">{p.internalNumber}</span>{d?.name} · {d?.phone} · {p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`}
+                              {/* ТЗ docx 30.08.26: статус клієнта видно і всередині листа. */}
+                              <span className="font-mono mr-1">{p.internalNumber}</span>
+                              <span className="font-medium text-gray-600">{d?.roleLabel}:</span>
+                              {d?.name} · {d?.phone} · {p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`}
                               {d?.phone && <ContactIcons phone={d.phone} className="print:hidden" />}
                             </div>
                           </div>
@@ -793,6 +811,10 @@ export default function RoutesPage() {
                       <div className="flex items-center gap-2 mt-0.5 ml-5">
                         <Link href={`/parcels/${p.id}`} className="block text-xs text-gray-500 min-w-0 truncate">
                           <span className="font-mono text-gray-400 mr-1">{p.internalNumber}</span>
+                          {/* ТЗ docx 30.08.26 (напрямок «б»): для вже створеної посилки система
+                              сама визначає, чия це адреса у країні перебування — показуємо
+                              статус клієнта (Отримувач/Відправник) і відповідний напрямок. */}
+                          <span className="font-medium text-gray-600">{d.roleLabel}:</span>{' '}
                           {d.name} · {d.phone} · {p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`}
                         </Link>
                         <ContactIcons phone={d.phone} className="shrink-0 print:hidden" />
@@ -902,6 +924,11 @@ export default function RoutesPage() {
               </div>
             </div>
           )}
+          {/* ТЗ docx 30.08.26: «Поле має автоматично розміщуватись ВВЕРХУ екрану».
+              Форма — останній блок сторінки, тож без запасу знизу браузеру нікуди її
+              піднімати (скрол упирається в кінець документа). Цей резерв існує лише
+              поки форма відкрита і дає їй стати рівно вгорі екрана. */}
+          {manualOpen && <div aria-hidden className="h-[70vh] print:hidden" />}
         </div>
       )}
     </div>
