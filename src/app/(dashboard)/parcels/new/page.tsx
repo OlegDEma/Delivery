@@ -159,15 +159,16 @@ export default function NewParcelPage() {
     const p = new URLSearchParams(window.location.search);
     const r = p.get('role');
     if (r !== 'sender' && r !== 'receiver') return null;
-    // «Прізвище Ім'я» з запису МЛ (може бути лише прізвище).
+    // ТЗ docx 30.08.26: у МЛ прізвище та імʼя вводяться ОКРЕМИМИ полями — беремо їх
+    // напряму. Для старих записів лишається розбір склеєного «Прізвище Імʼя».
     const name = (p.get('name') || '').trim();
-    const [lastName, ...restName] = name ? name.split(/\s+/) : [];
+    const [legacyLast, ...legacyRest] = name ? name.split(/\s+/) : [];
     return {
       role: r,
       dir: p.get('dir') || undefined,
       phone: p.get('phone') || undefined,
-      lastName: lastName || undefined,
-      firstName: restName.length ? restName.join(' ') : undefined,
+      lastName: p.get('lastName') || legacyLast || undefined,
+      firstName: p.get('firstName') || (legacyRest.length ? legacyRest.join(' ') : undefined),
       country: p.get('country') || undefined,
       city: p.get('city') || undefined,
       street: p.get('address') || undefined,

@@ -86,6 +86,13 @@ export type CollectionPoint = Prisma.CollectionPointModel
  */
 export type CashRegister = Prisma.CashRegisterModel
 /**
+ * Model RouteSheet
+ * ТЗ docx 30.08.26: Маршрутний лист як самостійна сутність (поїздка + дата).
+ * Створюється кнопкою «Створити Маршрутний лист» ще ДО того, як у нього додали
+ * адреси — тому порожній МЛ теж існує. Адреси привʼязуються через RouteTask.taskDate.
+ */
+export type RouteSheet = Prisma.RouteSheetModel
+/**
  * Model RouteTask
  * 
  */

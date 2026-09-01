@@ -64,6 +64,7 @@ export const ModelName = {
   PricingConfig: 'PricingConfig',
   CollectionPoint: 'CollectionPoint',
   CashRegister: 'CashRegister',
+  RouteSheet: 'RouteSheet',
   RouteTask: 'RouteTask',
   WarehouseInventory: 'WarehouseInventory',
   NpSyncLog: 'NpSyncLog',
@@ -426,6 +427,17 @@ export const CashRegisterScalarFieldEnum = {
 export type CashRegisterScalarFieldEnum = (typeof CashRegisterScalarFieldEnum)[keyof typeof CashRegisterScalarFieldEnum]
 
 
+export const RouteSheetScalarFieldEnum = {
+  id: 'id',
+  journeyId: 'journeyId',
+  sheetDate: 'sheetDate',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type RouteSheetScalarFieldEnum = (typeof RouteSheetScalarFieldEnum)[keyof typeof RouteSheetScalarFieldEnum]
+
+
 export const RouteTaskScalarFieldEnum = {
   id: 'id',
   tripId: 'tripId',
@@ -437,6 +449,10 @@ export const RouteTaskScalarFieldEnum = {
   addressText: 'addressText',
   postalCode: 'postalCode',
   manualName: 'manualName',
+  manualStreet: 'manualStreet',
+  manualBuilding: 'manualBuilding',
+  manualFirstName: 'manualFirstName',
+  manualLastName: 'manualLastName',
   manualPhone: 'manualPhone',
   manualDirection: 'manualDirection',
   manualCity: 'manualCity',

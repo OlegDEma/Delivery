@@ -14,6 +14,7 @@ import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
 import { ContactIcons } from '@/components/shared/contact-icons';
 import { PhoneInput } from '@/components/shared/phone-input';
+import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { toast } from 'sonner';
 
 interface PartyAddr {
@@ -117,6 +118,8 @@ export default function RoutesPage() {
     status: string | null; failureReason: string | null;
     addressText: string | null; postalCode: string | null;
     manualName: string | null; manualPhone: string | null; manualDirection: string | null; manualCity: string | null;
+    manualStreet?: string | null; manualBuilding?: string | null;
+    manualLastName?: string | null; manualFirstName?: string | null;
   }[]>([]);
   // ТЗ docx 08.08.26 (v12): операційне вікно для РУЧНИХ адрес у листі (статус/причина
   // зберігаються на самому RouteTask, бо посилки немає). Ключ — id задачі.
@@ -124,9 +127,14 @@ export default function RoutesPage() {
   const [manualReasons, setManualReasons] = useState<Record<string, string>>({});
   const [sheetDate, setSheetDate] = useState('');
   const [creatingSheet, setCreatingSheet] = useState(false);
+  // ТЗ docx 30.08.26: створені Маршрутні листи як окрема сутність (можуть бути порожні).
+  const [routeSheets, setRouteSheets] = useState<{ id: string; sheetDate: string }[]>([]);
+  // Поле дати показуємо після кліку по «Створити Маршрутний лист» («Оберіть дату»).
+  const [askSheetDate, setAskSheetDate] = useState(false);
+  const sheetDateRef = useRef<HTMLInputElement>(null);
   // ТЗ docx 08.08.26 (v12): «Додати адресу» — ручний ввід довільної адреси.
   const [manualOpen, setManualOpen] = useState(false);
-  const [manualForm, setManualForm] = useState({ addressText: '', postalCode: '', manualCity: '', manualName: '', manualPhone: '', manualDirection: '' });
+  const [manualForm, setManualForm] = useState({ postalCode: '', manualCity: '', manualStreet: '', manualBuilding: '', manualLastName: '', manualFirstName: '', manualPhone: '', manualDirection: '' });
   // ТЗ docx 21.08.26: «Статус клієнта» (Відправник/Отримувач/Пасажир) — визначає напрямок.
   const [clientStatus, setClientStatus] = useState('');
   const [addingManual, setAddingManual] = useState(false);
@@ -177,6 +185,11 @@ export default function RoutesPage() {
   useEffect(() => {
     if (!selectedJourneyId) return;
     let active = true;
+    // ТЗ docx 30.08.26: створені Маршрутні листи поїздки (можуть бути ще порожні).
+    fetch(`/api/route-sheets?journeyId=${selectedJourneyId}`)
+      .then(r => (r.ok ? r.json() : []))
+      .then(d => { if (active && Array.isArray(d)) setRouteSheets(d); })
+      .catch(() => {});
     // ТЗ docx 08.08.26: задачі маршрутних листів (за датами) цієї поїздки.
     fetch(`/api/route-tasks?journeyId=${selectedJourneyId}`)
       .then(r => (r.ok ? r.json() : []))
@@ -246,29 +259,87 @@ export default function RoutesPage() {
 
   // ТЗ docx 08.08.26 (v12): «Створити Маршрутний лист» — відмічені у списку адреси
   // (посилки + ручні) переміщуються у лист на обрану дату (зникають із загального списку).
-  async function handleCreateSheet() {
-    if (!sheetDate || selectedParcelIds.size === 0) return;
-    // Ручні адреси у виборі позначені префіксом «m:» (task id), решта — id посилок.
+  /** Прикріпити відмічені адреси до листа з датою `date`. */
+  async function attachSelectedTo(date: string) {
     const sel = Array.from(selectedParcelIds);
+    if (sel.length === 0) return true;
+    // Ручні адреси у виборі позначені префіксом «m:» (task id), решта — id посилок.
     const parcelIds = sel.filter(id => !id.startsWith('m:'));
     const taskIds = sel.filter(id => id.startsWith('m:')).map(id => id.slice(2));
-    setCreatingSheet(true);
     const res = await fetch('/api/route-tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ taskDate: sheetDate, parcelIds, taskIds }),
+      body: JSON.stringify({ taskDate: date, parcelIds, taskIds }),
     });
-    setCreatingSheet(false);
-    if (res.ok) {
-      setSelectedParcelIds(new Set());
-      setSheetDate('');
-      setReload(n => n + 1);
+    return res.ok;
+  }
+
+  /**
+   * ТЗ docx 30.08.26: кнопка «Створити Маршрутний лист» АКТИВНА завжди. Клік →
+   * просимо дату → створюємо лист (навіть порожній, без жодної адреси). Раніше
+   * кнопка була заблокована, поки не обрано дату І адреси — тому клієнт писав
+   * «Не створюється маршрутний лист».
+   */
+  async function handleCreateSheet() {
+    if (!selectedJourneyId) return;
+    if (!sheetDate) {
+      // Перший клік — показуємо поле дати («Оберіть дату» за ТЗ).
+      setAskSheetDate(true);
+      setTimeout(() => sheetDateRef.current?.focus(), 50);
+      toast.info('Оберіть дату Маршрутного листа');
+      return;
     }
+    setCreatingSheet(true);
+    const res = await fetch('/api/route-sheets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ journeyId: selectedJourneyId, sheetDate }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setCreatingSheet(false);
+      toast.error(data.error || 'Не вдалося створити Маршрутний лист');
+      return;
+    }
+    // Якщо адреси були відмічені — одразу кладемо їх у новий лист.
+    const attached = await attachSelectedTo(sheetDate);
+    setCreatingSheet(false);
+    toast.success(`Маршрутний лист на ${formatDate(sheetDate)} створено`);
+    if (!attached) toast.error('Лист створено, але частину адрес не вдалося додати');
+    setSelectedParcelIds(new Set());
+    setSheetDate('');
+    setAskSheetDate(false);
+    setReload(n => n + 1);
+  }
+
+  /** ТЗ docx 30.08.26: додати відмічені адреси у ВЖЕ створений Маршрутний лист. */
+  async function handleAddToSheet(date: string) {
+    if (selectedParcelIds.size === 0) return;
+    setCreatingSheet(true);
+    const ok = await attachSelectedTo(date);
+    setCreatingSheet(false);
+    if (ok) {
+      toast.success(`Додано у Маршрутний лист ${formatDate(date)}`);
+      setSelectedParcelIds(new Set());
+      setReload(n => n + 1);
+    } else {
+      toast.error('Не вдалося додати адреси');
+    }
+  }
+
+  /** Видалити Маршрутний лист — адреси повертаються у загальний список. */
+  async function handleDeleteSheet(date: string) {
+    const sheet = routeSheets.find(s => String(s.sheetDate).slice(0, 10) === date);
+    if (!sheet) { toast.error('Цей лист створений старим способом — приберіть із нього адреси'); return; }
+    if (!confirm(`Видалити Маршрутний лист ${formatDate(date)}? Адреси повернуться у загальний список.`)) return;
+    const res = await fetch(`/api/route-sheets?id=${sheet.id}`, { method: 'DELETE' });
+    if (res.ok) { toast.success('Маршрутний лист видалено'); setExpandedSheet(null); setReload(n => n + 1); }
+    else toast.error('Не вдалося видалити');
   }
 
   // ТЗ docx 08.08.26 (v12): додати довільну адресу вручну (без посилки) у загальний список.
   async function handleAddManual() {
-    if (!selectedJourneyId || !manualForm.addressText.trim()) return;
+    if (!selectedJourneyId || !manualForm.manualStreet.trim()) return;
     setAddingManual(true);
     const res = await fetch('/api/route-tasks', {
       method: 'POST',
@@ -278,7 +349,7 @@ export default function RoutesPage() {
     setAddingManual(false);
     if (res.ok) {
       setManualOpen(false);
-      setManualForm({ addressText: '', postalCode: '', manualCity: '', manualName: '', manualPhone: '', manualDirection: '' });
+      setManualForm({ postalCode: '', manualCity: '', manualStreet: '', manualBuilding: '', manualLastName: '', manualFirstName: '', manualPhone: '', manualDirection: '' });
       setClientStatus('');
       setReload(n => n + 1);
     }
@@ -363,6 +434,11 @@ export default function RoutesPage() {
   const parcelById = new Map(parcels.map(p => [p.id, p]));
   const sheets = (() => {
     const map = new Map<string, typeof routeTasks>();
+    // ТЗ docx 30.08.26: МЛ існує САМ ПО СОБІ (створений кнопкою), навіть порожній —
+    // тож спершу кладемо всі створені листи, а вже потім розкладаємо в них адреси.
+    for (const s of routeSheets) {
+      map.set(String(s.sheetDate).slice(0, 10), []);
+    }
     for (const t of routeTasks) {
       const key = (t.taskDate || '').slice(0, 10);
       if (!key) continue;
@@ -421,7 +497,13 @@ export default function RoutesPage() {
       : status === 'receiver' ? `${stayOther}-${stayHere}`
         : '';
   // Дані ручної адреси → префіл форми створення посилки (ТЗ 21.08 «Створити посилку»).
-  function createParcelHref(rec: { manualCity?: string | null; postalCode?: string | null; addressText?: string | null; manualName?: string | null; manualPhone?: string | null; manualDirection?: string | null }) {
+  function createParcelHref(rec: {
+    manualCity?: string | null; postalCode?: string | null; addressText?: string | null;
+    manualName?: string | null; manualPhone?: string | null; manualDirection?: string | null;
+    // ТЗ docx 30.08.26: окремі поля форми — переносимо їх точно, без розбору рядка.
+    manualStreet?: string | null; manualBuilding?: string | null;
+    manualLastName?: string | null; manualFirstName?: string | null;
+  }) {
     const dirText = rec.manualDirection || '';
     const isSender = dirText.startsWith(stayHere + '-');
     const params = new URLSearchParams();
@@ -431,11 +513,15 @@ export default function RoutesPage() {
     if (dirText) params.set('dir', dirText.startsWith('UA-') ? 'ua_to_eu' : 'eu_to_ua');
     // Країна адреси = поточна країна перебування (адреса саме звідти).
     if (stayHere) params.set('country', stayHere);
-    if (rec.manualName) params.set('name', rec.manualName);
+    if (rec.manualLastName) params.set('lastName', rec.manualLastName);
+    if (rec.manualFirstName) params.set('firstName', rec.manualFirstName);
+    // Legacy-записи (до 30.08) мають лише склеєне «Прізвище Імʼя».
+    if (!rec.manualLastName && rec.manualName) params.set('name', rec.manualName);
     if (rec.manualPhone) params.set('phone', rec.manualPhone);
     if (rec.manualCity) params.set('city', rec.manualCity);
     if (rec.postalCode) params.set('postalCode', rec.postalCode);
-    if (rec.addressText) params.set('address', rec.addressText);
+    const street = [rec.manualStreet, rec.manualBuilding].filter(Boolean).join(' ') || rec.addressText || '';
+    if (street) params.set('address', street);
     return `/parcels/new?${params.toString()}`;
   }
 
@@ -516,10 +602,36 @@ export default function RoutesPage() {
             </button>
           ))}
           <span className="mx-1 text-gray-300">|</span>
-          <Input type="date" value={sheetDate} onChange={(e) => setSheetDate(e.target.value)} className="h-8 w-40 text-xs" />
-          <Button size="sm" onClick={handleCreateSheet} disabled={!sheetDate || selectedParcelIds.size === 0 || creatingSheet}>
-            {creatingSheet ? 'Створення…' : `Створити Маршрутний лист (${selectedParcelIds.size})`}
+          {/* ТЗ docx 30.08.26: кнопка активна ЗАВЖДИ. Клік → «Оберіть дату» → створюємо
+              лист (навіть порожній). Поле дати показуємо лише після кліку. */}
+          {askSheetDate && (
+            <span className="inline-flex items-center gap-1">
+              <span className="text-gray-500 text-xs">Оберіть дату:</span>
+              <Input
+                ref={sheetDateRef} type="date" value={sheetDate}
+                onChange={(e) => setSheetDate(e.target.value)}
+                className="h-8 w-40 text-xs"
+              />
+            </span>
+          )}
+          <Button size="sm" onClick={handleCreateSheet} disabled={creatingSheet}>
+            {creatingSheet ? 'Створення…' : 'Створити Маршрутний лист'}
           </Button>
+          {/* ТЗ docx 30.08.26: відмічені адреси можна покласти у ВЖЕ створений лист. */}
+          {selectedParcelIds.size > 0 && sheets.length > 0 && (
+            <Select value="" onValueChange={(v) => { if (v) handleAddToSheet(v); }}>
+              <SelectTrigger className="h-8 w-56 text-xs">
+                <SelectValue>{`Додати вибрані (${selectedParcelIds.size}) у МЛ…`}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {sheets.map((s, i) => (
+                  <SelectItem key={s.date} value={s.date}>
+                    МЛ {i + 1} · {formatDateWithWeekday(s.date)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Button size="sm" variant="outline" onClick={toggleAllParcels}>
             {selectedParcelIds.size === generalParcels.length && generalParcels.length > 0 ? 'Зняти все' : 'Вибрати все'}
           </Button>
@@ -548,10 +660,13 @@ export default function RoutesPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs text-gray-400">{sheet.tasks.length} адрес</span>
-                  {isExpanded && (
+                  {isExpanded && (<>
                     <span role="button" tabIndex={0} className="h-7 px-2 flex items-center text-xs text-gray-600 hover:text-gray-900 print:hidden"
                       onClick={(e) => { e.stopPropagation(); window.print(); }}>🖨 Друкувати</span>
-                  )}
+                    {/* ТЗ docx 30.08.26: лист можна прибрати — адреси повернуться у загальний список. */}
+                    <span role="button" tabIndex={0} className="h-7 px-2 flex items-center text-xs text-red-500 hover:text-red-700 print:hidden"
+                      onClick={(e) => { e.stopPropagation(); handleDeleteSheet(sheet.date); }}>Видалити</span>
+                  </>)}
                 </div>
               </button>
               <div className={`divide-y ${isExpanded ? '' : 'hidden'}`}>
@@ -728,48 +843,61 @@ export default function RoutesPage() {
             <Button variant="outline" size="sm" onClick={openManualForm} className="print:hidden">+ Додати адресу</Button>
           ) : (
             <div ref={manualFormRef} className="border rounded-lg p-3 bg-amber-50/40 space-y-2 print:hidden scroll-mt-4">
-              {/* ТЗ docx 21.08.26: «Статус клієнта» — першим; за ним система визначає напрямок. */}
-              <div>
-                <label className="text-xs text-gray-600">Статус клієнта</label>
-                <Select value={clientStatus || '_none'} onValueChange={(v) => {
-                  const s = (v ?? '') === '_none' ? '' : (v ?? '');
-                  setClientStatus(s);
-                  setManualForm(f => ({ ...f, manualDirection: autoDirection(s) || f.manualDirection }));
-                }}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue>
-                      {clientStatus === 'sender' ? 'Відправник' : clientStatus === 'receiver' ? 'Отримувач' : clientStatus === 'passenger' ? 'Пасажир' : 'Оберіть статус'}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sender">Відправник</SelectItem>
-                    <SelectItem value="receiver">Отримувач</SelectItem>
-                    <SelectItem value="passenger">Пасажир</SelectItem>
-                  </SelectContent>
-                </Select>
-                {clientStatus && clientStatus !== 'passenger' && (
-                  <p className="text-[10px] text-gray-500 mt-0.5">Напрямок визначено автоматично: <span className="font-medium">{autoDirection(clientStatus)}</span></p>
-                )}
+              {/* ТЗ docx 21.08.26 / 30.08.26: «Статус клієнта» — з самого верху,
+                  «Напрямок» — справа від нього (заповнюється автоматично за статусом). */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-gray-600">Статус клієнта</label>
+                  <Select value={clientStatus || '_none'} onValueChange={(v) => {
+                    const s = (v ?? '') === '_none' ? '' : (v ?? '');
+                    setClientStatus(s);
+                    setManualForm(f => ({ ...f, manualDirection: autoDirection(s) || f.manualDirection }));
+                  }}>
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue>
+                        {clientStatus === 'sender' ? 'Відправник' : clientStatus === 'receiver' ? 'Отримувач' : clientStatus === 'passenger' ? 'Пасажир' : 'Оберіть статус'}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sender">Відправник</SelectItem>
+                      <SelectItem value="receiver">Отримувач</SelectItem>
+                      <SelectItem value="passenger">Пасажир</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600">Напрямок</label>
+                  <Input
+                    placeholder="визначиться автоматично"
+                    value={manualForm.manualDirection}
+                    onChange={(e) => setManualForm(f => ({ ...f, manualDirection: e.target.value }))}
+                    className="h-8 text-sm"
+                  />
+                </div>
               </div>
-              <Input placeholder="Адреса: індекс, місто, вулиця, будинок" value={manualForm.addressText} onChange={(e) => setManualForm(f => ({ ...f, addressText: e.target.value }))} className="h-8 text-sm" />
+              {/* ТЗ docx 30.08.26: Індекс | Місто */}
               <div className="grid grid-cols-2 gap-2">
                 <Input placeholder="Індекс" value={manualForm.postalCode} onChange={(e) => setManualForm(f => ({ ...f, postalCode: e.target.value }))} className="h-8 text-sm" />
                 <Input placeholder="Місто" value={manualForm.manualCity} onChange={(e) => setManualForm(f => ({ ...f, manualCity: e.target.value }))} className="h-8 text-sm" />
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                <Input placeholder="Клієнт (необовʼязково)" value={manualForm.manualName} onChange={(e) => setManualForm(f => ({ ...f, manualName: e.target.value }))} className="h-8 text-sm" />
-                {/* ТЗ docx 25.08.26: при введенні телефона в Маршрутний лист має бути
-                    можливість вибрати префікс (код країни) — той самий PhoneInput,
-                    що й у формах клієнта/пасажира. Дефолт — країна перебування. */}
-                <PhoneInput
-                  value={manualForm.manualPhone}
-                  onChange={(v) => setManualForm(f => ({ ...f, manualPhone: v }))}
-                  defaultCountry={(showUA ? 'UA' : (selectedJourney?.country as CountryCode)) || 'UA'}
-                />
-                <Input placeholder="Напрямок" value={manualForm.manualDirection} onChange={(e) => setManualForm(f => ({ ...f, manualDirection: e.target.value }))} className="h-8 text-sm" />
+              {/* ТЗ docx 30.08.26: Вулиця | Номер будинку (раніше був один рядок адреси). */}
+              <div className="grid grid-cols-2 gap-2">
+                <Input placeholder="Вулиця" value={manualForm.manualStreet} onChange={(e) => setManualForm(f => ({ ...f, manualStreet: e.target.value }))} className="h-8 text-sm" />
+                <Input placeholder="Номер будинку" value={manualForm.manualBuilding} onChange={(e) => setManualForm(f => ({ ...f, manualBuilding: e.target.value }))} className="h-8 text-sm" />
+              </div>
+              {/* ТЗ docx 25.08.26 / 30.08.26: телефон — окреме вікно коду країни + номер. */}
+              <PhoneInput
+                value={manualForm.manualPhone}
+                onChange={(v) => setManualForm(f => ({ ...f, manualPhone: v }))}
+                defaultCountry={(showUA ? 'UA' : (selectedJourney?.country as CountryCode)) || 'UA'}
+              />
+              {/* ТЗ docx 30.08.26: Прізвище | Імʼя (раніше одне поле «Клієнт»). */}
+              <div className="grid grid-cols-2 gap-2">
+                <CapitalizeInput placeholder="Прізвище" value={manualForm.manualLastName} onChange={(v) => setManualForm(f => ({ ...f, manualLastName: v }))} className="h-8 text-sm" />
+                <CapitalizeInput placeholder="Імʼя" value={manualForm.manualFirstName} onChange={(v) => setManualForm(f => ({ ...f, manualFirstName: v }))} className="h-8 text-sm" />
               </div>
               <div className="flex gap-2">
-                <Button size="sm" onClick={handleAddManual} disabled={!manualForm.addressText.trim() || addingManual}>{addingManual ? 'Додавання…' : 'Додати'}</Button>
+                <Button size="sm" onClick={handleAddManual} disabled={!manualForm.manualStreet.trim() || addingManual}>{addingManual ? 'Додавання…' : 'Додати'}</Button>
                 <Button size="sm" variant="ghost" onClick={() => { setManualOpen(false); setClientStatus(''); }}>Скасувати</Button>
               </div>
             </div>

@@ -309,6 +309,7 @@ export type JourneyWhereInput = {
   createdBy?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   vehicle?: Prisma.XOR<Prisma.VehicleNullableScalarRelationFilter, Prisma.VehicleWhereInput> | null
   trips?: Prisma.TripListRelationFilter
+  routeSheets?: Prisma.RouteSheetListRelationFilter
 }
 
 export type JourneyOrderByWithRelationInput = {
@@ -333,6 +334,7 @@ export type JourneyOrderByWithRelationInput = {
   createdBy?: Prisma.ProfileOrderByWithRelationInput
   vehicle?: Prisma.VehicleOrderByWithRelationInput
   trips?: Prisma.TripOrderByRelationAggregateInput
+  routeSheets?: Prisma.RouteSheetOrderByRelationAggregateInput
 }
 
 export type JourneyWhereUniqueInput = Prisma.AtLeast<{
@@ -360,6 +362,7 @@ export type JourneyWhereUniqueInput = Prisma.AtLeast<{
   createdBy?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   vehicle?: Prisma.XOR<Prisma.VehicleNullableScalarRelationFilter, Prisma.VehicleWhereInput> | null
   trips?: Prisma.TripListRelationFilter
+  routeSheets?: Prisma.RouteSheetListRelationFilter
 }, "id">
 
 export type JourneyOrderByWithAggregationInput = {
@@ -426,6 +429,7 @@ export type JourneyCreateInput = {
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedJourneysInput
   vehicle?: Prisma.VehicleCreateNestedOneWithoutJourneysInput
   trips?: Prisma.TripCreateNestedManyWithoutJourneyInput
+  routeSheets?: Prisma.RouteSheetCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUncheckedCreateInput = {
@@ -446,6 +450,7 @@ export type JourneyUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   trips?: Prisma.TripUncheckedCreateNestedManyWithoutJourneyInput
+  routeSheets?: Prisma.RouteSheetUncheckedCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUpdateInput = {
@@ -466,6 +471,7 @@ export type JourneyUpdateInput = {
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedJourneysNestedInput
   vehicle?: Prisma.VehicleUpdateOneWithoutJourneysNestedInput
   trips?: Prisma.TripUpdateManyWithoutJourneyNestedInput
+  routeSheets?: Prisma.RouteSheetUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateInput = {
@@ -486,6 +492,7 @@ export type JourneyUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   trips?: Prisma.TripUncheckedUpdateManyWithoutJourneyNestedInput
+  routeSheets?: Prisma.RouteSheetUncheckedUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyCreateManyInput = {
@@ -619,6 +626,11 @@ export type JourneySumOrderByAggregateInput = {
 export type JourneyNullableScalarRelationFilter = {
   is?: Prisma.JourneyWhereInput | null
   isNot?: Prisma.JourneyWhereInput | null
+}
+
+export type JourneyScalarRelationFilter = {
+  is?: Prisma.JourneyWhereInput
+  isNot?: Prisma.JourneyWhereInput
 }
 
 export type JourneyCreateNestedManyWithoutAssignedCourierInput = {
@@ -809,6 +821,20 @@ export type JourneyUncheckedUpdateManyWithoutVehicleNestedInput = {
   deleteMany?: Prisma.JourneyScalarWhereInput | Prisma.JourneyScalarWhereInput[]
 }
 
+export type JourneyCreateNestedOneWithoutRouteSheetsInput = {
+  create?: Prisma.XOR<Prisma.JourneyCreateWithoutRouteSheetsInput, Prisma.JourneyUncheckedCreateWithoutRouteSheetsInput>
+  connectOrCreate?: Prisma.JourneyCreateOrConnectWithoutRouteSheetsInput
+  connect?: Prisma.JourneyWhereUniqueInput
+}
+
+export type JourneyUpdateOneRequiredWithoutRouteSheetsNestedInput = {
+  create?: Prisma.XOR<Prisma.JourneyCreateWithoutRouteSheetsInput, Prisma.JourneyUncheckedCreateWithoutRouteSheetsInput>
+  connectOrCreate?: Prisma.JourneyCreateOrConnectWithoutRouteSheetsInput
+  upsert?: Prisma.JourneyUpsertWithoutRouteSheetsInput
+  connect?: Prisma.JourneyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.JourneyUpdateToOneWithWhereWithoutRouteSheetsInput, Prisma.JourneyUpdateWithoutRouteSheetsInput>, Prisma.JourneyUncheckedUpdateWithoutRouteSheetsInput>
+}
+
 export type JourneyCreateWithoutAssignedCourierInput = {
   id?: string
   country: $Enums.Country
@@ -826,6 +852,7 @@ export type JourneyCreateWithoutAssignedCourierInput = {
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedJourneysInput
   vehicle?: Prisma.VehicleCreateNestedOneWithoutJourneysInput
   trips?: Prisma.TripCreateNestedManyWithoutJourneyInput
+  routeSheets?: Prisma.RouteSheetCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUncheckedCreateWithoutAssignedCourierInput = {
@@ -845,6 +872,7 @@ export type JourneyUncheckedCreateWithoutAssignedCourierInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   trips?: Prisma.TripUncheckedCreateNestedManyWithoutJourneyInput
+  routeSheets?: Prisma.RouteSheetUncheckedCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyCreateOrConnectWithoutAssignedCourierInput = {
@@ -874,6 +902,7 @@ export type JourneyCreateWithoutSecondCourierInput = {
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedJourneysInput
   vehicle?: Prisma.VehicleCreateNestedOneWithoutJourneysInput
   trips?: Prisma.TripCreateNestedManyWithoutJourneyInput
+  routeSheets?: Prisma.RouteSheetCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUncheckedCreateWithoutSecondCourierInput = {
@@ -893,6 +922,7 @@ export type JourneyUncheckedCreateWithoutSecondCourierInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   trips?: Prisma.TripUncheckedCreateNestedManyWithoutJourneyInput
+  routeSheets?: Prisma.RouteSheetUncheckedCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyCreateOrConnectWithoutSecondCourierInput = {
@@ -922,6 +952,7 @@ export type JourneyCreateWithoutCreatedByInput = {
   secondCourier?: Prisma.ProfileCreateNestedOneWithoutSecondCourierJourneysInput
   vehicle?: Prisma.VehicleCreateNestedOneWithoutJourneysInput
   trips?: Prisma.TripCreateNestedManyWithoutJourneyInput
+  routeSheets?: Prisma.RouteSheetCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUncheckedCreateWithoutCreatedByInput = {
@@ -941,6 +972,7 @@ export type JourneyUncheckedCreateWithoutCreatedByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   trips?: Prisma.TripUncheckedCreateNestedManyWithoutJourneyInput
+  routeSheets?: Prisma.RouteSheetUncheckedCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyCreateOrConnectWithoutCreatedByInput = {
@@ -1040,6 +1072,7 @@ export type JourneyCreateWithoutTripsInput = {
   secondCourier?: Prisma.ProfileCreateNestedOneWithoutSecondCourierJourneysInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedJourneysInput
   vehicle?: Prisma.VehicleCreateNestedOneWithoutJourneysInput
+  routeSheets?: Prisma.RouteSheetCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUncheckedCreateWithoutTripsInput = {
@@ -1059,6 +1092,7 @@ export type JourneyUncheckedCreateWithoutTripsInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  routeSheets?: Prisma.RouteSheetUncheckedCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyCreateOrConnectWithoutTripsInput = {
@@ -1094,6 +1128,7 @@ export type JourneyUpdateWithoutTripsInput = {
   secondCourier?: Prisma.ProfileUpdateOneWithoutSecondCourierJourneysNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedJourneysNestedInput
   vehicle?: Prisma.VehicleUpdateOneWithoutJourneysNestedInput
+  routeSheets?: Prisma.RouteSheetUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateWithoutTripsInput = {
@@ -1113,6 +1148,7 @@ export type JourneyUncheckedUpdateWithoutTripsInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  routeSheets?: Prisma.RouteSheetUncheckedUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyCreateWithoutVehicleInput = {
@@ -1132,6 +1168,7 @@ export type JourneyCreateWithoutVehicleInput = {
   secondCourier?: Prisma.ProfileCreateNestedOneWithoutSecondCourierJourneysInput
   createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedJourneysInput
   trips?: Prisma.TripCreateNestedManyWithoutJourneyInput
+  routeSheets?: Prisma.RouteSheetCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUncheckedCreateWithoutVehicleInput = {
@@ -1151,6 +1188,7 @@ export type JourneyUncheckedCreateWithoutVehicleInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   trips?: Prisma.TripUncheckedCreateNestedManyWithoutJourneyInput
+  routeSheets?: Prisma.RouteSheetUncheckedCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyCreateOrConnectWithoutVehicleInput = {
@@ -1177,6 +1215,102 @@ export type JourneyUpdateWithWhereUniqueWithoutVehicleInput = {
 export type JourneyUpdateManyWithWhereWithoutVehicleInput = {
   where: Prisma.JourneyScalarWhereInput
   data: Prisma.XOR<Prisma.JourneyUpdateManyMutationInput, Prisma.JourneyUncheckedUpdateManyWithoutVehicleInput>
+}
+
+export type JourneyCreateWithoutRouteSheetsInput = {
+  id?: string
+  country: $Enums.Country
+  departureDate: Date | string
+  euArrivalDate?: Date | string | null
+  euReturnDate?: Date | string | null
+  endDate?: Date | string | null
+  status?: $Enums.TripStatus
+  vehicleInfo?: string | null
+  passengerCapacity?: number
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedJourneysInput
+  secondCourier?: Prisma.ProfileCreateNestedOneWithoutSecondCourierJourneysInput
+  createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedJourneysInput
+  vehicle?: Prisma.VehicleCreateNestedOneWithoutJourneysInput
+  trips?: Prisma.TripCreateNestedManyWithoutJourneyInput
+}
+
+export type JourneyUncheckedCreateWithoutRouteSheetsInput = {
+  id?: string
+  country: $Enums.Country
+  departureDate: Date | string
+  euArrivalDate?: Date | string | null
+  euReturnDate?: Date | string | null
+  endDate?: Date | string | null
+  status?: $Enums.TripStatus
+  assignedCourierId?: string | null
+  secondCourierId?: string | null
+  vehicleInfo?: string | null
+  vehicleId?: string | null
+  passengerCapacity?: number
+  notes?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  trips?: Prisma.TripUncheckedCreateNestedManyWithoutJourneyInput
+}
+
+export type JourneyCreateOrConnectWithoutRouteSheetsInput = {
+  where: Prisma.JourneyWhereUniqueInput
+  create: Prisma.XOR<Prisma.JourneyCreateWithoutRouteSheetsInput, Prisma.JourneyUncheckedCreateWithoutRouteSheetsInput>
+}
+
+export type JourneyUpsertWithoutRouteSheetsInput = {
+  update: Prisma.XOR<Prisma.JourneyUpdateWithoutRouteSheetsInput, Prisma.JourneyUncheckedUpdateWithoutRouteSheetsInput>
+  create: Prisma.XOR<Prisma.JourneyCreateWithoutRouteSheetsInput, Prisma.JourneyUncheckedCreateWithoutRouteSheetsInput>
+  where?: Prisma.JourneyWhereInput
+}
+
+export type JourneyUpdateToOneWithWhereWithoutRouteSheetsInput = {
+  where?: Prisma.JourneyWhereInput
+  data: Prisma.XOR<Prisma.JourneyUpdateWithoutRouteSheetsInput, Prisma.JourneyUncheckedUpdateWithoutRouteSheetsInput>
+}
+
+export type JourneyUpdateWithoutRouteSheetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
+  departureDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  euArrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  euReturnDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
+  vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedJourneysNestedInput
+  secondCourier?: Prisma.ProfileUpdateOneWithoutSecondCourierJourneysNestedInput
+  createdBy?: Prisma.ProfileUpdateOneWithoutCreatedJourneysNestedInput
+  vehicle?: Prisma.VehicleUpdateOneWithoutJourneysNestedInput
+  trips?: Prisma.TripUpdateManyWithoutJourneyNestedInput
+}
+
+export type JourneyUncheckedUpdateWithoutRouteSheetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
+  departureDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  euArrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  euReturnDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
+  assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  trips?: Prisma.TripUncheckedUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyCreateManyAssignedCourierInput = {
@@ -1250,6 +1384,7 @@ export type JourneyUpdateWithoutAssignedCourierInput = {
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedJourneysNestedInput
   vehicle?: Prisma.VehicleUpdateOneWithoutJourneysNestedInput
   trips?: Prisma.TripUpdateManyWithoutJourneyNestedInput
+  routeSheets?: Prisma.RouteSheetUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateWithoutAssignedCourierInput = {
@@ -1269,6 +1404,7 @@ export type JourneyUncheckedUpdateWithoutAssignedCourierInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   trips?: Prisma.TripUncheckedUpdateManyWithoutJourneyNestedInput
+  routeSheets?: Prisma.RouteSheetUncheckedUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateManyWithoutAssignedCourierInput = {
@@ -1306,6 +1442,7 @@ export type JourneyUpdateWithoutSecondCourierInput = {
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedJourneysNestedInput
   vehicle?: Prisma.VehicleUpdateOneWithoutJourneysNestedInput
   trips?: Prisma.TripUpdateManyWithoutJourneyNestedInput
+  routeSheets?: Prisma.RouteSheetUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateWithoutSecondCourierInput = {
@@ -1325,6 +1462,7 @@ export type JourneyUncheckedUpdateWithoutSecondCourierInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   trips?: Prisma.TripUncheckedUpdateManyWithoutJourneyNestedInput
+  routeSheets?: Prisma.RouteSheetUncheckedUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateManyWithoutSecondCourierInput = {
@@ -1362,6 +1500,7 @@ export type JourneyUpdateWithoutCreatedByInput = {
   secondCourier?: Prisma.ProfileUpdateOneWithoutSecondCourierJourneysNestedInput
   vehicle?: Prisma.VehicleUpdateOneWithoutJourneysNestedInput
   trips?: Prisma.TripUpdateManyWithoutJourneyNestedInput
+  routeSheets?: Prisma.RouteSheetUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateWithoutCreatedByInput = {
@@ -1381,6 +1520,7 @@ export type JourneyUncheckedUpdateWithoutCreatedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   trips?: Prisma.TripUncheckedUpdateManyWithoutJourneyNestedInput
+  routeSheets?: Prisma.RouteSheetUncheckedUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateManyWithoutCreatedByInput = {
@@ -1436,6 +1576,7 @@ export type JourneyUpdateWithoutVehicleInput = {
   secondCourier?: Prisma.ProfileUpdateOneWithoutSecondCourierJourneysNestedInput
   createdBy?: Prisma.ProfileUpdateOneWithoutCreatedJourneysNestedInput
   trips?: Prisma.TripUpdateManyWithoutJourneyNestedInput
+  routeSheets?: Prisma.RouteSheetUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateWithoutVehicleInput = {
@@ -1455,6 +1596,7 @@ export type JourneyUncheckedUpdateWithoutVehicleInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   trips?: Prisma.TripUncheckedUpdateManyWithoutJourneyNestedInput
+  routeSheets?: Prisma.RouteSheetUncheckedUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateManyWithoutVehicleInput = {
@@ -1482,10 +1624,12 @@ export type JourneyUncheckedUpdateManyWithoutVehicleInput = {
 
 export type JourneyCountOutputType = {
   trips: number
+  routeSheets: number
 }
 
 export type JourneyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   trips?: boolean | JourneyCountOutputTypeCountTripsArgs
+  routeSheets?: boolean | JourneyCountOutputTypeCountRouteSheetsArgs
 }
 
 /**
@@ -1503,6 +1647,13 @@ export type JourneyCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exte
  */
 export type JourneyCountOutputTypeCountTripsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.TripWhereInput
+}
+
+/**
+ * JourneyCountOutputType without action
+ */
+export type JourneyCountOutputTypeCountRouteSheetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RouteSheetWhereInput
 }
 
 
@@ -1528,6 +1679,7 @@ export type JourneySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdBy?: boolean | Prisma.Journey$createdByArgs<ExtArgs>
   vehicle?: boolean | Prisma.Journey$vehicleArgs<ExtArgs>
   trips?: boolean | Prisma.Journey$tripsArgs<ExtArgs>
+  routeSheets?: boolean | Prisma.Journey$routeSheetsArgs<ExtArgs>
   _count?: boolean | Prisma.JourneyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["journey"]>
 
@@ -1603,6 +1755,7 @@ export type JourneyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdBy?: boolean | Prisma.Journey$createdByArgs<ExtArgs>
   vehicle?: boolean | Prisma.Journey$vehicleArgs<ExtArgs>
   trips?: boolean | Prisma.Journey$tripsArgs<ExtArgs>
+  routeSheets?: boolean | Prisma.Journey$routeSheetsArgs<ExtArgs>
   _count?: boolean | Prisma.JourneyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type JourneyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1626,6 +1779,7 @@ export type $JourneyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     createdBy: Prisma.$ProfilePayload<ExtArgs> | null
     vehicle: Prisma.$VehiclePayload<ExtArgs> | null
     trips: Prisma.$TripPayload<ExtArgs>[]
+    routeSheets: Prisma.$RouteSheetPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2043,6 +2197,7 @@ export interface Prisma__JourneyClient<T, Null = never, ExtArgs extends runtime.
   createdBy<T extends Prisma.Journey$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Journey$createdByArgs<ExtArgs>>): Prisma.Prisma__ProfileClient<runtime.Types.Result.GetResult<Prisma.$ProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   vehicle<T extends Prisma.Journey$vehicleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Journey$vehicleArgs<ExtArgs>>): Prisma.Prisma__VehicleClient<runtime.Types.Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   trips<T extends Prisma.Journey$tripsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Journey$tripsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  routeSheets<T extends Prisma.Journey$routeSheetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Journey$routeSheetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RouteSheetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2586,6 +2741,30 @@ export type Journey$tripsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.TripScalarFieldEnum | Prisma.TripScalarFieldEnum[]
+}
+
+/**
+ * Journey.routeSheets
+ */
+export type Journey$routeSheetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RouteSheet
+   */
+  select?: Prisma.RouteSheetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RouteSheet
+   */
+  omit?: Prisma.RouteSheetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RouteSheetInclude<ExtArgs> | null
+  where?: Prisma.RouteSheetWhereInput
+  orderBy?: Prisma.RouteSheetOrderByWithRelationInput | Prisma.RouteSheetOrderByWithRelationInput[]
+  cursor?: Prisma.RouteSheetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RouteSheetScalarFieldEnum | Prisma.RouteSheetScalarFieldEnum[]
 }
 
 /**

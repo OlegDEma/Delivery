@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
       status: true, failureReason: true, sortOrder: true, createdAt: true,
       addressText: true, postalCode: true,
       manualName: true, manualPhone: true, manualDirection: true, manualCity: true,
+      manualStreet: true, manualBuilding: true, manualFirstName: true, manualLastName: true,
     },
   });
   return NextResponse.json(tasks);
@@ -49,17 +50,30 @@ export async function POST(request: NextRequest) {
     if (!journeyId) return NextResponse.json({ error: 'journeyId обовʼязковий' }, { status: 400 });
     const trip = await prisma.trip.findFirst({ where: { journeyId }, orderBy: { direction: 'asc' }, select: { id: true } });
     if (!trip) return NextResponse.json({ error: 'Рейси поїздки не знайдено' }, { status: 404 });
-    const addressText = String(body.addressText ?? '').trim();
-    if (!addressText) return NextResponse.json({ error: 'Вкажіть адресу' }, { status: 400 });
+    // ТЗ docx 30.08.26: адреса приходить окремими полями (вулиця + номер будинку),
+    // ПІБ — окремо прізвище та імʼя. Зводимо їх у legacy-поля addressText/manualName,
+    // щоб старі записи й вигляди списку працювали без змін.
+    const street = String(body.manualStreet ?? '').trim();
+    const building = String(body.manualBuilding ?? '').trim();
+    const lastName = String(body.manualLastName ?? '').trim();
+    const firstName = String(body.manualFirstName ?? '').trim();
+    const composedAddress = [street, building].filter(Boolean).join(' ');
+    const composedName = [lastName, firstName].filter(Boolean).join(' ');
+    const addressText = String(body.addressText ?? composedAddress).trim();
+    if (!addressText) return NextResponse.json({ error: 'Вкажіть вулицю і номер будинку' }, { status: 400 });
     await prisma.routeTask.create({
       data: {
         tripId: trip.id, taskType: 'delivery', taskDate: null,
         addressText,
         postalCode: body.postalCode ? String(body.postalCode).trim() : null,
         manualCity: body.manualCity ? String(body.manualCity).trim() : null,
-        manualName: body.manualName ? String(body.manualName).trim() : null,
+        manualName: (body.manualName ? String(body.manualName).trim() : composedName) || null,
         manualPhone: body.manualPhone ? String(body.manualPhone).trim() : null,
         manualDirection: body.manualDirection ? String(body.manualDirection).trim() : null,
+        manualStreet: street || null,
+        manualBuilding: building || null,
+        manualLastName: lastName || null,
+        manualFirstName: firstName || null,
       },
     });
     return NextResponse.json({ created: 1 }, { status: 201 });

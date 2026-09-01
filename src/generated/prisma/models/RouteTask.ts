@@ -45,6 +45,10 @@ export type RouteTaskMinAggregateOutputType = {
   addressText: string | null
   postalCode: string | null
   manualName: string | null
+  manualStreet: string | null
+  manualBuilding: string | null
+  manualFirstName: string | null
+  manualLastName: string | null
   manualPhone: string | null
   manualDirection: string | null
   manualCity: string | null
@@ -71,6 +75,10 @@ export type RouteTaskMaxAggregateOutputType = {
   addressText: string | null
   postalCode: string | null
   manualName: string | null
+  manualStreet: string | null
+  manualBuilding: string | null
+  manualFirstName: string | null
+  manualLastName: string | null
   manualPhone: string | null
   manualDirection: string | null
   manualCity: string | null
@@ -97,6 +105,10 @@ export type RouteTaskCountAggregateOutputType = {
   addressText: number
   postalCode: number
   manualName: number
+  manualStreet: number
+  manualBuilding: number
+  manualFirstName: number
+  manualLastName: number
   manualPhone: number
   manualDirection: number
   manualCity: number
@@ -133,6 +145,10 @@ export type RouteTaskMinAggregateInputType = {
   addressText?: true
   postalCode?: true
   manualName?: true
+  manualStreet?: true
+  manualBuilding?: true
+  manualFirstName?: true
+  manualLastName?: true
   manualPhone?: true
   manualDirection?: true
   manualCity?: true
@@ -159,6 +175,10 @@ export type RouteTaskMaxAggregateInputType = {
   addressText?: true
   postalCode?: true
   manualName?: true
+  manualStreet?: true
+  manualBuilding?: true
+  manualFirstName?: true
+  manualLastName?: true
   manualPhone?: true
   manualDirection?: true
   manualCity?: true
@@ -185,6 +205,10 @@ export type RouteTaskCountAggregateInputType = {
   addressText?: true
   postalCode?: true
   manualName?: true
+  manualStreet?: true
+  manualBuilding?: true
+  manualFirstName?: true
+  manualLastName?: true
   manualPhone?: true
   manualDirection?: true
   manualCity?: true
@@ -298,6 +322,10 @@ export type RouteTaskGroupByOutputType = {
   addressText: string | null
   postalCode: string | null
   manualName: string | null
+  manualStreet: string | null
+  manualBuilding: string | null
+  manualFirstName: string | null
+  manualLastName: string | null
   manualPhone: string | null
   manualDirection: string | null
   manualCity: string | null
@@ -347,6 +375,10 @@ export type RouteTaskWhereInput = {
   addressText?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualStreet?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualBuilding?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualFirstName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualLastName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualPhone?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualDirection?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualCity?: Prisma.StringNullableFilter<"RouteTask"> | string | null
@@ -378,6 +410,10 @@ export type RouteTaskOrderByWithRelationInput = {
   addressText?: Prisma.SortOrderInput | Prisma.SortOrder
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   manualName?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualStreet?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualBuilding?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualFirstName?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualLastName?: Prisma.SortOrderInput | Prisma.SortOrder
   manualPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   manualDirection?: Prisma.SortOrderInput | Prisma.SortOrder
   manualCity?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -412,6 +448,10 @@ export type RouteTaskWhereUniqueInput = Prisma.AtLeast<{
   addressText?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualStreet?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualBuilding?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualFirstName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualLastName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualPhone?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualDirection?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualCity?: Prisma.StringNullableFilter<"RouteTask"> | string | null
@@ -443,6 +483,10 @@ export type RouteTaskOrderByWithAggregationInput = {
   addressText?: Prisma.SortOrderInput | Prisma.SortOrder
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   manualName?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualStreet?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualBuilding?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualFirstName?: Prisma.SortOrderInput | Prisma.SortOrder
+  manualLastName?: Prisma.SortOrderInput | Prisma.SortOrder
   manualPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   manualDirection?: Prisma.SortOrderInput | Prisma.SortOrder
   manualCity?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -477,6 +521,10 @@ export type RouteTaskScalarWhereWithAggregatesInput = {
   addressText?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
   manualName?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
+  manualStreet?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
+  manualBuilding?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
+  manualFirstName?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
+  manualLastName?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
   manualPhone?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
   manualDirection?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
   manualCity?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
@@ -499,6 +547,10 @@ export type RouteTaskCreateInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -529,6 +581,10 @@ export type RouteTaskUncheckedCreateInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -551,6 +607,10 @@ export type RouteTaskUpdateInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -581,6 +641,10 @@ export type RouteTaskUncheckedUpdateInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -607,6 +671,10 @@ export type RouteTaskCreateManyInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -629,6 +697,10 @@ export type RouteTaskUpdateManyMutationInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -654,6 +726,10 @@ export type RouteTaskUncheckedUpdateManyInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -690,6 +766,10 @@ export type RouteTaskCountOrderByAggregateInput = {
   addressText?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
   manualName?: Prisma.SortOrder
+  manualStreet?: Prisma.SortOrder
+  manualBuilding?: Prisma.SortOrder
+  manualFirstName?: Prisma.SortOrder
+  manualLastName?: Prisma.SortOrder
   manualPhone?: Prisma.SortOrder
   manualDirection?: Prisma.SortOrder
   manualCity?: Prisma.SortOrder
@@ -720,6 +800,10 @@ export type RouteTaskMaxOrderByAggregateInput = {
   addressText?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
   manualName?: Prisma.SortOrder
+  manualStreet?: Prisma.SortOrder
+  manualBuilding?: Prisma.SortOrder
+  manualFirstName?: Prisma.SortOrder
+  manualLastName?: Prisma.SortOrder
   manualPhone?: Prisma.SortOrder
   manualDirection?: Prisma.SortOrder
   manualCity?: Prisma.SortOrder
@@ -746,6 +830,10 @@ export type RouteTaskMinOrderByAggregateInput = {
   addressText?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
   manualName?: Prisma.SortOrder
+  manualStreet?: Prisma.SortOrder
+  manualBuilding?: Prisma.SortOrder
+  manualFirstName?: Prisma.SortOrder
+  manualLastName?: Prisma.SortOrder
   manualPhone?: Prisma.SortOrder
   manualDirection?: Prisma.SortOrder
   manualCity?: Prisma.SortOrder
@@ -990,6 +1078,10 @@ export type RouteTaskCreateWithoutAssignedCourierInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1019,6 +1111,10 @@ export type RouteTaskUncheckedCreateWithoutAssignedCourierInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1073,6 +1169,10 @@ export type RouteTaskScalarWhereInput = {
   addressText?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualStreet?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualBuilding?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualFirstName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  manualLastName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualPhone?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualDirection?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualCity?: Prisma.StringNullableFilter<"RouteTask"> | string | null
@@ -1095,6 +1195,10 @@ export type RouteTaskCreateWithoutClientInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1123,6 +1227,10 @@ export type RouteTaskUncheckedCreateWithoutClientInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1171,6 +1279,10 @@ export type RouteTaskCreateWithoutAddressInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1199,6 +1311,10 @@ export type RouteTaskUncheckedCreateWithoutAddressInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1247,6 +1363,10 @@ export type RouteTaskCreateWithoutTripInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1275,6 +1395,10 @@ export type RouteTaskUncheckedCreateWithoutTripInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1323,6 +1447,10 @@ export type RouteTaskCreateWithoutParcelInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1351,6 +1479,10 @@ export type RouteTaskUncheckedCreateWithoutParcelInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1403,6 +1535,10 @@ export type RouteTaskCreateManyAssignedCourierInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1424,6 +1560,10 @@ export type RouteTaskUpdateWithoutAssignedCourierInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1453,6 +1593,10 @@ export type RouteTaskUncheckedUpdateWithoutAssignedCourierInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1478,6 +1622,10 @@ export type RouteTaskUncheckedUpdateManyWithoutAssignedCourierInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1502,6 +1650,10 @@ export type RouteTaskCreateManyClientInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1524,6 +1676,10 @@ export type RouteTaskUpdateWithoutClientInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1552,6 +1708,10 @@ export type RouteTaskUncheckedUpdateWithoutClientInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1577,6 +1737,10 @@ export type RouteTaskUncheckedUpdateManyWithoutClientInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1602,6 +1766,10 @@ export type RouteTaskCreateManyAddressInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1624,6 +1792,10 @@ export type RouteTaskUpdateWithoutAddressInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1652,6 +1824,10 @@ export type RouteTaskUncheckedUpdateWithoutAddressInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1677,6 +1853,10 @@ export type RouteTaskUncheckedUpdateManyWithoutAddressInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1702,6 +1882,10 @@ export type RouteTaskCreateManyTripInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1724,6 +1908,10 @@ export type RouteTaskUpdateWithoutTripInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1752,6 +1940,10 @@ export type RouteTaskUncheckedUpdateWithoutTripInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1777,6 +1969,10 @@ export type RouteTaskUncheckedUpdateManyWithoutTripInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1802,6 +1998,10 @@ export type RouteTaskCreateManyParcelInput = {
   addressText?: string | null
   postalCode?: string | null
   manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
   manualPhone?: string | null
   manualDirection?: string | null
   manualCity?: string | null
@@ -1824,6 +2024,10 @@ export type RouteTaskUpdateWithoutParcelInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1852,6 +2056,10 @@ export type RouteTaskUncheckedUpdateWithoutParcelInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1877,6 +2085,10 @@ export type RouteTaskUncheckedUpdateManyWithoutParcelInput = {
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1905,6 +2117,10 @@ export type RouteTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   addressText?: boolean
   postalCode?: boolean
   manualName?: boolean
+  manualStreet?: boolean
+  manualBuilding?: boolean
+  manualFirstName?: boolean
+  manualLastName?: boolean
   manualPhone?: boolean
   manualDirection?: boolean
   manualCity?: boolean
@@ -1936,6 +2152,10 @@ export type RouteTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   addressText?: boolean
   postalCode?: boolean
   manualName?: boolean
+  manualStreet?: boolean
+  manualBuilding?: boolean
+  manualFirstName?: boolean
+  manualLastName?: boolean
   manualPhone?: boolean
   manualDirection?: boolean
   manualCity?: boolean
@@ -1967,6 +2187,10 @@ export type RouteTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   addressText?: boolean
   postalCode?: boolean
   manualName?: boolean
+  manualStreet?: boolean
+  manualBuilding?: boolean
+  manualFirstName?: boolean
+  manualLastName?: boolean
   manualPhone?: boolean
   manualDirection?: boolean
   manualCity?: boolean
@@ -1998,6 +2222,10 @@ export type RouteTaskSelectScalar = {
   addressText?: boolean
   postalCode?: boolean
   manualName?: boolean
+  manualStreet?: boolean
+  manualBuilding?: boolean
+  manualFirstName?: boolean
+  manualLastName?: boolean
   manualPhone?: boolean
   manualDirection?: boolean
   manualCity?: boolean
@@ -2013,7 +2241,7 @@ export type RouteTaskSelectScalar = {
   updatedAt?: boolean
 }
 
-export type RouteTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tripId" | "parcelId" | "taskType" | "taskDate" | "clientId" | "addressId" | "addressText" | "postalCode" | "manualName" | "manualPhone" | "manualDirection" | "manualCity" | "assignedCourierId" | "status" | "rescheduleDate" | "failureReason" | "sortOrder" | "estimatedArrivalStart" | "estimatedArrivalEnd" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["routeTask"]>
+export type RouteTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tripId" | "parcelId" | "taskType" | "taskDate" | "clientId" | "addressId" | "addressText" | "postalCode" | "manualName" | "manualStreet" | "manualBuilding" | "manualFirstName" | "manualLastName" | "manualPhone" | "manualDirection" | "manualCity" | "assignedCourierId" | "status" | "rescheduleDate" | "failureReason" | "sortOrder" | "estimatedArrivalStart" | "estimatedArrivalEnd" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["routeTask"]>
 export type RouteTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
   parcel?: boolean | Prisma.RouteTask$parcelArgs<ExtArgs>
@@ -2056,6 +2284,10 @@ export type $RouteTaskPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     addressText: string | null
     postalCode: string | null
     manualName: string | null
+    manualStreet: string | null
+    manualBuilding: string | null
+    manualFirstName: string | null
+    manualLastName: string | null
     manualPhone: string | null
     manualDirection: string | null
     manualCity: string | null
@@ -2507,6 +2739,10 @@ export interface RouteTaskFieldRefs {
   readonly addressText: Prisma.FieldRef<"RouteTask", 'String'>
   readonly postalCode: Prisma.FieldRef<"RouteTask", 'String'>
   readonly manualName: Prisma.FieldRef<"RouteTask", 'String'>
+  readonly manualStreet: Prisma.FieldRef<"RouteTask", 'String'>
+  readonly manualBuilding: Prisma.FieldRef<"RouteTask", 'String'>
+  readonly manualFirstName: Prisma.FieldRef<"RouteTask", 'String'>
+  readonly manualLastName: Prisma.FieldRef<"RouteTask", 'String'>
   readonly manualPhone: Prisma.FieldRef<"RouteTask", 'String'>
   readonly manualDirection: Prisma.FieldRef<"RouteTask", 'String'>
   readonly manualCity: Prisma.FieldRef<"RouteTask", 'String'>

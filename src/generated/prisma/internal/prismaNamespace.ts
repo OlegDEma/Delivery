@@ -397,6 +397,7 @@ export const ModelName = {
   PricingConfig: 'PricingConfig',
   CollectionPoint: 'CollectionPoint',
   CashRegister: 'CashRegister',
+  RouteSheet: 'RouteSheet',
   RouteTask: 'RouteTask',
   WarehouseInventory: 'WarehouseInventory',
   NpSyncLog: 'NpSyncLog',
@@ -422,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "passenger" | "vehicle" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "invoiceSettings" | "smsLog" | "serviceCity" | "descriptionSuggestion" | "auditLog" | "claim"
+    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "passenger" | "vehicle" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeSheet" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "invoiceSettings" | "smsLog" | "serviceCity" | "descriptionSuggestion" | "auditLog" | "claim"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1385,6 +1386,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CashRegisterCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CashRegisterCountAggregateOutputType> | number
+        }
+      }
+    }
+    RouteSheet: {
+      payload: Prisma.$RouteSheetPayload<ExtArgs>
+      fields: Prisma.RouteSheetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RouteSheetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RouteSheetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload>
+        }
+        findFirst: {
+          args: Prisma.RouteSheetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RouteSheetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload>
+        }
+        findMany: {
+          args: Prisma.RouteSheetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload>[]
+        }
+        create: {
+          args: Prisma.RouteSheetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload>
+        }
+        createMany: {
+          args: Prisma.RouteSheetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RouteSheetCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload>[]
+        }
+        delete: {
+          args: Prisma.RouteSheetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload>
+        }
+        update: {
+          args: Prisma.RouteSheetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload>
+        }
+        deleteMany: {
+          args: Prisma.RouteSheetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RouteSheetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RouteSheetUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload>[]
+        }
+        upsert: {
+          args: Prisma.RouteSheetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RouteSheetPayload>
+        }
+        aggregate: {
+          args: Prisma.RouteSheetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRouteSheet>
+        }
+        groupBy: {
+          args: Prisma.RouteSheetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RouteSheetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RouteSheetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RouteSheetCountAggregateOutputType> | number
         }
       }
     }
@@ -2501,6 +2576,17 @@ export const CashRegisterScalarFieldEnum = {
 export type CashRegisterScalarFieldEnum = (typeof CashRegisterScalarFieldEnum)[keyof typeof CashRegisterScalarFieldEnum]
 
 
+export const RouteSheetScalarFieldEnum = {
+  id: 'id',
+  journeyId: 'journeyId',
+  sheetDate: 'sheetDate',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type RouteSheetScalarFieldEnum = (typeof RouteSheetScalarFieldEnum)[keyof typeof RouteSheetScalarFieldEnum]
+
+
 export const RouteTaskScalarFieldEnum = {
   id: 'id',
   tripId: 'tripId',
@@ -2512,6 +2598,10 @@ export const RouteTaskScalarFieldEnum = {
   addressText: 'addressText',
   postalCode: 'postalCode',
   manualName: 'manualName',
+  manualStreet: 'manualStreet',
+  manualBuilding: 'manualBuilding',
+  manualFirstName: 'manualFirstName',
+  manualLastName: 'manualLastName',
   manualPhone: 'manualPhone',
   manualDirection: 'manualDirection',
   manualCity: 'manualCity',
@@ -3179,6 +3269,7 @@ export type GlobalOmitConfig = {
   pricingConfig?: Prisma.PricingConfigOmit
   collectionPoint?: Prisma.CollectionPointOmit
   cashRegister?: Prisma.CashRegisterOmit
+  routeSheet?: Prisma.RouteSheetOmit
   routeTask?: Prisma.RouteTaskOmit
   warehouseInventory?: Prisma.WarehouseInventoryOmit
   npSyncLog?: Prisma.NpSyncLogOmit

@@ -281,6 +281,7 @@ model Journey {
   createdBy       Profile? @relation("JourneyCreatedBy", fields: [createdById], references: [id])
   vehicle         Vehicle? @relation(fields: [vehicleId], references: [id])
   trips           Trip[]
+  routeSheets     RouteSheet[]
 
   @@index([departureDate])
   @@index([status])
@@ -682,6 +683,23 @@ model CashRegister {
   @@map("cash_register")
 }
 
+/// ТЗ docx 30.08.26: Маршрутний лист як самостійна сутність (поїздка + дата).
+/// Створюється кнопкою «Створити Маршрутний лист» ще ДО того, як у нього додали
+/// адреси — тому порожній МЛ теж існує. Адреси привʼязуються через RouteTask.taskDate.
+model RouteSheet {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  journeyId   String   @map("journey_id") @db.Uuid
+  sheetDate   DateTime @map("sheet_date") @db.Date
+  createdById String?  @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  journey Journey @relation(fields: [journeyId], references: [id])
+
+  @@unique([journeyId, sheetDate])
+  @@index([journeyId])
+  @@map("route_sheets")
+}
+
 model RouteTask {
   id                    String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tripId                String          @map("trip_id") @db.Uuid
@@ -695,6 +713,11 @@ model RouteTask {
   postalCode            String?         @map("postal_code")
   // ТЗ docx 08.08.26 (v12): довільна адреса, додана Водієм вручну (без посилки).
   manualName            String?         @map("manual_name")
+  // ТЗ docx 30.08.26: окремі поля форми «Додати адресу» (вулиця/будинок, ПІБ).
+  manualStreet          String?         @map("manual_street")
+  manualBuilding        String?         @map("manual_building")
+  manualFirstName       String?         @map("manual_first_name")
+  manualLastName        String?         @map("manual_last_name")
   manualPhone           String?         @map("manual_phone")
   manualDirection       String?         @map("manual_direction")
   manualCity            String?         @map("manual_city")
