@@ -1,6 +1,6 @@
 ---
 name: delivery-project
-description: Codebase knowledge for Delivery — pro-bono parcel-logistics SaaS that moves parcels between EU (NL/AT/DE) and Ukraine through a Lviv hub + Nova Poshta. Next.js 16 + Supabase + Prisma + Tailwind/shadcn. Use this whenever working in `D:\Delivery` — the project has its own breaking-change Next.js, a domain-specific tariff calculator with five service kinds, a TZ document (`Загальна схема програми (N).xlsx` in the client's Downloads, read the highest N) that drives requirements, and a series of subtle traps (currency conversion for insurance, recalc must fire on cost-affecting fields, weight calculator semantics differ from `actual=max` default, Twilio fallback stub, etc.). Triggers when user is in this repo, mentions parcels / посилки / тарифи / клієнти / кур'єр / Львів in a coding context, asks about TZ sections (§E1–E14, §E48–E61), references `ТЗ`, asks about pricing/insurance/packaging/Пакет, or says «фікси» / «продовжуй» / «доведи до ладу» while in this codebase. Skip when the user is in another project or asking generic Next.js questions unrelated to this domain.
+description: Codebase knowledge for Delivery — pro-bono parcel-logistics SaaS that moves parcels between EU (NL/AT/DE) and Ukraine through a Lviv hub + Nova Poshta. Next.js 16 + Supabase + Prisma + Tailwind/shadcn. Use this whenever working in the Delivery repo (Windows `D:\Delivery` or a macOS clone) — the project has its own breaking-change Next.js, a domain-specific tariff calculator with five service kinds, a client-owned Google Doc ТЗ (newest dated section at the top, read via the Drive connector) that drives requirements, and a series of subtle traps (currency conversion for insurance, recalc must fire on cost-affecting fields, weight calculator semantics differ from `actual=max` default, Twilio fallback stub, etc.). Triggers when user is in this repo, mentions parcels / посилки / тарифи / клієнти / кур'єр / Львів in a coding context, asks about TZ sections (§E1–E14, §E48–E61), references `ТЗ`, asks about pricing/insurance/packaging/Пакет, or says «фікси» / «продовжуй» / «доведи до ладу» while in this codebase. Skip when the user is in another project or asking generic Next.js questions unrelated to this domain.
 ---
 
 # Delivery project — operating handbook
@@ -17,7 +17,14 @@ A courier company moves parcels both directions between Ukraine and three Europe
 
 | Need | File |
 |---|---|
-| What's done vs not, mapped to the client's ТЗ rows | `references/tz-audit.md` |
+| **Project context pack (read first on a new machine)** | **`.claude/context/00-START-HERE.md`** |
+| Where the project stands right now, by ТЗ date | `.claude/context/01-current-state.md` |
+| How we work (ТЗ → code → live test → push → client comment) | `.claude/context/02-workflow.md` |
+| Setup & commands on Windows **and macOS**, env traps | `.claude/context/03-environment.md` |
+| Reading the ТЗ doc + commenting back to the client | `.claude/context/04-tz-and-client.md` |
+| Browser-testing playbook (roles, gotchas) | `.claude/context/05-ui-testing.md` |
+| Open threads to pick up next | `.claude/context/06-open-items.md` |
+| What's done vs not, mapped to the client's ТЗ rows (May–July) | `references/tz-audit.md` |
 | Schema entities + how they relate | `references/data-model.md` |
 | Pricing calculator + currency + ТЗ §8/§9/§10/§11 | `references/pricing.md` |
 | SMS-invoice pipeline (Twilio + stub fallback) | `references/invoice-sms.md` |
@@ -137,13 +144,23 @@ Lint rule `react-hooks/set-state-in-effect` is in the codebase but several files
 
 ## Push troubleshooting (this comes up every session)
 
-The user is on Windows with Git Credential Manager. `git push` in `run_in_background: true` mode hangs because the credential prompt can't reach the user. Workaround:
+On **Windows** the user has Git Credential Manager; `git push` often appears to hang
+(the credential prompt can't reach the user). Workaround:
 
 ```bash
 GIT_ASKPASS=true git push origin main
 ```
 
-If that still hangs, `git push --porcelain` in foreground works. Don't loop sleep+poll — the `until grep -q "main ->" "$OUTPUT"` pattern works and is the idiomatic block-until-complete here.
+**Never conclude «push is blocked» without checking the remote directly** — a hung
+background push usually completes on its own after several minutes:
+
+```bash
+git ls-remote origin refs/heads/main   # compare with git rev-parse HEAD
+```
+
+`git rev-list --count @{u}..HEAD` reads a stale tracking ref and will lie to you.
+On **macOS** credentials come from `osxkeychain` — one interactive login, then pushes
+are normal. See `.claude/context/03-environment.md` for the cross-platform command table.
 
 ## What's missing from the codebase that the business will eventually need
 
@@ -160,13 +177,20 @@ Documented in `references/locations.md` and `references/tz-audit.md`. The big on
 
 ## When in doubt about ТЗ
 
-The TZ lives in `C:\Users\olegd\Downloads\Загальна схема програми (N).xlsx` on the user's machine — the client periodically re-exports it with a higher `(N)`. As of the last check, `(1)` and `(2)` are CONTENT-IDENTICAL. Always read the highest-numbered file; if two have the same content, the client hasn't changed requirements.
+**Current source of truth (since Aug 2026): a Google Doc owned by the client**, read
+live through the Drive connector — no more `.xlsx` exports from Downloads. Full details
+(fileId, how to read it, why comments and images are invisible to the connector, and the
+protocol for commenting back to the client) are in **`.claude/context/04-tz-and-client.md`**.
 
-Read it via the `xlsx` skill — green cells (`fg=FF4EA72E`) are «done/accepted by client», black cells (`fg=1` or `fg=FF000000`) are «to do», `Не зроблено` in column F is an explicit «not done» tag.
+Newest dated section is at the TOP of the doc. The client also edits OLD sections —
+re-read a date before assuming it is unchanged.
 
-**Crucial:** the client's file currently marks EVERYTHING black except `D3` (a section header). That means the client has NOT accepted any feature as done. The `🟢` marks in `references/tz-audit.md` are MY code-level reading, not the client's sign-off. When you report status, say «реалізовано в коді, клієнт не підтвердив», never «готово».
+The older spreadsheet-based audit at `references/tz-audit.md` was code-verified on
+2026-05-19 and covers the May–July rows (E3, E4, E7, …) — those row numbers are still
+used in conversation. For August-onward work read `.claude/context/01-current-state.md`.
 
-The audit at `references/tz-audit.md` was code-verified on 2026-05-19 — re-verify before claiming anything. The ТЗ row numbers (E3, E4, E7, ...) are stable references both sides use in conversation.
+**Crucial:** «реалізовано в коді» ≠ «клієнт підтвердив». Report what was verified live
+and what was not — never a blanket «готово».
 
 ## When the user says «фікси» / «продовжуй»
 
