@@ -74,16 +74,15 @@ const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
 };
 
 /**
- * ТЗ docx 30.08.26: підпис кнопки Маршрутного листа — рівно у форматі, який
- * клієнт показав у документі: «МЛ 1 - Чт, 13.08.26» (скорочено «МЛ», дефіс,
- * день тижня з комою, рік двома цифрами).
+ * ТЗ docx 02.09.26: нумерацію МЛ прибрано — ідентифікація лише день і дата
+ * («Чт, 03.09.26»). Раніше було «МЛ 1 - Чт, 03.09.26».
  */
-function sheetLabel(index: number, date: string): string {
+function sheetLabel(date: string): string {
   const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return `МЛ ${index}`;
-  const wd = d.toLocaleDateString('uk-UA', { weekday: 'short' }).replace(/\.$/, '');
-  const dmy = d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: '2-digit' });
-  return `МЛ ${index} - ${wd.charAt(0).toUpperCase()}${wd.slice(1)}, ${dmy}`;
+  if (Number.isNaN(d.getTime())) return "—";
+  const wd = d.toLocaleDateString("uk-UA", { weekday: "short" }).replace(/\.$/, "");
+  const dmy = d.toLocaleDateString("uk-UA", { day: "2-digit", month: "2-digit", year: "2-digit" });
+  return `${wd.charAt(0).toUpperCase()}${wd.slice(1)}, ${dmy}`;
 }
 
 /** UA → {EU} → UA · дата — компактний лейбл поїздки для селектора. */
@@ -133,15 +132,18 @@ export default function RoutesPage() {
     manualName: string | null; manualPhone: string | null; manualDirection: string | null; manualCity: string | null;
     manualStreet?: string | null; manualBuilding?: string | null;
     manualLastName?: string | null; manualFirstName?: string | null;
+    routeSheetId?: string | null;
   }[]>([]);
   // ТЗ docx 08.08.26 (v12): операційне вікно для РУЧНИХ адрес у листі (статус/причина
   // зберігаються на самому RouteTask, бо посилки немає). Ключ — id задачі.
   const [manualStatuses, setManualStatuses] = useState<Record<string, TaskStatus>>({});
   const [manualReasons, setManualReasons] = useState<Record<string, string>>({});
+  // ТЗ docx 02.09.26: обрана дата переносу для КОЖНОЇ адреси (підтверджується «Готово»).
+  const [moveDates, setMoveDates] = useState<Record<string, string>>({});
   const [sheetDate, setSheetDate] = useState('');
   const [creatingSheet, setCreatingSheet] = useState(false);
   // ТЗ docx 30.08.26: створені Маршрутні листи як окрема сутність (можуть бути порожні).
-  const [routeSheets, setRouteSheets] = useState<{ id: string; sheetDate: string }[]>([]);
+  const [routeSheets, setRouteSheets] = useState<{ id: string; sheetDate: string; ownerName?: string | null; isMine?: boolean; canMutate?: boolean }[]>([]);
   // Поле дати показуємо після кліку по «Створити Маршрутний лист» («Оберіть дату»).
   const [askSheetDate, setAskSheetDate] = useState(false);
   const sheetDateRef = useRef<HTMLInputElement>(null);
@@ -153,6 +155,8 @@ export default function RoutesPage() {
   const [addingManual, setAddingManual] = useState(false);
   // ТЗ docx 21.08.26: форма «Додати адресу» автоматично прокручується у верх екрану.
   const manualFormRef = useRef<HTMLDivElement>(null);
+  const EMPTY_MANUAL_FORM = { postalCode: "", manualCity: "", manualStreet: "", manualBuilding: "", manualLastName: "", manualFirstName: "", manualPhone: "", manualDirection: "" };
+  function resetManualForm() { setManualForm(EMPTY_MANUAL_FORM); }
   function openManualForm() {
     setManualOpen(true);
     // ТЗ docx 30.08.26: «Поле має автоматично розміщуватись вверху екрану». behavior:'auto'
@@ -166,7 +170,18 @@ export default function RoutesPage() {
   const [stayCountry, setStayCountry] = useState('');
   // ТЗ docx 21.08.26: МЛ показуються згорнутими кнопками; клік розгортає один лист
   // (тоді ховаємо загальний список). null = бачимо лише кнопки МЛ + загальний список.
+  // ТЗ docx 02.09.26: ключ — id листа (на одну дату їх може бути кілька).
   const [expandedSheet, setExpandedSheet] = useState<string | null>(null);
+  // ТЗ docx 02.09.26: «При відкритті якогось МЛ він повинен переміститись на самий
+  // верх екрану з тим щоб вверху була його шапка, нижче — адреси цього МЛ».
+  const expandedSheetRef = useRef<HTMLDivElement>(null);
+  function toggleSheet(id: string) {
+    const opening = expandedSheet !== id;
+    setExpandedSheet(opening ? id : null);
+    if (opening) {
+      setTimeout(() => expandedSheetRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' }), 60);
+    }
+  }
 
   // Завантажуємо поїздки; дефолт — ?journeyId з URL або найближча до сьогодні.
   useEffect(() => {
@@ -274,8 +289,8 @@ export default function RoutesPage() {
 
   // ТЗ docx 08.08.26 (v12): «Створити Маршрутний лист» — відмічені у списку адреси
   // (посилки + ручні) переміщуються у лист на обрану дату (зникають із загального списку).
-  /** Прикріпити відмічені адреси до листа з датою `date`. */
-  async function attachSelectedTo(date: string) {
+  /** ТЗ docx 02.09.26: прикріпити відмічені адреси до КОНКРЕТНОГО листа (не до дати). */
+  async function attachSelectedTo(routeSheetId: string) {
     const sel = Array.from(selectedParcelIds);
     if (sel.length === 0) return true;
     // Ручні адреси у виборі позначені префіксом «m:» (task id), решта — id посилок.
@@ -284,8 +299,12 @@ export default function RoutesPage() {
     const res = await fetch('/api/route-tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ taskDate: date, parcelIds, taskIds }),
+      body: JSON.stringify({ routeSheetId, parcelIds, taskIds }),
     });
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      toast.error(d.error || 'Не вдалося додати адреси');
+    }
     return res.ok;
   }
 
@@ -316,8 +335,8 @@ export default function RoutesPage() {
       toast.error(data.error || 'Не вдалося створити Маршрутний лист');
       return;
     }
-    // Якщо адреси були відмічені — одразу кладемо їх у новий лист.
-    const attached = await attachSelectedTo(sheetDate);
+    // Якщо адреси були відмічені — одразу кладемо їх у новий лист (за його id).
+    const attached = await attachSelectedTo(data.id);
     setCreatingSheet(false);
     toast.success(`Маршрутний лист на ${formatDate(sheetDate)} створено`);
     if (!attached) toast.error('Лист створено, але частину адрес не вдалося додати');
@@ -328,33 +347,37 @@ export default function RoutesPage() {
   }
 
   /** ТЗ docx 30.08.26: додати відмічені адреси у ВЖЕ створений Маршрутний лист. */
-  async function handleAddToSheet(date: string) {
+  async function handleAddToSheet(sheetId: string, date: string) {
     if (selectedParcelIds.size === 0) return;
     setCreatingSheet(true);
-    const ok = await attachSelectedTo(date);
+    const ok = await attachSelectedTo(sheetId);
     setCreatingSheet(false);
     if (ok) {
       toast.success(`Додано у Маршрутний лист ${formatDate(date)}`);
       setSelectedParcelIds(new Set());
       setReload(n => n + 1);
-    } else {
-      toast.error('Не вдалося додати адреси');
     }
   }
 
   /** Видалити Маршрутний лист — адреси повертаються у загальний список. */
-  async function handleDeleteSheet(date: string) {
-    const sheet = routeSheets.find(s => String(s.sheetDate).slice(0, 10) === date);
-    if (!sheet) { toast.error('Цей лист створений старим способом — приберіть із нього адреси'); return; }
+  async function handleDeleteSheet(sheetId: string, date: string) {
     if (!confirm(`Видалити Маршрутний лист ${formatDate(date)}? Адреси повернуться у загальний список.`)) return;
-    const res = await fetch(`/api/route-sheets?id=${sheet.id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/route-sheets?id=${sheetId}`, { method: 'DELETE' });
+    const data = await res.json().catch(() => ({}));
     if (res.ok) { toast.success('Маршрутний лист видалено'); setExpandedSheet(null); setReload(n => n + 1); }
-    else toast.error('Не вдалося видалити');
+    else toast.error(data.error || 'Не вдалося видалити');
   }
 
   // ТЗ docx 08.08.26 (v12): додати довільну адресу вручну (без посилки) у загальний список.
   async function handleAddManual() {
-    if (!selectedJourneyId || !manualForm.manualStreet.trim()) return;
+    if (!selectedJourneyId) { toast.error('Спершу оберіть поїздку'); return; }
+    // ТЗ docx 02.09.26: вулиця БІЛЬШЕ НЕ обовʼязкова. Клієнт заповнював лише індекс і
+    // місто — кнопка була заблокована, натискання нічого не робило («Не можу додати
+    // ручну адресу»). Тепер достатньо будь-якої складової адреси, а якщо порожньо —
+    // кажемо про це прямо, а не мовчимо.
+    const hasAddress = [manualForm.manualStreet, manualForm.manualCity, manualForm.postalCode]
+      .some(v => v.trim().length > 0);
+    if (!hasAddress) { toast.error('Вкажіть хоча б місто, індекс або вулицю'); return; }
     setAddingManual(true);
     const res = await fetch('/api/route-tasks', {
       method: 'POST',
@@ -362,9 +385,16 @@ export default function RoutesPage() {
       body: JSON.stringify({ manual: true, journeyId: selectedJourneyId, ...manualForm }),
     });
     setAddingManual(false);
+    if (!res.ok) {
+      // Раніше помилка серверa проковтувалась і користувач бачив «нічого не сталось».
+      const d = await res.json().catch(() => ({}));
+      toast.error(d.error || 'Не вдалося додати адресу');
+      return;
+    }
     if (res.ok) {
+      toast.success('Адресу додано у загальний список');
       setManualOpen(false);
-      setManualForm({ postalCode: '', manualCity: '', manualStreet: '', manualBuilding: '', manualLastName: '', manualFirstName: '', manualPhone: '', manualDirection: '' });
+      resetManualForm();
       setClientStatus('');
       setReload(n => n + 1);
     }
@@ -418,11 +448,18 @@ export default function RoutesPage() {
       toast.error('Поїздки на таку дату не існує. Виберіть іншу');
       return;
     }
-    await fetch(`/api/route-tasks/${taskId}`, {
+    const res = await fetch(`/api/route-tasks/${taskId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ taskDate: date }),
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { toast.error(data.error || 'Не вдалося перенести адресу'); return; }
+    // ТЗ 30.08.26 (п.2): якщо листа на цю дату немає — адреса йде у загальний список.
+    toast.success(data?.movedToGeneral
+      ? 'Маршрутного листа на цю дату немає — адресу повернуто у загальний список'
+      : `Адресу перенесено на ${formatDate(date)}`);
+    setMoveDates(m => ({ ...m, [taskId]: '' }));
     setReload(n => n + 1);
   }
 
@@ -447,55 +484,71 @@ export default function RoutesPage() {
 
   // ТЗ docx 08.08.26: групуємо задачі за ДАТОЮ — кожна дата = окремий Маршрутний лист.
   const parcelById = new Map(parcels.map(p => [p.id, p]));
-  const sheets = (() => {
-    const map = new Map<string, typeof routeTasks>();
-    // ТЗ docx 30.08.26: МЛ існує САМ ПО СОБІ (створений кнопкою), навіть порожній —
-    // тож спершу кладемо всі створені листи, а вже потім розкладаємо в них адреси.
-    for (const s of routeSheets) {
-      map.set(String(s.sheetDate).slice(0, 10), []);
-    }
-    for (const t of routeTasks) {
-      const key = (t.taskDate || '').slice(0, 10);
-      if (!key) continue;
-      const arr = map.get(key) ?? [];
-      arr.push(t);
-      map.set(key, arr);
-    }
-    return Array.from(map.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([date, tasks]) => ({ date, tasks }));
-  })();
+  // ТЗ docx 02.09.26: лист = ОКРЕМИЙ запис (на одну дату їх може бути кілька — по
+  // одному на водія). Адреси беремо по routeSheetId, а не по даті.
+  const sheets = routeSheets
+    .map(s => ({
+      id: s.id,
+      date: String(s.sheetDate).slice(0, 10),
+      ownerName: s.ownerName ?? null,
+      canMutate: s.canMutate !== false,
+      tasks: routeTasks.filter(t => t.routeSheetId === s.id),
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date) || (a.ownerName ?? "").localeCompare(b.ownerName ?? ""));
 
   // ТЗ docx 08.08.26 (v12): посилки, вже переміщені у якийсь лист (RouteTask з датою),
   // зникають із загального списку. Загальний список = посилки поїздки ЩЕ не в листі.
+  // ТЗ docx 02.09.26: адреса «в листі» = має routeSheetId (у т.ч. чужий лист —
+  // вона зникає із загального списку для обох водіїв).
   const sheetedParcelIds = new Set(
-    routeTasks.filter(t => t.taskDate && t.parcelId).map(t => t.parcelId as string),
+    routeTasks.filter(t => t.routeSheetId && t.parcelId).map(t => t.parcelId as string),
   );
   const generalParcels = parcels.filter(p => !sheetedParcelIds.has(p.id));
   // ТЗ docx 08.08.26 (v12): ручні адреси (без посилки), ще не переміщені в лист (taskDate=null).
-  const manualGeneral = routeTasks.filter(t => !t.parcelId && !t.taskDate);
+  const manualGeneral = routeTasks.filter(t => !t.parcelId && !t.routeSheetId);
   // ТЗ docx 21.08.26: обрана «країна перебування» = UA → показуємо українську сторону.
   const showUA = stayCountry === 'UA';
 
-  // ТЗ docx 08.08.26 (v12): групування загального списку за номером/індексом/містом.
+  /**
+   * ТЗ docx 08.08.26 (v12) + 02.09.26: групування загального списку.
+   * ТЗ 02.09.26 уточнює: групуються ВСІ «вільні» адреси — і з посилок, і ручні,
+   * навіть якщо ручна адреса має лише місто (без індексу й номера). Заголовки
+   * груп («Місто: Rotterdam») клієнт просив не показувати — просто список.
+   */
+  type ManualTask = (typeof routeTasks)[number];
   const groupedGeneral = (() => {
-    const keyOf = (p: RouteItem) => {
+    const parcelKey = (p: RouteItem) => {
       if (groupMode === 'postal') return partyInCountry(p, showUA).addr?.postalCode || 'Без індексу';
       if (groupMode === 'city') return partyInCountry(p, showUA).addr?.city || 'Без міста';
-      return ''; // 'number' — без груп (єдиний список за номером)
+      return '';
+    };
+    const manualKey = (t: ManualTask) => {
+      if (groupMode === 'postal') return t.postalCode || 'Без індексу';
+      if (groupMode === 'city') return t.manualCity || 'Без міста';
+      return '';
     };
     if (groupMode === 'number') {
-      return [{ key: '', items: [...generalParcels].sort((a, b) => a.internalNumber.localeCompare(b.internalNumber)) }];
+      return [{
+        key: '',
+        parcels: [...generalParcels].sort((a, b) => a.internalNumber.localeCompare(b.internalNumber)),
+        manuals: manualGeneral,
+      }];
     }
-    const map = new Map<string, RouteItem[]>();
-    for (const p of generalParcels) {
-      const k = keyOf(p);
-      const arr = map.get(k) ?? [];
-      arr.push(p);
-      map.set(k, arr);
-    }
-    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([key, items]) => ({ key, items }));
+    const map = new Map<string, { parcels: RouteItem[]; manuals: ManualTask[] }>();
+    const bucket = (k: string) => {
+      const b = map.get(k) ?? { parcels: [], manuals: [] };
+      map.set(k, b);
+      return b;
+    };
+    for (const p of generalParcels) bucket(parcelKey(p)).parcels.push(p);
+    for (const t of manualGeneral) bucket(manualKey(t)).manuals.push(t);
+    return Array.from(map.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, v]) => ({ key, ...v }));
   })();
+
+  // ТЗ docx 02.09.26: класти адреси можна лише у СВОЇ листи.
+  const mySheets = sheets.filter(s => s.canMutate);
 
   const selectedJourney = journeys.find(j => j.id === selectedJourneyId) || null;
   // ТЗ docx 08.08.26 (v12): у шапці — ПОВНІ імена водіїв (не лише прізвища).
@@ -544,7 +597,8 @@ export default function RoutesPage() {
     <div>
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold">Маршрутний лист</h1>
+          {/* ТЗ docx 02.09.26: сторінка називається «Маршрути» — Маршрутні листи нижче. */}
+          <h1 className="text-2xl font-bold">Маршрути</h1>
           {/* ТЗ docx 21.07.26 (п.3): зверху — дата поїздки, прізвища водіїв,
               номер машини (саме в цьому порядку). Видимі й у друку. */}
           {/* ТЗ docx 08.08.26 (v12): максимально стисло, БЕЗ підписів полів —
@@ -610,38 +664,39 @@ export default function RoutesPage() {
       {selectedJourney && (
         <div className="flex flex-wrap items-center gap-2 mb-3 text-sm print:hidden">
           <span className="text-gray-500">Групувати:</span>
-          {(['number', 'postal', 'city'] as const).map((m) => (
+          {/* ТЗ docx 02.09.26: порядок віконечок зліва направо — місто, індекс, номер. */}
+          {(['city', 'postal', 'number'] as const).map((m) => (
             <button key={m} type="button" onClick={() => setGroupMode(m)}
               className={`px-2 py-1 rounded border text-xs ${groupMode === m ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-gray-300 hover:bg-gray-50'}`}>
               {m === 'number' ? 'Номер' : m === 'postal' ? 'Індекс' : 'Місто'}
             </button>
           ))}
           <span className="mx-1 text-gray-300">|</span>
-          {/* ТЗ docx 30.08.26: кнопка активна ЗАВЖДИ. Клік → «Оберіть дату» → створюємо
-              лист (навіть порожній). Поле дати показуємо лише після кліку. */}
-          {askSheetDate && (
-            <span className="inline-flex items-center gap-1">
-              <span className="text-gray-500 text-xs">Оберіть дату:</span>
-              <Input
-                ref={sheetDateRef} type="date" value={sheetDate}
-                onChange={(e) => setSheetDate(e.target.value)}
-                className="h-8 w-40 text-xs"
-              />
-            </span>
-          )}
-          <Button size="sm" onClick={handleCreateSheet} disabled={creatingSheet}>
-            {creatingSheet ? 'Створення…' : 'Створити Маршрутний лист'}
+          {/* ТЗ docx 02.09.26: кнопка активна завжди; після кліку поле дати зʼявляється
+              ПІД нею (окремим рядком), а коли дату обрано — сама кнопка підсвічується,
+              щоб було зрозуміло, що на неї треба натиснути ще раз. */}
+          <Button
+            size="sm"
+            onClick={handleCreateSheet}
+            disabled={creatingSheet}
+            className={askSheetDate && sheetDate ? 'bg-amber-500 hover:bg-amber-600 text-white animate-pulse ring-2 ring-amber-300' : undefined}
+          >
+            {creatingSheet ? 'Створення…' : askSheetDate && sheetDate ? 'Створити Маршрутний лист ✓' : 'Створити Маршрутний лист'}
           </Button>
           {/* ТЗ docx 30.08.26: відмічені адреси можна покласти у ВЖЕ створений лист. */}
-          {selectedParcelIds.size > 0 && sheets.length > 0 && (
-            <Select value="" onValueChange={(v) => { if (v) handleAddToSheet(v); }}>
+          {selectedParcelIds.size > 0 && mySheets.length > 0 && (
+            <Select value="" onValueChange={(v) => {
+              const s = mySheets.find(x => x.id === v);
+              if (s) handleAddToSheet(s.id, s.date);
+            }}>
               <SelectTrigger className="h-8 w-56 text-xs">
                 <SelectValue>{`Додати вибрані (${selectedParcelIds.size}) у МЛ…`}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {sheets.map((s, i) => (
-                  <SelectItem key={s.date} value={s.date}>
-                    {sheetLabel(i + 1, s.date)}
+                {/* На одну дату може бути кілька листів — без автора вони нерозрізненні. */}
+                {mySheets.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {sheetLabel(s.date)}{s.ownerName ? ` · ${s.ownerName}` : ''}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -650,6 +705,18 @@ export default function RoutesPage() {
           <Button size="sm" variant="outline" onClick={toggleAllParcels}>
             {selectedParcelIds.size === generalParcels.length && generalParcels.length > 0 ? 'Зняти все' : 'Вибрати все'}
           </Button>
+          {/* Поле дати — окремим рядком ПІД кнопкою (ТЗ 02.09.26). */}
+          {askSheetDate && (
+            <div className="w-full flex items-center gap-2 mt-1">
+              <span className="text-gray-500 text-xs">Оберіть дату:</span>
+              <Input
+                ref={sheetDateRef} type="date" value={sheetDate}
+                onChange={(e) => setSheetDate(e.target.value)}
+                className="h-8 w-40 text-xs"
+              />
+              {sheetDate && <span className="text-xs text-amber-600 font-medium">↑ тепер натисніть «Створити Маршрутний лист»</span>}
+            </div>
+          )}
         </div>
       )}
 
@@ -657,30 +724,35 @@ export default function RoutesPage() {
           країна · дата · відповідальний водій · транспорт · Друк + адреси зі статусами. */}
       {selectedJourney && sheets.length > 0 && (
         <div className="mb-4 space-y-2">
-          {sheets.map((sheet, si) => {
+          {sheets.map((sheet) => {
             // ТЗ docx 21.08.26: розгорнутий лист бачимо повністю; згорнутий — лише кнопка.
-            const isExpanded = expandedSheet === sheet.date;
+            const isExpanded = expandedSheet === sheet.id;
             return (
-            <div key={sheet.date} className="border rounded-lg bg-white overflow-hidden">
+            <div key={sheet.id} ref={isExpanded ? expandedSheetRef : undefined}
+              className="border rounded-lg bg-white overflow-hidden scroll-mt-2">
               {/* Клік по шапці — розгорнути/згорнути цей МЛ. */}
-              <button type="button" onClick={() => setExpandedSheet(isExpanded ? null : sheet.date)}
-                className="w-full px-3 py-2 border-b bg-blue-50/60 flex items-center justify-between text-sm gap-2 text-left hover:bg-blue-100/60">
+              <button type="button" onClick={() => toggleSheet(sheet.id)}
+                className="w-full px-2 py-1.5 border-b bg-blue-50/60 flex items-center justify-between text-sm gap-2 text-left hover:bg-blue-100/60">
                 <div className="min-w-0">
                   <span className="text-gray-400 mr-1">{isExpanded ? '▾' : '▸'}</span>
-                  <span className="font-semibold">{sheetLabel(si + 1, sheet.date)}</span>
-                  <span className="ml-2 text-gray-600 text-xs">
-                    {COUNTRY_LABELS[selectedJourney.country as CountryCode] || selectedJourney.country}
-                    {drivers ? ` · ${drivers}` : ''}{selectedJourney.vehicleInfo ? ` · ${selectedJourney.vehicleInfo}` : ''}
-                  </span>
+                  <span className="font-semibold">{sheetLabel(sheet.date)}</span>
+                  {/* ТЗ docx 02.09.26: у шапці листа — лише той, хто його створив.
+                      Прізвища всіх водіїв поїздки та транспорт прибрано. */}
+                  {sheet.ownerName && (
+                    <span className="ml-2 text-gray-600 text-xs">{sheet.ownerName}</span>
+                  )}
+                  {!sheet.canMutate && <span className="ml-1 text-[10px] text-gray-400">(чужий)</span>}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-gray-400">{sheet.tasks.length} адрес</span>
+                  <span className="text-xs text-gray-400">{sheet.tasks.length}</span>
                   {isExpanded && (<>
-                    <span role="button" tabIndex={0} className="h-7 px-2 flex items-center text-xs text-gray-600 hover:text-gray-900 print:hidden"
-                      onClick={(e) => { e.stopPropagation(); window.print(); }}>🖨 Друкувати</span>
-                    {/* ТЗ docx 30.08.26: лист можна прибрати — адреси повернуться у загальний список. */}
-                    <span role="button" tabIndex={0} className="h-7 px-2 flex items-center text-xs text-red-500 hover:text-red-700 print:hidden"
-                      onClick={(e) => { e.stopPropagation(); handleDeleteSheet(sheet.date); }}>Видалити</span>
+                    <span role="button" tabIndex={0} className="h-6 px-1.5 flex items-center text-xs text-gray-600 hover:text-gray-900 print:hidden"
+                      onClick={(e) => { e.stopPropagation(); window.print(); }}>🖨</span>
+                    {/* ТЗ docx 02.09.26: видалити можна ЛИШЕ свій лист. */}
+                    {sheet.canMutate && (
+                      <span role="button" tabIndex={0} className="h-6 px-1.5 flex items-center text-xs text-red-500 hover:text-red-700 print:hidden"
+                        onClick={(e) => { e.stopPropagation(); handleDeleteSheet(sheet.id, sheet.date); }}>Видалити</span>
+                    )}
                   </>)}
                 </div>
               </button>
@@ -747,10 +819,26 @@ export default function RoutesPage() {
                               value={(p ? failureReasons[p.id] : manualReasons[t.id]) || ''}
                               onChange={(e) => (p ? updateFailReason(p.id, e.target.value) : updateManualReason(t.id, e.target.value))} />
                           )}
+                          {/* ТЗ docx 02.09.26: «Перенести» → зʼявляється ВИДІЛЕНЕ віконце
+                              «Виберіть дату», і лише після «Готово» адреса переїжджає.
+                              Раніше перенос спрацьовував просто на зміну поля. */}
                           {ts === 'rescheduled' && (
-                            <Input type="date" className="h-7 text-xs w-36" title="Оберіть дату — адреса переміститься у відповідний лист"
-                              value={(p ? reschedDates[p.id] : '') || ''}
-                              onChange={(e) => { if (p) updateReschedDate(p.id, e.target.value); handleRescheduleTask(t.id, e.target.value); }} />
+                            <span className="inline-flex items-center gap-1">
+                              <span className="text-[11px] text-amber-700 font-medium">Виберіть дату:</span>
+                              <Input type="date" autoFocus
+                                className="h-7 text-xs w-36 border-amber-400 ring-2 ring-amber-200 bg-amber-50"
+                                title="Оберіть дату і натисніть «Готово»"
+                                value={(p ? reschedDates[p.id] : moveDates[t.id]) || ''}
+                                onChange={(e) => {
+                                  if (p) updateReschedDate(p.id, e.target.value);
+                                  setMoveDates(m => ({ ...m, [t.id]: e.target.value }));
+                                }} />
+                              <Button size="sm" className="h-7 px-2 text-xs"
+                                disabled={!((p ? reschedDates[p.id] : moveDates[t.id]) || '')}
+                                onClick={() => handleRescheduleTask(t.id, (p ? reschedDates[p.id] : moveDates[t.id]) || '')}>
+                                Готово
+                              </Button>
+                            </span>
                           )}
                         </div>
                       )}
@@ -763,6 +851,12 @@ export default function RoutesPage() {
           })}
         </div>
       )}
+
+      {/* ТЗ docx 02.09.26: «При відкритті якогось МЛ він повинен переміститись на самий
+          верх екрану». Коли лист розгорнуто, загальний список ховається і сторінка стає
+          короткою — без цього запасу скрол упирається в кінець документа і шапка листа
+          лишається посеред екрана. */}
+      {expandedSheet && <div aria-hidden className="h-screen print:hidden" />}
 
       {loading ? (
         <div className="text-center py-12 text-gray-500">Завантаження...</div>
@@ -788,9 +882,10 @@ export default function RoutesPage() {
           )}
           {groupedGeneral.map((grp, gi) => (
             <div key={grp.key || `g${gi}`}>
-              {grp.key && <div className="text-xs font-semibold text-gray-500 mb-1 px-1">{groupMode === 'postal' ? 'Індекс' : 'Місто'}: {grp.key}</div>}
+              {/* ТЗ docx 02.09.26: заголовки груп («Місто: Rotterdam») не показуємо —
+                  просто список, згрупований за обраною ознакою. */}
               <div className="bg-white rounded-lg border divide-y">
-                {grp.items.map((p, idx) => {
+                {grp.parcels.map((p, idx) => {
                   const d = partyInCountry(p, showUA);
                   const a = d.addr;
                   return (
@@ -822,14 +917,9 @@ export default function RoutesPage() {
                     </div>
                   );
                 })}
-              </div>
-            </div>
-          ))}
-
-          {/* ТЗ docx 08.08.26 (v12): ручні адреси (додані Водієм) у загальному списку. */}
-          {manualGeneral.length > 0 && (
-            <div className="bg-white rounded-lg border divide-y">
-              {manualGeneral.map((t, idx) => {
+                {/* ТЗ docx 02.09.26: ручні адреси групуються РАЗОМ із адресами посилок —
+                    за тією ж ознакою (місто/індекс), навіть якщо інших даних немає. */}
+                {grp.manuals.map((t, idx) => {
                 const selId = `m:${t.id}`;
                 return (
                   <div key={t.id} className="px-3 py-2">
@@ -857,8 +947,9 @@ export default function RoutesPage() {
                   </div>
                 );
               })}
+              </div>
             </div>
-          )}
+          ))}
 
           {/* ТЗ docx 08.08.26 (v12): «Додати адресу» — завжди під останнім записом. */}
           {!manualOpen ? (
@@ -919,8 +1010,13 @@ export default function RoutesPage() {
                 <CapitalizeInput placeholder="Імʼя" value={manualForm.manualFirstName} onChange={(v) => setManualForm(f => ({ ...f, manualFirstName: v }))} className="h-8 text-sm" />
               </div>
               <div className="flex gap-2">
-                <Button size="sm" onClick={handleAddManual} disabled={!manualForm.manualStreet.trim() || addingManual}>{addingManual ? 'Додавання…' : 'Додати'}</Button>
-                <Button size="sm" variant="ghost" onClick={() => { setManualOpen(false); setClientStatus(''); }}>Скасувати</Button>
+                {/* ТЗ docx 02.09.26: кнопка більше НЕ блокується мовчки — раніше без
+                    заповненої «Вулиці» вона була сірою, натискання нічого не робило
+                    і клієнт не міг додати адресу. Тепер вона активна, а чого бракує —
+                    підказує повідомлення. */}
+                <Button size="sm" onClick={handleAddManual} disabled={addingManual}>{addingManual ? 'Додавання…' : 'Додати'}</Button>
+                {/* ТЗ docx 02.09.26: після «Скасувати» форма має відкритись ЧИСТОЮ. */}
+                <Button size="sm" variant="ghost" onClick={() => { setManualOpen(false); setClientStatus(''); resetManualForm(); }}>Скасувати</Button>
               </div>
             </div>
           )}

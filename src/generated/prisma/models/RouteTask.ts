@@ -43,6 +43,7 @@ export type RouteTaskMinAggregateOutputType = {
   clientId: string | null
   addressId: string | null
   addressText: string | null
+  routeSheetId: string | null
   postalCode: string | null
   manualName: string | null
   manualStreet: string | null
@@ -73,6 +74,7 @@ export type RouteTaskMaxAggregateOutputType = {
   clientId: string | null
   addressId: string | null
   addressText: string | null
+  routeSheetId: string | null
   postalCode: string | null
   manualName: string | null
   manualStreet: string | null
@@ -103,6 +105,7 @@ export type RouteTaskCountAggregateOutputType = {
   clientId: number
   addressId: number
   addressText: number
+  routeSheetId: number
   postalCode: number
   manualName: number
   manualStreet: number
@@ -143,6 +146,7 @@ export type RouteTaskMinAggregateInputType = {
   clientId?: true
   addressId?: true
   addressText?: true
+  routeSheetId?: true
   postalCode?: true
   manualName?: true
   manualStreet?: true
@@ -173,6 +177,7 @@ export type RouteTaskMaxAggregateInputType = {
   clientId?: true
   addressId?: true
   addressText?: true
+  routeSheetId?: true
   postalCode?: true
   manualName?: true
   manualStreet?: true
@@ -203,6 +208,7 @@ export type RouteTaskCountAggregateInputType = {
   clientId?: true
   addressId?: true
   addressText?: true
+  routeSheetId?: true
   postalCode?: true
   manualName?: true
   manualStreet?: true
@@ -320,6 +326,7 @@ export type RouteTaskGroupByOutputType = {
   clientId: string | null
   addressId: string | null
   addressText: string | null
+  routeSheetId: string | null
   postalCode: string | null
   manualName: string | null
   manualStreet: string | null
@@ -373,6 +380,7 @@ export type RouteTaskWhereInput = {
   clientId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressText?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  routeSheetId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualStreet?: Prisma.StringNullableFilter<"RouteTask"> | string | null
@@ -396,6 +404,7 @@ export type RouteTaskWhereInput = {
   parcel?: Prisma.XOR<Prisma.ParcelNullableScalarRelationFilter, Prisma.ParcelWhereInput> | null
   client?: Prisma.XOR<Prisma.ClientNullableScalarRelationFilter, Prisma.ClientWhereInput> | null
   address?: Prisma.XOR<Prisma.ClientAddressNullableScalarRelationFilter, Prisma.ClientAddressWhereInput> | null
+  routeSheet?: Prisma.XOR<Prisma.RouteSheetNullableScalarRelationFilter, Prisma.RouteSheetWhereInput> | null
   assignedCourier?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
 }
 
@@ -408,6 +417,7 @@ export type RouteTaskOrderByWithRelationInput = {
   clientId?: Prisma.SortOrderInput | Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
   addressText?: Prisma.SortOrderInput | Prisma.SortOrder
+  routeSheetId?: Prisma.SortOrderInput | Prisma.SortOrder
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   manualName?: Prisma.SortOrderInput | Prisma.SortOrder
   manualStreet?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -431,6 +441,7 @@ export type RouteTaskOrderByWithRelationInput = {
   parcel?: Prisma.ParcelOrderByWithRelationInput
   client?: Prisma.ClientOrderByWithRelationInput
   address?: Prisma.ClientAddressOrderByWithRelationInput
+  routeSheet?: Prisma.RouteSheetOrderByWithRelationInput
   assignedCourier?: Prisma.ProfileOrderByWithRelationInput
 }
 
@@ -446,6 +457,7 @@ export type RouteTaskWhereUniqueInput = Prisma.AtLeast<{
   clientId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressText?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  routeSheetId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualStreet?: Prisma.StringNullableFilter<"RouteTask"> | string | null
@@ -469,6 +481,7 @@ export type RouteTaskWhereUniqueInput = Prisma.AtLeast<{
   parcel?: Prisma.XOR<Prisma.ParcelNullableScalarRelationFilter, Prisma.ParcelWhereInput> | null
   client?: Prisma.XOR<Prisma.ClientNullableScalarRelationFilter, Prisma.ClientWhereInput> | null
   address?: Prisma.XOR<Prisma.ClientAddressNullableScalarRelationFilter, Prisma.ClientAddressWhereInput> | null
+  routeSheet?: Prisma.XOR<Prisma.RouteSheetNullableScalarRelationFilter, Prisma.RouteSheetWhereInput> | null
   assignedCourier?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
 }, "id">
 
@@ -481,6 +494,7 @@ export type RouteTaskOrderByWithAggregationInput = {
   clientId?: Prisma.SortOrderInput | Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
   addressText?: Prisma.SortOrderInput | Prisma.SortOrder
+  routeSheetId?: Prisma.SortOrderInput | Prisma.SortOrder
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   manualName?: Prisma.SortOrderInput | Prisma.SortOrder
   manualStreet?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -519,6 +533,7 @@ export type RouteTaskScalarWhereWithAggregatesInput = {
   clientId?: Prisma.UuidNullableWithAggregatesFilter<"RouteTask"> | string | null
   addressId?: Prisma.UuidNullableWithAggregatesFilter<"RouteTask"> | string | null
   addressText?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
+  routeSheetId?: Prisma.UuidNullableWithAggregatesFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
   manualName?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
   manualStreet?: Prisma.StringNullableWithAggregatesFilter<"RouteTask"> | string | null
@@ -567,6 +582,7 @@ export type RouteTaskCreateInput = {
   parcel?: Prisma.ParcelCreateNestedOneWithoutRouteTasksInput
   client?: Prisma.ClientCreateNestedOneWithoutRouteTasksInput
   address?: Prisma.ClientAddressCreateNestedOneWithoutRouteTasksInput
+  routeSheet?: Prisma.RouteSheetCreateNestedOneWithoutTasksInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedRouteTasksInput
 }
 
@@ -579,6 +595,7 @@ export type RouteTaskUncheckedCreateInput = {
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -627,6 +644,7 @@ export type RouteTaskUpdateInput = {
   parcel?: Prisma.ParcelUpdateOneWithoutRouteTasksNestedInput
   client?: Prisma.ClientUpdateOneWithoutRouteTasksNestedInput
   address?: Prisma.ClientAddressUpdateOneWithoutRouteTasksNestedInput
+  routeSheet?: Prisma.RouteSheetUpdateOneWithoutTasksNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedRouteTasksNestedInput
 }
 
@@ -639,6 +657,7 @@ export type RouteTaskUncheckedUpdateInput = {
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -669,6 +688,7 @@ export type RouteTaskCreateManyInput = {
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -724,6 +744,7 @@ export type RouteTaskUncheckedUpdateManyInput = {
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -764,6 +785,7 @@ export type RouteTaskCountOrderByAggregateInput = {
   clientId?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
   addressText?: Prisma.SortOrder
+  routeSheetId?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
   manualName?: Prisma.SortOrder
   manualStreet?: Prisma.SortOrder
@@ -798,6 +820,7 @@ export type RouteTaskMaxOrderByAggregateInput = {
   clientId?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
   addressText?: Prisma.SortOrder
+  routeSheetId?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
   manualName?: Prisma.SortOrder
   manualStreet?: Prisma.SortOrder
@@ -828,6 +851,7 @@ export type RouteTaskMinOrderByAggregateInput = {
   clientId?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
   addressText?: Prisma.SortOrder
+  routeSheetId?: Prisma.SortOrder
   postalCode?: Prisma.SortOrder
   manualName?: Prisma.SortOrder
   manualStreet?: Prisma.SortOrder
@@ -1063,6 +1087,48 @@ export type RouteTaskUncheckedUpdateManyWithoutParcelNestedInput = {
   deleteMany?: Prisma.RouteTaskScalarWhereInput | Prisma.RouteTaskScalarWhereInput[]
 }
 
+export type RouteTaskCreateNestedManyWithoutRouteSheetInput = {
+  create?: Prisma.XOR<Prisma.RouteTaskCreateWithoutRouteSheetInput, Prisma.RouteTaskUncheckedCreateWithoutRouteSheetInput> | Prisma.RouteTaskCreateWithoutRouteSheetInput[] | Prisma.RouteTaskUncheckedCreateWithoutRouteSheetInput[]
+  connectOrCreate?: Prisma.RouteTaskCreateOrConnectWithoutRouteSheetInput | Prisma.RouteTaskCreateOrConnectWithoutRouteSheetInput[]
+  createMany?: Prisma.RouteTaskCreateManyRouteSheetInputEnvelope
+  connect?: Prisma.RouteTaskWhereUniqueInput | Prisma.RouteTaskWhereUniqueInput[]
+}
+
+export type RouteTaskUncheckedCreateNestedManyWithoutRouteSheetInput = {
+  create?: Prisma.XOR<Prisma.RouteTaskCreateWithoutRouteSheetInput, Prisma.RouteTaskUncheckedCreateWithoutRouteSheetInput> | Prisma.RouteTaskCreateWithoutRouteSheetInput[] | Prisma.RouteTaskUncheckedCreateWithoutRouteSheetInput[]
+  connectOrCreate?: Prisma.RouteTaskCreateOrConnectWithoutRouteSheetInput | Prisma.RouteTaskCreateOrConnectWithoutRouteSheetInput[]
+  createMany?: Prisma.RouteTaskCreateManyRouteSheetInputEnvelope
+  connect?: Prisma.RouteTaskWhereUniqueInput | Prisma.RouteTaskWhereUniqueInput[]
+}
+
+export type RouteTaskUpdateManyWithoutRouteSheetNestedInput = {
+  create?: Prisma.XOR<Prisma.RouteTaskCreateWithoutRouteSheetInput, Prisma.RouteTaskUncheckedCreateWithoutRouteSheetInput> | Prisma.RouteTaskCreateWithoutRouteSheetInput[] | Prisma.RouteTaskUncheckedCreateWithoutRouteSheetInput[]
+  connectOrCreate?: Prisma.RouteTaskCreateOrConnectWithoutRouteSheetInput | Prisma.RouteTaskCreateOrConnectWithoutRouteSheetInput[]
+  upsert?: Prisma.RouteTaskUpsertWithWhereUniqueWithoutRouteSheetInput | Prisma.RouteTaskUpsertWithWhereUniqueWithoutRouteSheetInput[]
+  createMany?: Prisma.RouteTaskCreateManyRouteSheetInputEnvelope
+  set?: Prisma.RouteTaskWhereUniqueInput | Prisma.RouteTaskWhereUniqueInput[]
+  disconnect?: Prisma.RouteTaskWhereUniqueInput | Prisma.RouteTaskWhereUniqueInput[]
+  delete?: Prisma.RouteTaskWhereUniqueInput | Prisma.RouteTaskWhereUniqueInput[]
+  connect?: Prisma.RouteTaskWhereUniqueInput | Prisma.RouteTaskWhereUniqueInput[]
+  update?: Prisma.RouteTaskUpdateWithWhereUniqueWithoutRouteSheetInput | Prisma.RouteTaskUpdateWithWhereUniqueWithoutRouteSheetInput[]
+  updateMany?: Prisma.RouteTaskUpdateManyWithWhereWithoutRouteSheetInput | Prisma.RouteTaskUpdateManyWithWhereWithoutRouteSheetInput[]
+  deleteMany?: Prisma.RouteTaskScalarWhereInput | Prisma.RouteTaskScalarWhereInput[]
+}
+
+export type RouteTaskUncheckedUpdateManyWithoutRouteSheetNestedInput = {
+  create?: Prisma.XOR<Prisma.RouteTaskCreateWithoutRouteSheetInput, Prisma.RouteTaskUncheckedCreateWithoutRouteSheetInput> | Prisma.RouteTaskCreateWithoutRouteSheetInput[] | Prisma.RouteTaskUncheckedCreateWithoutRouteSheetInput[]
+  connectOrCreate?: Prisma.RouteTaskCreateOrConnectWithoutRouteSheetInput | Prisma.RouteTaskCreateOrConnectWithoutRouteSheetInput[]
+  upsert?: Prisma.RouteTaskUpsertWithWhereUniqueWithoutRouteSheetInput | Prisma.RouteTaskUpsertWithWhereUniqueWithoutRouteSheetInput[]
+  createMany?: Prisma.RouteTaskCreateManyRouteSheetInputEnvelope
+  set?: Prisma.RouteTaskWhereUniqueInput | Prisma.RouteTaskWhereUniqueInput[]
+  disconnect?: Prisma.RouteTaskWhereUniqueInput | Prisma.RouteTaskWhereUniqueInput[]
+  delete?: Prisma.RouteTaskWhereUniqueInput | Prisma.RouteTaskWhereUniqueInput[]
+  connect?: Prisma.RouteTaskWhereUniqueInput | Prisma.RouteTaskWhereUniqueInput[]
+  update?: Prisma.RouteTaskUpdateWithWhereUniqueWithoutRouteSheetInput | Prisma.RouteTaskUpdateWithWhereUniqueWithoutRouteSheetInput[]
+  updateMany?: Prisma.RouteTaskUpdateManyWithWhereWithoutRouteSheetInput | Prisma.RouteTaskUpdateManyWithWhereWithoutRouteSheetInput[]
+  deleteMany?: Prisma.RouteTaskScalarWhereInput | Prisma.RouteTaskScalarWhereInput[]
+}
+
 export type EnumRouteTaskTypeFieldUpdateOperationsInput = {
   set?: $Enums.RouteTaskType
 }
@@ -1098,6 +1164,7 @@ export type RouteTaskCreateWithoutAssignedCourierInput = {
   parcel?: Prisma.ParcelCreateNestedOneWithoutRouteTasksInput
   client?: Prisma.ClientCreateNestedOneWithoutRouteTasksInput
   address?: Prisma.ClientAddressCreateNestedOneWithoutRouteTasksInput
+  routeSheet?: Prisma.RouteSheetCreateNestedOneWithoutTasksInput
 }
 
 export type RouteTaskUncheckedCreateWithoutAssignedCourierInput = {
@@ -1109,6 +1176,7 @@ export type RouteTaskUncheckedCreateWithoutAssignedCourierInput = {
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -1167,6 +1235,7 @@ export type RouteTaskScalarWhereInput = {
   clientId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   addressText?: Prisma.StringNullableFilter<"RouteTask"> | string | null
+  routeSheetId?: Prisma.UuidNullableFilter<"RouteTask"> | string | null
   postalCode?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualName?: Prisma.StringNullableFilter<"RouteTask"> | string | null
   manualStreet?: Prisma.StringNullableFilter<"RouteTask"> | string | null
@@ -1214,6 +1283,7 @@ export type RouteTaskCreateWithoutClientInput = {
   trip: Prisma.TripCreateNestedOneWithoutRouteTasksInput
   parcel?: Prisma.ParcelCreateNestedOneWithoutRouteTasksInput
   address?: Prisma.ClientAddressCreateNestedOneWithoutRouteTasksInput
+  routeSheet?: Prisma.RouteSheetCreateNestedOneWithoutTasksInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedRouteTasksInput
 }
 
@@ -1225,6 +1295,7 @@ export type RouteTaskUncheckedCreateWithoutClientInput = {
   taskDate?: Date | string | null
   addressId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -1298,6 +1369,7 @@ export type RouteTaskCreateWithoutAddressInput = {
   trip: Prisma.TripCreateNestedOneWithoutRouteTasksInput
   parcel?: Prisma.ParcelCreateNestedOneWithoutRouteTasksInput
   client?: Prisma.ClientCreateNestedOneWithoutRouteTasksInput
+  routeSheet?: Prisma.RouteSheetCreateNestedOneWithoutTasksInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedRouteTasksInput
 }
 
@@ -1309,6 +1381,7 @@ export type RouteTaskUncheckedCreateWithoutAddressInput = {
   taskDate?: Date | string | null
   clientId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -1382,6 +1455,7 @@ export type RouteTaskCreateWithoutTripInput = {
   parcel?: Prisma.ParcelCreateNestedOneWithoutRouteTasksInput
   client?: Prisma.ClientCreateNestedOneWithoutRouteTasksInput
   address?: Prisma.ClientAddressCreateNestedOneWithoutRouteTasksInput
+  routeSheet?: Prisma.RouteSheetCreateNestedOneWithoutTasksInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedRouteTasksInput
 }
 
@@ -1393,6 +1467,7 @@ export type RouteTaskUncheckedCreateWithoutTripInput = {
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -1466,6 +1541,7 @@ export type RouteTaskCreateWithoutParcelInput = {
   trip: Prisma.TripCreateNestedOneWithoutRouteTasksInput
   client?: Prisma.ClientCreateNestedOneWithoutRouteTasksInput
   address?: Prisma.ClientAddressCreateNestedOneWithoutRouteTasksInput
+  routeSheet?: Prisma.RouteSheetCreateNestedOneWithoutTasksInput
   assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedRouteTasksInput
 }
 
@@ -1477,6 +1553,7 @@ export type RouteTaskUncheckedCreateWithoutParcelInput = {
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -1524,6 +1601,92 @@ export type RouteTaskUpdateManyWithWhereWithoutParcelInput = {
   data: Prisma.XOR<Prisma.RouteTaskUpdateManyMutationInput, Prisma.RouteTaskUncheckedUpdateManyWithoutParcelInput>
 }
 
+export type RouteTaskCreateWithoutRouteSheetInput = {
+  id?: string
+  taskType: $Enums.RouteTaskType
+  taskDate?: Date | string | null
+  addressText?: string | null
+  postalCode?: string | null
+  manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
+  status?: $Enums.RouteTaskStatus
+  rescheduleDate?: Date | string | null
+  failureReason?: string | null
+  sortOrder?: number | null
+  estimatedArrivalStart?: Date | string | null
+  estimatedArrivalEnd?: Date | string | null
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  trip: Prisma.TripCreateNestedOneWithoutRouteTasksInput
+  parcel?: Prisma.ParcelCreateNestedOneWithoutRouteTasksInput
+  client?: Prisma.ClientCreateNestedOneWithoutRouteTasksInput
+  address?: Prisma.ClientAddressCreateNestedOneWithoutRouteTasksInput
+  assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedRouteTasksInput
+}
+
+export type RouteTaskUncheckedCreateWithoutRouteSheetInput = {
+  id?: string
+  tripId: string
+  parcelId?: string | null
+  taskType: $Enums.RouteTaskType
+  taskDate?: Date | string | null
+  clientId?: string | null
+  addressId?: string | null
+  addressText?: string | null
+  postalCode?: string | null
+  manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
+  assignedCourierId?: string | null
+  status?: $Enums.RouteTaskStatus
+  rescheduleDate?: Date | string | null
+  failureReason?: string | null
+  sortOrder?: number | null
+  estimatedArrivalStart?: Date | string | null
+  estimatedArrivalEnd?: Date | string | null
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type RouteTaskCreateOrConnectWithoutRouteSheetInput = {
+  where: Prisma.RouteTaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.RouteTaskCreateWithoutRouteSheetInput, Prisma.RouteTaskUncheckedCreateWithoutRouteSheetInput>
+}
+
+export type RouteTaskCreateManyRouteSheetInputEnvelope = {
+  data: Prisma.RouteTaskCreateManyRouteSheetInput | Prisma.RouteTaskCreateManyRouteSheetInput[]
+  skipDuplicates?: boolean
+}
+
+export type RouteTaskUpsertWithWhereUniqueWithoutRouteSheetInput = {
+  where: Prisma.RouteTaskWhereUniqueInput
+  update: Prisma.XOR<Prisma.RouteTaskUpdateWithoutRouteSheetInput, Prisma.RouteTaskUncheckedUpdateWithoutRouteSheetInput>
+  create: Prisma.XOR<Prisma.RouteTaskCreateWithoutRouteSheetInput, Prisma.RouteTaskUncheckedCreateWithoutRouteSheetInput>
+}
+
+export type RouteTaskUpdateWithWhereUniqueWithoutRouteSheetInput = {
+  where: Prisma.RouteTaskWhereUniqueInput
+  data: Prisma.XOR<Prisma.RouteTaskUpdateWithoutRouteSheetInput, Prisma.RouteTaskUncheckedUpdateWithoutRouteSheetInput>
+}
+
+export type RouteTaskUpdateManyWithWhereWithoutRouteSheetInput = {
+  where: Prisma.RouteTaskScalarWhereInput
+  data: Prisma.XOR<Prisma.RouteTaskUpdateManyMutationInput, Prisma.RouteTaskUncheckedUpdateManyWithoutRouteSheetInput>
+}
+
 export type RouteTaskCreateManyAssignedCourierInput = {
   id?: string
   tripId: string
@@ -1533,6 +1696,7 @@ export type RouteTaskCreateManyAssignedCourierInput = {
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -1580,6 +1744,7 @@ export type RouteTaskUpdateWithoutAssignedCourierInput = {
   parcel?: Prisma.ParcelUpdateOneWithoutRouteTasksNestedInput
   client?: Prisma.ClientUpdateOneWithoutRouteTasksNestedInput
   address?: Prisma.ClientAddressUpdateOneWithoutRouteTasksNestedInput
+  routeSheet?: Prisma.RouteSheetUpdateOneWithoutTasksNestedInput
 }
 
 export type RouteTaskUncheckedUpdateWithoutAssignedCourierInput = {
@@ -1591,6 +1756,7 @@ export type RouteTaskUncheckedUpdateWithoutAssignedCourierInput = {
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1620,6 +1786,7 @@ export type RouteTaskUncheckedUpdateManyWithoutAssignedCourierInput = {
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1648,6 +1815,7 @@ export type RouteTaskCreateManyClientInput = {
   taskDate?: Date | string | null
   addressId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -1695,6 +1863,7 @@ export type RouteTaskUpdateWithoutClientInput = {
   trip?: Prisma.TripUpdateOneRequiredWithoutRouteTasksNestedInput
   parcel?: Prisma.ParcelUpdateOneWithoutRouteTasksNestedInput
   address?: Prisma.ClientAddressUpdateOneWithoutRouteTasksNestedInput
+  routeSheet?: Prisma.RouteSheetUpdateOneWithoutTasksNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedRouteTasksNestedInput
 }
 
@@ -1706,6 +1875,7 @@ export type RouteTaskUncheckedUpdateWithoutClientInput = {
   taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1735,6 +1905,7 @@ export type RouteTaskUncheckedUpdateManyWithoutClientInput = {
   taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1764,6 +1935,7 @@ export type RouteTaskCreateManyAddressInput = {
   taskDate?: Date | string | null
   clientId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -1811,6 +1983,7 @@ export type RouteTaskUpdateWithoutAddressInput = {
   trip?: Prisma.TripUpdateOneRequiredWithoutRouteTasksNestedInput
   parcel?: Prisma.ParcelUpdateOneWithoutRouteTasksNestedInput
   client?: Prisma.ClientUpdateOneWithoutRouteTasksNestedInput
+  routeSheet?: Prisma.RouteSheetUpdateOneWithoutTasksNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedRouteTasksNestedInput
 }
 
@@ -1822,6 +1995,7 @@ export type RouteTaskUncheckedUpdateWithoutAddressInput = {
   taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1851,6 +2025,7 @@ export type RouteTaskUncheckedUpdateManyWithoutAddressInput = {
   taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1880,6 +2055,7 @@ export type RouteTaskCreateManyTripInput = {
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -1927,6 +2103,7 @@ export type RouteTaskUpdateWithoutTripInput = {
   parcel?: Prisma.ParcelUpdateOneWithoutRouteTasksNestedInput
   client?: Prisma.ClientUpdateOneWithoutRouteTasksNestedInput
   address?: Prisma.ClientAddressUpdateOneWithoutRouteTasksNestedInput
+  routeSheet?: Prisma.RouteSheetUpdateOneWithoutTasksNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedRouteTasksNestedInput
 }
 
@@ -1938,6 +2115,7 @@ export type RouteTaskUncheckedUpdateWithoutTripInput = {
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1967,6 +2145,7 @@ export type RouteTaskUncheckedUpdateManyWithoutTripInput = {
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1996,6 +2175,7 @@ export type RouteTaskCreateManyParcelInput = {
   clientId?: string | null
   addressId?: string | null
   addressText?: string | null
+  routeSheetId?: string | null
   postalCode?: string | null
   manualName?: string | null
   manualStreet?: string | null
@@ -2043,12 +2223,134 @@ export type RouteTaskUpdateWithoutParcelInput = {
   trip?: Prisma.TripUpdateOneRequiredWithoutRouteTasksNestedInput
   client?: Prisma.ClientUpdateOneWithoutRouteTasksNestedInput
   address?: Prisma.ClientAddressUpdateOneWithoutRouteTasksNestedInput
+  routeSheet?: Prisma.RouteSheetUpdateOneWithoutTasksNestedInput
   assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedRouteTasksNestedInput
 }
 
 export type RouteTaskUncheckedUpdateWithoutParcelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
+  taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
+  rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  estimatedArrivalStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedArrivalEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RouteTaskUncheckedUpdateManyWithoutParcelInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tripId?: Prisma.StringFieldUpdateOperationsInput | string
+  taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeSheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
+  rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  estimatedArrivalStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedArrivalEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RouteTaskCreateManyRouteSheetInput = {
+  id?: string
+  tripId: string
+  parcelId?: string | null
+  taskType: $Enums.RouteTaskType
+  taskDate?: Date | string | null
+  clientId?: string | null
+  addressId?: string | null
+  addressText?: string | null
+  postalCode?: string | null
+  manualName?: string | null
+  manualStreet?: string | null
+  manualBuilding?: string | null
+  manualFirstName?: string | null
+  manualLastName?: string | null
+  manualPhone?: string | null
+  manualDirection?: string | null
+  manualCity?: string | null
+  assignedCourierId?: string | null
+  status?: $Enums.RouteTaskStatus
+  rescheduleDate?: Date | string | null
+  failureReason?: string | null
+  sortOrder?: number | null
+  estimatedArrivalStart?: Date | string | null
+  estimatedArrivalEnd?: Date | string | null
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type RouteTaskUpdateWithoutRouteSheetInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
+  taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  addressText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualStreet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualBuilding?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualDirection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  manualCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumRouteTaskStatusFieldUpdateOperationsInput | $Enums.RouteTaskStatus
+  rescheduleDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  estimatedArrivalStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedArrivalEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  trip?: Prisma.TripUpdateOneRequiredWithoutRouteTasksNestedInput
+  parcel?: Prisma.ParcelUpdateOneWithoutRouteTasksNestedInput
+  client?: Prisma.ClientUpdateOneWithoutRouteTasksNestedInput
+  address?: Prisma.ClientAddressUpdateOneWithoutRouteTasksNestedInput
+  assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedRouteTasksNestedInput
+}
+
+export type RouteTaskUncheckedUpdateWithoutRouteSheetInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tripId?: Prisma.StringFieldUpdateOperationsInput | string
+  parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
   taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2075,9 +2377,10 @@ export type RouteTaskUncheckedUpdateWithoutParcelInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type RouteTaskUncheckedUpdateManyWithoutParcelInput = {
+export type RouteTaskUncheckedUpdateManyWithoutRouteSheetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tripId?: Prisma.StringFieldUpdateOperationsInput | string
+  parcelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taskType?: Prisma.EnumRouteTaskTypeFieldUpdateOperationsInput | $Enums.RouteTaskType
   taskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2115,6 +2418,7 @@ export type RouteTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   clientId?: boolean
   addressId?: boolean
   addressText?: boolean
+  routeSheetId?: boolean
   postalCode?: boolean
   manualName?: boolean
   manualStreet?: boolean
@@ -2138,6 +2442,7 @@ export type RouteTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   parcel?: boolean | Prisma.RouteTask$parcelArgs<ExtArgs>
   client?: boolean | Prisma.RouteTask$clientArgs<ExtArgs>
   address?: boolean | Prisma.RouteTask$addressArgs<ExtArgs>
+  routeSheet?: boolean | Prisma.RouteTask$routeSheetArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.RouteTask$assignedCourierArgs<ExtArgs>
 }, ExtArgs["result"]["routeTask"]>
 
@@ -2150,6 +2455,7 @@ export type RouteTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   clientId?: boolean
   addressId?: boolean
   addressText?: boolean
+  routeSheetId?: boolean
   postalCode?: boolean
   manualName?: boolean
   manualStreet?: boolean
@@ -2173,6 +2479,7 @@ export type RouteTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   parcel?: boolean | Prisma.RouteTask$parcelArgs<ExtArgs>
   client?: boolean | Prisma.RouteTask$clientArgs<ExtArgs>
   address?: boolean | Prisma.RouteTask$addressArgs<ExtArgs>
+  routeSheet?: boolean | Prisma.RouteTask$routeSheetArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.RouteTask$assignedCourierArgs<ExtArgs>
 }, ExtArgs["result"]["routeTask"]>
 
@@ -2185,6 +2492,7 @@ export type RouteTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   clientId?: boolean
   addressId?: boolean
   addressText?: boolean
+  routeSheetId?: boolean
   postalCode?: boolean
   manualName?: boolean
   manualStreet?: boolean
@@ -2208,6 +2516,7 @@ export type RouteTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   parcel?: boolean | Prisma.RouteTask$parcelArgs<ExtArgs>
   client?: boolean | Prisma.RouteTask$clientArgs<ExtArgs>
   address?: boolean | Prisma.RouteTask$addressArgs<ExtArgs>
+  routeSheet?: boolean | Prisma.RouteTask$routeSheetArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.RouteTask$assignedCourierArgs<ExtArgs>
 }, ExtArgs["result"]["routeTask"]>
 
@@ -2220,6 +2529,7 @@ export type RouteTaskSelectScalar = {
   clientId?: boolean
   addressId?: boolean
   addressText?: boolean
+  routeSheetId?: boolean
   postalCode?: boolean
   manualName?: boolean
   manualStreet?: boolean
@@ -2241,12 +2551,13 @@ export type RouteTaskSelectScalar = {
   updatedAt?: boolean
 }
 
-export type RouteTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tripId" | "parcelId" | "taskType" | "taskDate" | "clientId" | "addressId" | "addressText" | "postalCode" | "manualName" | "manualStreet" | "manualBuilding" | "manualFirstName" | "manualLastName" | "manualPhone" | "manualDirection" | "manualCity" | "assignedCourierId" | "status" | "rescheduleDate" | "failureReason" | "sortOrder" | "estimatedArrivalStart" | "estimatedArrivalEnd" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["routeTask"]>
+export type RouteTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tripId" | "parcelId" | "taskType" | "taskDate" | "clientId" | "addressId" | "addressText" | "routeSheetId" | "postalCode" | "manualName" | "manualStreet" | "manualBuilding" | "manualFirstName" | "manualLastName" | "manualPhone" | "manualDirection" | "manualCity" | "assignedCourierId" | "status" | "rescheduleDate" | "failureReason" | "sortOrder" | "estimatedArrivalStart" | "estimatedArrivalEnd" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["routeTask"]>
 export type RouteTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
   parcel?: boolean | Prisma.RouteTask$parcelArgs<ExtArgs>
   client?: boolean | Prisma.RouteTask$clientArgs<ExtArgs>
   address?: boolean | Prisma.RouteTask$addressArgs<ExtArgs>
+  routeSheet?: boolean | Prisma.RouteTask$routeSheetArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.RouteTask$assignedCourierArgs<ExtArgs>
 }
 export type RouteTaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2254,6 +2565,7 @@ export type RouteTaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   parcel?: boolean | Prisma.RouteTask$parcelArgs<ExtArgs>
   client?: boolean | Prisma.RouteTask$clientArgs<ExtArgs>
   address?: boolean | Prisma.RouteTask$addressArgs<ExtArgs>
+  routeSheet?: boolean | Prisma.RouteTask$routeSheetArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.RouteTask$assignedCourierArgs<ExtArgs>
 }
 export type RouteTaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2261,6 +2573,7 @@ export type RouteTaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   parcel?: boolean | Prisma.RouteTask$parcelArgs<ExtArgs>
   client?: boolean | Prisma.RouteTask$clientArgs<ExtArgs>
   address?: boolean | Prisma.RouteTask$addressArgs<ExtArgs>
+  routeSheet?: boolean | Prisma.RouteTask$routeSheetArgs<ExtArgs>
   assignedCourier?: boolean | Prisma.RouteTask$assignedCourierArgs<ExtArgs>
 }
 
@@ -2271,6 +2584,7 @@ export type $RouteTaskPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     parcel: Prisma.$ParcelPayload<ExtArgs> | null
     client: Prisma.$ClientPayload<ExtArgs> | null
     address: Prisma.$ClientAddressPayload<ExtArgs> | null
+    routeSheet: Prisma.$RouteSheetPayload<ExtArgs> | null
     assignedCourier: Prisma.$ProfilePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -2282,6 +2596,7 @@ export type $RouteTaskPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     clientId: string | null
     addressId: string | null
     addressText: string | null
+    routeSheetId: string | null
     postalCode: string | null
     manualName: string | null
     manualStreet: string | null
@@ -2699,6 +3014,7 @@ export interface Prisma__RouteTaskClient<T, Null = never, ExtArgs extends runtim
   parcel<T extends Prisma.RouteTask$parcelArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RouteTask$parcelArgs<ExtArgs>>): Prisma.Prisma__ParcelClient<runtime.Types.Result.GetResult<Prisma.$ParcelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   client<T extends Prisma.RouteTask$clientArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RouteTask$clientArgs<ExtArgs>>): Prisma.Prisma__ClientClient<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   address<T extends Prisma.RouteTask$addressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RouteTask$addressArgs<ExtArgs>>): Prisma.Prisma__ClientAddressClient<runtime.Types.Result.GetResult<Prisma.$ClientAddressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  routeSheet<T extends Prisma.RouteTask$routeSheetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RouteTask$routeSheetArgs<ExtArgs>>): Prisma.Prisma__RouteSheetClient<runtime.Types.Result.GetResult<Prisma.$RouteSheetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   assignedCourier<T extends Prisma.RouteTask$assignedCourierArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RouteTask$assignedCourierArgs<ExtArgs>>): Prisma.Prisma__ProfileClient<runtime.Types.Result.GetResult<Prisma.$ProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2737,6 +3053,7 @@ export interface RouteTaskFieldRefs {
   readonly clientId: Prisma.FieldRef<"RouteTask", 'String'>
   readonly addressId: Prisma.FieldRef<"RouteTask", 'String'>
   readonly addressText: Prisma.FieldRef<"RouteTask", 'String'>
+  readonly routeSheetId: Prisma.FieldRef<"RouteTask", 'String'>
   readonly postalCode: Prisma.FieldRef<"RouteTask", 'String'>
   readonly manualName: Prisma.FieldRef<"RouteTask", 'String'>
   readonly manualStreet: Prisma.FieldRef<"RouteTask", 'String'>
@@ -3211,6 +3528,25 @@ export type RouteTask$addressArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   include?: Prisma.ClientAddressInclude<ExtArgs> | null
   where?: Prisma.ClientAddressWhereInput
+}
+
+/**
+ * RouteTask.routeSheet
+ */
+export type RouteTask$routeSheetArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RouteSheet
+   */
+  select?: Prisma.RouteSheetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RouteSheet
+   */
+  omit?: Prisma.RouteSheetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RouteSheetInclude<ExtArgs> | null
+  where?: Prisma.RouteSheetWhereInput
 }
 
 /**

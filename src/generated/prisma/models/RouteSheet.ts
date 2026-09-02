@@ -185,6 +185,7 @@ export type RouteSheetWhereInput = {
   createdById?: Prisma.UuidNullableFilter<"RouteSheet"> | string | null
   createdAt?: Prisma.DateTimeFilter<"RouteSheet"> | Date | string
   journey?: Prisma.XOR<Prisma.JourneyScalarRelationFilter, Prisma.JourneyWhereInput>
+  tasks?: Prisma.RouteTaskListRelationFilter
 }
 
 export type RouteSheetOrderByWithRelationInput = {
@@ -194,11 +195,12 @@ export type RouteSheetOrderByWithRelationInput = {
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   journey?: Prisma.JourneyOrderByWithRelationInput
+  tasks?: Prisma.RouteTaskOrderByRelationAggregateInput
 }
 
 export type RouteSheetWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  journeyId_sheetDate?: Prisma.RouteSheetJourneyIdSheetDateCompoundUniqueInput
+  journeyId_sheetDate_createdById?: Prisma.RouteSheetJourneyIdSheetDateCreatedByIdCompoundUniqueInput
   AND?: Prisma.RouteSheetWhereInput | Prisma.RouteSheetWhereInput[]
   OR?: Prisma.RouteSheetWhereInput[]
   NOT?: Prisma.RouteSheetWhereInput | Prisma.RouteSheetWhereInput[]
@@ -207,7 +209,8 @@ export type RouteSheetWhereUniqueInput = Prisma.AtLeast<{
   createdById?: Prisma.UuidNullableFilter<"RouteSheet"> | string | null
   createdAt?: Prisma.DateTimeFilter<"RouteSheet"> | Date | string
   journey?: Prisma.XOR<Prisma.JourneyScalarRelationFilter, Prisma.JourneyWhereInput>
-}, "id" | "journeyId_sheetDate">
+  tasks?: Prisma.RouteTaskListRelationFilter
+}, "id" | "journeyId_sheetDate_createdById">
 
 export type RouteSheetOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -237,6 +240,7 @@ export type RouteSheetCreateInput = {
   createdById?: string | null
   createdAt?: Date | string
   journey: Prisma.JourneyCreateNestedOneWithoutRouteSheetsInput
+  tasks?: Prisma.RouteTaskCreateNestedManyWithoutRouteSheetInput
 }
 
 export type RouteSheetUncheckedCreateInput = {
@@ -245,6 +249,7 @@ export type RouteSheetUncheckedCreateInput = {
   sheetDate: Date | string
   createdById?: string | null
   createdAt?: Date | string
+  tasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutRouteSheetInput
 }
 
 export type RouteSheetUpdateInput = {
@@ -253,6 +258,7 @@ export type RouteSheetUpdateInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journey?: Prisma.JourneyUpdateOneRequiredWithoutRouteSheetsNestedInput
+  tasks?: Prisma.RouteTaskUpdateManyWithoutRouteSheetNestedInput
 }
 
 export type RouteSheetUncheckedUpdateInput = {
@@ -261,6 +267,7 @@ export type RouteSheetUncheckedUpdateInput = {
   sheetDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutRouteSheetNestedInput
 }
 
 export type RouteSheetCreateManyInput = {
@@ -296,9 +303,10 @@ export type RouteSheetOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type RouteSheetJourneyIdSheetDateCompoundUniqueInput = {
+export type RouteSheetJourneyIdSheetDateCreatedByIdCompoundUniqueInput = {
   journeyId: string
   sheetDate: Date | string
+  createdById: string
 }
 
 export type RouteSheetCountOrderByAggregateInput = {
@@ -323,6 +331,11 @@ export type RouteSheetMinOrderByAggregateInput = {
   sheetDate?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type RouteSheetNullableScalarRelationFilter = {
+  is?: Prisma.RouteSheetWhereInput | null
+  isNot?: Prisma.RouteSheetWhereInput | null
 }
 
 export type RouteSheetCreateNestedManyWithoutJourneyInput = {
@@ -367,11 +380,28 @@ export type RouteSheetUncheckedUpdateManyWithoutJourneyNestedInput = {
   deleteMany?: Prisma.RouteSheetScalarWhereInput | Prisma.RouteSheetScalarWhereInput[]
 }
 
+export type RouteSheetCreateNestedOneWithoutTasksInput = {
+  create?: Prisma.XOR<Prisma.RouteSheetCreateWithoutTasksInput, Prisma.RouteSheetUncheckedCreateWithoutTasksInput>
+  connectOrCreate?: Prisma.RouteSheetCreateOrConnectWithoutTasksInput
+  connect?: Prisma.RouteSheetWhereUniqueInput
+}
+
+export type RouteSheetUpdateOneWithoutTasksNestedInput = {
+  create?: Prisma.XOR<Prisma.RouteSheetCreateWithoutTasksInput, Prisma.RouteSheetUncheckedCreateWithoutTasksInput>
+  connectOrCreate?: Prisma.RouteSheetCreateOrConnectWithoutTasksInput
+  upsert?: Prisma.RouteSheetUpsertWithoutTasksInput
+  disconnect?: Prisma.RouteSheetWhereInput | boolean
+  delete?: Prisma.RouteSheetWhereInput | boolean
+  connect?: Prisma.RouteSheetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.RouteSheetUpdateToOneWithWhereWithoutTasksInput, Prisma.RouteSheetUpdateWithoutTasksInput>, Prisma.RouteSheetUncheckedUpdateWithoutTasksInput>
+}
+
 export type RouteSheetCreateWithoutJourneyInput = {
   id?: string
   sheetDate: Date | string
   createdById?: string | null
   createdAt?: Date | string
+  tasks?: Prisma.RouteTaskCreateNestedManyWithoutRouteSheetInput
 }
 
 export type RouteSheetUncheckedCreateWithoutJourneyInput = {
@@ -379,6 +409,7 @@ export type RouteSheetUncheckedCreateWithoutJourneyInput = {
   sheetDate: Date | string
   createdById?: string | null
   createdAt?: Date | string
+  tasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutRouteSheetInput
 }
 
 export type RouteSheetCreateOrConnectWithoutJourneyInput = {
@@ -418,6 +449,54 @@ export type RouteSheetScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"RouteSheet"> | Date | string
 }
 
+export type RouteSheetCreateWithoutTasksInput = {
+  id?: string
+  sheetDate: Date | string
+  createdById?: string | null
+  createdAt?: Date | string
+  journey: Prisma.JourneyCreateNestedOneWithoutRouteSheetsInput
+}
+
+export type RouteSheetUncheckedCreateWithoutTasksInput = {
+  id?: string
+  journeyId: string
+  sheetDate: Date | string
+  createdById?: string | null
+  createdAt?: Date | string
+}
+
+export type RouteSheetCreateOrConnectWithoutTasksInput = {
+  where: Prisma.RouteSheetWhereUniqueInput
+  create: Prisma.XOR<Prisma.RouteSheetCreateWithoutTasksInput, Prisma.RouteSheetUncheckedCreateWithoutTasksInput>
+}
+
+export type RouteSheetUpsertWithoutTasksInput = {
+  update: Prisma.XOR<Prisma.RouteSheetUpdateWithoutTasksInput, Prisma.RouteSheetUncheckedUpdateWithoutTasksInput>
+  create: Prisma.XOR<Prisma.RouteSheetCreateWithoutTasksInput, Prisma.RouteSheetUncheckedCreateWithoutTasksInput>
+  where?: Prisma.RouteSheetWhereInput
+}
+
+export type RouteSheetUpdateToOneWithWhereWithoutTasksInput = {
+  where?: Prisma.RouteSheetWhereInput
+  data: Prisma.XOR<Prisma.RouteSheetUpdateWithoutTasksInput, Prisma.RouteSheetUncheckedUpdateWithoutTasksInput>
+}
+
+export type RouteSheetUpdateWithoutTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sheetDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  journey?: Prisma.JourneyUpdateOneRequiredWithoutRouteSheetsNestedInput
+}
+
+export type RouteSheetUncheckedUpdateWithoutTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  journeyId?: Prisma.StringFieldUpdateOperationsInput | string
+  sheetDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type RouteSheetCreateManyJourneyInput = {
   id?: string
   sheetDate: Date | string
@@ -430,6 +509,7 @@ export type RouteSheetUpdateWithoutJourneyInput = {
   sheetDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.RouteTaskUpdateManyWithoutRouteSheetNestedInput
 }
 
 export type RouteSheetUncheckedUpdateWithoutJourneyInput = {
@@ -437,6 +517,7 @@ export type RouteSheetUncheckedUpdateWithoutJourneyInput = {
   sheetDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutRouteSheetNestedInput
 }
 
 export type RouteSheetUncheckedUpdateManyWithoutJourneyInput = {
@@ -447,6 +528,35 @@ export type RouteSheetUncheckedUpdateManyWithoutJourneyInput = {
 }
 
 
+/**
+ * Count Type RouteSheetCountOutputType
+ */
+
+export type RouteSheetCountOutputType = {
+  tasks: number
+}
+
+export type RouteSheetCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  tasks?: boolean | RouteSheetCountOutputTypeCountTasksArgs
+}
+
+/**
+ * RouteSheetCountOutputType without action
+ */
+export type RouteSheetCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RouteSheetCountOutputType
+   */
+  select?: Prisma.RouteSheetCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * RouteSheetCountOutputType without action
+ */
+export type RouteSheetCountOutputTypeCountTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RouteTaskWhereInput
+}
+
 
 export type RouteSheetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -455,6 +565,8 @@ export type RouteSheetSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   createdById?: boolean
   createdAt?: boolean
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
+  tasks?: boolean | Prisma.RouteSheet$tasksArgs<ExtArgs>
+  _count?: boolean | Prisma.RouteSheetCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["routeSheet"]>
 
 export type RouteSheetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -486,6 +598,8 @@ export type RouteSheetSelectScalar = {
 export type RouteSheetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "journeyId" | "sheetDate" | "createdById" | "createdAt", ExtArgs["result"]["routeSheet"]>
 export type RouteSheetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
+  tasks?: boolean | Prisma.RouteSheet$tasksArgs<ExtArgs>
+  _count?: boolean | Prisma.RouteSheetCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type RouteSheetIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
@@ -498,6 +612,7 @@ export type $RouteSheetPayload<ExtArgs extends runtime.Types.Extensions.Internal
   name: "RouteSheet"
   objects: {
     journey: Prisma.$JourneyPayload<ExtArgs>
+    tasks: Prisma.$RouteTaskPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -900,6 +1015,7 @@ readonly fields: RouteSheetFieldRefs;
 export interface Prisma__RouteSheetClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   journey<T extends Prisma.JourneyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JourneyDefaultArgs<ExtArgs>>): Prisma.Prisma__JourneyClient<runtime.Types.Result.GetResult<Prisma.$JourneyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  tasks<T extends Prisma.RouteSheet$tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RouteSheet$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RouteTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1332,6 +1448,30 @@ export type RouteSheetDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many RouteSheets to delete.
    */
   limit?: number
+}
+
+/**
+ * RouteSheet.tasks
+ */
+export type RouteSheet$tasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RouteTask
+   */
+  select?: Prisma.RouteTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RouteTask
+   */
+  omit?: Prisma.RouteTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RouteTaskInclude<ExtArgs> | null
+  where?: Prisma.RouteTaskWhereInput
+  orderBy?: Prisma.RouteTaskOrderByWithRelationInput | Prisma.RouteTaskOrderByWithRelationInput[]
+  cursor?: Prisma.RouteTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RouteTaskScalarFieldEnum | Prisma.RouteTaskScalarFieldEnum[]
 }
 
 /**

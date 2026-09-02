@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth/guards';
-import { LOGISTICS_ROLES } from '@/lib/constants/roles';
+import { LOGISTICS_ROLES, ROLES } from "@/lib/constants/roles";
 
 /**
  * ТЗ docx 08.08.26 (v12): RouteTask = «адреса на маршруті» поїздки. Може бути:
@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
       addressText: true, postalCode: true,
       manualName: true, manualPhone: true, manualDirection: true, manualCity: true,
       manualStreet: true, manualBuilding: true, manualFirstName: true, manualLastName: true,
+      routeSheetId: true,
     },
   });
   return NextResponse.json(tasks);
@@ -59,12 +60,19 @@ export async function POST(request: NextRequest) {
     const firstName = String(body.manualFirstName ?? '').trim();
     const composedAddress = [street, building].filter(Boolean).join(' ');
     const composedName = [lastName, firstName].filter(Boolean).join(' ');
+    const city = String(body.manualCity ?? "").trim();
+    const postal = String(body.postalCode ?? "").trim();
     const addressText = String(body.addressText ?? composedAddress).trim();
-    if (!addressText) return NextResponse.json({ error: 'Вкажіть вулицю і номер будинку' }, { status: 400 });
+    // ТЗ docx 02.09.26: вулиця НЕ обовʼязкова — клієнт заповнював лише індекс і місто,
+    // а кнопка «Додати» була заблокована і адреса не створювалась. Достатньо, щоб
+    // була бодай одна складова адреси.
+    if (!addressText && !city && !postal) {
+      return NextResponse.json({ error: "Вкажіть хоча б місто, індекс або вулицю" }, { status: 400 });
+    }
     await prisma.routeTask.create({
       data: {
         tripId: trip.id, taskType: 'delivery', taskDate: null,
-        addressText,
+        addressText: addressText || null,
         postalCode: body.postalCode ? String(body.postalCode).trim() : null,
         manualCity: body.manualCity ? String(body.manualCity).trim() : null,
         manualName: (body.manualName ? String(body.manualName).trim() : composedName) || null,
@@ -79,13 +87,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ created: 1 }, { status: 201 });
   }
 
-  // ── Режим 2: «Створити Маршрутний лист» — перемістити обрані адреси на дату. ──
-  const taskDate = body.taskDate ? new Date(body.taskDate) : null;
+  // ── Режим 2: покласти обрані адреси у Маршрутний лист. ──
+  // ТЗ docx 02.09.26: адреса лягає у КОНКРЕТНИЙ лист (routeSheetId), бо на одну дату
+  // може бути кілька листів різних водіїв. Класти можна лише у СВІЙ лист.
   const parcelIds: string[] = Array.isArray(body.parcelIds) ? body.parcelIds : [];
   const taskIds: string[] = Array.isArray(body.taskIds) ? body.taskIds : [];
-  if (!taskDate || Number.isNaN(taskDate.getTime())) {
-    return NextResponse.json({ error: 'Невалідна дата листа' }, { status: 400 });
+  const routeSheetId: string | null = body.routeSheetId ?? null;
+  if (!routeSheetId) {
+    return NextResponse.json({ error: "Оберіть Маршрутний лист" }, { status: 400 });
   }
+  const sheet = await prisma.routeSheet.findUnique({
+    where: { id: routeSheetId },
+    select: { id: true, sheetDate: true, createdById: true },
+  });
+  if (!sheet) return NextResponse.json({ error: "Маршрутний лист не знайдено" }, { status: 404 });
+  if (guard.user.role !== ROLES.SUPER_ADMIN && sheet.createdById !== guard.user.userId) {
+    return NextResponse.json({ error: "Це Маршрутний лист іншого водія" }, { status: 403 });
+  }
+  const taskDate = sheet.sheetDate;
   if (parcelIds.length === 0 && taskIds.length === 0) {
     return NextResponse.json({ error: 'Оберіть хоча б одну адресу' }, { status: 400 });
   }
@@ -99,20 +118,20 @@ export async function POST(request: NextRequest) {
     for (const p of parcels) {
       if (!p.tripId) continue;
       const exists = await prisma.routeTask.findFirst({
-        where: { tripId: p.tripId, parcelId: p.id, taskDate }, select: { id: true },
+        where: { tripId: p.tripId, parcelId: p.id, routeSheetId }, select: { id: true },
       });
       if (exists) continue;
       const taskType = p.direction === 'eu_to_ua' ? 'pickup' : 'delivery';
       const addressId = p.direction === 'eu_to_ua' ? p.senderAddressId : p.receiverAddressId;
       await prisma.routeTask.create({
-        data: { tripId: p.tripId, parcelId: p.id, taskDate, taskType, addressId: addressId ?? null },
+        data: { tripId: p.tripId, parcelId: p.id, taskDate, routeSheetId, taskType, addressId: addressId ?? null },
       });
       created++;
     }
   }
   // Наявні ручні адреси (taskDate=null) → переміщуємо в лист (проставляємо дату).
   if (taskIds.length) {
-    const r = await prisma.routeTask.updateMany({ where: { id: { in: taskIds } }, data: { taskDate } });
+    const r = await prisma.routeTask.updateMany({ where: { id: { in: taskIds } }, data: { taskDate, routeSheetId } });
     created += r.count;
   }
   return NextResponse.json({ created }, { status: 201 });

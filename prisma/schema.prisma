@@ -694,8 +694,10 @@ model RouteSheet {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   journey Journey @relation(fields: [journeyId], references: [id])
+  tasks   RouteTask[]
 
-  @@unique([journeyId, sheetDate])
+  // ТЗ docx 02.09.26: кілька МЛ на одну дату — по одному на кожного водія.
+  @@unique([journeyId, sheetDate, createdById])
   @@index([journeyId])
   @@map("route_sheets")
 }
@@ -710,6 +712,8 @@ model RouteTask {
   clientId              String?         @map("client_id") @db.Uuid
   addressId             String?         @map("address_id") @db.Uuid
   addressText           String?         @map("address_text")
+  // ТЗ docx 02.09.26: адреса належить КОНКРЕТНОМУ листу (на дату може бути кілька).
+  routeSheetId          String?         @map("route_sheet_id") @db.Uuid
   postalCode            String?         @map("postal_code")
   // ТЗ docx 08.08.26 (v12): довільна адреса, додана Водієм вручну (без посилки).
   manualName            String?         @map("manual_name")
@@ -737,6 +741,7 @@ model RouteTask {
   parcel          Parcel?        @relation(fields: [parcelId], references: [id])
   client          Client?        @relation(fields: [clientId], references: [id])
   address         ClientAddress? @relation(fields: [addressId], references: [id])
+  routeSheet      RouteSheet?    @relation(fields: [routeSheetId], references: [id])
   assignedCourier Profile?       @relation("RouteTaskAssignedCourier", fields: [assignedCourierId], references: [id])
 
   @@index([tripId])

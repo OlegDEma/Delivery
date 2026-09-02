@@ -447,6 +447,7 @@ export const RouteTaskScalarFieldEnum = {
   clientId: 'clientId',
   addressId: 'addressId',
   addressText: 'addressText',
+  routeSheetId: 'routeSheetId',
   postalCode: 'postalCode',
   manualName: 'manualName',
   manualStreet: 'manualStreet',
