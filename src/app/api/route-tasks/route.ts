@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
       addressText: true, postalCode: true,
       manualName: true, manualPhone: true, manualDirection: true, manualCity: true,
       manualStreet: true, manualBuilding: true, manualFirstName: true, manualLastName: true,
+      manualClientStatus: true,
       routeSheetId: true,
     },
   });
@@ -82,6 +83,8 @@ export async function POST(request: NextRequest) {
         manualBuilding: building || null,
         manualLastName: lastName || null,
         manualFirstName: firstName || null,
+        // ТЗ docx 03.09.26: статус клієнта показуємо у другому рядку запису.
+        manualClientStatus: body.clientStatus ? String(body.clientStatus).trim() : null,
       },
     });
     return NextResponse.json({ created: 1 }, { status: 201 });

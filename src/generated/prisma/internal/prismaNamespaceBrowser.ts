@@ -454,6 +454,7 @@ export const RouteTaskScalarFieldEnum = {
   manualBuilding: 'manualBuilding',
   manualFirstName: 'manualFirstName',
   manualLastName: 'manualLastName',
+  manualClientStatus: 'manualClientStatus',
   manualPhone: 'manualPhone',
   manualDirection: 'manualDirection',
   manualCity: 'manualCity',

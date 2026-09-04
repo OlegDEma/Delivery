@@ -722,6 +722,8 @@ model RouteTask {
   manualBuilding        String?         @map("manual_building")
   manualFirstName       String?         @map("manual_first_name")
   manualLastName        String?         @map("manual_last_name")
+  // ТЗ docx 03.09.26: статус клієнта ручної адреси (sender / receiver / passenger).
+  manualClientStatus    String?         @map("manual_client_status")
   manualPhone           String?         @map("manual_phone")
   manualDirection       String?         @map("manual_direction")
   manualCity            String?         @map("manual_city")

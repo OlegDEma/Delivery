@@ -86,9 +86,15 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ error: 'Немає що оновлювати' }, { status: 400 });
   }
 
+  // ТЗ docx 03.09.26: «Після того як адресу перенесено з одного МЛ в інший вона,
+  // по замовчуванню, отримує статус "Очікує"». Раніше це робилось лише для посилок,
+  // тож ручна адреса приїжджала в новий лист зі статусом «Перенесено».
+  if (moved && body.status === undefined) {
+    data.status = 'pending';
+    data.failureReason = null;
+  }
   await prisma.routeTask.update({ where: { id }, data });
-  // Після переміщення у новий лист — операційний статус посилки скидаємо на «Очікує»
-  // (свіжий запис на нову дату), щоб не тягнути «Перенесено» у цільовий лист.
+  // Те саме для посилки — операційний статус зберігається на самій посилці.
   if (moved && task.parcelId) {
     await prisma.parcel
       .update({ where: { id: task.parcelId }, data: { routeTaskStatus: 'pending', routeTaskReschedDate: null } })
@@ -105,8 +111,39 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
   if (!guard.ok) return guard.response;
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
-  const exists = await prisma.routeTask.findUnique({ where: { id }, select: { id: true } });
-  if (!exists) return NextResponse.json({ error: 'Задачу не знайдено' }, { status: 404 });
+  const task = await prisma.routeTask.findUnique({
+    where: { id },
+    select: { id: true, parcelId: true, routeSheetId: true, routeSheet: { select: { createdById: true } } },
+  });
+  if (!task) return NextResponse.json({ error: 'Задачу не знайдено' }, { status: 404 });
+
+  // ТЗ docx 02.09.26: адресу з ЧУЖОГО листа чіпати не можна.
+  if (task.routeSheet && guard.user.role !== ROLES.SUPER_ADMIN
+      && task.routeSheet.createdById !== guard.user.userId) {
+    return NextResponse.json({ error: 'Ця адреса у Маршрутному листі іншого водія' }, { status: 403 });
+  }
+
+  /**
+   * ТЗ docx 03.09.26 (баг «створив 5 адрес — залишилось три; зникають лише ручні»):
+   * «Прибрати» з Маршрутного листа мусить ПОВЕРТАТИ адресу в загальний список.
+   * Раніше запис видалявся фізично. Для посилки це було непомітно (сама посилка
+   * лишалась і поверталась у список), а для РУЧНОЇ адреси запис — це і є адреса,
+   * тому вона зникала назавжди.
+   * Тепер: якщо адреса лежить у листі — лише відвʼязуємо її (повертається у
+   * загальний список). Справжнє видалення — лише коли вона вже у загальному
+   * списку (кнопка «Видалити»), і лише для ручної адреси.
+   */
+  if (task.routeSheetId && !task.parcelId) {
+    // Ручна адреса: сам запис і є адресою — відвʼязуємо, а не видаляємо.
+    await prisma.routeTask.update({
+      where: { id },
+      data: { routeSheetId: null, taskDate: null, status: 'pending', failureReason: null },
+    });
+    return NextResponse.json({ success: true, returnedToGeneral: true });
+  }
+
+  // Посилка: сама посилка живе окремо, тож задачу можна прибрати — посилка
+  // одразу повернеться у загальний список поїздки.
   await prisma.routeTask.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, returnedToGeneral: !!task.routeSheetId });
 }

@@ -67,22 +67,23 @@ type TaskStatus = 'pending' | 'address_confirmed' | 'in_navigator' | 'completed'
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   pending: 'Очікує',
   address_confirmed: 'Адресу підтверджено',
-  in_navigator: 'В навігаторі',
+  in_navigator: "Внесено в навігатор",
   completed: 'Виконано',
   not_completed: 'Не виконано',
   rescheduled: 'Перенесено',
 };
 
 /**
- * ТЗ docx 02.09.26: нумерацію МЛ прибрано — ідентифікація лише день і дата
- * («Чт, 03.09.26»). Раніше було «МЛ 1 - Чт, 03.09.26».
+ * ТЗ docx 02.09.26: нумерацію МЛ прибрано (було «МЛ 1 - …»).
+ * ТЗ docx 03.09.26: але букви «МЛ» мають стояти перед кожною датою —
+ * «МЛ - Чт, 03.09.26».
  */
 function sheetLabel(date: string): string {
   const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "МЛ";
   const wd = d.toLocaleDateString("uk-UA", { weekday: "short" }).replace(/\.$/, "");
   const dmy = d.toLocaleDateString("uk-UA", { day: "2-digit", month: "2-digit", year: "2-digit" });
-  return `${wd.charAt(0).toUpperCase()}${wd.slice(1)}, ${dmy}`;
+  return `МЛ - ${wd.charAt(0).toUpperCase()}${wd.slice(1)}, ${dmy}`;
 }
 
 /** UA → {EU} → UA · дата — компактний лейбл поїздки для селектора. */
@@ -132,6 +133,8 @@ export default function RoutesPage() {
     manualName: string | null; manualPhone: string | null; manualDirection: string | null; manualCity: string | null;
     manualStreet?: string | null; manualBuilding?: string | null;
     manualLastName?: string | null; manualFirstName?: string | null;
+    // ТЗ docx 03.09.26: статус клієнта ручної адреси (для другого рядка запису).
+    manualClientStatus?: string | null;
     routeSheetId?: string | null;
   }[]>([]);
   // ТЗ docx 08.08.26 (v12): операційне вікно для РУЧНИХ адрес у листі (статус/причина
@@ -164,7 +167,8 @@ export default function RoutesPage() {
     setTimeout(() => manualFormRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' }), 60);
   }
   // ТЗ docx 08.08.26 (v12): групування списку адрес — за номером/індексом/містом.
-  const [groupMode, setGroupMode] = useState<'number' | 'postal' | 'city'>('number');
+  // ТЗ docx 03.09.26: за замовчуванням адреси групуються за «Місто».
+  const [groupMode, setGroupMode] = useState<"number" | "postal" | "city">("city");
   // ТЗ docx 21.08.26: «Країна перебування» — яку сторону адрес показувати. Порожньо =
   // країна призначення поїздки (EU); 'UA' = українська сторона.
   const [stayCountry, setStayCountry] = useState('');
@@ -382,7 +386,8 @@ export default function RoutesPage() {
     const res = await fetch('/api/route-tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ manual: true, journeyId: selectedJourneyId, ...manualForm }),
+      // ТЗ docx 03.09.26: статус клієнта зберігаємо разом з адресою.
+      body: JSON.stringify({ manual: true, journeyId: selectedJourneyId, clientStatus, ...manualForm }),
     });
     setAddingManual(false);
     if (!res.ok) {
@@ -400,8 +405,18 @@ export default function RoutesPage() {
     }
   }
 
-  async function handleRemoveFromSheet(taskId: string) {
-    await fetch(`/api/route-tasks/${taskId}`, { method: 'DELETE' });
+  /**
+   * ТЗ docx 03.09.26: «Прибрати» з Маршрутного листа ПОВЕРТАЄ адресу в загальний
+   * список (клієнт: «створив 5 адрес… залишилось три; зникають лише ручні»).
+   * «Видалити» в загальному списку — справжнє видалення, і для ручної адреси
+   * перепитуємо підтвердження.
+   */
+  async function handleRemoveFromSheet(taskId: string, isManual = false, isDelete = false) {
+    if (isDelete && isManual && !confirm('Дійсно бажаєте видалити?')) return;
+    const res = await fetch(`/api/route-tasks/${taskId}`, { method: 'DELETE' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { toast.error(data.error || 'Не вдалося виконати дію'); return; }
+    toast.success(data.returnedToGeneral ? 'Адресу повернуто у загальний список' : 'Адресу видалено');
     setReload(n => n + 1);
   }
 
@@ -564,6 +579,55 @@ export default function RoutesPage() {
     status === 'sender' ? `${stayHere}-${stayOther}`
       : status === 'receiver' ? `${stayOther}-${stayHere}`
         : '';
+
+  /**
+   * ТЗ docx 03.09.26: вигляд запису адреси уніфіковано — і для готової посилки,
+   * і для ручної адреси. Відрізняються лише кольором номера; слово «Ручна адреса»
+   * прибрано. Рядок 2 усюди однаковий: статус · телефон · імʼя · напрямок.
+   */
+  function manualStatusLabel(t: ManualTask): string {
+    const s = t.manualClientStatus;
+    if (s === 'sender') return 'Відправник';
+    if (s === 'receiver') return 'Отримувач';
+    if (s === 'passenger') return 'Пасажир';
+    // Записи, створені до 03.09.26, статусу не зберігали — виводимо його з напрямку.
+    const dir = t.manualDirection || '';
+    if (dir && stayHere) {
+      if (dir.startsWith(`${stayHere}-`)) return 'Відправник';
+      if (dir.endsWith(`-${stayHere}`)) return 'Отримувач';
+    }
+    return '';
+  }
+
+  function addressView(t: ManualTask) {
+    const p = t.parcelId ? parcelById.get(t.parcelId) : null;
+    if (p) {
+      const d = partyInCountry(p, showUA);
+      const a = d.addr;
+      return {
+        parcel: p,
+        isManual: false,
+        address: a
+          ? [a.postalCode, a.city, [a.street, a.building].filter(Boolean).join(' ')].filter(Boolean).join(', ')
+          : 'Адресу не вказано',
+        status: d.roleLabel,
+        phone: d.phone || '',
+        name: d.name || '',
+        direction: p.direction === 'eu_to_ua' ? `${selectedJourney?.country}-UA` : `UA-${selectedJourney?.country}`,
+        number: p.internalNumber,
+      };
+    }
+    return {
+      parcel: null,
+      isManual: true,
+      address: [t.postalCode, t.manualCity, t.addressText].filter(Boolean).join(', ') || 'Адресу не вказано',
+      status: manualStatusLabel(t),
+      phone: t.manualPhone || '',
+      name: t.manualName || '',
+      direction: t.manualDirection || '',
+      number: null as string | null,
+    };
+  }
   // Дані ручної адреси → префіл форми створення посилки (ТЗ 21.08 «Створити посилку»).
   function createParcelHref(rec: {
     manualCity?: string | null; postalCode?: string | null; addressText?: string | null;
@@ -693,12 +757,18 @@ export default function RoutesPage() {
                 <SelectValue>{`Додати вибрані (${selectedParcelIds.size}) у МЛ…`}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {/* На одну дату може бути кілька листів — без автора вони нерозрізненні. */}
-                {mySheets.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {sheetLabel(s.date)}{s.ownerName ? ` · ${s.ownerName}` : ''}
-                  </SelectItem>
-                ))}
+                {/* ТЗ docx 03.09.26: у списку прізвища водія прибрано — лише дати
+                    створених МЛ. Автора дописуємо тільки якщо на одну дату справді
+                    є кілька доступних листів (у водія такого не буває — лише в
+                    суперадміна, який бачить чужі); інакше вони нерозрізненні. */}
+                {mySheets.map((s) => {
+                  const sameDate = mySheets.filter(x => x.date === s.date).length > 1;
+                  return (
+                    <SelectItem key={s.id} value={s.id}>
+                      {sheetLabel(s.date)}{sameDate && s.ownerName ? ` · ${s.ownerName}` : ''}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           )}
@@ -757,11 +827,11 @@ export default function RoutesPage() {
                 </div>
               </button>
               <div className={`divide-y ${isExpanded ? '' : 'hidden'}`}>
-                {sheet.tasks.map(t => {
+                {sheet.tasks.map((t, ti) => {
                   const p = t.parcelId ? parcelById.get(t.parcelId) : null;
                   const isManual = !t.parcelId;
-                  const d = p ? partyInCountry(p, showUA) : null;
-                  const a = d?.addr;
+                  // ТЗ docx 03.09.26: єдиний вигляд запису — і посилка, і ручна адреса.
+                  const v = addressView(t);
                   // Статус: посилка → parcel.routeTaskStatus (taskStatuses); ручна → RouteTask.status.
                   const ts: TaskStatus = (p ? taskStatuses[p.id] : manualStatuses[t.id]) || 'pending';
                   const onStatus = (v: string | null) => (p
@@ -769,36 +839,33 @@ export default function RoutesPage() {
                     : updateManualStatus(t.id, (v ?? 'pending') as TaskStatus));
                   return (
                     <div key={t.id} className="px-3 py-2 text-sm">
-                      <div className="flex items-start justify-between gap-2">
+                      {/* ТЗ docx 03.09.26 (в): запис у Маршрутному листі — 4 рядки.
+                          1) індекс · місто · вулиця і будинок … справа «Прибрати»
+                          2) статус · телефон · імʼя · напрямок
+                          3) «Створити посилку» · іконки звʼязку
+                          4) випадаючий список статусів і дій. */}
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-mono shrink-0 ${v.isManual ? 'text-amber-500' : 'text-gray-400'}`}>
+                          {v.isManual ? '✎' : ''}{ti + 1}.
+                        </span>
                         {p ? (
-                          // ТЗ docx 21.08.26: адреса — Link; телефон+іконки контакту — окремим
-                          // рядком (не вкладаємо <a> в <a>). Три способи звʼязку біля номера.
-                          <div className="min-w-0">
-                            <Link href={`/parcels/${p.id}`} className="block text-gray-700 hover:text-blue-600">
-                              {a ? <>{a.postalCode ? `${a.postalCode} ` : ''}{a.city}{a.street ? `, ${a.street}` : ''}{a.building ? ` ${a.building}` : ''}</> : 'Адресу не вказано'}
-                            </Link>
-                            <div className="text-xs text-gray-500 flex items-center gap-1 flex-wrap">
-                              {/* ТЗ docx 30.08.26: статус клієнта видно і всередині листа. */}
-                              <span className="font-mono mr-1">{p.internalNumber}</span>
-                              <span className="font-medium text-gray-600">{d?.roleLabel}:</span>
-                              {d?.name} · {d?.phone} · {p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`}
-                              {d?.phone && <ContactIcons phone={d.phone} className="print:hidden" />}
-                            </div>
-                          </div>
-                        ) : isManual ? (
-                          // ТЗ docx 08.08.26 (v12): ручна адреса в листі — повноцінний запис (не «прибрано»).
-                          <div className="min-w-0">
-                            <div className="text-gray-700">
-                              <span className="text-amber-500 mr-1">✎</span>
-                              {t.postalCode ? `${t.postalCode} ` : ''}{t.manualCity || ''}{t.addressText ? `${t.manualCity ? ', ' : ''}${t.addressText}` : ''}
-                            </div>
-                            <div className="text-xs text-amber-600 flex items-center gap-1 flex-wrap">
-                              Ручна адреса{t.manualName ? ` · ${t.manualName}` : ''}{t.manualPhone ? ` · ${t.manualPhone}` : ''}{t.manualDirection ? ` · ${t.manualDirection}` : ''}
-                              {t.manualPhone && <ContactIcons phone={t.manualPhone} className="print:hidden" />}
-                            </div>
-                          </div>
-                        ) : <span className="text-gray-400 text-xs">Посилку прибрано з поїздки</span>}
-                        <button type="button" onClick={() => handleRemoveFromSheet(t.id)} className="text-xs text-red-500 hover:text-red-700 shrink-0 print:hidden">Прибрати</button>
+                          <Link href={`/parcels/${p.id}`} className="min-w-0 flex-1 text-gray-700 hover:text-blue-600 truncate">{v.address}</Link>
+                        ) : (
+                          <span className="min-w-0 flex-1 text-gray-700 truncate">{v.address}</span>
+                        )}
+                        <button type="button" onClick={() => handleRemoveFromSheet(t.id, v.isManual)}
+                          className="text-xs text-red-500 hover:text-red-700 shrink-0 print:hidden">Прибрати</button>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5 ml-5 truncate">
+                        {v.number && <span className="font-mono text-gray-400 mr-1">{v.number}</span>}
+                        {v.status && <span className="font-medium text-gray-600">{v.status}:</span>}{' '}
+                        {[v.phone, v.name, v.direction].filter(Boolean).join(' · ')}
+                      </div>
+                      <div className="text-xs mt-0.5 ml-5 flex items-center gap-2 flex-wrap print:hidden">
+                        {v.isManual && (
+                          <a href={createParcelHref(t)} className="text-blue-600 hover:text-blue-800 font-medium">+ Створити посилку</a>
+                        )}
+                        {v.phone && <ContactIcons phone={v.phone} />}
                       </div>
                       {/* ТЗ docx 08.08.26 (v12): операційне вікно статусу адреси в листі (посилки і ручні). */}
                       {(p || isManual) && (
@@ -806,12 +873,11 @@ export default function RoutesPage() {
                           <Select value={ts} onValueChange={onStatus}>
                             <SelectTrigger className="h-7 text-xs w-44"><SelectValue>{TASK_LABELS[ts]}</SelectValue></SelectTrigger>
                             <SelectContent>
+                              {/* ТЗ docx 03.09.26: список звужено до чотирьох дій. */}
                               <SelectItem value="pending">Очікує</SelectItem>
-                              <SelectItem value="address_confirmed">Адресу підтверджено</SelectItem>
                               <SelectItem value="in_navigator">Внесено в навігатор</SelectItem>
                               <SelectItem value="completed">Виконано</SelectItem>
                               <SelectItem value="rescheduled">Перенести</SelectItem>
-                              <SelectItem value="not_completed">Не виконано</SelectItem>
                             </SelectContent>
                           </Select>
                           {ts === 'not_completed' && (
@@ -885,34 +951,33 @@ export default function RoutesPage() {
               {/* ТЗ docx 02.09.26: заголовки груп («Місто: Rotterdam») не показуємо —
                   просто список, згрупований за обраною ознакою. */}
               <div className="bg-white rounded-lg border divide-y">
+                {/* ТЗ docx 03.09.26 (б): запис у загальному списку — 3 рядки.
+                    1) індекс · місто · вулиця і будинок … справа чекбокс
+                    2) статус · телефон · імʼя · напрямок
+                    3) «Створити посилку» · іконки звʼязку · «Видалити».
+                    Готова посилка і ручна адреса відрізняються лише кольором номера. */}
                 {grp.parcels.map((p, idx) => {
                   const d = partyInCountry(p, showUA);
                   const a = d.addr;
+                  const addr = a
+                    ? [a.postalCode, a.city, [a.street, a.building].filter(Boolean).join(' ')].filter(Boolean).join(', ')
+                    : 'Адресу не вказано';
                   return (
                     <div key={p.id} className="px-3 py-2">
-                      {/* Верхній рядок: № + адреса (індекс, місто, вулиця, будинок) + чекбокс справа */}
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-400 font-mono shrink-0">{idx + 1}.</span>
-                        <Link href={`/parcels/${p.id}`} className="min-w-0 flex-1 text-sm hover:text-blue-600 truncate">
-                          {a
-                            ? <>{a.postalCode ? `${a.postalCode} ` : ''}{a.city}{a.street ? `, ${a.street}` : ''}{a.building ? ` ${a.building}` : ''}</>
-                            : <span className="text-gray-400">Адресу не вказано</span>}
-                        </Link>
+                        <Link href={`/parcels/${p.id}`} className="min-w-0 flex-1 text-sm hover:text-blue-600 truncate">{addr}</Link>
                         <div className="shrink-0">
                           <Checkbox checked={selectedParcelIds.has(p.id)} onCheckedChange={() => toggleParcelSelection(p.id)} />
                         </div>
                       </div>
-                      {/* Нижній рядок: клієнт · телефон · напрямок + ТЗ 21.08.26 контакт-іконки. */}
-                      <div className="flex items-center gap-2 mt-0.5 ml-5">
-                        <Link href={`/parcels/${p.id}`} className="block text-xs text-gray-500 min-w-0 truncate">
-                          <span className="font-mono text-gray-400 mr-1">{p.internalNumber}</span>
-                          {/* ТЗ docx 30.08.26 (напрямок «б»): для вже створеної посилки система
-                              сама визначає, чия це адреса у країні перебування — показуємо
-                              статус клієнта (Отримувач/Відправник) і відповідний напрямок. */}
-                          <span className="font-medium text-gray-600">{d.roleLabel}:</span>{' '}
-                          {d.name} · {d.phone} · {p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`}
-                        </Link>
-                        <ContactIcons phone={d.phone} className="shrink-0 print:hidden" />
+                      <Link href={`/parcels/${p.id}`} className="block text-xs text-gray-500 mt-0.5 ml-5 truncate">
+                        <span className="font-mono text-gray-400 mr-1">{p.internalNumber}</span>
+                        <span className="font-medium text-gray-600">{d.roleLabel}:</span>{' '}
+                        {[d.phone, d.name, p.direction === 'eu_to_ua' ? `${selectedJourney.country}-UA` : `UA-${selectedJourney.country}`].filter(Boolean).join(' · ')}
+                      </Link>
+                      <div className="text-xs mt-0.5 ml-5 flex items-center gap-2 flex-wrap print:hidden">
+                        <ContactIcons phone={d.phone} />
                       </div>
                     </div>
                   );
@@ -924,25 +989,30 @@ export default function RoutesPage() {
                 return (
                   <div key={t.id} className="px-3 py-2">
                     <div className="flex items-center gap-2">
+                      {/* ТЗ docx 03.09.26 (а): від посилки відрізняється лише кольором номера. */}
                       <span className="text-xs text-amber-500 font-mono shrink-0">✎{idx + 1}.</span>
                       {/* ТЗ docx 21.08.26: клік по ручній адресі → форма створення посилки з префілом.
                           Звичайний <a> (не <Link>): потрібне повне завантаження сторінки, щоб форма
                           перечитала префіл-параметри з URL, а не лишилась у попередньому стані. */}
                       <a href={createParcelHref(t)} className="min-w-0 flex-1 text-sm truncate hover:text-blue-600">
-                        {t.postalCode ? `${t.postalCode} ` : ''}{t.manualCity || ''}{t.addressText ? `${t.manualCity ? ', ' : ''}${t.addressText}` : ''}
+                        {addressView(t).address}
                       </a>
                       <div className="shrink-0">
                         <Checkbox checked={selectedParcelIds.has(selId)} onCheckedChange={() => toggleParcelSelection(selId)} />
                       </div>
                     </div>
-                    <div className="text-xs text-gray-500 mt-0.5 ml-5 flex items-center gap-1 flex-wrap">
-                      <span className="text-amber-600">Ручна адреса</span>
-                      {t.manualName ? ` · ${t.manualName}` : ''}{t.manualPhone ? ` · ${t.manualPhone}` : ''}{t.manualDirection ? ` · ${t.manualDirection}` : ''}
-                      {t.manualPhone && <ContactIcons phone={t.manualPhone} className="ml-1 print:hidden" />}
+                    {/* ТЗ docx 03.09.26: статус · телефон · імʼя · напрямок. Слова «Ручна адреса» прибрано. */}
+                    <div className="text-xs text-gray-500 mt-0.5 ml-5 truncate">
+                      {addressView(t).status && <span className="font-medium text-gray-600">{addressView(t).status}:</span>}{' '}
+                      {[t.manualPhone, t.manualName, t.manualDirection].filter(Boolean).join(' · ')}
+                    </div>
+                    <div className="text-xs mt-0.5 ml-5 flex items-center gap-2 flex-wrap print:hidden">
                       {/* ТЗ docx 21.08.26: «Створити посилку» — префіл даних цієї адреси у форму
                           (звичайний <a> — щоб форма перечитала параметри при повному завантаженні). */}
-                      <a href={createParcelHref(t)} className="ml-auto text-blue-600 hover:text-blue-800 font-medium print:hidden">+ Створити посилку</a>
-                      <button type="button" onClick={() => handleRemoveFromSheet(t.id)} className="text-red-500 hover:text-red-700 print:hidden">Видалити</button>
+                      <a href={createParcelHref(t)} className="text-blue-600 hover:text-blue-800 font-medium">+ Створити посилку</a>
+                      {t.manualPhone && <ContactIcons phone={t.manualPhone} />}
+                      {/* ТЗ docx 03.09.26: видалення ручної адреси — з підтвердженням. */}
+                      <button type="button" onClick={() => handleRemoveFromSheet(t.id, true, true)} className="text-red-500 hover:text-red-700">Видалити</button>
                     </div>
                   </div>
                 );
