@@ -721,6 +721,7 @@ export type ParcelWhereInput = {
   statusHistory?: Prisma.ParcelStatusHistoryListRelationFilter
   cashEntries?: Prisma.CashRegisterListRelationFilter
   routeTasks?: Prisma.RouteTaskListRelationFilter
+  createdFromTasks?: Prisma.RouteTaskListRelationFilter
   warehouseActions?: Prisma.WarehouseInventoryListRelationFilter
   npSyncLogs?: Prisma.NpSyncLogListRelationFilter
   claims?: Prisma.ClaimListRelationFilter
@@ -801,6 +802,7 @@ export type ParcelOrderByWithRelationInput = {
   statusHistory?: Prisma.ParcelStatusHistoryOrderByRelationAggregateInput
   cashEntries?: Prisma.CashRegisterOrderByRelationAggregateInput
   routeTasks?: Prisma.RouteTaskOrderByRelationAggregateInput
+  createdFromTasks?: Prisma.RouteTaskOrderByRelationAggregateInput
   warehouseActions?: Prisma.WarehouseInventoryOrderByRelationAggregateInput
   npSyncLogs?: Prisma.NpSyncLogOrderByRelationAggregateInput
   claims?: Prisma.ClaimOrderByRelationAggregateInput
@@ -884,6 +886,7 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
   statusHistory?: Prisma.ParcelStatusHistoryListRelationFilter
   cashEntries?: Prisma.CashRegisterListRelationFilter
   routeTasks?: Prisma.RouteTaskListRelationFilter
+  createdFromTasks?: Prisma.RouteTaskListRelationFilter
   warehouseActions?: Prisma.WarehouseInventoryListRelationFilter
   npSyncLogs?: Prisma.NpSyncLogListRelationFilter
   claims?: Prisma.ClaimListRelationFilter
@@ -1091,6 +1094,7 @@ export type ParcelCreateInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -1162,6 +1166,7 @@ export type ParcelUncheckedCreateInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -1233,6 +1238,7 @@ export type ParcelUpdateInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -1304,6 +1310,7 @@ export type ParcelUncheckedUpdateInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -2207,6 +2214,12 @@ export type ParcelCreateNestedOneWithoutRouteTasksInput = {
   connect?: Prisma.ParcelWhereUniqueInput
 }
 
+export type ParcelCreateNestedOneWithoutCreatedFromTasksInput = {
+  create?: Prisma.XOR<Prisma.ParcelCreateWithoutCreatedFromTasksInput, Prisma.ParcelUncheckedCreateWithoutCreatedFromTasksInput>
+  connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCreatedFromTasksInput
+  connect?: Prisma.ParcelWhereUniqueInput
+}
+
 export type ParcelUpdateOneWithoutRouteTasksNestedInput = {
   create?: Prisma.XOR<Prisma.ParcelCreateWithoutRouteTasksInput, Prisma.ParcelUncheckedCreateWithoutRouteTasksInput>
   connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutRouteTasksInput
@@ -2215,6 +2228,16 @@ export type ParcelUpdateOneWithoutRouteTasksNestedInput = {
   delete?: Prisma.ParcelWhereInput | boolean
   connect?: Prisma.ParcelWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ParcelUpdateToOneWithWhereWithoutRouteTasksInput, Prisma.ParcelUpdateWithoutRouteTasksInput>, Prisma.ParcelUncheckedUpdateWithoutRouteTasksInput>
+}
+
+export type ParcelUpdateOneWithoutCreatedFromTasksNestedInput = {
+  create?: Prisma.XOR<Prisma.ParcelCreateWithoutCreatedFromTasksInput, Prisma.ParcelUncheckedCreateWithoutCreatedFromTasksInput>
+  connectOrCreate?: Prisma.ParcelCreateOrConnectWithoutCreatedFromTasksInput
+  upsert?: Prisma.ParcelUpsertWithoutCreatedFromTasksInput
+  disconnect?: Prisma.ParcelWhereInput | boolean
+  delete?: Prisma.ParcelWhereInput | boolean
+  connect?: Prisma.ParcelWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ParcelUpdateToOneWithWhereWithoutCreatedFromTasksInput, Prisma.ParcelUpdateWithoutCreatedFromTasksInput>, Prisma.ParcelUncheckedUpdateWithoutCreatedFromTasksInput>
 }
 
 export type ParcelCreateNestedOneWithoutWarehouseActionsInput = {
@@ -2326,6 +2349,7 @@ export type ParcelCreateWithoutAssignedCourierInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -2396,6 +2420,7 @@ export type ParcelUncheckedCreateWithoutAssignedCourierInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -2476,6 +2501,7 @@ export type ParcelCreateWithoutCreatedByInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -2546,6 +2572,7 @@ export type ParcelUncheckedCreateWithoutCreatedByInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -2626,6 +2653,7 @@ export type ParcelCreateWithoutCollectedByInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -2696,6 +2724,7 @@ export type ParcelUncheckedCreateWithoutCollectedByInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -2891,6 +2920,7 @@ export type ParcelCreateWithoutSenderInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -2961,6 +2991,7 @@ export type ParcelUncheckedCreateWithoutSenderInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -3041,6 +3072,7 @@ export type ParcelCreateWithoutReceiverInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -3111,6 +3143,7 @@ export type ParcelUncheckedCreateWithoutReceiverInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -3223,6 +3256,7 @@ export type ParcelCreateWithoutSenderAddressInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -3293,6 +3327,7 @@ export type ParcelUncheckedCreateWithoutSenderAddressInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -3373,6 +3408,7 @@ export type ParcelCreateWithoutReceiverAddressInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -3443,6 +3479,7 @@ export type ParcelUncheckedCreateWithoutReceiverAddressInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -3555,6 +3592,7 @@ export type ParcelCreateWithoutTripInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -3625,6 +3663,7 @@ export type ParcelUncheckedCreateWithoutTripInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -3721,6 +3760,7 @@ export type ParcelCreateWithoutPlacesInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -3791,6 +3831,7 @@ export type ParcelUncheckedCreateWithoutPlacesInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -3877,6 +3918,7 @@ export type ParcelUpdateWithoutPlacesInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -3947,6 +3989,7 @@ export type ParcelUncheckedUpdateWithoutPlacesInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -4017,6 +4060,7 @@ export type ParcelCreateWithoutStatusHistoryInput = {
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -4087,6 +4131,7 @@ export type ParcelUncheckedCreateWithoutStatusHistoryInput = {
   places?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -4173,6 +4218,7 @@ export type ParcelUpdateWithoutStatusHistoryInput = {
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -4243,6 +4289,7 @@ export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
   places?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -4313,6 +4360,7 @@ export type ParcelCreateWithoutCollectionPointInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -4383,6 +4431,7 @@ export type ParcelUncheckedCreateWithoutCollectionPointInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -4479,6 +4528,7 @@ export type ParcelCreateWithoutCashEntriesInput = {
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -4549,6 +4599,7 @@ export type ParcelUncheckedCreateWithoutCashEntriesInput = {
   places?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutParcelInput
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -4635,6 +4686,7 @@ export type ParcelUpdateWithoutCashEntriesInput = {
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -4705,6 +4757,7 @@ export type ParcelUncheckedUpdateWithoutCashEntriesInput = {
   places?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutParcelNestedInput
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -4775,6 +4828,7 @@ export type ParcelCreateWithoutRouteTasksInput = {
   places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
@@ -4845,6 +4899,7 @@ export type ParcelUncheckedCreateWithoutRouteTasksInput = {
   places?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutParcelInput
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
@@ -4853,6 +4908,153 @@ export type ParcelUncheckedCreateWithoutRouteTasksInput = {
 export type ParcelCreateOrConnectWithoutRouteTasksInput = {
   where: Prisma.ParcelWhereUniqueInput
   create: Prisma.XOR<Prisma.ParcelCreateWithoutRouteTasksInput, Prisma.ParcelUncheckedCreateWithoutRouteTasksInput>
+}
+
+export type ParcelCreateWithoutCreatedFromTasksInput = {
+  id?: string
+  itn: string
+  internalNumber: string
+  sequentialNumber: number
+  shortNumber?: number | null
+  direction: $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  shipmentType?: $Enums.ShipmentType
+  description?: string | null
+  declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: string
+  totalWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: number
+  payer?: $Enums.Payer
+  paymentMethod?: $Enums.PaymentMethod
+  paymentInUkraine?: boolean
+  needsPackaging?: boolean
+  doorstepDelivery?: boolean
+  deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
+  addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  isMultiParcelPickup?: boolean | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: string
+  npTtn?: string | null
+  npTrackingStatus?: string | null
+  status?: $Enums.ParcelStatus
+  createdSource?: $Enums.CreatedSource
+  estimatedDeliveryStart?: Date | string | null
+  estimatedDeliveryEnd?: Date | string | null
+  isPaid?: boolean
+  paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
+  photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  routeTaskStatus?: string | null
+  routeTaskFailReason?: string | null
+  routeTaskReschedDate?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sender: Prisma.ClientCreateNestedOneWithoutSentParcelsInput
+  senderAddress?: Prisma.ClientAddressCreateNestedOneWithoutSenderParcelsInput
+  receiver: Prisma.ClientCreateNestedOneWithoutReceivedParcelsInput
+  receiverAddress?: Prisma.ClientAddressCreateNestedOneWithoutReceiverParcelsInput
+  trip?: Prisma.TripCreateNestedOneWithoutParcelsInput
+  collectionPoint?: Prisma.CollectionPointCreateNestedOneWithoutParcelsInput
+  collectedBy?: Prisma.ProfileCreateNestedOneWithoutCollectedParcelsInput
+  createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedParcelsInput
+  assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedParcelsInput
+  places?: Prisma.ParcelPlaceCreateNestedManyWithoutParcelInput
+  statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
+  cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
+  routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
+  npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
+  claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
+}
+
+export type ParcelUncheckedCreateWithoutCreatedFromTasksInput = {
+  id?: string
+  itn: string
+  internalNumber: string
+  sequentialNumber: number
+  shortNumber?: number | null
+  direction: $Enums.Direction
+  senderId: string
+  senderAddressId?: string | null
+  receiverId: string
+  receiverAddressId?: string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  tripId?: string | null
+  shipmentType?: $Enums.ShipmentType
+  description?: string | null
+  declaredValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: string
+  totalWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: number
+  payer?: $Enums.Payer
+  paymentMethod?: $Enums.PaymentMethod
+  paymentInUkraine?: boolean
+  needsPackaging?: boolean
+  doorstepDelivery?: boolean
+  deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: boolean
+  addressDeliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  isMultiParcelPickup?: boolean | null
+  parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: string
+  npTtn?: string | null
+  npTrackingStatus?: string | null
+  status?: $Enums.ParcelStatus
+  createdSource?: $Enums.CreatedSource
+  createdById?: string | null
+  assignedCourierId?: string | null
+  estimatedDeliveryStart?: Date | string | null
+  estimatedDeliveryEnd?: Date | string | null
+  isPaid?: boolean
+  paidAt?: Date | string | null
+  invoiceSentToPayerAt?: Date | string | null
+  photos?: Prisma.ParcelCreatephotosInput | string[]
+  collectionMethod?: $Enums.CollectionMethod | null
+  collectionPointId?: string | null
+  collectionDate?: Date | string | null
+  collectionAddress?: string | null
+  collectedAt?: Date | string | null
+  collectedById?: string | null
+  routeTaskStatus?: string | null
+  routeTaskFailReason?: string | null
+  routeTaskReschedDate?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  places?: Prisma.ParcelPlaceUncheckedCreateNestedManyWithoutParcelInput
+  statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
+  cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
+  routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
+  npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
+  claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
+}
+
+export type ParcelCreateOrConnectWithoutCreatedFromTasksInput = {
+  where: Prisma.ParcelWhereUniqueInput
+  create: Prisma.XOR<Prisma.ParcelCreateWithoutCreatedFromTasksInput, Prisma.ParcelUncheckedCreateWithoutCreatedFromTasksInput>
 }
 
 export type ParcelUpsertWithoutRouteTasksInput = {
@@ -4931,6 +5133,7 @@ export type ParcelUpdateWithoutRouteTasksInput = {
   places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -5001,6 +5204,160 @@ export type ParcelUncheckedUpdateWithoutRouteTasksInput = {
   places?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutParcelNestedInput
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
+  npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
+  claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
+}
+
+export type ParcelUpsertWithoutCreatedFromTasksInput = {
+  update: Prisma.XOR<Prisma.ParcelUpdateWithoutCreatedFromTasksInput, Prisma.ParcelUncheckedUpdateWithoutCreatedFromTasksInput>
+  create: Prisma.XOR<Prisma.ParcelCreateWithoutCreatedFromTasksInput, Prisma.ParcelUncheckedCreateWithoutCreatedFromTasksInput>
+  where?: Prisma.ParcelWhereInput
+}
+
+export type ParcelUpdateToOneWithWhereWithoutCreatedFromTasksInput = {
+  where?: Prisma.ParcelWhereInput
+  data: Prisma.XOR<Prisma.ParcelUpdateWithoutCreatedFromTasksInput, Prisma.ParcelUncheckedUpdateWithoutCreatedFromTasksInput>
+}
+
+export type ParcelUpdateWithoutCreatedFromTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  itn?: Prisma.StringFieldUpdateOperationsInput | string
+  internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  totalWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  payer?: Prisma.EnumPayerFieldUpdateOperationsInput | $Enums.Payer
+  paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
+  createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
+  estimatedDeliveryStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sender?: Prisma.ClientUpdateOneRequiredWithoutSentParcelsNestedInput
+  senderAddress?: Prisma.ClientAddressUpdateOneWithoutSenderParcelsNestedInput
+  receiver?: Prisma.ClientUpdateOneRequiredWithoutReceivedParcelsNestedInput
+  receiverAddress?: Prisma.ClientAddressUpdateOneWithoutReceiverParcelsNestedInput
+  trip?: Prisma.TripUpdateOneWithoutParcelsNestedInput
+  collectionPoint?: Prisma.CollectionPointUpdateOneWithoutParcelsNestedInput
+  collectedBy?: Prisma.ProfileUpdateOneWithoutCollectedParcelsNestedInput
+  createdBy?: Prisma.ProfileUpdateOneWithoutCreatedParcelsNestedInput
+  assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedParcelsNestedInput
+  places?: Prisma.ParcelPlaceUpdateManyWithoutParcelNestedInput
+  statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
+  cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
+  routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
+  npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
+  claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
+}
+
+export type ParcelUncheckedUpdateWithoutCreatedFromTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  itn?: Prisma.StringFieldUpdateOperationsInput | string
+  internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  senderAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiverId?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverAddressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senderSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  receiverSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  tripId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shipmentType?: Prisma.EnumShipmentTypeFieldUpdateOperationsInput | $Enums.ShipmentType
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declaredValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  declaredValueCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  totalWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalVolumetricWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalPlacesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  payer?: Prisma.EnumPayerFieldUpdateOperationsInput | $Enums.Payer
+  paymentMethod?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  paymentInUkraine?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  needsPackaging?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  doorstepDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  packagingCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  doorstepCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  insuranceApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  addressDeliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  pickupPointCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
+  npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
+  createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedDeliveryStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estimatedDeliveryEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invoiceSentToPayerAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photos?: Prisma.ParcelUpdatephotosInput | string[]
+  collectionMethod?: Prisma.NullableEnumCollectionMethodFieldUpdateOperationsInput | $Enums.CollectionMethod | null
+  collectionPointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskFailReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  routeTaskReschedDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  places?: Prisma.ParcelPlaceUncheckedUpdateManyWithoutParcelNestedInput
+  statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
+  cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
+  routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -5072,6 +5429,7 @@ export type ParcelCreateWithoutWarehouseActionsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
 }
@@ -5142,6 +5500,7 @@ export type ParcelUncheckedCreateWithoutWarehouseActionsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
 }
@@ -5228,6 +5587,7 @@ export type ParcelUpdateWithoutWarehouseActionsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
 }
@@ -5298,6 +5658,7 @@ export type ParcelUncheckedUpdateWithoutWarehouseActionsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
 }
@@ -5368,6 +5729,7 @@ export type ParcelCreateWithoutNpSyncLogsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimCreateNestedManyWithoutParcelInput
 }
@@ -5438,6 +5800,7 @@ export type ParcelUncheckedCreateWithoutNpSyncLogsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   claims?: Prisma.ClaimUncheckedCreateNestedManyWithoutParcelInput
 }
@@ -5524,6 +5887,7 @@ export type ParcelUpdateWithoutNpSyncLogsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
 }
@@ -5594,6 +5958,7 @@ export type ParcelUncheckedUpdateWithoutNpSyncLogsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
 }
@@ -5664,6 +6029,7 @@ export type ParcelCreateWithoutClaimsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogCreateNestedManyWithoutParcelInput
 }
@@ -5734,6 +6100,7 @@ export type ParcelUncheckedCreateWithoutClaimsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedCreateNestedManyWithoutParcelInput
   cashEntries?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutParcelInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutParcelInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutCreatedParcelInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedCreateNestedManyWithoutParcelInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedCreateNestedManyWithoutParcelInput
 }
@@ -5820,6 +6187,7 @@ export type ParcelUpdateWithoutClaimsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
 }
@@ -5890,6 +6258,7 @@ export type ParcelUncheckedUpdateWithoutClaimsInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
 }
@@ -6148,6 +6517,7 @@ export type ParcelUpdateWithoutAssignedCourierInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -6218,6 +6588,7 @@ export type ParcelUncheckedUpdateWithoutAssignedCourierInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -6351,6 +6722,7 @@ export type ParcelUpdateWithoutCreatedByInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -6421,6 +6793,7 @@ export type ParcelUncheckedUpdateWithoutCreatedByInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -6554,6 +6927,7 @@ export type ParcelUpdateWithoutCollectedByInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -6624,6 +6998,7 @@ export type ParcelUncheckedUpdateWithoutCollectedByInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -6883,6 +7258,7 @@ export type ParcelUpdateWithoutSenderInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -6953,6 +7329,7 @@ export type ParcelUncheckedUpdateWithoutSenderInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -7086,6 +7463,7 @@ export type ParcelUpdateWithoutReceiverInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -7156,6 +7534,7 @@ export type ParcelUncheckedUpdateWithoutReceiverInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -7415,6 +7794,7 @@ export type ParcelUpdateWithoutSenderAddressInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -7485,6 +7865,7 @@ export type ParcelUncheckedUpdateWithoutSenderAddressInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -7618,6 +7999,7 @@ export type ParcelUpdateWithoutReceiverAddressInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -7688,6 +8070,7 @@ export type ParcelUncheckedUpdateWithoutReceiverAddressInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -7884,6 +8267,7 @@ export type ParcelUpdateWithoutTripInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -7954,6 +8338,7 @@ export type ParcelUncheckedUpdateWithoutTripInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -8150,6 +8535,7 @@ export type ParcelUpdateWithoutCollectionPointInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUpdateManyWithoutParcelNestedInput
@@ -8220,6 +8606,7 @@ export type ParcelUncheckedUpdateWithoutCollectionPointInput = {
   statusHistory?: Prisma.ParcelStatusHistoryUncheckedUpdateManyWithoutParcelNestedInput
   cashEntries?: Prisma.CashRegisterUncheckedUpdateManyWithoutParcelNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutParcelNestedInput
+  createdFromTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutCreatedParcelNestedInput
   warehouseActions?: Prisma.WarehouseInventoryUncheckedUpdateManyWithoutParcelNestedInput
   npSyncLogs?: Prisma.NpSyncLogUncheckedUpdateManyWithoutParcelNestedInput
   claims?: Prisma.ClaimUncheckedUpdateManyWithoutParcelNestedInput
@@ -8298,6 +8685,7 @@ export type ParcelCountOutputType = {
   statusHistory: number
   cashEntries: number
   routeTasks: number
+  createdFromTasks: number
   warehouseActions: number
   npSyncLogs: number
   claims: number
@@ -8308,6 +8696,7 @@ export type ParcelCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   statusHistory?: boolean | ParcelCountOutputTypeCountStatusHistoryArgs
   cashEntries?: boolean | ParcelCountOutputTypeCountCashEntriesArgs
   routeTasks?: boolean | ParcelCountOutputTypeCountRouteTasksArgs
+  createdFromTasks?: boolean | ParcelCountOutputTypeCountCreatedFromTasksArgs
   warehouseActions?: boolean | ParcelCountOutputTypeCountWarehouseActionsArgs
   npSyncLogs?: boolean | ParcelCountOutputTypeCountNpSyncLogsArgs
   claims?: boolean | ParcelCountOutputTypeCountClaimsArgs
@@ -8348,6 +8737,13 @@ export type ParcelCountOutputTypeCountCashEntriesArgs<ExtArgs extends runtime.Ty
  * ParcelCountOutputType without action
  */
 export type ParcelCountOutputTypeCountRouteTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RouteTaskWhereInput
+}
+
+/**
+ * ParcelCountOutputType without action
+ */
+export type ParcelCountOutputTypeCountCreatedFromTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RouteTaskWhereInput
 }
 
@@ -8448,6 +8844,7 @@ export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   statusHistory?: boolean | Prisma.Parcel$statusHistoryArgs<ExtArgs>
   cashEntries?: boolean | Prisma.Parcel$cashEntriesArgs<ExtArgs>
   routeTasks?: boolean | Prisma.Parcel$routeTasksArgs<ExtArgs>
+  createdFromTasks?: boolean | Prisma.Parcel$createdFromTasksArgs<ExtArgs>
   warehouseActions?: boolean | Prisma.Parcel$warehouseActionsArgs<ExtArgs>
   npSyncLogs?: boolean | Prisma.Parcel$npSyncLogsArgs<ExtArgs>
   claims?: boolean | Prisma.Parcel$claimsArgs<ExtArgs>
@@ -8679,6 +9076,7 @@ export type ParcelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   statusHistory?: boolean | Prisma.Parcel$statusHistoryArgs<ExtArgs>
   cashEntries?: boolean | Prisma.Parcel$cashEntriesArgs<ExtArgs>
   routeTasks?: boolean | Prisma.Parcel$routeTasksArgs<ExtArgs>
+  createdFromTasks?: boolean | Prisma.Parcel$createdFromTasksArgs<ExtArgs>
   warehouseActions?: boolean | Prisma.Parcel$warehouseActionsArgs<ExtArgs>
   npSyncLogs?: boolean | Prisma.Parcel$npSyncLogsArgs<ExtArgs>
   claims?: boolean | Prisma.Parcel$claimsArgs<ExtArgs>
@@ -8723,6 +9121,7 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     statusHistory: Prisma.$ParcelStatusHistoryPayload<ExtArgs>[]
     cashEntries: Prisma.$CashRegisterPayload<ExtArgs>[]
     routeTasks: Prisma.$RouteTaskPayload<ExtArgs>[]
+    createdFromTasks: Prisma.$RouteTaskPayload<ExtArgs>[]
     warehouseActions: Prisma.$WarehouseInventoryPayload<ExtArgs>[]
     npSyncLogs: Prisma.$NpSyncLogPayload<ExtArgs>[]
     claims: Prisma.$ClaimPayload<ExtArgs>[]
@@ -9236,6 +9635,7 @@ export interface Prisma__ParcelClient<T, Null = never, ExtArgs extends runtime.T
   statusHistory<T extends Prisma.Parcel$statusHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$statusHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelStatusHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cashEntries<T extends Prisma.Parcel$cashEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$cashEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CashRegisterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   routeTasks<T extends Prisma.Parcel$routeTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$routeTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RouteTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdFromTasks<T extends Prisma.Parcel$createdFromTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$createdFromTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RouteTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   warehouseActions<T extends Prisma.Parcel$warehouseActionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$warehouseActionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WarehouseInventoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   npSyncLogs<T extends Prisma.Parcel$npSyncLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$npSyncLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NpSyncLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   claims<T extends Prisma.Parcel$claimsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Parcel$claimsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClaimPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -9938,6 +10338,30 @@ export type Parcel$cashEntriesArgs<ExtArgs extends runtime.Types.Extensions.Inte
  * Parcel.routeTasks
  */
 export type Parcel$routeTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RouteTask
+   */
+  select?: Prisma.RouteTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RouteTask
+   */
+  omit?: Prisma.RouteTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RouteTaskInclude<ExtArgs> | null
+  where?: Prisma.RouteTaskWhereInput
+  orderBy?: Prisma.RouteTaskOrderByWithRelationInput | Prisma.RouteTaskOrderByWithRelationInput[]
+  cursor?: Prisma.RouteTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RouteTaskScalarFieldEnum | Prisma.RouteTaskScalarFieldEnum[]
+}
+
+/**
+ * Parcel.createdFromTasks
+ */
+export type Parcel$createdFromTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the RouteTask
    */

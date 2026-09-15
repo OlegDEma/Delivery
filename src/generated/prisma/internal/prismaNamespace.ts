@@ -2604,6 +2604,7 @@ export const RouteTaskScalarFieldEnum = {
   manualFirstName: 'manualFirstName',
   manualLastName: 'manualLastName',
   manualClientStatus: 'manualClientStatus',
+  createdParcelId: 'createdParcelId',
   manualPhone: 'manualPhone',
   manualDirection: 'manualDirection',
   manualCity: 'manualCity',

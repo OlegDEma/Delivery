@@ -544,6 +544,19 @@ export default function NewParcelPage() {
 
     if (res.ok) {
       const parcel = await res.json();
+      // ТЗ docx 11.09.26 (п.1): якщо посилку створено з ручної адреси Маршрутного
+      // листа (?fromTaskId=…), привʼязуємо її до тієї адреси — у списку адрес замість
+      // «Створити посилку» зʼявиться номер уже створеної посилки.
+      const fromTaskId = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('fromTaskId')
+        : null;
+      if (fromTaskId) {
+        await fetch(`/api/route-tasks/${fromTaskId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ createdParcelId: parcel.id }),
+        }).catch(() => {});
+      }
       toast.success('Посилку створено');
       router.push(`/parcels/${parcel.id}`);
     } else {

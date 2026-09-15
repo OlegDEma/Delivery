@@ -496,6 +496,8 @@ model Parcel {
   statusHistory     ParcelStatusHistory[]
   cashEntries       CashRegister[]
   routeTasks        RouteTask[]
+  // ТЗ docx 11.09.26: ручні адреси МЛ, з яких створено цю посилку.
+  createdFromTasks  RouteTask[]    @relation("RouteTaskCreatedParcel")
   warehouseActions  WarehouseInventory[]
   npSyncLogs        NpSyncLog[]
   claims            Claim[]
@@ -724,6 +726,8 @@ model RouteTask {
   manualLastName        String?         @map("manual_last_name")
   // ТЗ docx 03.09.26: статус клієнта ручної адреси (sender / receiver / passenger).
   manualClientStatus    String?         @map("manual_client_status")
+  // ТЗ docx 11.09.26: посилка, створена з цієї ручної адреси («Створити посилку»).
+  createdParcelId       String?         @map("created_parcel_id") @db.Uuid
   manualPhone           String?         @map("manual_phone")
   manualDirection       String?         @map("manual_direction")
   manualCity            String?         @map("manual_city")
@@ -744,6 +748,7 @@ model RouteTask {
   client          Client?        @relation(fields: [clientId], references: [id])
   address         ClientAddress? @relation(fields: [addressId], references: [id])
   routeSheet      RouteSheet?    @relation(fields: [routeSheetId], references: [id])
+  createdParcel   Parcel?        @relation("RouteTaskCreatedParcel", fields: [createdParcelId], references: [id])
   assignedCourier Profile?       @relation("RouteTaskAssignedCourier", fields: [assignedCourierId], references: [id])
 
   @@index([tripId])

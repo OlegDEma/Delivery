@@ -33,6 +33,9 @@ export async function GET(request: NextRequest) {
       manualStreet: true, manualBuilding: true, manualFirstName: true, manualLastName: true,
       manualClientStatus: true,
       routeSheetId: true,
+      // ТЗ docx 11.09.26: номер посилки, створеної з цієї ручної адреси.
+      createdParcelId: true,
+      createdParcel: { select: { id: true, internalNumber: true } },
     },
   });
   return NextResponse.json(tasks);
@@ -70,6 +73,11 @@ export async function POST(request: NextRequest) {
     if (!addressText && !city && !postal) {
       return NextResponse.json({ error: "Вкажіть хоча б місто, індекс або вулицю" }, { status: 400 });
     }
+    // ТЗ docx 11.09.26 (п.1): статус клієнта — ОБОВʼЯЗКОВО.
+    const clientStatus = String(body.clientStatus ?? "").trim();
+    if (!["sender", "receiver", "passenger"].includes(clientStatus)) {
+      return NextResponse.json({ error: "Оберіть статус клієнта (Відправник, Отримувач або Пасажир)" }, { status: 400 });
+    }
     await prisma.routeTask.create({
       data: {
         tripId: trip.id, taskType: 'delivery', taskDate: null,
@@ -84,7 +92,7 @@ export async function POST(request: NextRequest) {
         manualLastName: lastName || null,
         manualFirstName: firstName || null,
         // ТЗ docx 03.09.26: статус клієнта показуємо у другому рядку запису.
-        manualClientStatus: body.clientStatus ? String(body.clientStatus).trim() : null,
+        manualClientStatus: clientStatus,
       },
     });
     return NextResponse.json({ created: 1 }, { status: 201 });

@@ -82,6 +82,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (body.failureReason !== undefined) {
     data.failureReason = body.failureReason ? String(body.failureReason) : null;
   }
+  // ТЗ docx 11.09.26 (п.1): після «Створити посилку» з ручної адреси запамʼятовуємо,
+  // яка посилка з неї створена — у третьому рядку показуємо її номер замість кнопки.
+  if (body.createdParcelId !== undefined) {
+    const pid = body.createdParcelId ? String(body.createdParcelId) : null;
+    if (pid && !isUuid(pid)) return NextResponse.json({ error: 'Невалідний id посилки' }, { status: 400 });
+    if (pid) {
+      const parcel = await prisma.parcel.findUnique({ where: { id: pid }, select: { id: true } });
+      if (!parcel) return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
+    }
+    data.createdParcelId = pid;
+  }
   if (Object.keys(data).length === 0) {
     return NextResponse.json({ error: 'Немає що оновлювати' }, { status: 400 });
   }
