@@ -196,6 +196,21 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
   const visibleMethods = (hideOthers ? METHODS.filter(m => m === value.method) : METHODS)
     .filter(m => !clientFacing || !isMethodForbiddenForClient(m));
 
+  // Перевірка 15.09.26 (перший прогін «як справжній клієнт» на чистій базі): коли для
+  // міста відправника дозволено ЛИШЕ ОДИН спосіб (напр. Amsterdam — тільки «Виклик
+  // курʼєра»), картка показувалась, але не була вибрана, а форма це не перевіряла —
+  // сервер відповідав технічним «collectionMethod: Invalid option», і клієнт застрягав.
+  // Єдиний доступний спосіб обираємо за клієнта автоматично.
+  const onlyMethod = clientFacing && !value.method && !loadingPoints && visibleMethods.length === 1
+    ? visibleMethods[0]
+    : null;
+  useEffect(() => {
+    if (!onlyMethod) return;
+    // Стейт живе у батька (new-order) — оновлюємо через onChange, як і при кліку.
+    onChange({ ...value, method: onlyMethod });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onlyMethod]);
+
   return (
     <div className="space-y-3">
       {/* ТЗ §E13: фразу «Як Ви передасте нам посилку?» лишаємо ЛИШЕ вгорі
@@ -249,8 +264,10 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
             );
           })}
         </div>
-        {/* «Очистити вибір» — і для staff, і для клієнта (per ТЗ). */}
-        {value.method && (
+        {/* «Очистити вибір» — і для staff, і для клієнта (per ТЗ).
+            Перевірка 15.09.26: коли клієнту доступний лише один спосіб (обраний
+            автоматично), очищати нічого — кнопку ховаємо, інакше вона «не працює». */}
+        {value.method && !(clientFacing && visibleMethods.length === 1) && (
           <button
             type="button"
             onClick={() => setMethod('')}

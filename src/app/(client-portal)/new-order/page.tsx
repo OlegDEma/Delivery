@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,7 +57,11 @@ const DAY_LABELS: Record<string, string> = {
 export default function NewOrderPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const errorRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (error) errorRef.current?.scrollIntoView({ behavior: "auto", block: "center" });
+  }, [error]);
   const [successNumber, setSuccessNumber] = useState<string | null>(null);
   const [pricingConfigs, setPricingConfigs] = useState<PricingConfig[]>([]);
   // ТЗ docx 02.07.26 (D8): правила Логістики — щоб ховати заборонені для
@@ -299,8 +303,14 @@ export default function NewOrderPage() {
         return;
       }
       if (!places.some(p => Number(p.weight) > 0)) {
-        setError('Вкажіть вагу хоча б одного місця'); return;
+        setError("Вкажіть вагу хоча б одного місця"); return;
       }
+    }
+    // Перевірка 15.09.26: спосіб передачі посилки — обовʼязковий. Раніше форма
+    // відправляла порожнє значення, сервер відповідав технічною помилкою, і клієнт
+    // не розумів, що робити.
+    if (!collectionMethod) {
+      setError("Оберіть, як Ви передасте нам посилку (розділ «Як Ви передасте нам посилку?»)"); return;
     }
     setSaving(true);
 
@@ -403,7 +413,8 @@ export default function NewOrderPage() {
         <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-bold text-green-800 mb-2">Замовлення створено</h2>
           <p className="text-green-700">
-            Попереднє відправлення N{successNumber} сформовано. Кур&apos;єр перевірить Ваші дані.
+            {/* Перевірка 15.09.26: SWC «зʼїдав» пробіл після номера («…2026сформовано») — ставимо явно. */}
+            Попереднє відправлення N{successNumber}{' '}сформовано. Кур&apos;єр перевірить Ваші дані.
           </p>
         </div>
         <Button onClick={() => router.push('/my-orders')} className="w-full h-12 text-base">
@@ -790,7 +801,9 @@ export default function NewOrderPage() {
           </CardContent>
         </Card>
 
-        {error && <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">{error}</div>}
+        {/* Перевірка 15.09.26: помилка стояла внизу довгої форми поза екраном —
+            клієнт її не бачив. Тепер при появі помилки прокручуємо до неї. */}
+        {error && <div ref={errorRef} className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 scroll-mt-4">{error}</div>}
 
         <Button type="submit" className="w-full h-12 text-base" disabled={saving}>
           {saving ? 'Створення...' : 'Створити замовлення'}
