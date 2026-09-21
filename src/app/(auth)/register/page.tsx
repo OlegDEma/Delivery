@@ -36,23 +36,35 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    const res = await fetch('/api/client-portal', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, firstName, lastName, phone }),
-    });
+    // Перевірка перед запуском 21.09.26: без try/catch обрив звʼязку (мобільний
+    // інтернет) лишав кнопку у стані «Реєстрація...» назавжди й без пояснення.
+    try {
+      const res = await fetch('/api/client-portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, firstName, lastName, phone }),
+      });
 
-    if (res.ok) {
-      // Auto-login
-      const supabase = createClient();
-      await supabase.auth.signInWithPassword({ email, password });
-      router.push('/my-orders');
-      router.refresh();
-    } else {
-      const data = await res.json();
-      setError(data.error || 'Помилка реєстрації');
+      if (res.ok) {
+        // Auto-login
+        const supabase = createClient();
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) {
+          // Акаунт створено, але автологін не вдався — ведемо на звичайний вхід.
+          router.push('/login');
+          return;
+        }
+        router.push('/my-orders');
+        router.refresh();
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      setError(data?.error || 'Помилка реєстрації. Спробуйте ще раз.');
+    } catch {
+      setError('Немає звʼязку з сервером. Перевірте інтернет і спробуйте ще раз.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

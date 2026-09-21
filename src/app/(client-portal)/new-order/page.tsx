@@ -333,39 +333,47 @@ export default function NewOrderPage() {
       composedCollectionAddress = collectionWarehouse.trim() ? `Склад №${collectionWarehouse.trim()}` : '';
     }
 
-    const res = await fetch('/api/client-portal/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        direction, shipmentType, description,
-        declaredValue: declaredValue ? Number(declaredValue) : undefined,
-        insurance, needsPackaging,
-        // ТЗ docx 02.07.26 (D4): не застосовуємо doorstep, якщо опція недоступна.
-        doorstepDelivery: canDoorstep && doorstepDelivery,
-        // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
-        payer, paymentMethod, paymentInUkraine,
-        senderPhone, senderFirstName, senderLastName, senderMiddleName, senderCountry, senderCity, senderPostalCode,
-        receiverPhone, receiverFirstName, receiverLastName, receiverMiddleName, receiverCountry, receiverCity, receiverPostalCode,
-        receiverStreet, receiverBuilding, receiverLandmark, receiverDeliveryMethod, receiverNpWarehouse, receiverPickupPointText,
-        places: places.map(p => ({
-          weight: Number(p.weight) || 0,
-          length: Number(p.length) || undefined,
-          width: Number(p.width) || undefined,
-          height: Number(p.height) || undefined,
-        })),
-        collectionMethod, collectionPointId, collectionDate,
-        collectionAddress: composedCollectionAddress,
-      }),
-    });
+    // Перевірка перед запуском 21.09.26: обрив звʼязку або не-JSON відповідь
+    // (напр. сторінка помилки хостингу) лишали кнопку у стані «Створення...»
+    // без жодного повідомлення — ловимо й показуємо зрозумілий текст.
+    try {
+      const res = await fetch('/api/client-portal/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          direction, shipmentType, description,
+          declaredValue: declaredValue ? Number(declaredValue) : undefined,
+          insurance, needsPackaging,
+          // ТЗ docx 02.07.26 (D4): не застосовуємо doorstep, якщо опція недоступна.
+          doorstepDelivery: canDoorstep && doorstepDelivery,
+          // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
+          payer, paymentMethod, paymentInUkraine,
+          senderPhone, senderFirstName, senderLastName, senderMiddleName, senderCountry, senderCity, senderPostalCode,
+          receiverPhone, receiverFirstName, receiverLastName, receiverMiddleName, receiverCountry, receiverCity, receiverPostalCode,
+          receiverStreet, receiverBuilding, receiverLandmark, receiverDeliveryMethod, receiverNpWarehouse, receiverPickupPointText,
+          places: places.map(p => ({
+            weight: Number(p.weight) || 0,
+            length: Number(p.length) || undefined,
+            width: Number(p.width) || undefined,
+            height: Number(p.height) || undefined,
+          })),
+          collectionMethod, collectionPointId, collectionDate,
+          collectionAddress: composedCollectionAddress,
+        }),
+      });
 
-    if (res.ok) {
-      const parcel = await res.json();
-      setSuccessNumber(parcel.internalNumber);
-    } else {
-      const data = await res.json();
-      setError(data.error || 'Помилка');
+      if (res.ok) {
+        const parcel = await res.json();
+        setSuccessNumber(parcel.internalNumber);
+      } else {
+        const data = await res.json().catch(() => null);
+        setError(data?.error || 'Не вдалося створити замовлення. Спробуйте ще раз.');
+      }
+    } catch {
+      setError('Немає звʼязку з сервером. Перевірте інтернет і спробуйте ще раз.');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   const totalWeight = places.reduce((s, p) => s + (Number(p.weight) || 0), 0);
