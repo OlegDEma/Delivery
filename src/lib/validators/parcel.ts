@@ -107,6 +107,10 @@ export const clientOrderSchema = z.object({
   // Sender address (client is always the sender — enforced in route)
   senderCity: text(100).optional(),
   senderStreet: z.string().trim().max(300).optional().nullable(),
+  /** Перевірка 22.09.26: Будинок + Орієнтир відправника — клієнт вводить їх у блоці
+   *  «Виклик курʼєра», а зберігаємо в адресі відправника (як у Працівника). */
+  senderBuilding: z.string().trim().max(50).optional().nullable(),
+  senderLandmark: z.string().trim().max(300).optional().nullable(),
   /** Індекс (поштовий код) відправника — ТЗ §5b. */
   senderPostalCode: z.string().trim().max(20).optional().nullable(),
   senderCountry: countrySchema.optional().nullable(),

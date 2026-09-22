@@ -349,6 +349,11 @@ export default function NewOrderPage() {
           // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
           payer, paymentMethod, paymentInUkraine,
           senderPhone, senderFirstName, senderLastName, senderMiddleName, senderCountry, senderCity, senderPostalCode,
+          // Перевірка 22.09.26: адреса з блоку «Виклик курʼєра» — і в адресу відправника
+          // (картка посилки, Маршрутний лист), а не лише у текстовий collectionAddress.
+          senderStreet: collectionMethod === 'courier_pickup' ? collectionStreet.trim() || undefined : undefined,
+          senderBuilding: collectionMethod === 'courier_pickup' ? collectionBuilding.trim() || undefined : undefined,
+          senderLandmark: collectionMethod === 'courier_pickup' ? collectionLandmark.trim() || undefined : undefined,
           receiverPhone, receiverFirstName, receiverLastName, receiverMiddleName, receiverCountry, receiverCity, receiverPostalCode,
           receiverStreet, receiverBuilding, receiverLandmark, receiverDeliveryMethod, receiverNpWarehouse, receiverPickupPointText,
           places: places.map(p => ({

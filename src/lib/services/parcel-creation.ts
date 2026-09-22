@@ -351,13 +351,17 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
               : null,
           parcelMoneyCost: parcelMoneyCost || null,
           totalCost: totalCost || null,
-          collectionMethod: input.direction === 'eu_to_ua' ? (input.collectionMethod ?? null) : null,
+          // Перевірка 22.09.26: спосіб передачі зберігаємо і для UA→EU (клієнт у Львові
+          // обирає «Виклик курʼєра»/«Пошта» — раніше вибір мовчки губився і Працівник
+          // не знав, як посилка потрапить на склад). Тарифні ознаки вище лишаються
+          // лише для EU→UA — на вартість це не впливає. Пункт збору — суто EU.
+          collectionMethod: input.collectionMethod ?? null,
           collectionPointId:
             input.direction === 'eu_to_ua' && input.collectionMethod === 'pickup_point'
               ? (input.collectionPointId ?? null) : null,
           collectionDate: input.collectionDate ?? null,
           collectionAddress:
-            input.direction === 'eu_to_ua' && input.collectionMethod === 'courier_pickup'
+            input.collectionMethod === 'courier_pickup'
               ? (input.collectionAddress ?? null) : null,
           status: input.status,
           createdSource: input.createdSource,

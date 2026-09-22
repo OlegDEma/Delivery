@@ -364,7 +364,9 @@ export default function EditParcelPage() {
         paymentMethod,
         paymentInUkraine,
         tripId: selectedTripId || null,
-        collectionMethod: direction === 'eu_to_ua' && collection.method ? collection.method : null,
+        // Перевірка 22.09.26: для UA→EU блок не показуємо, але збережений вибір клієнта
+        // (кур'єр/пошта) не затираємо при редагуванні інших полів.
+        collectionMethod: collection.method ? collection.method : null,
         collectionPointId: collection.method === 'pickup_point' ? collection.pointId || null : null,
         collectionDate: collection.date || null,
         collectionAddress: collection.method === 'courier_pickup' ? collection.address || null : null,

@@ -90,16 +90,24 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // Sender address: dedupe per client by (country, city, street).
+  // Sender address: dedupe per client by (country, city, street, building).
+  // Перевірка 22.09.26 (перші замовлення клієнта на проді): вулиця/будинок/орієнтир,
+  // які клієнт вводить у блоці «Виклик курʼєра», раніше потрапляли ЛИШЕ у текстове
+  // поле collectionAddress — картка посилки і Маршрутний лист (беруть адресу
+  // відправника з client_addresses) показували місто без вулиці. Тепер ці поля
+  // зберігаємо і в адресі відправника — так само, як робить форма Працівника.
   let senderAddressId: string | null = null;
   if (body.senderCity) {
     const senderCountry = (body.senderCountry ?? 'UA') as Country;
+    const sStreet = body.senderStreet || null;
+    const sBuilding = body.senderBuilding || null;
     const existingSenderAddr = await prisma.clientAddress.findFirst({
       where: {
         clientId: sender.id,
         country: senderCountry,
         city: body.senderCity,
-        street: body.senderStreet || null,
+        street: sStreet,
+        building: sBuilding,
       },
     });
     if (existingSenderAddr) {
@@ -110,7 +118,9 @@ export async function POST(request: NextRequest) {
           clientId: sender.id,
           country: senderCountry,
           city: body.senderCity,
-          street: body.senderStreet || null,
+          street: sStreet,
+          building: sBuilding,
+          landmark: body.senderLandmark || null,
           postalCode: body.senderPostalCode || null,
         },
       });
