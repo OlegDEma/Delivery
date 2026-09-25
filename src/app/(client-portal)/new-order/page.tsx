@@ -10,6 +10,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { CollectionBlock } from '@/components/parcels/collection-block';
+// ТЗ docx 21.09.26 (п.5): клієнт має бачити вартість ДО «Створити замовлення».
+import { CostCalculator } from '@/components/parcels/cost-calculator';
 import { AddressInput } from '@/components/parcels/address-input';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { FieldHint } from '@/components/shared/field-hint';
@@ -109,11 +111,20 @@ export default function NewOrderPage() {
   const [declaredValue, setDeclaredValue] = useState('');
   // Per ТЗ — opt-in services. Прихований 3% автоматичний бонус скасовано.
   const [insurance, setInsurance] = useState(false);
+  // ТЗ docx 21.09.26 (п.4): понад 50 € (для UA→EU — гривневий еквівалент)
+  // страхування обовʼязкове — сервер вмикає його сам, а тут блокуємо чекбокс.
+  const [insuranceAuto, setInsuranceAuto] = useState(false);
   const [needsPackaging, setNeedsPackaging] = useState(false);
   // ТЗ docx 01.07.26: opt-in чекбокс «Доставка до порога будинку» (клієнт теж бачить).
   const [doorstepDelivery, setDoorstepDelivery] = useState(false);
   // ТЗ docx 02.07.26 (D4): доступна лише Європа→Україна + Адресна доставка Отримувача.
   const canDoorstep = direction === 'eu_to_ua' && receiverDeliveryMethod === 'address';
+  // ТЗ docx 21.09.26 (п.4): для напрямку Україна→Європа оголошена вартість —
+  // у гривнях (як у формі Працівника), для Європа→Україна — в EUR. Раніше
+  // клієнту завжди писало «(EUR)», і гривнева сума йшла на сервер як EUR.
+  const declaredCurrency: 'EUR' | 'UAH' =
+    senderCountry === 'UA' || (!senderCountry && direction === 'ua_to_eu') ? 'UAH' : 'EUR';
+  const declaredCurrencyLabel = declaredCurrency === 'UAH' ? 'грн' : 'EUR';
   // ТЗ §E10: «Поле "Пакет" при заповненні Клієнтом відсутнє» — опція
   // з'являється лише коли оформлює Працівник. У клієнтському порталі не
   // показуємо і не відправляємо.
@@ -343,7 +354,8 @@ export default function NewOrderPage() {
         body: JSON.stringify({
           direction, shipmentType, description,
           declaredValue: declaredValue ? Number(declaredValue) : undefined,
-          insurance, needsPackaging,
+          declaredValueCurrency: declaredCurrency,
+          insurance: insurance || insuranceAuto, needsPackaging,
           // ТЗ docx 02.07.26 (D4): не застосовуємо doorstep, якщо опція недоступна.
           doorstepDelivery: canDoorstep && doorstepDelivery,
           // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
@@ -721,15 +733,26 @@ export default function NewOrderPage() {
             {shipmentType === 'parcels_cargo' && (
               <div><Label>Опис відправлення <FieldHint text="Опишіть що саме відправляється: побутові речі, продукти харчування, будівельні матеріали тощо" /></Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Побутові речі, продукти..." rows={2} /></div>
             )}
-            <div><Label>Оголошена вартість (EUR) <FieldHint text="Оцініть вартість своєї посилки" /></Label><Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} /></div>
+            <div><Label>Оголошена вартість ({declaredCurrencyLabel}) <FieldHint text="Оцініть вартість своєї посилки" /></Label><Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} /></div>
 
             {/* Додаткові послуги — кожна вмикається чекбоксом, % і суми
                 визначаються тарифом для напрямку. Тексти підказок — per ТЗ §E10. */}
             <div className="space-y-2 pt-2 border-t">
+              {/* ТЗ docx 21.09.26 (п.4): понад 50 € оголошеної вартості страхування
+                  вмикається автоматично і зняти його не можна. */}
               <label className="flex items-center gap-2 text-sm">
-                <Checkbox checked={insurance} onCheckedChange={(c) => setInsurance(c === true)} />
+                <Checkbox
+                  checked={insurance || insuranceAuto}
+                  disabled={insuranceAuto}
+                  onCheckedChange={(c) => setInsurance(c === true)}
+                />
                 Страхування <FieldHint text="У разі загибелі посилки відшкодовується лише сума страхування. Відмітьте чекбокс, якщо бажаєте застрахувати посилку згідно оголошеної вартості" />
               </label>
+              {insuranceAuto && (
+                <p className="text-xs text-amber-700 pl-6">
+                  Обовʼязкове: оголошена вартість перевищує 50 € — страхування вже враховане у вартості.
+                </p>
+              )}
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
                 Пакування <FieldHint text="Відмітьте, якщо пакунок не є у коробці" />
@@ -813,6 +836,39 @@ export default function NewOrderPage() {
             </label>
           </CardContent>
         </Card>
+
+        {/* ТЗ docx 21.09.26 (п.5): «Клієнт повинен бачити ВАРТІСТЬ, яку він
+            повинен сплатити за послугу» — блок стоїть після «Оплати», щоб
+            клієнт погодився з сумою і лише тоді тиснув «Створити замовлення».
+            Компонент — той самий, що у Працівника і в готовій посилці, тож
+            сума збігається з тією, яку буде виставлено. */}
+        {!!direction && totalWeight > 0 && (
+          <Card>
+            <CardHeader className="py-3 px-4"><CardTitle className="text-base">Вартість</CardTitle></CardHeader>
+            <CardContent className="px-4 pb-4 pt-0">
+              <CostCalculator
+                direction={direction}
+                senderCountry={senderCountry || null}
+                receiverCountry={receiverCountry || null}
+                actualWeight={totalWeight}
+                volumetricWeight={totalVolWeight}
+                declaredValue={Number(declaredValue) || 0}
+                declaredValueCurrency={declaredCurrency}
+                insurance={insurance}
+                needsPackaging={needsPackaging}
+                isDoorstepDelivery={canDoorstep && doorstepDelivery}
+                // ТЗ docx 21.09.26 (п.3): вартість рахується згідно ВИБРАНОЇ
+                // клієнтом опції доставки Отримувача.
+                isAddressDelivery={receiverDeliveryMethod === 'address'}
+                isPickupPoint={direction === 'eu_to_ua' && collectionMethod === 'pickup_point'}
+                isCourierPickup={direction === 'eu_to_ua' && collectionMethod === 'courier_pickup'}
+                receiverCity={receiverCity || null}
+                clientFacing
+                onInsuranceAutoApplied={setInsuranceAuto}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Перевірка 15.09.26: помилка стояла внизу довгої форми поза екраном —
             клієнт її не бачив. Тепер при появі помилки прокручуємо до неї. */}

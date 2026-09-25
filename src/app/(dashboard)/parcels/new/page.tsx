@@ -195,6 +195,12 @@ export default function NewParcelPage() {
   }
   const [declaredValue, setDeclaredValue] = useState('');
   const [insurance, setInsurance] = useState(false);
+  // ТЗ docx 21.09.26 (п.4): понад 50 € оголошеної вартості (для UA→EU —
+  // гривневий еквівалент) страхування вмикається автоматично на сервері.
+  // Прапорець приходить з «Розрахунку вартості» — блокуємо чекбокс, щоб
+  // оператор не знімав те, що вже враховано в сумі.
+  const [insuranceAuto, setInsuranceAuto] = useState(false);
+
   // «Пакет» (per ТЗ) — sender's cash transfer to receiver. The amount is NOT
   // a delivery cost; the calculator computes a % fee from it instead. Empty
   // string means «opt-out» — Пакет row hidden from receipt and total.
@@ -501,7 +507,7 @@ export default function NewParcelPage() {
         description: description || undefined,
         declaredValue: declaredValue ? Number(declaredValue) : undefined,
         declaredValueCurrency: declaredCurrency,
-        insurance,
+        insurance: insurance || insuranceAuto,
         parcelMoneyAmount:
           parcelMoneyEnabled && Number(parcelMoneyAmount) > 0
             ? Number(parcelMoneyAmount)
@@ -728,7 +734,8 @@ export default function NewParcelPage() {
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="insurance-cb"
-                  checked={insurance}
+                  checked={insurance || insuranceAuto}
+                  disabled={insuranceAuto}
                   onCheckedChange={(c) => setInsurance(c === true)}
                 />
                 <Label htmlFor="insurance-cb" className="text-sm font-medium cursor-pointer">
@@ -736,8 +743,13 @@ export default function NewParcelPage() {
                   <FieldHint text="При активації до вартості посилки додається % від Оголошеної вартості." />
                 </Label>
               </div>
+              {insuranceAuto && (
+                <div className="mt-1 text-xs text-amber-700">
+                  Обовʼязкове: оголошена вартість перевищує 50 € (ТЗ 21.09.26).
+                </div>
+              )}
               <div className="mt-1 text-xs text-gray-500">
-                {insurance
+                {insurance || insuranceAuto
                   ? (Number(declaredValue) > 0
                       ? `Сума страхування рахується автоматично — див. блок «Розрахунок вартості» нижче.`
                       : 'Вкажіть оголошену вартість, щоб розрахувати страхування.')
@@ -1083,6 +1095,7 @@ export default function NewParcelPage() {
           declaredValue={Number(declaredValue) || 0}
           declaredValueCurrency={declaredCurrency}
           insurance={insurance}
+          onInsuranceAutoApplied={setInsuranceAuto}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
           isDoorstepDelivery={canDoorstep && doorstepDelivery}
           isAddressDelivery={receiver?.addresses[0]?.deliveryMethod === 'address'}

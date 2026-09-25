@@ -41,7 +41,8 @@ function ReceiptContent() {
     <div className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-blue-700">Delivery</h1>
+          {/* ТЗ docx 21.09.26 (п.1): назва сервісу. */}
+          <h1 className="text-2xl font-extrabold brand-wordmark">ПОСИЛОЧКА</h1>
           <p className="text-sm text-gray-500">Електронна квитанція</p>
         </div>
 

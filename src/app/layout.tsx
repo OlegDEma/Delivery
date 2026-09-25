@@ -7,8 +7,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Delivery - Управління доставкою",
-  description: "Система управління доставкою посилок Європа-Україна",
+  // ТЗ docx 21.09.26 (п.1): назва сервісу — «ПОСИЛОЧКА».
+  title: "ПОСИЛОЧКА — перевезення пасажирів та посилок",
+  description: "Сервіс перевезень пасажирів та посилок Європа-Україна",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.svg",

@@ -35,7 +35,9 @@ export default function ClientPortalLayout({ children }: { children: React.React
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/my-orders" className="text-lg font-bold text-blue-700">Delivery</Link>
+          {/* ТЗ docx 21.09.26 (п.2): у клієнтському порталі (в т.ч. на створенні
+              посилки) назва теж «ПОСИЛОЧКА». */}
+          <Link href="/my-orders" className="text-lg font-extrabold brand-wordmark">ПОСИЛОЧКА</Link>
           <div className="flex items-center gap-1">
             {NAV.map(item => (
               <Link

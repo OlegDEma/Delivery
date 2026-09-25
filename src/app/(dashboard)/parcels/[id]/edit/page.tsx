@@ -127,6 +127,12 @@ export default function EditParcelPage() {
   const [description, setDescription] = useState('');
   const [declaredValue, setDeclaredValue] = useState('');
   const [insurance, setInsurance] = useState(false);
+  // ТЗ docx 21.09.26 (п.4): понад 50 € оголошеної вартості (для UA→EU —
+  // гривневий еквівалент) страхування вмикається автоматично на сервері.
+  // Прапорець приходить з «Розрахунку вартості» — блокуємо чекбокс, щоб
+  // оператор не знімав те, що вже враховано в сумі.
+  const [insuranceAuto, setInsuranceAuto] = useState(false);
+
   const [needsPackaging, setNeedsPackaging] = useState(false);
   // ТЗ docx 01.07.26: opt-in «Доставка до порога будинку».
   const [doorstepDelivery, setDoorstepDelivery] = useState(false);
@@ -352,7 +358,7 @@ export default function EditParcelPage() {
         shipmentType,
         description: description || null,
         declaredValue: declaredValue ? Number(declaredValue) : 0,
-        insuranceApplied: insurance,
+        insuranceApplied: insurance || insuranceAuto,
         needsPackaging,
         // ТЗ docx 02.07.26 (D4): не застосовуємо doorstep, якщо опція недоступна.
         doorstepDelivery: canDoorstep && doorstepDelivery,
@@ -558,7 +564,7 @@ export default function EditParcelPage() {
 
             <div className="rounded-lg border p-3 bg-gray-50">
               <div className="flex items-center gap-2">
-                <Checkbox id="insurance-cb" checked={insurance} onCheckedChange={(c) => setInsurance(c === true)} />
+                <Checkbox id="insurance-cb" checked={insurance || insuranceAuto} disabled={insuranceAuto} onCheckedChange={(c) => setInsurance(c === true)} />
                 <Label htmlFor="insurance-cb" className="text-sm font-medium cursor-pointer">
                   Страхування{' '}
                   <FieldHint text="При активації до вартості додається % від Оголошеної вартості." />
@@ -797,6 +803,7 @@ export default function EditParcelPage() {
           declaredValue={Number(declaredValue) || 0}
           declaredValueCurrency={declaredCurrency}
           insurance={insurance}
+          onInsuranceAutoApplied={setInsuranceAuto}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
           isDoorstepDelivery={canDoorstep && doorstepDelivery}
           isAddressDelivery={parcel.receiverAddress?.deliveryMethod === 'address'}

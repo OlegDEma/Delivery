@@ -229,6 +229,9 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
   let parcelMoneyCost = 0;
   let doorstepCost = 0;
   let totalCost = 0;
+  // ТЗ docx 21.09.26 (п.4): страхування понад 50 € вмикається автоматично —
+  // прапорець беремо з розрахунку, щоб у посилці стояло insuranceApplied=true.
+  let insuranceAutoApplied = false;
   if (pricingCountry) {
     const config = await prisma.pricingConfig.findFirst({
       where: { country: pricingCountry, direction: input.direction, isActive: true },
@@ -272,6 +275,7 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
       packagingCost = breakdown.packagingCost;
       doorstepCost = breakdown.doorstepCost;
       insuranceCost = breakdown.insuranceCost;
+      insuranceAutoApplied = breakdown.insuranceAutoApplied;
       addressDeliveryCost = breakdown.addressDeliveryCost;
       pickupPointCost = breakdown.pickupPointCost;
       parcelMoneyCost = breakdown.parcelMoneyCost;
@@ -338,7 +342,7 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
           packagingCost: packagingCost || null,
           doorstepCost: doorstepCost || null,
           insuranceCost: insuranceCost || null,
-          insuranceApplied: input.insurance === true,
+          insuranceApplied: input.insurance === true || insuranceAutoApplied,
           addressDeliveryCost: addressDeliveryCost || null,
           pickupPointCost: pickupPointCost || null,
           isMultiParcelPickup:

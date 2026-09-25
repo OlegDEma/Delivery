@@ -66,7 +66,8 @@ export default function TrackingPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col items-center px-4 pt-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-700 mb-2">Delivery</h1>
+          {/* ТЗ docx 21.09.26 (п.1): єдина назва сервісу на всіх клієнтських сторінках. */}
+          <h1 className="text-3xl font-extrabold brand-wordmark mb-2">ПОСИЛОЧКА</h1>
           <p className="text-gray-500">Відстеження посилки</p>
         </div>
 

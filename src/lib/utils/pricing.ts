@@ -1,4 +1,5 @@
 import { getBillableWeight } from './volumetric';
+import { INSURANCE_AUTO_THRESHOLD_EUR } from '@/lib/constants/insurance';
 
 /**
  * Pricing inputs used by `calculateParcelCost`. Mirrors the persisted
@@ -155,6 +156,8 @@ export interface CostBreakdown {
    */
   deliveryCost: number;
   insuranceCost: number;
+  /** ТЗ docx 21.09.26 (п.4): страхування ввімкнулось автоматично (понад 50 €). */
+  insuranceAutoApplied: boolean;
   packagingCost: number;
   /** ТЗ docx 29.06.26 «Тарифи»: надбавка «Доставка до порога будинку» (адитивна). */
   doorstepCost: number;
@@ -233,8 +236,14 @@ export function calculateParcelCost(
   const deliveryCost = roundMoney(Math.max(baseDeliveryCost, minimumApplied));
 
   // 3. Страхування — opt-in via checkbox, % from declaredValue.
+  // ТЗ docx 21.09.26 (п.4): понад 50 € оголошеної вартості страхування
+  // вмикається АВТОМАТИЧНО — незалежно від чекбокса у формі. declaredValue тут
+  // уже в EUR (конвертація в toEur), тож для UA→EU це гривневий еквівалент.
+  const insuranceAutoApplied =
+    config.insuranceEnabled && parcel.declaredValue > INSURANCE_AUTO_THRESHOLD_EUR;
+  const insuranceOn = parcel.insurance || insuranceAutoApplied;
   let insuranceCost = 0;
-  if (parcel.insurance && config.insuranceEnabled && parcel.declaredValue > 0) {
+  if (insuranceOn && config.insuranceEnabled && parcel.declaredValue > 0) {
     insuranceCost = roundMoney(parcel.declaredValue * (config.insurancePercent / 100));
   }
 
@@ -294,6 +303,7 @@ export function calculateParcelCost(
     minimumLabel,
     deliveryCost,
     insuranceCost,
+    insuranceAutoApplied,
     packagingCost,
     doorstepCost,
     // Lagacy: ці компоненти більше не нараховуються окремо — вони стали

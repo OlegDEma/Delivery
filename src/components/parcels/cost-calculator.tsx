@@ -46,6 +46,14 @@ interface CostCalculatorProps {
    * від поточної наявності тарифу. Якщо totalCost ще не розраховано —
    * повертаємось до живої оцінки.
    */
+  /**
+   * ТЗ docx 21.09.26 (п.4): сервер сам вмикає страхування, коли оголошена
+   * вартість понад 50 € (для UA→EU — гривневий еквівалент за курсом НБУ).
+   * Повідомляємо про це форму, щоб чекбокс «Страхування» став увімкненим і
+   * заблокованим — інакше клієнт бачив би незакреслений чекбокс, а в сумі
+   * страхування вже враховане.
+   */
+  onInsuranceAutoApplied?: (auto: boolean) => void;
   saved?: {
     deliveryCost: number | string | null;
     insuranceCost: number | string | null;
@@ -71,6 +79,8 @@ interface CostBreakdown {
   minimumLabel: string | null;
   deliveryCost: number;
   insuranceCost: number;
+  /** ТЗ docx 21.09.26 (п.4): страхування ввімкнулось автоматично (понад 50 €). */
+  insuranceAutoApplied?: boolean;
   packagingCost: number;
   /** ТЗ docx 29.06.26: надбавка «Доставка до порога будинку». */
   doorstepCost: number;
@@ -152,8 +162,11 @@ export function CostCalculator(props: CostCalculatorProps) {
           }),
         });
         if (res.ok) {
-          setCost(await res.json());
+          const data: CostBreakdown = await res.json();
+          setCost(data);
           setError('');
+          // ТЗ docx 21.09.26 (п.4): віддаємо формі прапорець авто-страхування.
+          props.onInsuranceAutoApplied?.(!!data.insuranceAutoApplied);
         } else {
           setCost(null);
           // ТЗ docx 12.07.26: Клієнту — нейтральний текст; staff'у — 404
@@ -300,7 +313,10 @@ export function CostCalculator(props: CostCalculatorProps) {
       </div>
       {cost.insuranceCost > 0 && (
         <div className="flex justify-between">
-          <span className="text-gray-600">Страхування:</span>
+          {/* ТЗ docx 21.09.26 (п.4): пояснюємо, чому страхування вже в сумі. */}
+          <span className="text-gray-600">
+            Страхування{cost.insuranceAutoApplied ? ' (обовʼязкове)' : ''}:
+          </span>
           <span>{formatCurrency(cost.insuranceCost, 'EUR')}</span>
         </div>
       )}

@@ -76,8 +76,11 @@ function LoginInner() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Delivery</CardTitle>
-        <CardDescription>Система управління доставкою</CardDescription>
+        {/* ТЗ docx 21.09.26 (п.1): Привітальна сторінка — назва сервісу
+            «ПОСИЛОЧКА» насиченим оранжевим із темним контуром (клас
+            .brand-wordmark у globals.css) і новий підзаголовок. */}
+        <CardTitle className="text-3xl font-extrabold brand-wordmark">ПОСИЛОЧКА</CardTitle>
+        <CardDescription>Сервіс перевезень пасажирів та посилок</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
