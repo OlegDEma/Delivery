@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { STAFF_ROLES } from '@/lib/constants/roles';
+import type { UserRole } from '@/generated/prisma/client';
+
+const VALID_ROLES: string[] = ['super_admin', 'admin', 'cashier', 'warehouse_worker', 'driver_courier', 'client'];
 
 // GET /api/users — list all users (admin only)
-export async function GET() {
+export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -20,7 +24,14 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  // ТЗ docx 28.09.26: «У вкладці "Адміністрування/Користувачі" повинні бути лише
+  // працівники — водії, адміни, менеджери». Клієнти живуть у «Адміністрування/Клієнти»
+  // (`/clients`), а тут їх було видно разом із персоналом (17 клієнтських профілів).
+  // Дозволяємо ?role=client лише як свідомий запит (напр. для діагностики).
+  const roleParam = new URL(request.url).searchParams.get('role');
+  const roleFilter = VALID_ROLES.includes(roleParam ?? '') ? (roleParam as UserRole) : null;
   const profiles = await prisma.profile.findMany({
+    where: roleFilter ? { role: roleFilter } : { role: { in: STAFF_ROLES as UserRole[] } },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
@@ -65,7 +76,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const VALID_ROLES = ['super_admin', 'admin', 'cashier', 'warehouse_worker', 'driver_courier', 'client'];
   if (!VALID_ROLES.includes(role)) {
     return NextResponse.json({ error: 'Невалідна роль' }, { status: 400 });
   }
