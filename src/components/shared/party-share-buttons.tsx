@@ -106,7 +106,12 @@ export function PartyShareButtons({ parcelId, toParty, phone, message, onSent, c
     logSend(ch, 'manual')
       .then(() => { toast.success(`${ch.title}: відмічено як надіслане`); onSent?.(); })
       .catch(() => {});
-    setPending(null);
+    // Аудит 01.10.26 (скарга ТЗ 28.09 «підтвердження не приходить, хоча пише що пішло»):
+    // href/target цього <a> залежать від `pending`. Синхронний setPending(null)
+    // React 19 застосовує ДО того, як браузер виконає переход за посиланням —
+    // href ставав '#', і WhatsApp/Viber/SMS не відкривались узагалі. Відкладаємо
+    // скидання стану, щоб навігація встигла відбутись.
+    setTimeout(() => setPending(null), 400);
   }
 
   const isConfigured = pending ? !!configured[pending.key] : false;

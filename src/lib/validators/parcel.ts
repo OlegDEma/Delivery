@@ -93,6 +93,12 @@ export const clientOrderSchema = z.object({
   shipmentType: shipmentTypeSchema.optional(),
   description: z.string().trim().max(500).optional().nullable(),
   declaredValue: moneySchema.optional().nullable(),
+  /**
+   * Аудит 01.10.26: форма клієнта з 21.09 надсилає валюту (для UA→EU — «грн»),
+   * але схема її не приймала — Zod молча відкидав ключ, і гривні вважались євро
+   * (страхування 3% від «1000 EUR» замість 1000 грн). Приймаємо явно.
+   */
+  declaredValueCurrency: z.enum(['EUR', 'UAH']).optional(),
   /** Insurance opt-in checkbox (per ТЗ). */
   insurance: z.boolean().optional(),
   /** Packaging opt-in checkbox (per ТЗ). */

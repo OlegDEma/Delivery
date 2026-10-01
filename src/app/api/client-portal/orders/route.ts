@@ -210,6 +210,10 @@ export async function POST(request: NextRequest) {
       shipmentType: body.shipmentType,
       description: body.description ?? null,
       declaredValue: body.declaredValue ?? null,
+      // Аудит 01.10.26: валюта оголошеної вартості — як у формі Працівника
+      // (UA→EU: відправник в Україні → гривня). Без цього toEur() не конвертує.
+      declaredValueCurrency:
+        body.declaredValueCurrency ?? (body.direction === 'ua_to_eu' ? 'UAH' : 'EUR'),
       // Per ТЗ: opt-in послуги. Тариф для напрямку визначає % і суми.
       insurance: body.insurance ?? false,
       needsPackaging: body.needsPackaging ?? false,

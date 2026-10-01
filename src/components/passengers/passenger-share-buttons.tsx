@@ -71,7 +71,10 @@ export function PassengerShareButtons({ passengerId, kind, phone, className }: P
     })
       .then((r) => { if (r.ok) toast.success(`${ch.title}: відмічено як надіслане`); })
       .catch(() => {});
-    setPending(null);
+    // Аудит 01.10.26: те саме, що у party-share-buttons — href цього <a>
+    // залежить від `pending`, і синхронне скидання стану не давало браузеру
+    // перейти в застосунок (href ставав '#').
+    setTimeout(() => setPending(null), 400);
   }
 
   const title = kind === 'invoice' ? 'рахунок' : 'підтвердження';
