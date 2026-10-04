@@ -323,7 +323,11 @@ export function ParcelPlacesCard({
                 <div key={place.placeNumber} className="flex items-center justify-between text-sm border-b pb-1 last:border-0">
                   <div>
                     <span className="font-medium">#{place.placeNumber}</span>
-                    {place.itnPlace && (
+                    {/* ТЗ docx 03.10.26 (п.1): «поки що не відображати ІТН, поки не
+                        розробили правила його формування» — номер місця походить
+                        від ІТН, тож Клієнту його теж не показуємо. Працівнику —
+                        як було (потрібен для етикеток і сканування). */}
+                    {place.itnPlace && !clientFacing && (
                       <span className="text-xs text-gray-400 ml-2 font-mono">{place.itnPlace}</span>
                     )}
                     {place.needsPackaging && (
