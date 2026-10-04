@@ -23,6 +23,8 @@ interface ParcelListItem {
   id: string;
   itn: string;
   internalNumber: string;
+  /** ТЗ docx 03.10.26 (п.4): ТТН Нової пошти має бути видно і в списку Працівника. */
+  npTtn: string | null;
   direction: string;
   status: ParcelStatusType;
   totalPlacesCount: number;
@@ -407,6 +409,14 @@ function ParcelsContent() {
                           <Badge className={`text-xs whitespace-normal text-left h-auto py-0.5 ${STATUS_COLORS[p.status]}`}>
                             {statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction })}
                           </Badge>
+                          {/* ТЗ docx 03.10.26 (п.4): «Після введення ТТН Клієнтом він
+                              повинен відображатись … і тут у будь-якого працівника» —
+                              у ТЗ червоним позначено саме рядок списку. */}
+                          {p.npTtn && (
+                            <Badge variant="secondary" className="text-xs whitespace-nowrap font-mono">
+                              ТТН {p.npTtn}
+                            </Badge>
+                          )}
                           {/* ТЗ docx 28.09.26 (зауваження «Неоплата в посилках коряво
                               відображається»): оплачена посилка мала зрозумілий бейдж, а
                               неоплачена — лише самотній значок 💰 у кінці рядка без підпису.

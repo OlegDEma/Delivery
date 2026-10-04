@@ -31,7 +31,7 @@ function baseUrl(): string {
 
 /** ТЗ docx 17.08.26 (Частина 3): текст підтвердження — той самий, що на детальній посилки. */
 export function buildConfirmationBody(parcel: {
-  internalNumber: string; itn: string; totalPlacesCount: number;
+  internalNumber: string; itn: string; npTtn?: string | null; totalPlacesCount: number;
   totalCost: unknown; direction: string; description: string | null;
   trip: { departureDate: Date | string; country: string } | null;
   // для parcelParties:
@@ -46,7 +46,9 @@ export function buildConfirmationBody(parcel: {
   return [
     `Посилка ${label}`,
     parcel.trip ? `Рейс: ${formatDate(parcel.trip.departureDate)}(${parcel.trip.country})` : null,
-    `ІТН: ${parcel.itn}`,
+    // ТЗ docx 03.10.26 (п.1): ІТН у тексті для Клієнта більше не друкуємо —
+    // правила його формування ще не розроблені. Замість нього — ТТН, коли є.
+    parcel.npTtn ? `ТТН: ${parcel.npTtn}` : null,
     `Отримувач: ${p.receiver.lastName} ${p.receiver.firstName}, ${p.receiver.phone}`,
     `Відправник: ${p.sender.lastName} ${p.sender.firstName}, ${p.sender.phone}`,
     `Місць: ${parcel.totalPlacesCount}`,
@@ -54,7 +56,8 @@ export function buildConfirmationBody(parcel: {
     cost > 0 ? `Вартість: ${cost.toFixed(2)} EUR` : null,
     `Напрямок: ${parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}`,
     parcel.description ? `Опис: ${parcel.description}` : null,
-    `Відстежити: ${baseUrl()}/tracking?q=${encodeURIComponent(parcel.itn)}`,
+    // Посилання — за внутрішнім номером/ТТН, щоб ІТН не «витікав» у тексті.
+    `Відстежити: ${baseUrl()}/tracking?q=${encodeURIComponent(parcel.npTtn || parcel.internalNumber)}`,
   ].filter((l) => l !== null).join('\n');
 }
 
@@ -162,7 +165,7 @@ export async function sendConfirmation(args: SendConfirmationArgs): Promise<{
   const parcel = await prisma.parcel.findUnique({
     where: { id: args.parcelId },
     select: {
-      id: true, internalNumber: true, itn: true, totalPlacesCount: true, totalCost: true,
+      id: true, internalNumber: true, itn: true, npTtn: true, totalPlacesCount: true, totalCost: true,
       direction: true, description: true, status: true, senderSnapshot: true, receiverSnapshot: true,
       sender: { select: { firstName: true, lastName: true, phone: true } },
       receiver: { select: { firstName: true, lastName: true, phone: true } },

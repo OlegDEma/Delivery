@@ -156,15 +156,12 @@ export default function PrintLabelPage() {
       <div className="print-label border-2 border-black p-2 mb-4 max-w-[58mm] mx-auto text-[10px] leading-tight">
         <div className="text-center font-bold text-[12px] mb-1">КВИТАНЦІЯ</div>
         <div className="text-center font-mono text-[11px] font-bold">{data.internalNumber}</div>
-        <div className="text-center text-[8px] mb-1">
-          ІТН: {data.itn}
-          {data.npTtn && (
-            <>
-              <br />
-              ТТН: {data.npTtn}
-            </>
-          )}
-        </div>
+        {/* ТЗ docx 03.10.26 (п.1): у квитанції, яку забирає Клієнт, ІТН не друкуємо —
+            правила його формування ще не розроблені. На самій етикетці код лишається:
+            це вміст QR/штрихкоду, без нього не відсканувати місце. */}
+        {data.npTtn && (
+          <div className="text-center text-[8px] mb-1">ТТН: {data.npTtn}</div>
+        )}
 
         <div className="border-t border-black pt-1 mb-1">
           <div className="font-bold">ВІД:</div>

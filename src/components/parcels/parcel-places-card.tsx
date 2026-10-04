@@ -228,9 +228,8 @@ export function ParcelPlacesCard({
               <div key={d.id} className="border rounded-md p-2 bg-gray-50">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">Місце #{d.placeNumber}</span>
-                  {d.itnPlace && (
-                    <span className="text-xs text-gray-400 font-mono">{d.itnPlace}</span>
-                  )}
+                  {/* ТЗ docx 03.10.26 (п.1): код місця походить від ІТН, тож не
+                      показуємо його нікому — ні Клієнту, ні Працівнику. */}
                 </div>
                 <div className="grid grid-cols-4 gap-1">
                   <div>
@@ -325,11 +324,9 @@ export function ParcelPlacesCard({
                     <span className="font-medium">#{place.placeNumber}</span>
                     {/* ТЗ docx 03.10.26 (п.1): «поки що не відображати ІТН, поки не
                         розробили правила його формування» — номер місця походить
-                        від ІТН, тож Клієнту його теж не показуємо. Працівнику —
-                        як було (потрібен для етикеток і сканування). */}
-                    {place.itnPlace && !clientFacing && (
-                      <span className="text-xs text-gray-400 ml-2 font-mono">{place.itnPlace}</span>
-                    )}
+                        від ІТН. Правка 04.10.26: ховаємо і від Працівника теж
+                        (раніше лишали йому). На етикетці код друкується далі —
+                        це вміст QR/штрихкоду для сканування. */}
                     {place.needsPackaging && (
                       <Badge variant="secondary" className="ml-2 text-xs">
                         {place.packagingDone ? 'Запаковано' : 'Пакування'}

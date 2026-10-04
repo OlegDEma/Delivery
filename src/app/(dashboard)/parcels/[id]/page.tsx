@@ -283,21 +283,25 @@ export default function ParcelDetailPage() {
   // ТЗ docx 08.08.26: текст ПІДТВЕРДЖЕННЯ (зведення посилки) для WhatsApp/Viber —
   // ЛИШЕ деталі відправлення (сторони, місця, вартість, напрямок), БЕЗ блоку
   // оплати/кур'єра/історії статусів (див. зображення у ТЗ).
+  // ТЗ docx 03.10.26 (п.1): ІТН не показуємо, поки не розроблені правила його
+  // формування — тож і посилання на відстеження будуємо за внутрішнім номером
+  // (роут /api/tracking шукає і по ньому, і по ТТН).
   const trackingUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/tracking?q=${encodeURIComponent(parcel.itn)}`
+    ? `${window.location.origin}/tracking?q=${encodeURIComponent(parcel.npTtn || parcel.internalNumber)}`
     : '';
   // ТЗ docx 17.08.26 (Частина третя, за фото): формат підтвердження —
   //   Посилка <номер без суфікса місць «1/2»>
   //   Рейс: <дата>(<КОД>)
-  //   ІТН: … / Отримувач / Відправник / Місць: N   (без ваги, без ТТН)
+  //   Отримувач / Відправник / Місць: N   (без ваги)
   //   <порожній рядок>
   //   Вартість / Напрямок / Опис / Відстежити
+  // Рядок «ІТН: …» прибрано за ТЗ docx 03.10.26 (п.1); замість нього — ТТН, коли є.
   // Суфікс кількості місць («135 Amstetten 1/2, …» → «135 Amstetten, …») прибираємо.
   const parcelLabel = parcel.internalNumber.replace(/\s\d+(?:\/\d+)?,/, ',');
   const confirmationMessage = [
     `Посилка ${parcelLabel}`,
     parcel.trip ? `Рейс: ${formatDate(parcel.trip.departureDate)}(${parcel.trip.country})` : null,
-    `ІТН: ${parcel.itn}`,
+    parcel.npTtn ? `ТТН: ${parcel.npTtn}` : null,
     `Отримувач: ${parties.receiver.lastName} ${parties.receiver.firstName}, ${parties.receiver.phone}`,
     `Відправник: ${parties.sender.lastName} ${parties.sender.firstName}, ${parties.sender.phone}`,
     `Місць: ${parcel.totalPlacesCount}`,
@@ -376,10 +380,11 @@ export default function ParcelDetailPage() {
             </>
           )}
         </div>
+        {/* ТЗ docx 03.10.26 (п.1): «Поки що не відображати ІТН, поки не розробили
+            правила його формування» — прибрано і в Працівника, а не лише в Клієнта
+            (правка 04.10.26 після зауваження: ІТН було видно в кабінеті).
+            Код лишається на етикетці/в QR і в пошуку — він потрібен для сканування. */}
         <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
-          <span>ІТН: <span className="font-mono">{parcel.itn}</span></span>
-          <CopyButton text={parcel.itn} />
-          <span className="text-gray-300">|</span>
           {parcel.npTtn ? (
             <>
               <span>ТТН: <span className="font-mono">{parcel.npTtn}</span></span>

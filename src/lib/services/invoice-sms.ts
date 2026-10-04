@@ -35,6 +35,8 @@ export interface InvoiceContext {
   itn: string;
   /** Internal number (e.g. «2026/N00031»). */
   internalNumber: string;
+  /** ТЗ docx 03.10.26 (п.2): ТТН Нової пошти — доступна заміна у шаблоні. */
+  npTtn?: string | null;
 }
 
 export interface BankDetails {
@@ -68,6 +70,7 @@ export function renderInvoiceTemplate(
     amount: ctx.amount.toFixed(2),
     itn: ctx.itn,
     internalNumber: ctx.internalNumber,
+    npTtn: ctx.npTtn ?? '',
     bankName: bank.bankName ?? '',
     iban: bank.iban ?? '',
     accountHolder: bank.accountHolder ?? '',
@@ -158,7 +161,7 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
   const parcel = await prisma.parcel.findUnique({
     where: { id: args.parcelId },
     select: {
-      id: true, itn: true, internalNumber: true, totalCost: true,
+      id: true, itn: true, npTtn: true, internalNumber: true, totalCost: true,
       // ТЗ docx 26.07.26 (п.1): для accepted+ ПІБ/тел беремо зі знімка (parcelParties).
       status: true, senderSnapshot: true, receiverSnapshot: true,
       sender: { select: { firstName: true, lastName: true, phone: true } },
@@ -187,6 +190,7 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
       amount: totalCost,
       itn: parcel.itn,
       internalNumber: parcel.internalNumber,
+      npTtn: parcel.npTtn,
     },
     {
       bankName: settings?.bankName,
