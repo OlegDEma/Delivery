@@ -145,6 +145,9 @@ export default function NewOrderPage() {
   const [collectionBuilding, setCollectionBuilding] = useState('');
   const [collectionLandmark, setCollectionLandmark] = useState('');
   const [collectionWarehouse, setCollectionWarehouse] = useState('');
+  // ТЗ docx 03.10.26 (п.2): номер ТТН Нової пошти, який Клієнт вводить при
+  // способі передачі «Пошта». Зберігається в посилці (parcels.np_ttn).
+  const [npTtn, setNpTtn] = useState('');
 
   // Автопідставляння країн за напрямком (ТЗ §E8). Виноситься в колбек,
   // щоб не дзеркалити стейт у useEffect — react-hooks/set-state-in-effect.
@@ -375,6 +378,8 @@ export default function NewOrderPage() {
             height: Number(p.height) || undefined,
           })),
           collectionMethod, collectionPointId, collectionDate,
+          // ТЗ docx 03.10.26 (п.2, п.4): ТТН зберігаємо в посилці.
+          npTtn: npTtn.trim() || undefined,
           collectionAddress: composedCollectionAddress,
         }),
       });
@@ -685,6 +690,7 @@ export default function NewOrderPage() {
                   building: collectionBuilding,
                   landmark: collectionLandmark,
                   warehouseNum: collectionWarehouse,
+                  npTtn,
                 }}
                 onChange={(next) => {
                   setCollectionMethod(next.method);
@@ -695,6 +701,7 @@ export default function NewOrderPage() {
                   setCollectionBuilding(next.building ?? '');
                   setCollectionLandmark(next.landmark ?? '');
                   setCollectionWarehouse(next.warehouseNum ?? '');
+                  setNpTtn(next.npTtn ?? '');
                   // ТЗ docx 29.06.26 §2: при виборі пункту збору його поштовий
                   // код авто-вставляється в «Індекс» Відправника.
                   if (next.method === 'pickup_point' && next.postalCode) {

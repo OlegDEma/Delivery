@@ -79,16 +79,14 @@ export default function MyOrdersPage() {
               <div className="flex items-start justify-between mb-1">
                 <div>
                   <div className="font-mono text-sm font-medium">{o.internalNumber}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">
-                    ІТН: <span className="font-mono">{o.itn}</span>
-                    {/* ТЗ §7: поряд з ІТН — ТТН Нової Пошти коли вона є. */}
-                    {o.npTtn && (
-                      <>
-                        <span className="mx-1.5 text-gray-300">|</span>
-                        ТТН: <span className="font-mono">{o.npTtn}</span>
-                      </>
-                    )}
-                  </div>
+                  {/* ТЗ docx 03.10.26 (п.1): ІТН Клієнту НЕ показуємо, поки не
+                      розроблені правила його формування. (п.4) Замість нього —
+                      ТТН, введений Клієнтом. */}
+                  {o.npTtn && (
+                    <div className="text-xs text-gray-400 mt-0.5">
+                      ТТН: <span className="font-mono">{o.npTtn}</span>
+                    </div>
+                  )}
                 </div>
                 <Badge className={STATUS_COLORS[o.status]}>
                   {STATUS_LABELS[o.status]}

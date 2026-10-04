@@ -59,6 +59,12 @@ export interface CollectionState {
   building?: string;
   landmark?: string;
   warehouseNum?: string;
+  /**
+   * ТЗ docx 03.10.26 (п.2, п.4): номер ТТН Нової пошти (для EU-пошти — номер
+   * накладної місцевого перевізника). Клієнт вводить його при способі «Пошта»,
+   * далі він показується і Клієнту, і Працівнику замість ІТН.
+   */
+  npTtn?: string;
 }
 
 interface CollectionBlockProps {
@@ -480,6 +486,21 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
               />
             </div>
           )}
+          {/* ТЗ docx 03.10.26 (п.2, п.3): при відправці поштою Клієнт вводить номер ТТН. */}
+          {clientFacing && (
+            <div>
+              <Label className="text-xs text-gray-500">Номер ТТН Нової пошти *</Label>
+              <Input
+                value={value.npTtn ?? ''}
+                onChange={(e) => onChange({ ...value, npTtn: e.target.value })}
+                placeholder="Напр. 59000123456789"
+                inputMode="numeric"
+              />
+              <p className="text-[11px] text-gray-500 mt-1">
+                Введіть номер ТТН після відправки — за ним ми знайдемо Вашу посилку.
+              </p>
+            </div>
+          )}
           <div className="text-xs text-gray-700 bg-amber-50 border border-amber-200 rounded p-3 space-y-2 leading-snug">
             <div className="font-medium text-amber-900">
               Відправте Вашу посилку нам Новою поштою
@@ -533,6 +554,17 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
                 value={value.warehouseNum ?? ''}
                 onChange={(e) => onChange({ ...value, warehouseNum: e.target.value })}
                 placeholder="Напр. 5"
+              />
+            </div>
+          )}
+          {/* ТЗ docx 03.10.26 (п.2): для EU-пошти — номер накладної перевізника. */}
+          {clientFacing && (
+            <div>
+              <Label className="text-xs text-gray-500">Номер накладної (трек-номер)</Label>
+              <Input
+                value={value.npTtn ?? ''}
+                onChange={(e) => onChange({ ...value, npTtn: e.target.value })}
+                placeholder="Номер відправлення локальної пошти"
               />
             </div>
           )}

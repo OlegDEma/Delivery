@@ -40,6 +40,8 @@ export interface CreateParcelInput {
   description?: string | null;
   declaredValue?: number | null;
   declaredValueCurrency?: 'EUR' | 'UAH';
+  /** ТЗ docx 03.10.26 (п.2): номер ТТН Нової пошти, якщо Клієнт відправляє поштою. */
+  npTtn?: string | null;
   /** When true, user explicitly opted in for insurance — overrides pricing config. */
   insurance?: boolean;
   /**
@@ -317,6 +319,8 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
       (itn) => tx.parcel.create({
         data: {
           itn,
+          // ТЗ docx 03.10.26 (п.2, п.4): ТТН, введений Клієнтом при відправці поштою.
+          npTtn: input.npTtn?.trim() || null,
           internalNumber,
           sequentialNumber: seqNum,
           shortNumber,

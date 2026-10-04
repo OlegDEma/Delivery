@@ -231,6 +231,8 @@ export async function POST(request: NextRequest) {
       collectionPointId: body.collectionPointId ?? null,
       collectionDate: body.collectionDate ? new Date(body.collectionDate) : null,
       collectionAddress: body.collectionAddress ?? null,
+      // ТЗ docx 03.10.26 (п.2): ТТН Нової пошти від Клієнта.
+      npTtn: body.npTtn ?? null,
     });
 
     return NextResponse.json(created, { status: 201 });

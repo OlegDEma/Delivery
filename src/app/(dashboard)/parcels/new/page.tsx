@@ -85,6 +85,10 @@ export default function NewParcelPage() {
       setPayer(data.payer);
       setPaymentMethod(data.paymentMethod);
       setPaymentInUkraine(data.paymentInUkraine);
+      // ТЗ docx 28.09.26 (скарга «скопіював N5 → N6, у Водія її нема»): копія
+      // не переносила рейс, а «Мої посилки» Водія показують лише посилки рейсів
+      // його поїздки — тож копія ставала невидимою навіть для автора.
+      if (data.tripId) setSelectedTripId(data.tripId);
       // Set sender/receiver from data
       if (data.sender) {
         setSender({

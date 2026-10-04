@@ -147,6 +147,12 @@ export default function ParcelDetailPage() {
   const [npTtn, setNpTtn] = useState('');
   const [editTtn, setEditTtn] = useState(false);
   const [editTrip, setEditTrip] = useState(false);
+  // ТЗ docx 28.09.26 (скарга «нотатка з акаунта водія не створюється»):
+  // замість window.prompt (на смартфоні браузер може його блокувати, і помилку
+  // запиту ніде не було видно) — поле просто в сторінці + показ помилки сервера.
+  const [noteDraft, setNoteDraft] = useState('');
+  const [addingNote, setAddingNote] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [trips, setTrips] = useState<TripOption[]>([]);
   const [couriers, setCouriers] = useState<{ id: string; fullName: string }[]>([]);
@@ -756,22 +762,59 @@ export default function ParcelDetailPage() {
             }}
           />
         </label>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            const note = window.prompt('Додати нотатку до посилки:');
-            if (!note || !note.trim()) return;
-            fetch(`/api/parcels/${id}`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ status: parcel.status, statusNote: note }),
-            }).then(fetchParcel);
-          }}
-        >
+        <Button size="sm" variant="outline" onClick={() => { setNoteDraft(''); setNoteOpen(true); }}>
           <StickyNote className="w-4 h-4 mr-1" /> Додати нотатку
         </Button>
       </div>
+
+      {/* ТЗ docx 28.09.26: нотатка додається полем у сторінці (не нативним
+          prompt, який на смартфоні може бути заблокований), а помилка сервера
+          показується користувачу — раніше запит падав мовчки. */}
+      {noteOpen && (
+        <div className="border rounded-lg p-3 space-y-2 bg-amber-50/50">
+          <Label className="text-xs text-gray-600">Нотатка до посилки</Label>
+          <Input
+            value={noteDraft}
+            onChange={(e) => setNoteDraft(e.target.value)}
+            placeholder="Напр. клієнт просив зателефонувати після 18:00"
+            autoFocus
+          />
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              disabled={addingNote || !noteDraft.trim()}
+              onClick={async () => {
+                setAddingNote(true);
+                try {
+                  const res = await fetch(`/api/parcels/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: parcel.status, statusNote: noteDraft.trim() }),
+                  });
+                  if (!res.ok) {
+                    const data = await res.json().catch(() => null);
+                    toast.error(data?.error || 'Не вдалося додати нотатку');
+                    return;
+                  }
+                  toast.success('Нотатку додано');
+                  setNoteOpen(false);
+                  setNoteDraft('');
+                  fetchParcel();
+                } catch {
+                  toast.error('Немає звʼязку з сервером. Спробуйте ще раз.');
+                } finally {
+                  setAddingNote(false);
+                }
+              }}
+            >
+              {addingNote ? 'Збереження…' : 'Зберегти нотатку'}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setNoteOpen(false)} disabled={addingNote}>
+              Скасувати
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Галерея фото (якщо є) — під кнопкою */}
       {parcel.photos?.length ? (

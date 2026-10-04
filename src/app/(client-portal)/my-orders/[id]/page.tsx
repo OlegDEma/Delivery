@@ -110,6 +110,11 @@ export default function MyOrderDetailPage() {
   // ТЗ docx 15.07.26 (п.3): тарифи — для рядка «Розрахункова вага» (як у staff).
   // Клієнту дозволено GET /api/pricing (докс 12.07.26 middleware-виняток).
   const [pricingConfigs, setPricingConfigs] = useState<PricingCfg[]>([]);
+  // ТЗ docx 03.10.26 (п.2): Клієнт може додати або змінити номер ТТН.
+  const [editTtn, setEditTtn] = useState(false);
+  const [ttnDraft, setTtnDraft] = useState('');
+  const [savingTtn, setSavingTtn] = useState(false);
+  const [ttnError, setTtnError] = useState('');
 
   const fetchParcel = useCallback(() => {
     fetch(`/api/client-portal/orders/${id}`)
@@ -123,6 +128,31 @@ export default function MyOrderDetailPage() {
   }, [id]);
 
   useEffect(() => { fetchParcel(); }, [fetchParcel]);
+
+  // ТЗ docx 03.10.26 (п.2, п.4): зберегти ТТН і одразу показати його Клієнту
+  // (Працівник бачить те саме поле у своїй детальній).
+  async function saveTtn() {
+    setSavingTtn(true);
+    setTtnError('');
+    try {
+      const res = await fetch(`/api/client-portal/orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ npTtn: ttnDraft.trim() || null }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setTtnError(data?.error || 'Не вдалося зберегти ТТН');
+        return;
+      }
+      setEditTtn(false);
+      fetchParcel();
+    } catch {
+      setTtnError('Немає звʼязку з сервером. Спробуйте ще раз.');
+    } finally {
+      setSavingTtn(false);
+    }
+  }
   useEffect(() => {
     fetch('/api/pricing').then(r => (r.ok ? r.json() : [])).then(setPricingConfigs).catch(() => {});
   }, []);
@@ -167,18 +197,59 @@ export default function MyOrderDetailPage() {
           </Badge>
         </div>
         <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
-          <span>ІТН: <span className="font-mono">{parcel.itn}</span></span>
-          <CopyButton text={parcel.itn} />
-          {parcel.npTtn && (
+          {/* ТЗ docx 03.10.26 (п.1): ІТН Клієнту не показуємо — правила його
+              формування ще не розроблені. (п.4) Замість нього — ТТН. */}
+          {/* ТЗ docx 03.10.26 (п.2): номер ТТН Клієнт може додати і змінити. */}
+          {editTtn ? (
+            <span className="inline-flex items-center gap-1">
+              <input
+                value={ttnDraft}
+                onChange={(e) => setTtnDraft(e.target.value)}
+                placeholder="Номер ТТН"
+                className="border rounded px-2 py-0.5 text-xs font-mono w-44"
+                autoFocus
+              />
+              <Button size="sm" className="h-6 text-xs px-2" onClick={saveTtn} disabled={savingTtn}>
+                {savingTtn ? '…' : 'Зберегти'}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 text-xs px-2"
+                onClick={() => { setEditTtn(false); setTtnError(''); }}
+                disabled={savingTtn}
+              >
+                Скасувати
+              </Button>
+            </span>
+          ) : parcel.npTtn ? (
             <>
-              <span className="text-gray-300">|</span>
               <span>ТТН: <span className="font-mono">{parcel.npTtn}</span></span>
               <CopyButton text={parcel.npTtn} />
+              <button
+                type="button"
+                onClick={() => { setTtnDraft(parcel.npTtn || ''); setEditTtn(true); }}
+                className="text-blue-600 hover:underline"
+              >
+                змінити
+              </button>
+              <span className="text-gray-300">|</span>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => { setTtnDraft(''); setEditTtn(true); }}
+                className="text-blue-600 hover:underline"
+              >
+                + Додати номер ТТН
+              </button>
+              <span className="text-gray-300">|</span>
             </>
           )}
-          <span className="text-gray-300">|</span>
           <span>{formatDateTime(parcel.createdAt)}</span>
         </div>
+        {ttnError && <div className="text-xs text-red-600 mt-1">{ttnError}</div>}
       </div>
 
       {/* Відправник / Отримувач — той самий компактний блок, що й у Працівника

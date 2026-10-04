@@ -88,6 +88,15 @@ export const createParcelSchema = z.object({
 });
 
 /** Client portal POST /api/client-portal/orders */
+/**
+ * ТЗ docx 03.10.26 (п.2): єдине, що Клієнт може змінити у вже створеній
+ * посилці — номер ТТН. Окрема вузька схема, щоб через цей роут не можна було
+ * підмінити вартість, статус чи сторони.
+ */
+export const clientParcelPatchSchema = z.object({
+  npTtn: z.string().trim().max(50).optional().nullable(),
+});
+
 export const clientOrderSchema = z.object({
   direction: directionSchema.optional(),
   shipmentType: shipmentTypeSchema.optional(),
@@ -99,6 +108,8 @@ export const clientOrderSchema = z.object({
    * (страхування 3% від «1000 EUR» замість 1000 грн). Приймаємо явно.
    */
   declaredValueCurrency: z.enum(['EUR', 'UAH']).optional(),
+  /** ТЗ docx 03.10.26 (п.2): номер ТТН Нової пошти, введений Клієнтом. */
+  npTtn: z.string().trim().max(50).optional().nullable(),
   /** Insurance opt-in checkbox (per ТЗ). */
   insurance: z.boolean().optional(),
   /** Packaging opt-in checkbox (per ТЗ). */
