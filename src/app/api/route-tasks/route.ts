@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
   }
   const sheet = await prisma.routeSheet.findUnique({
     where: { id: routeSheetId },
-    select: { id: true, sheetDate: true, createdById: true },
+    select: { id: true, sheetDate: true, createdById: true, journeyId: true },
   });
   if (!sheet) return NextResponse.json({ error: "Маршрутний лист не знайдено" }, { status: 404 });
   if (guard.user.role !== ROLES.SUPER_ADMIN && sheet.createdById !== guard.user.userId) {
@@ -120,10 +120,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Оберіть хоча б одну адресу' }, { status: 400 });
   }
 
+  // Аудит 04.10.26: і посилки, і ручні адреси беремо ЛИШЕ з поїздки цього листа.
+  // Раніше id приймались як є, тож запитом можна було затягнути в свій лист
+  // адресу з чужої поїздки або з чужого Маршрутного листа.
+  const journeyTripIds = (
+    await prisma.trip.findMany({ where: { journeyId: sheet.journeyId }, select: { id: true } })
+  ).map((t) => t.id);
+
   let created = 0;
   if (parcelIds.length) {
     const parcels = await prisma.parcel.findMany({
-      where: { id: { in: parcelIds } },
+      where: { id: { in: parcelIds }, tripId: { in: journeyTripIds } },
       select: { id: true, tripId: true, direction: true, receiverAddressId: true, senderAddressId: true },
     });
     for (const p of parcels) {
@@ -141,8 +148,19 @@ export async function POST(request: NextRequest) {
     }
   }
   // Наявні ручні адреси (taskDate=null) → переміщуємо в лист (проставляємо дату).
+  // ТЗ docx 03.09.26: після перенесення адреса за замовчуванням знову «Очікує».
   if (taskIds.length) {
-    const r = await prisma.routeTask.updateMany({ where: { id: { in: taskIds } }, data: { taskDate, routeSheetId } });
+    const r = await prisma.routeTask.updateMany({
+      where: {
+        id: { in: taskIds },
+        tripId: { in: journeyTripIds },
+        // Беремо лише адреси загального списку або зі СВОГО листа.
+        ...(guard.user.role === ROLES.SUPER_ADMIN
+          ? {}
+          : { OR: [{ routeSheetId: null }, { routeSheet: { createdById: guard.user.userId } }] }),
+      },
+      data: { taskDate, routeSheetId, status: 'pending' },
+    });
     created += r.count;
   }
   return NextResponse.json({ created }, { status: 201 });

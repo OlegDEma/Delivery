@@ -245,8 +245,26 @@ export default function RoutesPage() {
         setManualReasons(mr);
       })
       .catch(() => {});
-    fetch(`/api/parcels?journeyId=${selectedJourneyId}&limit=100`)
-      .then(r => (r.ok ? r.json() : null))
+    /**
+     * Аудит 04.10.26: раніше бралася ЛИШЕ перша сторінка (limit=100 — це ще й
+     * стеля API), тому у великій поїздці частина адрес не показувалась, а
+     * підсумок «Всього по поїздці N адрес» (ТЗ 11.09.26 п.4) був занижений.
+     * Дочитуємо всі сторінки.
+     */
+    const fetchAllJourneyParcels = async () => {
+      const first = await fetch(`/api/parcels?journeyId=${selectedJourneyId}&limit=100`);
+      if (!first.ok) return null;
+      const data = await first.json();
+      const pages: number = Number(data?.pages) || 1;
+      for (let page = 2; page <= pages; page++) {
+        const res = await fetch(`/api/parcels?journeyId=${selectedJourneyId}&limit=100&page=${page}`);
+        if (!res.ok) break;
+        const next = await res.json();
+        if (Array.isArray(next?.parcels)) data.parcels.push(...next.parcels);
+      }
+      return data;
+    };
+    fetchAllJourneyParcels()
       .then(data => {
         if (!active) return;
         if (data?.parcels) {
@@ -286,12 +304,20 @@ export default function RoutesPage() {
     });
   }
 
-  function toggleAllParcels() {
-    if (selectedParcelIds.size === parcels.length) {
-      setSelectedParcelIds(new Set());
-    } else {
-      setSelectedParcelIds(new Set(parcels.map(p => p.id)));
-    }
+  /**
+   * ТЗ docx 08.08.26: відмічати можна саме адреси ЗАГАЛЬНОГО списку — ті, що
+   * ще не в жодному Маршрутному листі, і посилки, і ручні.
+   * Аудит 04.10.26: раніше бралися ВСІ посилки поїздки (включно з тими, що вже
+   * лежать у листах — звідси дублі задач), а ручні адреси не бралися взагалі,
+   * хоча підпис кнопки рахував саме загальний список.
+   */
+  function toggleAllGeneral() {
+    const allIds = [
+      ...generalParcels.map(p => p.id),
+      ...manualGeneral.map(t => `m:${t.id}`),
+    ];
+    const allSelected = allIds.length > 0 && allIds.every(id => selectedParcelIds.has(id));
+    setSelectedParcelIds(allSelected ? new Set() : new Set(allIds));
   }
 
   // ТЗ docx 08.08.26 (v12): «Створити Маршрутний лист» — відмічені у списку адреси
@@ -526,6 +552,8 @@ export default function RoutesPage() {
   const generalParcels = parcels.filter(p => !sheetedParcelIds.has(p.id));
   // ТЗ docx 08.08.26 (v12): ручні адреси (без посилки), ще не переміщені в лист (taskDate=null).
   const manualGeneral = routeTasks.filter(t => !t.parcelId && !t.routeSheetId);
+  /** Скільки всього адрес у загальному списку — для підпису «Вибрати все»/«Зняти все». */
+  const generalTotal = generalParcels.length + manualGeneral.length;
   // ТЗ docx 21.08.26: обрана «країна перебування» = UA → показуємо українську сторону.
   const showUA = stayCountry === 'UA';
 
@@ -536,6 +564,22 @@ export default function RoutesPage() {
    * груп («Місто: Rotterdam») клієнт просив не показувати — просто список.
    */
   type ManualTask = (typeof routeTasks)[number];
+  /**
+   * Аудит 04.10.26 (ТЗ 03.09.26 «всі адреси групуються згідно того, що є у
+   * віконечку "Місто"»): ключ групи нормалізуємо — інакше «Wien», «wien» і
+   * «Wien » дають три окремі групи того самого міста. Для показу беремо перше
+   * написання, яке трапилось.
+   */
+  const normKey = (s: string) => s.trim().replace(/\s+/g, ' ').toLocaleLowerCase('uk');
+  /**
+   * Аудит 04.10.26: «Номер» сортувався лексикографічно, тому «10 Київ…» ставало
+   * перед «2 Київ…». Внутрішній номер починається з порядкового числа посилки —
+   * сортуємо саме по ньому, а решту рядка лишаємо як вторинний ключ.
+   */
+  const parcelOrdinal = (n: string) => {
+    const m = /^\s*(\d+)/.exec(n);
+    return m ? Number(m[1]) : Number.MAX_SAFE_INTEGER;
+  };
   const groupedGeneral = (() => {
     const parcelKey = (p: RouteItem) => {
       if (groupMode === 'postal') return partyInCountry(p, showUA).addr?.postalCode || 'Без індексу';
@@ -550,21 +594,26 @@ export default function RoutesPage() {
     if (groupMode === 'number') {
       return [{
         key: '',
-        parcels: [...generalParcels].sort((a, b) => a.internalNumber.localeCompare(b.internalNumber)),
+        parcels: [...generalParcels].sort(
+          (a, b) =>
+            parcelOrdinal(a.internalNumber) - parcelOrdinal(b.internalNumber) ||
+            a.internalNumber.localeCompare(b.internalNumber),
+        ),
         manuals: manualGeneral,
       }];
     }
-    const map = new Map<string, { parcels: RouteItem[]; manuals: ManualTask[] }>();
-    const bucket = (k: string) => {
-      const b = map.get(k) ?? { parcels: [], manuals: [] };
+    const map = new Map<string, { label: string; parcels: RouteItem[]; manuals: ManualTask[] }>();
+    const bucket = (raw: string) => {
+      const k = normKey(raw);
+      const b = map.get(k) ?? { label: raw.trim(), parcels: [], manuals: [] };
       map.set(k, b);
       return b;
     };
     for (const p of generalParcels) bucket(parcelKey(p)).parcels.push(p);
     for (const t of manualGeneral) bucket(manualKey(t)).manuals.push(t);
-    return Array.from(map.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([key, v]) => ({ key, ...v }));
+    return Array.from(map.values())
+      .sort((a, b) => a.label.localeCompare(b.label, 'uk'))
+      .map(({ label, parcels, manuals }) => ({ key: label, parcels, manuals }));
   })();
 
   // ТЗ docx 02.09.26: класти адреси можна лише у СВОЇ листи.
@@ -825,8 +874,8 @@ export default function RoutesPage() {
               </SelectContent>
             </Select>
           )}
-          <Button size="sm" variant="outline" onClick={toggleAllParcels}>
-            {selectedParcelIds.size === generalParcels.length && generalParcels.length > 0 ? 'Зняти все' : 'Вибрати все'}
+          <Button size="sm" variant="outline" onClick={toggleAllGeneral}>
+            {generalTotal > 0 && selectedParcelIds.size === generalTotal ? 'Зняти все' : 'Вибрати все'}
           </Button>
           {/* Поле дати — окремим рядком ПІД кнопкою (ТЗ 02.09.26). */}
           {askSheetDate && (

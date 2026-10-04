@@ -1,8 +1,9 @@
 'use client';
 
-import { useImperativeHandle, useState, type Ref } from 'react';
+import { useImperativeHandle, useEffect, useState, type Ref } from 'react';
 import { toast } from 'sonner';
 import type { ParcelEditHandle } from './parcel-places-card';
+import { INSURANCE_AUTO_THRESHOLD_EUR } from '@/lib/constants/insurance';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,6 +54,32 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
   const [paymentInUkraine, setPaymentInUkraine] = useState(parcel.paymentInUkraine);
   const [needsPackaging, setNeedsPackaging] = useState(parcel.needsPackaging);
   const [insuranceApplied, setInsuranceApplied] = useState(!!parcel.insuranceApplied);
+  /**
+   * ТЗ docx 21.09.26 (п.4): понад 50 € оголошеної вартості страхування
+   * вмикається автоматично (для гривні — еквівалент за курсом НБУ).
+   * Аудит 04.10.26: у формах створення/редагування чекбокс уже блокувався, а
+   * ось у цій картці його можна було зняти — сервер усе одно нараховував
+   * страхування, тож екран суперечив рахунку. Курс тягнемо лише коли він
+   * справді потрібен (оголошена вартість у гривнях).
+   */
+  const [uahPerEur, setUahPerEur] = useState<number | null>(null);
+  const declaredIsUah = (parcel.declaredValueCurrency ?? 'EUR') === 'UAH';
+  useEffect(() => {
+    if (!declaredIsUah || uahPerEur !== null) return;
+    let active = true;
+    fetch('/api/nbu-rate')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (active && d?.rate) setUahPerEur(Number(d.rate)); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [declaredIsUah, uahPerEur]);
+  const declaredEur = (() => {
+    const raw = Number(declaredValue);
+    if (!Number.isFinite(raw) || raw <= 0) return 0;
+    if (!declaredIsUah) return raw;
+    return uahPerEur ? raw / uahPerEur : 0;
+  })();
+  const insuranceAutoApplied = declaredEur > INSURANCE_AUTO_THRESHOLD_EUR;
   // Stored as string so user can clear the field while editing (per fix
   // applied to admin tariffs editor — `Number('')` would snap back to 0).
   const [parcelMoneyAmount, setParcelMoneyAmount] = useState(
@@ -97,7 +124,8 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
           paymentMethod,
           paymentInUkraine,
           needsPackaging,
-          insuranceApplied,
+          // ТЗ docx 21.09.26 (п.4): понад поріг — страхування йде на сервер як увімкнене.
+          insuranceApplied: insuranceApplied || insuranceAutoApplied,
           parcelMoneyAmount: parcelMoneyAmount && Number(parcelMoneyAmount) > 0
             ? Number(parcelMoneyAmount)
             : null,
@@ -263,8 +291,18 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
             при створенні, але на детальній сторінці tab-структури немає). */}
         {editing ? (
           <label className="flex items-center gap-2 text-sm py-1">
-            <Checkbox checked={insuranceApplied} onCheckedChange={(c) => setInsuranceApplied(c === true)} />
+            {/* ТЗ docx 21.09.26 (п.4): понад 50 € — вмикається саме і зняти не можна. */}
+            <Checkbox
+              checked={insuranceApplied || insuranceAutoApplied}
+              disabled={insuranceAutoApplied}
+              onCheckedChange={(c) => setInsuranceApplied(c === true)}
+            />
             Страхування
+            {insuranceAutoApplied && (
+              <span className="text-xs text-gray-500">
+                (обовʼязкове: оголошена вартість понад {INSURANCE_AUTO_THRESHOLD_EUR} €)
+              </span>
+            )}
           </label>
         ) : parcel.insuranceApplied && (
           <div className="flex justify-between">
