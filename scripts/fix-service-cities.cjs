@@ -71,8 +71,26 @@ const norm = (s) => (s || '').trim().toLowerCase();
     }
   }
 
-  // Дублі активних пунктів — клієнт бачить кілька однакових рядків у списку.
+  // Справжній дубль — це той самий пункт: місто + адреса + дні + години.
+  // Кілька пунктів в одному місті (різні адреси/часи) — це НОРМА, клієнт бачить
+  // їх окремими картками з адресою й розкладом.
   const dups = (
+    await c.query(
+      `select country, city, address, working_hours, working_days::text as days, count(*)::int n
+         from collection_points
+        where is_active = true
+        group by country, city, address, working_hours, working_days
+       having count(*) > 1
+        order by country, city`
+    )
+  ).rows;
+  if (dups.length) {
+    console.log('\nСПРАВЖНІ дублі активних пунктів (однакові місто+адреса+розклад):');
+    console.table(dups);
+  } else {
+    console.log('\nСправжніх дублів активних пунктів немає.');
+  }
+  const multi = (
     await c.query(
       `select country, city, count(*)::int n
          from collection_points
@@ -82,9 +100,9 @@ const norm = (s) => (s || '').trim().toLowerCase();
         order by country, city`
     )
   ).rows;
-  if (dups.length) {
-    console.log('\nДУБЛІ активних пунктів збору (скрипт їх НЕ чіпає — вирішує користувач):');
-    console.table(dups);
+  if (multi.length) {
+    console.log('Міста з кількома пунктами (це нормально — різні адреси/час):');
+    console.table(multi);
   }
 
   console.log(
