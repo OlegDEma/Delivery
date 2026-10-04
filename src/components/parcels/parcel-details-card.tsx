@@ -320,9 +320,15 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
         {!editing && (
           <>
             <div className="flex justify-between">
-              <span className="text-gray-500">Сплачено</span>
-              <span className={parcel.isPaid ? 'text-green-600 font-medium' : 'text-red-600'}>
-                {parcel.isPaid ? '✅ Так' : '❌ Ні'}
+              <span className="text-gray-500">Оплата</span>
+              {/* ТЗ docx 28.09.26: «❌ Ні» червоним читалось як помилка. Показуємо
+                  стан тим самим бейджем, що й у списку посилок. */}
+              <span
+                className={`text-xs font-medium rounded px-1.5 py-0.5 ${
+                  parcel.isPaid ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                }`}
+              >
+                {parcel.isPaid ? 'Оплачено' : 'Не сплачено'}
               </span>
             </div>
             {parcel.assignedCourier && (

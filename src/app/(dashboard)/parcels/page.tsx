@@ -219,6 +219,9 @@ function ParcelsContent() {
   async function handleQuickPaid(e: React.MouseEvent, id: string) {
     e.preventDefault();
     e.stopPropagation();
+    // ТЗ docx 28.09.26: раніше це був значок 💰 без підпису, і один випадковий
+    // тап у списку одразу позначав посилку оплаченою. Перепитуємо.
+    if (!confirm('Позначити цю посилку оплаченою?')) return;
     try {
       const res = await fetch('/api/parcels/bulk-paid', {
         method: 'POST',
@@ -404,7 +407,13 @@ function ParcelsContent() {
                           <Badge className={`text-xs whitespace-normal text-left h-auto py-0.5 ${STATUS_COLORS[p.status]}`}>
                             {statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction })}
                           </Badge>
-                          {p.isPaid && <Badge className="text-xs bg-green-100 text-green-800">Оплачено</Badge>}
+                          {/* ТЗ docx 28.09.26 (зауваження «Неоплата в посилках коряво
+                              відображається»): оплачена посилка мала зрозумілий бейдж, а
+                              неоплачена — лише самотній значок 💰 у кінці рядка без підпису.
+                              Тепер стан оплати показується однаково в обох випадках. */}
+                          {p.isPaid
+                            ? <Badge className="text-xs bg-green-100 text-green-800">Оплачено</Badge>
+                            : <Badge className="text-xs bg-amber-100 text-amber-800">Не сплачено</Badge>}
                           {/* ТЗ docx 08.08.26 (G7): помітка — яким рейсом посилка перевозилася. */}
                           {p.trip && (
                             <Badge variant="secondary" className="text-xs whitespace-nowrap">
@@ -475,9 +484,9 @@ function ParcelsContent() {
                       type="button"
                       onClick={(e) => handleQuickPaid(e, p.id)}
                       title="Позначити оплаченим"
-                      className="shrink-0 px-2 py-1 rounded hover:bg-green-100 text-lg leading-none"
+                      className="shrink-0 px-2 py-1 rounded border border-green-200 text-green-700 hover:bg-green-50 text-xs font-medium leading-none whitespace-nowrap"
                     >
-                      💰
+                      💰 Оплачено
                     </button>
                   )}
                 </div>
