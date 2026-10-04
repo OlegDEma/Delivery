@@ -219,6 +219,30 @@ export default function RoutesPage() {
   // перезавантажує посилки (setState лише в .then-колбеку, не синхронно в ефекті).
   const [reload, setReload] = useState(0);
 
+  /**
+   * ТЗ docx 02.09.26: «Має бути можливість одночасно залогінитись двом водіям…
+   * Обидва водії можуть бачити всі маршрутні листи даної поїздки».
+   * Аудит 04.10.26: дані тягнулись лише при завантаженні сторінки і після
+   * ВЛАСНИХ дій, тож другий водій бачив чужі зміни лише після F5. Оновлюємо,
+   * коли вкладка знову стає видимою (водій повернувся в застосунок), але не
+   * частіше ніж раз на 30 с — щоб не смикати мережу на телефоні.
+   */
+  useEffect(() => {
+    let lastAt = Date.now();
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (Date.now() - lastAt < 30_000) return;
+      lastAt = Date.now();
+      setReload(n => n + 1);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, []);
+
   useEffect(() => {
     if (!selectedJourneyId) return;
     let active = true;
