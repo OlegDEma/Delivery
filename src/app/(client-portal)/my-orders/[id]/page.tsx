@@ -17,6 +17,7 @@ import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
 import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
 import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
+import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 
 /**
  * Деталі посилки для Клієнта.
@@ -332,7 +333,7 @@ export default function MyOrderDetailPage() {
         doorstepDelivery={parcel.doorstepDelivery}
         insuranceEnabled={parcel.insuranceApplied ?? (Number(parcel.insuranceCost) > 0)}
         parcelMoneyAmount={parcel.parcelMoneyAmount}
-        isPickupPoint={parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'pickup_point'}
+        isPickupPoint={isPickupPointPricing({ direction: parcel.direction, collectionMethod: parcel.collectionMethod, receiverDeliveryMethod: parcel.receiverAddress?.deliveryMethod })}
         isCourierPickup={parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'courier_pickup'}
         isMultiParcelPickup={!!parcel.isMultiParcelPickup}
         onUpdate={fetchParcel}

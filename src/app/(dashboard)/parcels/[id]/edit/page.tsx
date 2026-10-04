@@ -21,6 +21,7 @@ import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { getBillableWeight } from '@/lib/utils/volumetric';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
+import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 
 /**
  * Редагування існуючої посилки. Зроблено по докс-багу від 03.06.2026:
@@ -807,7 +808,7 @@ export default function EditParcelPage() {
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
           isDoorstepDelivery={canDoorstep && doorstepDelivery}
           isAddressDelivery={parcel.receiverAddress?.deliveryMethod === 'address'}
-          isPickupPoint={direction === 'eu_to_ua' && collection.method === 'pickup_point'}
+          isPickupPoint={isPickupPointPricing({ direction, collectionMethod: collection.method, receiverDeliveryMethod: parcel.receiverAddress?.deliveryMethod })}
           isCourierPickup={direction === 'eu_to_ua' && collection.method === 'courier_pickup'}
           isMultiParcelPickup={!!collection.isMultiParcelPickup}
           parcelMoneyAmount={parcelMoneyEnabled ? Number(parcelMoneyAmount) || 0 : 0}

@@ -17,6 +17,7 @@ import { calculateVolumetricWeight, volumetricWeightFromVolume, roundWeight } fr
 import { calculateParcelCost } from '@/lib/utils/pricing';
 import { buildPricingInput } from '@/lib/utils/pricing-input';
 import { toEur } from '@/lib/utils/currency';
+import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 import { generateInternalNumber, generatePlaceITN, withItnRetry } from '@/lib/utils/itn';
 import { logger } from '@/lib/logger';
 
@@ -261,8 +262,13 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
           // ТЗ docx 01.07.26: doorstep — за явним opt-in чекбоксом.
           isDoorstepDelivery: input.doorstepDelivery ?? false,
           isAddressDelivery: deliveryMethod === 'address',
-          isPickupPoint:
-            input.direction === 'eu_to_ua' && input.collectionMethod === 'pickup_point',
+          // ТЗ docx 28.09.26: мінімум «Пункт збору» діє і коли Отримувач сам
+          // забирає посилку з пункту видачі (не лише коли Відправник привозить).
+          isPickupPoint: isPickupPointPricing({
+            direction: input.direction,
+            collectionMethod: input.collectionMethod,
+            receiverDeliveryMethod: deliveryMethod,
+          }),
           isCourierPickup:
             input.direction === 'eu_to_ua' && input.collectionMethod === 'courier_pickup',
           isMultiParcelPickup:

@@ -32,6 +32,7 @@ import { ParcelPaymentCard } from '@/components/parcels/parcel-payment-card';
 import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { toast } from 'sonner';
+import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 
 interface ParcelDetail {
   id: string;
@@ -651,7 +652,7 @@ export default function ParcelDetailPage() {
         // for historical data.
         insuranceEnabled={parcel.insuranceApplied ?? (Number(parcel.insuranceCost) > 0)}
         parcelMoneyAmount={parcel.parcelMoneyAmount}
-        isPickupPoint={parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'pickup_point'}
+        isPickupPoint={isPickupPointPricing({ direction: parcel.direction, collectionMethod: parcel.collectionMethod, receiverDeliveryMethod: parcel.receiverAddress?.deliveryMethod })}
         isCourierPickup={parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'courier_pickup'}
         isMultiParcelPickup={!!parcel.isMultiParcelPickup}
         onUpdate={fetchParcel}

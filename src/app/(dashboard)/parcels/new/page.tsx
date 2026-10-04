@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { type CollectionState } from '@/components/parcels/collection-block';
 import { PhoneInput } from '@/components/shared/phone-input';
+import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 
 interface SelectedClient {
   id: string;
@@ -1103,7 +1104,7 @@ export default function NewParcelPage() {
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
           isDoorstepDelivery={canDoorstep && doorstepDelivery}
           isAddressDelivery={receiver?.addresses[0]?.deliveryMethod === 'address'}
-          isPickupPoint={direction === 'eu_to_ua' && collection.method === 'pickup_point'}
+          isPickupPoint={isPickupPointPricing({ direction, collectionMethod: collection.method, receiverDeliveryMethod: recvDeliveryMethod })}
           isCourierPickup={direction === 'eu_to_ua' && collection.method === 'courier_pickup'}
           isMultiParcelPickup={!!collection.isMultiParcelPickup}
           parcelMoneyAmount={parcelMoneyEnabled ? Number(parcelMoneyAmount) || 0 : 0}

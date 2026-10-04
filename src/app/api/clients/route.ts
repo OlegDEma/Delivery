@@ -151,7 +151,19 @@ export async function POST(request: NextRequest) {
     where: { OR: [{ phone }, { phoneNormalized: normalized }], deletedAt: null },
   });
   if (existing) {
-    return NextResponse.json({ error: 'Клієнт з таким номером вже існує' }, { status: 409 });
+    // ТЗ docx 28.09.26 (скарга «при створенні посилки від імені клієнта при
+    // заповненні даних Відправника видає таке — це вже було»): раніше роут
+    // віддавав лише текст помилки, і оператор застрягав. ТЗ docx 15.07.26
+    // вимагає «не блокувати збереження при збігу номера» — для РЕДАГУВАННЯ це
+    // вже зроблено через conflictClientId, тепер так само і для СТВОРЕННЯ:
+    // форма сама підхопить наявного клієнта з цим номером.
+    return NextResponse.json(
+      {
+        error: 'Клієнт з таким номером уже є — використовуємо його картку',
+        conflictClientId: existing.id,
+      },
+      { status: 409 },
+    );
   }
 
   let client;

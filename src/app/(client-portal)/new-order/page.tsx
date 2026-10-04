@@ -20,6 +20,7 @@ import { getBillableWeight } from '@/lib/utils/volumetric';
 import { normalizeCityForMatch } from '@/lib/utils/transliterate';
 import { isCourierAllowed, isPostalAllowed, isPickupPointAllowed, type ServiceRule } from '@/lib/utils/logistics-availability';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
+import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 
 interface PlaceData {
   weight: string;
@@ -323,6 +324,11 @@ export default function NewOrderPage() {
     // Перевірка 15.09.26: спосіб передачі посилки — обовʼязковий. Раніше форма
     // відправляла порожнє значення, сервер відповідав технічною помилкою, і клієнт
     // не розумів, що робити.
+    // Аудит 01.10.26: місто Відправника не було обовʼязковим у формі, тож сервер
+    // віддавав сирий текст валідатора «senderCity: Обовʼязкове поле».
+    if (!senderCity.trim()) {
+      setError('Вкажіть Ваш населений пункт у розділі «Відправник»'); return;
+    }
     if (!collectionMethod) {
       setError("Оберіть, як Ви передасте нам посилку (розділ «Як Ви передасте нам посилку?»)"); return;
     }
@@ -867,7 +873,7 @@ export default function NewOrderPage() {
                 // ТЗ docx 21.09.26 (п.3): вартість рахується згідно ВИБРАНОЇ
                 // клієнтом опції доставки Отримувача.
                 isAddressDelivery={receiverDeliveryMethod === 'address'}
-                isPickupPoint={direction === 'eu_to_ua' && collectionMethod === 'pickup_point'}
+                isPickupPoint={isPickupPointPricing({ direction, collectionMethod, receiverDeliveryMethod })}
                 isCourierPickup={direction === 'eu_to_ua' && collectionMethod === 'courier_pickup'}
                 receiverCity={receiverCity || null}
                 clientFacing

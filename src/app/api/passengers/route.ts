@@ -24,7 +24,19 @@ const passengerCreateSchema = z.object({
 });
 
 // ТЗ docx 20.08.26: редагування наявного пасажира (усі поля опційні).
-const passengerUpdateSchema = passengerCreateSchema.omit({ tripId: true }).partial();
+// Аудит 01.10.26 (ТЗ 23.08 п.4 «дозволити водію прийом оплати у пасажира»):
+// `.partial()` у zod 4 НЕ прибирає `.default()`, тож у розпарсеному body завжди
+// з'являлись `currency` і `isPaid`. Через це перевірка «водій змінює лише isPaid»
+// (`onlyPayment`) ніколи не була true — водій і касир отримували 403, а в адміна
+// клік «Прийняти оплату» тихо скидав валюту на EUR. Тому в схемі оновлення
+// defaults прибрані явно.
+const passengerUpdateSchema = passengerCreateSchema
+  .omit({ tripId: true, currency: true, isPaid: true })
+  .extend({
+    currency: z.enum(['EUR', 'UAH', 'USD']).optional(),
+    isPaid: z.boolean().optional(),
+  })
+  .partial();
 
 // GET /api/passengers?tripId=...
 // За замовчуванням повертає пасажирів майбутніх та нещодавніх рейсів.

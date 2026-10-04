@@ -15,6 +15,7 @@ import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transition
 import { isUuid } from '@/lib/validators/common';
 import { canEditParcelData, canEditParcelParties, editLockReason } from '@/lib/parcels/edit-lock';
 import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
+import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 
 // GET /api/parcels/[id]
 export async function GET(
@@ -533,8 +534,13 @@ export async function PATCH(
               needsPackaging: !!needsPackaging,
               isDoorstepDelivery: !!doorstepDelivery,
               isAddressDelivery,
-              isPickupPoint:
-                parcel.direction === 'eu_to_ua' && collectionMethod === 'pickup_point',
+              // ТЗ docx 28.09.26: див. isPickupPointPricing — мінімум діє і для
+              // «Пункту видачі» Отримувача.
+              isPickupPoint: isPickupPointPricing({
+                direction: parcel.direction,
+                collectionMethod,
+                receiverDeliveryMethod: receiverAddr?.deliveryMethod,
+              }),
               isCourierPickup:
                 parcel.direction === 'eu_to_ua' && collectionMethod === 'courier_pickup',
               isMultiParcelPickup: body.isMultiParcelPickup !== undefined
@@ -562,6 +568,24 @@ export async function PATCH(
     }
   }
 
+  /**
+   * ТЗ docx 25.08.26: «У ВСІХ посилках повинна бути можливість редагувати дані
+   * Отримувача або Відправника. НЕЗАЛЕЖНО ВІД СТАТУСУ».
+   *
+   * Аудит 01.10.26: дозвіл був, але для статусів accepted+ усі екрани (детальна,
+   * список, друк, Маршрути, текст підтвердження) читають ЗАМОРОЖЕНИЙ знімок
+   * сторін (ТЗ docx 26.07.26), а знімок робився лише при draft → accepted.
+   * Тому правка зберігалась у БД, але ніде не була видна. Після зміни сторін
+   * перезнімаємо знімок — тоді заморозка далі захищає від змін КЛІЄНТА, але
+   * свідома правка Працівника одразу видна.
+   */
+  const parcelStatusBefore = parcel.status;
+  async function refreshPartySnapshotIfNeeded() {
+    if (!touchesParties || parcelStatusBefore === 'draft') return;
+    const snapshot = await snapshotParcelParties(prisma, id);
+    if (snapshot) await prisma.parcel.update({ where: { id }, data: snapshot });
+  }
+
   // Single transaction: places + parcel update.
   if (Array.isArray(body.places)) {
     await prisma.$transaction(async (tx) => {
@@ -575,6 +599,7 @@ export async function PATCH(
       }
       await tx.parcel.update({ where: { id }, data: updateData });
     });
+    await refreshPartySnapshotIfNeeded();
     const full = await prisma.parcel.findUnique({ where: { id } });
     return NextResponse.json(full);
   }
@@ -584,6 +609,7 @@ export async function PATCH(
     where: { id },
     data: updateData,
   });
+  await refreshPartySnapshotIfNeeded();
   return NextResponse.json(updated);
 }
 

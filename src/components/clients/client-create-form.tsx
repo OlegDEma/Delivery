@@ -475,8 +475,20 @@ export function ClientCreateForm({
         toast.success('Клієнта створено');
         onSuccess(data, meta);
       } else {
-        const data = await res.json();
-        setError(data.error || 'Помилка створення клієнта');
+        const data = await res.json().catch(() => null);
+        // ТЗ docx 15.07.26 / скарга 28.09.26: номер уже зайнятий — не блокуємо
+        // роботу, а підхоплюємо наявну картку клієнта (як при редагуванні).
+        if (res.status === 409 && data?.conflictClientId) {
+          const owner = await fetch(`/api/clients/${data.conflictClientId}`)
+            .then((r) => (r.ok ? r.json() : null))
+            .catch(() => null);
+          if (owner) {
+            toast.info('Клієнт з таким номером уже є — підставили його дані');
+            onSuccess(owner, meta);
+            return;
+          }
+        }
+        setError(data?.error || 'Помилка створення клієнта');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Помилка мережі');
