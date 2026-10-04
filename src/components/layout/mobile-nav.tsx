@@ -116,10 +116,10 @@ export function MobileNav() {
     <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-gray-200 bg-white sticky top-0 z-50 print:hidden">
       <Link href="/" className="flex items-center gap-2">
         <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white text-xs font-bold">
-          D
+          П
         </div>
         <span className="text-base font-semibold text-gray-900 tracking-tight">
-          Delivery
+          ПОСИЛОЧКА
         </span>
       </Link>
 
@@ -135,10 +135,10 @@ export function MobileNav() {
           <SheetTitle className="flex items-center h-14 px-5 border-b border-gray-200 shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white text-xs font-bold">
-                D
+                П
               </div>
               <span className="text-base font-semibold text-gray-900 tracking-tight">
-                Delivery
+                ПОСИЛОЧКА
               </span>
             </div>
           </SheetTitle>

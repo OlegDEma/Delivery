@@ -123,10 +123,10 @@ export function Sidebar() {
       <div className="flex items-center h-16 px-5 border-b border-gray-200 shrink-0">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white text-sm font-bold">
-            D
+            П
           </div>
           <span className="text-base font-semibold text-gray-900 tracking-tight">
-            Delivery
+            ПОСИЛОЧКА
           </span>
         </Link>
       </div>
