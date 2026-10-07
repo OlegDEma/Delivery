@@ -28,13 +28,13 @@ export async function GET(
         where: { deletedAt: null },
         take: 10,
         orderBy: { createdAt: 'desc' },
-        select: { id: true, internalNumber: true, status: true, createdAt: true },
+        select: { id: true, internalNumber: true, status: true, createdAt: true, createdSource: true, createdBy: { select: { role: true } } },
       },
       receivedParcels: {
         where: { deletedAt: null },
         take: 10,
         orderBy: { createdAt: 'desc' },
-        select: { id: true, internalNumber: true, status: true, createdAt: true },
+        select: { id: true, internalNumber: true, status: true, createdAt: true, createdSource: true, createdBy: { select: { role: true } } },
       },
     },
   });

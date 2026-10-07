@@ -43,7 +43,7 @@ export async function GET() {
     ]);
     const dRecentParcels = tripIds.length ? await prisma.parcel.findMany({
       where: scope, take: 5, orderBy: { createdAt: 'desc' },
-      select: { id: true, internalNumber: true, status: true, createdAt: true, receiver: { select: { lastName: true, firstName: true, phone: true } }, senderSnapshot: true, receiverSnapshot: true },
+      select: { id: true, internalNumber: true, status: true, createdAt: true, createdSource: true, createdBy: { select: { role: true } }, receiver: { select: { lastName: true, firstName: true, phone: true } }, senderSnapshot: true, receiverSnapshot: true },
     }) : [];
     const dRecentActivity = tripIds.length ? await prisma.parcelStatusHistory.findMany({
       where: { parcel: { tripId: { in: tripIds } } }, take: 10, orderBy: { changedAt: 'desc' },
@@ -115,6 +115,9 @@ export async function GET() {
       internalNumber: true,
       status: true,
       createdAt: true,
+      // ТЗ docx 04.10.26: «Створена клієнтом/водієм/…».
+      createdSource: true,
+      createdBy: { select: { role: true } },
       receiver: { select: { lastName: true, firstName: true, phone: true } },
       // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (рендер через parcelParties).
       senderSnapshot: true,

@@ -15,6 +15,16 @@ import { ListSkeleton } from '@/components/shared/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { rememberOpenedParcel, useReturnToParcel, readListState, saveListState } from '@/lib/hooks/use-return-to-parcel';
+
+// ТЗ docx 04.10.26: повернення до відкритої посилки + збережений стан списку.
+const RETURN_KEY = 'myParcels:lastOpened';
+const LIST_STATE_KEY = 'myParcels:listState';
+interface MyParcelsListState {
+  bucket: Bucket; search: string; statusFilter: string; dateFrom: string; dateTo: string;
+  senderPhone: string; receiverPhone: string;
+}
 
 interface ParcelItem {
   id: string;
@@ -28,6 +38,8 @@ interface ParcelItem {
   createdAt: string;
   createdSource: string | null;
   createdById: string | null;
+  /** ТЗ docx 04.10.26: «Створена водієм/…». */
+  createdBy?: { role: string } | null;
   sender: { phone: string; firstName: string; lastName: string };
   receiver: { phone: string; firstName: string; lastName: string };
   receiverAddress: { city: string; street: string | null; npWarehouseNum: string | null } | null;
@@ -51,15 +63,23 @@ export default function MyParcelsPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const [bucket, setBucket] = useState<Bucket>('all');
+  // ТЗ docx 04.10.26: після виходу з посилки список відкривається в тому ж стані.
+  const [saved] = useState(() => readListState<MyParcelsListState>(LIST_STATE_KEY));
+  const [bucket, setBucket] = useState<Bucket>(saved?.bucket || 'all');
 
   // Filters
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [senderPhone, setSenderPhone] = useState('');
-  const [receiverPhone, setReceiverPhone] = useState('');
+  const [search, setSearch] = useState(saved?.search || '');
+  const [statusFilter, setStatusFilter] = useState(saved?.statusFilter || 'all');
+  const [dateFrom, setDateFrom] = useState(saved?.dateFrom || '');
+  const [dateTo, setDateTo] = useState(saved?.dateTo || '');
+  const [senderPhone, setSenderPhone] = useState(saved?.senderPhone || '');
+  const [receiverPhone, setReceiverPhone] = useState(saved?.receiverPhone || '');
+
+  useEffect(() => {
+    saveListState<MyParcelsListState>(LIST_STATE_KEY, {
+      bucket, search, statusFilter, dateFrom, dateTo, senderPhone, receiverPhone,
+    });
+  }, [bucket, search, statusFilter, dateFrom, dateTo, senderPhone, receiverPhone]);
   const [showFilters, setShowFilters] = useState(false);
 
   const fetchParcels = useCallback(async () => {
@@ -88,6 +108,9 @@ export default function MyParcelsPage() {
     const timer = setTimeout(fetchParcels, 300);
     return () => clearTimeout(timer);
   }, [fetchParcels]);
+
+  // ТЗ docx 04.10.26: посилка, з якої щойно повернулись, — по центру й підсвічена.
+  const highlightedId = useReturnToParcel(RETURN_KEY, !loading && parcels.length > 0);
 
   // Bucket filtering — клієнт-сайдом.
   const isMine = (p: ParcelItem) => p.createdById === user?.id;
@@ -221,12 +244,21 @@ export default function MyParcelsPage() {
           {visibleParcels.map((p) => {
             const pt = parcelParties(p);
             return (
-            <Link key={p.id} href={`/parcels/${p.id}`} className="block p-3 hover:bg-gray-50">
+            <Link
+              key={p.id}
+              href={`/parcels/${p.id}`}
+              data-parcel-id={p.id}
+              onClick={() => rememberOpenedParcel(RETURN_KEY, p.id)}
+              className={cn(
+                'block p-3 hover:bg-gray-50 transition-colors',
+                highlightedId === p.id && 'bg-amber-50 ring-2 ring-inset ring-amber-300',
+              )}
+            >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
-                    <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction })}</Badge>
+                    <span className="font-mono text-sm font-medium">{displayParcelNumber(p.internalNumber)}</span>
+                    <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}</Badge>
                     {!p.isPaid && p.totalCost && <Badge variant="destructive" className="text-xs">Не оплачено</Badge>}
                   </div>
                   <div className="text-sm">

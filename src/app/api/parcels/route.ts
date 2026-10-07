@@ -4,6 +4,7 @@ import { requireStaff } from '@/lib/auth/guards';
 import { ROLES } from '@/lib/constants/roles';
 import { parseBody, createParcelSchema } from '@/lib/validators';
 import { createParcel } from '@/lib/services/parcel-creation';
+import { findNearestTrip, parcelEuCountry } from '@/lib/parcels/nearest-trip';
 import { logger } from '@/lib/logger';
 import { kyivDateRange } from '@/lib/utils/tz';
 import type { Prisma } from '@/generated/prisma/client';
@@ -284,6 +285,8 @@ export async function GET(request: NextRequest) {
         // списку, щоб оператор бачив контекст без переходу в деталі.
         collectedBy: { select: { id: true, fullName: true } },
         assignedCourier: { select: { id: true, fullName: true } },
+        // ТЗ docx 04.10.26: «Створена клієнтом/водієм/суперадміном» — роль автора.
+        createdBy: { select: { role: true } },
       },
       orderBy: { [sortBy]: sortOrderParam },
       skip: (page - 1) * limit,
@@ -305,6 +308,12 @@ export async function POST(request: NextRequest) {
   const guard = await requireStaff();
   if (!guard.ok) return guard.response;
   const userId = guard.user.userId;
+
+  // ТЗ docx 04.10.26: «Без рейсу» Працівник обирає свідомо — тоді автоприв'язку
+  // не робимо. Прапорець читаємо з копії тіла (спільна схема його не описує).
+  const withoutTrip: boolean = await request.clone().json()
+    .then((b: { withoutTrip?: unknown }) => b?.withoutTrip === true)
+    .catch(() => false);
 
   const parsed = await parseBody(request, createParcelSchema);
   if (parsed instanceof NextResponse) return parsed;
@@ -360,12 +369,28 @@ export async function POST(request: NextRequest) {
       defaultCountry: parsed.direction === 'ua_to_eu' ? 'UA' : null,
     });
 
+    // ТЗ docx 04.10.26: «посилка автоматично прив'язується до найближчого наявного
+    // рейсу». Форма підставляє рейс сама, але Водій бачить лише рейси своїх
+    // поїздок — тож якщо рейс не передано (і не «Без рейсу»), добираємо на сервері.
+    let tripId = parsed.tripId ?? null;
+    if (!tripId && !withoutTrip) {
+      const [sAddr, rAddr] = await Promise.all([
+        senderAddressId ? prisma.clientAddress.findUnique({ where: { id: senderAddressId }, select: { country: true } }) : null,
+        receiverAddressId ? prisma.clientAddress.findUnique({ where: { id: receiverAddressId }, select: { country: true } }) : null,
+      ]);
+      const nearest = await findNearestTrip(
+        parsed.direction,
+        parcelEuCountry(parsed.direction, sAddr?.country, rAddr?.country),
+      );
+      tripId = nearest?.id ?? null;
+    }
+
     const created = await createParcel({
       senderId: parsed.senderId,
       senderAddressId,
       receiverId: parsed.receiverId,
       receiverAddressId,
-      tripId: parsed.tripId ?? null,
+      tripId,
       direction: parsed.direction,
       shipmentType: parsed.shipmentType,
       description: parsed.description ?? null,

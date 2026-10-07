@@ -30,6 +30,9 @@ export async function GET(request: NextRequest) {
       direction: true,
       totalPlacesCount: true,
       createdAt: true,
+      // ТЗ docx 04.10.26: «Створена клієнтом/водієм/…» — лише джерело і роль автора.
+      createdSource: true,
+      createdBy: { select: { role: true } },
       receiverAddress: { select: { city: true } },
       // ТЗ docx 26.07.26 (п.1): місто отримувача — зі знімка для accepted+ (parcelParties
       // визначає «заморожено» за наявністю senderSnapshot, тож потрібні обидва поля).
@@ -59,5 +62,7 @@ export async function GET(request: NextRequest) {
     createdAt: parcel.createdAt,
     receiverCity: parcelParties(parcel).receiver.address?.city || null,
     statusHistory: parcel.statusHistory,
+    createdSource: parcel.createdSource,
+    createdByRole: parcel.createdBy?.role ?? null,
   });
 }

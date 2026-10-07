@@ -8,7 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { statusLabel } from '@/lib/parcels/status-label';
-import { formatDateTime, formatCurrency } from '@/lib/utils/format';
+import { formatDateTime, formatDate, formatCurrency } from '@/lib/utils/format';
+import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { NO_TRIP_MESSAGE, OPERATOR_PHONE } from '@/lib/parcels/no-trip';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { summarizePartyAddress } from '@/lib/utils/address-summary';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
@@ -35,6 +37,10 @@ interface ParcelDetail {
   internalNumber: string;
   itn: string;
   npTtn: string | null;
+  /** ТЗ docx 04.10.26: рейсу до країни посилки в базі немає взагалі (з API). */
+  noTripForCountry?: boolean;
+  /** ТЗ docx 04.10.26 (п.3): нотатка, яку Клієнт залишив при створенні. */
+  clientNote: string | null;
   direction: string;
   status: ParcelStatusType;
   shipmentType: string;
@@ -62,6 +68,9 @@ interface ParcelDetail {
   estimatedDeliveryStart: string | null;
   estimatedDeliveryEnd: string | null;
   createdAt: string;
+  /** ТЗ docx 04.10.26: «Створена клієнтом/…». */
+  createdSource: string | null;
+  createdBy: { role: string } | null;
   sender: {
     firstName: string; lastName: string; phone: string;
     /** Для fallback-визначення EU-країни (як у staff) — лише country. */
@@ -192,11 +201,30 @@ export default function MyOrderDetailPage() {
       {/* Header — ІТН та ТТН поряд у самому верху (як у Працівника). */}
       <div>
         <div className="flex items-center gap-3 mb-1 flex-wrap">
-          <h1 className="text-xl font-bold font-mono">{parcel.internalNumber}</h1>
+          {/* ТЗ docx 04.10.26: дату створення з шапки прибрано — замість неї номер
+              рейсу, до якого автоматично прив'язана посилка. */}
+          <h1 className="text-xl font-bold font-mono">
+            {displayParcelNumber(parcel.internalNumber)}
+            {parcel.trip && <>, Рейс: {formatDate(parcel.trip.departureDate)}({parcel.trip.country})</>}
+          </h1>
           <Badge className={STATUS_COLORS[parcel.status]}>
-            {statusLabel(parcel.status, { tripCountry: parcel.trip?.country, direction: parcel.direction })}
+            {statusLabel(parcel.status, {
+              tripCountry: parcel.trip?.country, direction: parcel.direction,
+              createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role,
+            })}
           </Badge>
         </div>
+        {/* ТЗ docx 04.10.26: рейсу до вибраної країни в базі немає взагалі.
+            Якщо рейс є, але посилку ще не прив'язано, — нейтральний рядок. */}
+        {!parcel.trip && !parcel.noTripForCountry && (
+          <div className="text-sm text-gray-500 mb-1">Рейс ще не призначено — оператор призначить найближчий.</div>
+        )}
+        {!parcel.trip && parcel.noTripForCountry && (
+          <div className="text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1 mb-1">
+            {NO_TRIP_MESSAGE.replace(OPERATOR_PHONE, '')}
+            <a href={`tel:${OPERATOR_PHONE}`} className="font-medium underline">{OPERATOR_PHONE}</a>
+          </div>
+        )}
         <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
           {/* ТЗ docx 03.10.26 (п.1): ІТН Клієнту не показуємо — правила його
               формування ще не розроблені. (п.4) Замість нього — ТТН. */}
@@ -251,6 +279,13 @@ export default function MyOrderDetailPage() {
           <span>{formatDateTime(parcel.createdAt)}</span>
         </div>
         {ttnError && <div className="text-xs text-red-600 mt-1">{ttnError}</div>}
+        {/* ТЗ docx 04.10.26 (п.3): нотатка Клієнта до замовлення. */}
+        {parcel.clientNote && (
+          <div className="mt-1 text-sm bg-amber-50 border border-amber-200 rounded px-2 py-1">
+            <span className="text-amber-800 font-medium">Ваша нотатка:</span>{' '}
+            <span className="whitespace-pre-wrap break-words">{parcel.clientNote}</span>
+          </div>
+        )}
       </div>
 
       {/* Відправник / Отримувач — той самий компактний блок, що й у Працівника
@@ -385,23 +420,7 @@ export default function MyOrderDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Рейс + кур'єр — як у Працівника (read-only, без редагування). */}
-      <div className="text-sm py-1 border-y">
-        <span className="text-gray-500">Рейс:</span>{' '}
-        {parcel.trip ? (
-          <span className="font-medium">
-            {new Date(parcel.trip.departureDate).toLocaleDateString('uk-UA')}
-            <span className="text-gray-400 ml-1">({parcel.trip.country})</span>
-          </span>
-        ) : (
-          <span className="text-gray-400">Не прив&apos;язано</span>
-        )}
-        <span className="text-gray-300 mx-2">|</span>
-        <span className="text-gray-500">Кур&apos;єр:</span>{' '}
-        <span className="font-medium">
-          {parcel.assignedCourier?.fullName || <span className="text-gray-400">Не призначено</span>}
-        </span>
-      </div>
+      {/* ТЗ docx 04.10.26: рядок «Рейс: … | Кур'єр: …» прибрано — рейс тепер у шапці. */}
 
       <Card>
         <CardHeader className="py-2 px-3"><CardTitle className="text-sm">Історія статусів</CardTitle></CardHeader>
@@ -410,7 +429,7 @@ export default function MyOrderDetailPage() {
             {parcel.statusHistory.map((h, i) => (
               <div key={i} className="text-sm">
                 <div className="font-medium">
-                  {statusLabel(h.status, { tripCountry: parcel.trip?.country, direction: parcel.direction })}
+                  {statusLabel(h.status, { tripCountry: parcel.trip?.country, direction: parcel.direction, createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role })}
                 </div>
                 <div className="text-xs text-gray-400">{formatDateTime(h.changedAt)}</div>
                 {h.notes && <div className="text-xs text-gray-500 mt-0.5">{h.notes}</div>}

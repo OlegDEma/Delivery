@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { statusLabel } from '@/lib/parcels/status-label';
+import { displayParcelNumber } from '@/lib/parcels/display-number';
 import { formatDate } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 
@@ -19,6 +21,9 @@ interface Order {
   totalPlacesCount: number;
   totalWeight: number | null;
   createdAt: string;
+  /** ТЗ docx 04.10.26: «Створена клієнтом/…». */
+  createdSource: string | null;
+  createdBy: { role: string } | null;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; landmark: string | null; deliveryMethod: string; npWarehouseNum: string | null } | null;
@@ -78,7 +83,7 @@ export default function MyOrdersPage() {
             >
               <div className="flex items-start justify-between mb-1">
                 <div>
-                  <div className="font-mono text-sm font-medium">{o.internalNumber}</div>
+                  <div className="font-mono text-sm font-medium">{displayParcelNumber(o.internalNumber)}</div>
                   {/* ТЗ docx 03.10.26 (п.1): ІТН Клієнту НЕ показуємо, поки не
                       розроблені правила його формування. (п.4) Замість нього —
                       ТТН, введений Клієнтом. */}
@@ -89,14 +94,11 @@ export default function MyOrdersPage() {
                   )}
                 </div>
                 <Badge className={STATUS_COLORS[o.status]}>
-                  {STATUS_LABELS[o.status]}
+                  {statusLabel(o.status, { createdSource: o.createdSource, createdByRole: o.createdBy?.role })}
                 </Badge>
               </div>
               <div className="text-sm mt-2">
-                <div>
-                  <span className="text-gray-500">Від:</span> {pt.sender.lastName} {pt.sender.firstName}
-                  {pt.sender.address && <span className="text-gray-400"> — {fmtAddr(pt.sender.address)}</span>}
-                </div>
+                {/* ТЗ docx 04.10.26: у загальному списку «Від кого» не показуємо — економія місця на смартфоні. */}
                 <div>
                   <span className="text-gray-500">Кому:</span> {pt.receiver.lastName} {pt.receiver.firstName}
                   {pt.receiver.address && (

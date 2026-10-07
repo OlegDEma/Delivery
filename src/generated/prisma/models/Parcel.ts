@@ -99,6 +99,7 @@ export type ParcelMinAggregateOutputType = {
   totalCost: runtime.Decimal | null
   costCurrency: string | null
   npTtn: string | null
+  clientNote: string | null
   npTrackingStatus: string | null
   status: $Enums.ParcelStatus | null
   createdSource: $Enums.CreatedSource | null
@@ -160,6 +161,7 @@ export type ParcelMaxAggregateOutputType = {
   totalCost: runtime.Decimal | null
   costCurrency: string | null
   npTtn: string | null
+  clientNote: string | null
   npTrackingStatus: string | null
   status: $Enums.ParcelStatus | null
   createdSource: $Enums.CreatedSource | null
@@ -223,6 +225,7 @@ export type ParcelCountAggregateOutputType = {
   totalCost: number
   costCurrency: number
   npTtn: number
+  clientNote: number
   npTrackingStatus: number
   status: number
   createdSource: number
@@ -323,6 +326,7 @@ export type ParcelMinAggregateInputType = {
   totalCost?: true
   costCurrency?: true
   npTtn?: true
+  clientNote?: true
   npTrackingStatus?: true
   status?: true
   createdSource?: true
@@ -384,6 +388,7 @@ export type ParcelMaxAggregateInputType = {
   totalCost?: true
   costCurrency?: true
   npTtn?: true
+  clientNote?: true
   npTrackingStatus?: true
   status?: true
   createdSource?: true
@@ -447,6 +452,7 @@ export type ParcelCountAggregateInputType = {
   totalCost?: true
   costCurrency?: true
   npTtn?: true
+  clientNote?: true
   npTrackingStatus?: true
   status?: true
   createdSource?: true
@@ -598,6 +604,7 @@ export type ParcelGroupByOutputType = {
   totalCost: runtime.Decimal | null
   costCurrency: string
   npTtn: string | null
+  clientNote: string | null
   npTrackingStatus: string | null
   status: $Enums.ParcelStatus
   createdSource: $Enums.CreatedSource
@@ -685,6 +692,7 @@ export type ParcelWhereInput = {
   totalCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableFilter<"Parcel"> | string | null
+  clientNote?: Prisma.StringNullableFilter<"Parcel"> | string | null
   npTrackingStatus?: Prisma.StringNullableFilter<"Parcel"> | string | null
   status?: Prisma.EnumParcelStatusFilter<"Parcel"> | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFilter<"Parcel"> | $Enums.CreatedSource
@@ -766,6 +774,7 @@ export type ParcelOrderByWithRelationInput = {
   totalCost?: Prisma.SortOrderInput | Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrderInput | Prisma.SortOrder
+  clientNote?: Prisma.SortOrderInput | Prisma.SortOrder
   npTrackingStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdSource?: Prisma.SortOrder
@@ -850,6 +859,7 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
   totalCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableFilter<"Parcel"> | string | null
+  clientNote?: Prisma.StringNullableFilter<"Parcel"> | string | null
   npTrackingStatus?: Prisma.StringNullableFilter<"Parcel"> | string | null
   status?: Prisma.EnumParcelStatusFilter<"Parcel"> | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFilter<"Parcel"> | $Enums.CreatedSource
@@ -931,6 +941,7 @@ export type ParcelOrderByWithAggregationInput = {
   totalCost?: Prisma.SortOrderInput | Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrderInput | Prisma.SortOrder
+  clientNote?: Prisma.SortOrderInput | Prisma.SortOrder
   npTrackingStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdSource?: Prisma.SortOrder
@@ -1003,6 +1014,7 @@ export type ParcelScalarWhereWithAggregatesInput = {
   totalCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringWithAggregatesFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableWithAggregatesFilter<"Parcel"> | string | null
+  clientNote?: Prisma.StringNullableWithAggregatesFilter<"Parcel"> | string | null
   npTrackingStatus?: Prisma.StringNullableWithAggregatesFilter<"Parcel"> | string | null
   status?: Prisma.EnumParcelStatusWithAggregatesFilter<"Parcel"> | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceWithAggregatesFilter<"Parcel"> | $Enums.CreatedSource
@@ -1062,6 +1074,7 @@ export type ParcelCreateInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -1139,6 +1152,7 @@ export type ParcelUncheckedCreateInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -1206,6 +1220,7 @@ export type ParcelUpdateInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -1283,6 +1298,7 @@ export type ParcelUncheckedUpdateInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -1355,6 +1371,7 @@ export type ParcelCreateManyInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -1414,6 +1431,7 @@ export type ParcelUpdateManyMutationInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -1474,6 +1492,7 @@ export type ParcelUncheckedUpdateManyInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -1556,6 +1575,7 @@ export type ParcelCountOrderByAggregateInput = {
   totalCost?: Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrder
+  clientNote?: Prisma.SortOrder
   npTrackingStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdSource?: Prisma.SortOrder
@@ -1636,6 +1656,7 @@ export type ParcelMaxOrderByAggregateInput = {
   totalCost?: Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrder
+  clientNote?: Prisma.SortOrder
   npTrackingStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdSource?: Prisma.SortOrder
@@ -1697,6 +1718,7 @@ export type ParcelMinOrderByAggregateInput = {
   totalCost?: Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrder
+  clientNote?: Prisma.SortOrder
   npTrackingStatus?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdSource?: Prisma.SortOrder
@@ -2318,6 +2340,7 @@ export type ParcelCreateWithoutAssignedCourierInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -2394,6 +2417,7 @@ export type ParcelUncheckedCreateWithoutAssignedCourierInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -2470,6 +2494,7 @@ export type ParcelCreateWithoutCreatedByInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -2546,6 +2571,7 @@ export type ParcelUncheckedCreateWithoutCreatedByInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -2622,6 +2648,7 @@ export type ParcelCreateWithoutCollectedByInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -2698,6 +2725,7 @@ export type ParcelUncheckedCreateWithoutCollectedByInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -2798,6 +2826,7 @@ export type ParcelScalarWhereInput = {
   totalCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableFilter<"Parcel"> | string | null
+  clientNote?: Prisma.StringNullableFilter<"Parcel"> | string | null
   npTrackingStatus?: Prisma.StringNullableFilter<"Parcel"> | string | null
   status?: Prisma.EnumParcelStatusFilter<"Parcel"> | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFilter<"Parcel"> | $Enums.CreatedSource
@@ -2889,6 +2918,7 @@ export type ParcelCreateWithoutSenderInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -2964,6 +2994,7 @@ export type ParcelUncheckedCreateWithoutSenderInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3041,6 +3072,7 @@ export type ParcelCreateWithoutReceiverInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3116,6 +3148,7 @@ export type ParcelUncheckedCreateWithoutReceiverInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3225,6 +3258,7 @@ export type ParcelCreateWithoutSenderAddressInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3300,6 +3334,7 @@ export type ParcelUncheckedCreateWithoutSenderAddressInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3377,6 +3412,7 @@ export type ParcelCreateWithoutReceiverAddressInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3452,6 +3488,7 @@ export type ParcelUncheckedCreateWithoutReceiverAddressInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3561,6 +3598,7 @@ export type ParcelCreateWithoutTripInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3636,6 +3674,7 @@ export type ParcelUncheckedCreateWithoutTripInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3729,6 +3768,7 @@ export type ParcelCreateWithoutPlacesInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3805,6 +3845,7 @@ export type ParcelUncheckedCreateWithoutPlacesInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -3887,6 +3928,7 @@ export type ParcelUpdateWithoutPlacesInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -3963,6 +4005,7 @@ export type ParcelUncheckedUpdateWithoutPlacesInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -4029,6 +4072,7 @@ export type ParcelCreateWithoutStatusHistoryInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -4105,6 +4149,7 @@ export type ParcelUncheckedCreateWithoutStatusHistoryInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -4187,6 +4232,7 @@ export type ParcelUpdateWithoutStatusHistoryInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -4263,6 +4309,7 @@ export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -4329,6 +4376,7 @@ export type ParcelCreateWithoutCollectionPointInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -4405,6 +4453,7 @@ export type ParcelUncheckedCreateWithoutCollectionPointInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -4497,6 +4546,7 @@ export type ParcelCreateWithoutCashEntriesInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -4573,6 +4623,7 @@ export type ParcelUncheckedCreateWithoutCashEntriesInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -4655,6 +4706,7 @@ export type ParcelUpdateWithoutCashEntriesInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -4731,6 +4783,7 @@ export type ParcelUncheckedUpdateWithoutCashEntriesInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -4797,6 +4850,7 @@ export type ParcelCreateWithoutRouteTasksInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -4873,6 +4927,7 @@ export type ParcelUncheckedCreateWithoutRouteTasksInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -4944,6 +4999,7 @@ export type ParcelCreateWithoutCreatedFromTasksInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -5020,6 +5076,7 @@ export type ParcelUncheckedCreateWithoutCreatedFromTasksInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -5102,6 +5159,7 @@ export type ParcelUpdateWithoutRouteTasksInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -5178,6 +5236,7 @@ export type ParcelUncheckedUpdateWithoutRouteTasksInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -5255,6 +5314,7 @@ export type ParcelUpdateWithoutCreatedFromTasksInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -5331,6 +5391,7 @@ export type ParcelUncheckedUpdateWithoutCreatedFromTasksInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -5397,6 +5458,7 @@ export type ParcelCreateWithoutWarehouseActionsInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -5473,6 +5535,7 @@ export type ParcelUncheckedCreateWithoutWarehouseActionsInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -5555,6 +5618,7 @@ export type ParcelUpdateWithoutWarehouseActionsInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -5631,6 +5695,7 @@ export type ParcelUncheckedUpdateWithoutWarehouseActionsInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -5697,6 +5762,7 @@ export type ParcelCreateWithoutNpSyncLogsInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -5773,6 +5839,7 @@ export type ParcelUncheckedCreateWithoutNpSyncLogsInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -5855,6 +5922,7 @@ export type ParcelUpdateWithoutNpSyncLogsInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -5931,6 +5999,7 @@ export type ParcelUncheckedUpdateWithoutNpSyncLogsInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -5997,6 +6066,7 @@ export type ParcelCreateWithoutClaimsInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -6073,6 +6143,7 @@ export type ParcelUncheckedCreateWithoutClaimsInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -6155,6 +6226,7 @@ export type ParcelUpdateWithoutClaimsInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -6231,6 +6303,7 @@ export type ParcelUncheckedUpdateWithoutClaimsInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -6302,6 +6375,7 @@ export type ParcelCreateManyAssignedCourierInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -6365,6 +6439,7 @@ export type ParcelCreateManyCreatedByInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -6428,6 +6503,7 @@ export type ParcelCreateManyCollectedByInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -6486,6 +6562,7 @@ export type ParcelUpdateWithoutAssignedCourierInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -6562,6 +6639,7 @@ export type ParcelUncheckedUpdateWithoutAssignedCourierInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -6633,6 +6711,7 @@ export type ParcelUncheckedUpdateManyWithoutAssignedCourierInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -6691,6 +6770,7 @@ export type ParcelUpdateWithoutCreatedByInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -6767,6 +6847,7 @@ export type ParcelUncheckedUpdateWithoutCreatedByInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -6838,6 +6919,7 @@ export type ParcelUncheckedUpdateManyWithoutCreatedByInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -6896,6 +6978,7 @@ export type ParcelUpdateWithoutCollectedByInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -6972,6 +7055,7 @@ export type ParcelUncheckedUpdateWithoutCollectedByInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7043,6 +7127,7 @@ export type ParcelUncheckedUpdateManyWithoutCollectedByInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7105,6 +7190,7 @@ export type ParcelCreateManySenderInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -7168,6 +7254,7 @@ export type ParcelCreateManyReceiverInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -7227,6 +7314,7 @@ export type ParcelUpdateWithoutSenderInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7302,6 +7390,7 @@ export type ParcelUncheckedUpdateWithoutSenderInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7373,6 +7462,7 @@ export type ParcelUncheckedUpdateManyWithoutSenderInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7432,6 +7522,7 @@ export type ParcelUpdateWithoutReceiverInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7507,6 +7598,7 @@ export type ParcelUncheckedUpdateWithoutReceiverInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7578,6 +7670,7 @@ export type ParcelUncheckedUpdateManyWithoutReceiverInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7641,6 +7734,7 @@ export type ParcelCreateManySenderAddressInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -7704,6 +7798,7 @@ export type ParcelCreateManyReceiverAddressInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -7763,6 +7858,7 @@ export type ParcelUpdateWithoutSenderAddressInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7838,6 +7934,7 @@ export type ParcelUncheckedUpdateWithoutSenderAddressInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7909,6 +8006,7 @@ export type ParcelUncheckedUpdateManyWithoutSenderAddressInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -7968,6 +8066,7 @@ export type ParcelUpdateWithoutReceiverAddressInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -8043,6 +8142,7 @@ export type ParcelUncheckedUpdateWithoutReceiverAddressInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -8114,6 +8214,7 @@ export type ParcelUncheckedUpdateManyWithoutReceiverAddressInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -8177,6 +8278,7 @@ export type ParcelCreateManyTripInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -8236,6 +8338,7 @@ export type ParcelUpdateWithoutTripInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -8311,6 +8414,7 @@ export type ParcelUncheckedUpdateWithoutTripInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -8382,6 +8486,7 @@ export type ParcelUncheckedUpdateManyWithoutTripInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -8446,6 +8551,7 @@ export type ParcelCreateManyCollectionPointInput = {
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
+  clientNote?: string | null
   npTrackingStatus?: string | null
   status?: $Enums.ParcelStatus
   createdSource?: $Enums.CreatedSource
@@ -8504,6 +8610,7 @@ export type ParcelUpdateWithoutCollectionPointInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -8580,6 +8687,7 @@ export type ParcelUncheckedUpdateWithoutCollectionPointInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -8651,6 +8759,7 @@ export type ParcelUncheckedUpdateManyWithoutCollectionPointInput = {
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   npTrackingStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumParcelStatusFieldUpdateOperationsInput | $Enums.ParcelStatus
   createdSource?: Prisma.EnumCreatedSourceFieldUpdateOperationsInput | $Enums.CreatedSource
@@ -8808,6 +8917,7 @@ export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
+  clientNote?: boolean
   npTrackingStatus?: boolean
   status?: boolean
   createdSource?: boolean
@@ -8890,6 +9000,7 @@ export type ParcelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
+  clientNote?: boolean
   npTrackingStatus?: boolean
   status?: boolean
   createdSource?: boolean
@@ -8963,6 +9074,7 @@ export type ParcelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
+  clientNote?: boolean
   npTrackingStatus?: boolean
   status?: boolean
   createdSource?: boolean
@@ -9036,6 +9148,7 @@ export type ParcelSelectScalar = {
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
+  clientNote?: boolean
   npTrackingStatus?: boolean
   status?: boolean
   createdSource?: boolean
@@ -9061,7 +9174,7 @@ export type ParcelSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "senderSnapshot" | "receiverSnapshot" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "doorstepDelivery" | "deliveryCost" | "packagingCost" | "doorstepCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "isMultiParcelPickup" | "parcelMoneyAmount" | "parcelMoneyCost" | "totalCost" | "costCurrency" | "npTtn" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
+export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "senderSnapshot" | "receiverSnapshot" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "doorstepDelivery" | "deliveryCost" | "packagingCost" | "doorstepCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "isMultiParcelPickup" | "parcelMoneyAmount" | "parcelMoneyCost" | "totalCost" | "costCurrency" | "npTtn" | "clientNote" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
 export type ParcelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sender?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   senderAddress?: boolean | Prisma.Parcel$senderAddressArgs<ExtArgs>
@@ -9201,6 +9314,10 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     totalCost: runtime.Decimal | null
     costCurrency: string
     npTtn: string | null
+    /**
+     * ТЗ docx 04.10.26 (п.3): нотатка Клієнта до 150 знаків, введена при створенні замовлення.
+     */
+    clientNote: string | null
     npTrackingStatus: string | null
     status: $Enums.ParcelStatus
     createdSource: $Enums.CreatedSource
@@ -9706,6 +9823,7 @@ export interface ParcelFieldRefs {
   readonly totalCost: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly costCurrency: Prisma.FieldRef<"Parcel", 'String'>
   readonly npTtn: Prisma.FieldRef<"Parcel", 'String'>
+  readonly clientNote: Prisma.FieldRef<"Parcel", 'String'>
   readonly npTrackingStatus: Prisma.FieldRef<"Parcel", 'String'>
   readonly status: Prisma.FieldRef<"Parcel", 'ParcelStatus'>
   readonly createdSource: Prisma.FieldRef<"Parcel", 'CreatedSource'>

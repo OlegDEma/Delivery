@@ -4,6 +4,7 @@ import type { Country, TripStatus } from '@/generated/prisma/client';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { JOURNEY_TRIP_MUTATION_ROLES } from '@/lib/constants/roles';
 import { autoAdvanceTrips } from '@/lib/services/trip-status';
+import { linkOrphanDraftParcels } from '@/lib/parcels/nearest-trip';
 
 // GET /api/journeys — staff only
 export async function GET() {
@@ -170,6 +171,9 @@ export async function POST(request: NextRequest) {
     });
     created.push(journey);
   }
+
+  // ТЗ docx 04.10.26: «Створені» посилки без рейсу — до найближчого рейсу.
+  await linkOrphanDraftParcels();
 
   return NextResponse.json({ count: created.length, first: created[0] }, { status: 201 });
 }

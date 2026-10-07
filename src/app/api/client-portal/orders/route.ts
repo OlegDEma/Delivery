@@ -5,6 +5,7 @@ import { canonicalPhone, normalizePhone } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
 import { parseBody, clientOrderSchema } from '@/lib/validators';
 import { createParcel } from '@/lib/services/parcel-creation';
+import { findNearestTrip, parcelEuCountry } from '@/lib/parcels/nearest-trip';
 import { logger } from '@/lib/logger';
 import type { Country } from '@/generated/prisma/enums';
 
@@ -31,6 +32,8 @@ export async function GET() {
       receiver: { select: { firstName: true, lastName: true, phone: true } },
       receiverAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, landmark: true, deliveryMethod: true, npWarehouseNum: true } },
       senderAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, landmark: true } },
+      // ТЗ docx 04.10.26: «Створена клієнтом/водієм/…» — лише роль автора.
+      createdBy: { select: { role: true } },
       statusHistory: {
         orderBy: { changedAt: 'desc' },
         take: 1,
@@ -59,6 +62,16 @@ export async function POST(request: NextRequest) {
       { error: 'Заповніть ПІБ у профілі, перш ніж створювати замовлення' },
       { status: 400 }
     );
+  }
+
+  // ТЗ docx 04.10.26 (п.3): нотатка Клієнта (до 150 знаків). Читаємо з копії
+  // тіла запиту — спільна схема clientOrderSchema поле не описує і відкидає.
+  const rawNote: unknown = await request.clone().json()
+    .then((b: { clientNote?: unknown }) => b?.clientNote)
+    .catch(() => null);
+  const clientNote = typeof rawNote === 'string' && rawNote.trim() ? rawNote.trim() : null;
+  if (clientNote && clientNote.length > 150) {
+    return NextResponse.json({ error: 'Нотатка — не більше 150 знаків' }, { status: 400 });
   }
 
   const parsed = await parseBody(request, clientOrderSchema);
@@ -199,13 +212,23 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // ТЗ docx 04.10.26: посилка, створена Клієнтом, одразу прив'язується до
+  // найближчого наявного рейсу (раніше — лише при «Прийнято до перевезення»).
+  // Якщо рейсу до країни немає — лишається без рейсу, а картка посилки показує
+  // «Повідомте оператора про відсутність рейсу…».
+  const direction = body.direction ?? 'eu_to_ua';
+  const nearestTrip = await findNearestTrip(
+    direction,
+    parcelEuCountry(direction, body.senderCountry, body.receiverCountry),
+  );
+
   try {
     const created = await createParcel({
       senderId: sender.id,
       senderAddressId,
       receiverId: receiver.id,
       receiverAddressId,
-      tripId: null,
+      tripId: nearestTrip?.id ?? null,
       direction: body.direction ?? 'eu_to_ua',
       shipmentType: body.shipmentType,
       description: body.description ?? null,
@@ -234,6 +257,10 @@ export async function POST(request: NextRequest) {
       // ТЗ docx 03.10.26 (п.2): ТТН Нової пошти від Клієнта.
       npTtn: body.npTtn ?? null,
     });
+
+    if (clientNote) {
+      await prisma.parcel.update({ where: { id: created.id }, data: { clientNote } });
+    }
 
     return NextResponse.json(created, { status: 201 });
   } catch (err) {

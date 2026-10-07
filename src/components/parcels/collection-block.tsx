@@ -489,15 +489,22 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
           {/* ТЗ docx 03.10.26 (п.2, п.3): при відправці поштою Клієнт вводить номер ТТН. */}
           {clientFacing && (
             <div>
-              <Label className="text-xs text-gray-500">Номер ТТН Нової пошти *</Label>
+              {/* ТЗ docx 04.10.26 (п.1): ТТН НЕ обов'язковий — Клієнт може оформити
+                  замовлення ще до фізичної відправки посилки Новою поштою. */}
+              <Label className="text-xs text-gray-500">Номер ТТН Нової пошти</Label>
               <Input
                 value={value.npTtn ?? ''}
                 onChange={(e) => onChange({ ...value, npTtn: e.target.value })}
                 placeholder="Напр. 59000123456789"
                 inputMode="numeric"
               />
-              <p className="text-[11px] text-gray-500 mt-1">
-                Введіть номер ТТН після відправки — за ним ми знайдемо Вашу посилку.
+              {/* ТЗ docx 04.10.26 (п.2): підказку виділено (помаранчевий, як логотип
+                  ПОСИЛОЧКА, напівжирний), щоб спонукати Клієнта ввести номер. */}
+              <p className="text-sm font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1.5 mt-1.5 leading-snug">
+                📌 Вже відправили посилку? Введіть номер ТТН — так ми швидше її знайдемо.
+                <span className="block text-xs font-normal text-orange-800 mt-0.5">
+                  Ще не відправили — додасте номер пізніше в деталях замовлення.
+                </span>
               </p>
             </div>
           )}

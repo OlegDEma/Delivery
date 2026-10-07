@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { isUuid } from '@/lib/validators/common';
 import { clientParcelPatchSchema } from '@/lib/validators/parcel';
 import { logger } from '@/lib/logger';
+import { isNoTripForCountry } from '@/lib/parcels/nearest-trip';
 
 /**
  * GET /api/client-portal/orders/[id]
@@ -60,6 +61,8 @@ export async function GET(
         select: { status: true, changedAt: true, notes: true },
       },
       trip: { select: { departureDate: true, country: true } },
+      // ТЗ docx 04.10.26: «Створена клієнтом/водієм/…» — потрібна лише роль автора.
+      createdBy: { select: { role: true } },
       // ТЗ docx 12.07.26: підсумок Клієнта = детальна Працівника — картка
       // «Деталі» показує кур'єра, як у staff-вигляді.
       assignedCourier: { select: { id: true, fullName: true } },
@@ -78,7 +81,14 @@ export async function GET(
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }
 
-  return NextResponse.json(parcel);
+  // ТЗ docx 04.10.26: «Повідомте оператора…» — лише коли рейсу до країни справді немає.
+  const noTripForCountry = !parcel.tripId && await isNoTripForCountry(
+    parcel.direction,
+    parcel.senderAddress?.country ?? parcel.sender.addresses[0]?.country,
+    parcel.receiverAddress?.country,
+  );
+
+  return NextResponse.json({ ...parcel, noTripForCountry });
 }
 
 /**

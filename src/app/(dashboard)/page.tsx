@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { statusLabel } from '@/lib/parcels/status-label';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { formatDateTime, formatCurrency, formatDate } from '@/lib/utils/format';
@@ -41,6 +42,9 @@ interface Stats {
     internalNumber: string;
     status: ParcelStatusType;
     createdAt: string;
+    /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
+    createdSource?: string | null;
+    createdBy?: { role: string } | null;
     receiver: { lastName: string; firstName: string; phone: string };
     // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
     senderSnapshot: unknown;
@@ -213,7 +217,7 @@ export default function DashboardPage() {
                   <span className="text-sm text-gray-500 ml-2">{pt.receiver.lastName} {pt.receiver.firstName}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{STATUS_LABELS[p.status]}</Badge>
+                  <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}</Badge>
                 </div>
               </Link>
               );

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { NO_TRIP_MESSAGE, OPERATOR_PHONE } from '@/lib/parcels/no-trip';
 import { CollectionBlock } from '@/components/parcels/collection-block';
 // ТЗ docx 21.09.26 (п.5): клієнт має бачити вартість ДО «Створити замовлення».
 import { CostCalculator } from '@/components/parcels/cost-calculator';
@@ -56,6 +57,9 @@ const DAY_LABELS: Record<string, string> = {
   sunday: 'неділя', monday: 'понеділок', tuesday: 'вівторок', wednesday: 'середа',
   thursday: 'четвер', friday: "п'ятниця", saturday: 'субота',
 };
+
+// ТЗ docx 04.10.26 (п.3): максимальна довжина нотатки Клієнта.
+const CLIENT_NOTE_MAX = 150;
 
 export default function NewOrderPage() {
   const router = useRouter();
@@ -149,6 +153,11 @@ export default function NewOrderPage() {
   // ТЗ docx 03.10.26 (п.2): номер ТТН Нової пошти, який Клієнт вводить при
   // способі передачі «Пошта». Зберігається в посилці (parcels.np_ttn).
   const [npTtn, setNpTtn] = useState('');
+  // ТЗ docx 04.10.26 (п.3): нотатка — вільний текст до 150 знаків.
+  const [clientNote, setClientNote] = useState('');
+  // ТЗ docx 04.10.26: чи є рейс до вибраної країни (посилка до нього прив'яжеться
+  // автоматично). Ключ «напрямок:країна» — щоб не показати застарілу відповідь.
+  const [tripCheck, setTripCheck] = useState<{ key: string; hasTrip: boolean } | null>(null);
 
   // Автопідставляння країн за напрямком (ТЗ §E8). Виноситься в колбек,
   // щоб не дзеркалити стейт у useEffect — react-hooks/set-state-in-effect.
@@ -166,6 +175,23 @@ export default function NewOrderPage() {
       setSenderCountry('UA');
     }
   }
+
+  // EU-країна маршруту: для EU→UA — країна Відправника, для UA→EU — Отримувача.
+  const euCountry = direction === 'eu_to_ua' ? senderCountry : direction === 'ua_to_eu' ? receiverCountry : '';
+  const tripKey = direction && euCountry && euCountry !== 'UA' ? `${direction}:${euCountry}` : '';
+  useEffect(() => {
+    if (!tripKey) return;
+    const [dir, country] = tripKey.split(':');
+    let cancelled = false;
+    fetch(`/api/client-portal/nearest-trip?direction=${dir}&country=${country}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { trip: unknown } | null) => {
+        if (!cancelled && d) setTripCheck({ key: tripKey, hasTrip: !!d.trip });
+      })
+      .catch(() => { /* мережа — попередження просто не покажемо */ });
+    return () => { cancelled = true; };
+  }, [tripKey]);
+  const noTripForCountry = !!tripKey && tripCheck?.key === tripKey && !tripCheck.hasTrip;
 
   useEffect(() => {
     fetch('/api/pricing').then(r => r.ok ? r.json() : []).then(setPricingConfigs);
@@ -386,6 +412,8 @@ export default function NewOrderPage() {
           collectionMethod, collectionPointId, collectionDate,
           // ТЗ docx 03.10.26 (п.2, п.4): ТТН зберігаємо в посилці.
           npTtn: npTtn.trim() || undefined,
+          // ТЗ docx 04.10.26 (п.3): нотатка Клієнта.
+          clientNote: clientNote.trim() || undefined,
           collectionAddress: composedCollectionAddress,
         }),
       });
@@ -746,6 +774,19 @@ export default function NewOrderPage() {
             {shipmentType === 'parcels_cargo' && (
               <div><Label>Опис відправлення <FieldHint text="Опишіть що саме відправляється: побутові речі, продукти харчування, будівельні матеріали тощо" /></Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Побутові речі, продукти..." rows={2} /></div>
             )}
+            {/* ТЗ docx 04.10.26 (п.3): «Додати можливість створити нотатку (поле для
+                вільного тексту на 150 знаків)». Нотатку бачить і Працівник. */}
+            <div>
+              <Label>Нотатка <FieldHint text="Будь-яка додаткова інформація для нас: коли зручно зателефонувати, що врахувати тощо" /></Label>
+              <Textarea
+                value={clientNote}
+                onChange={(e) => setClientNote(e.target.value.slice(0, CLIENT_NOTE_MAX))}
+                maxLength={CLIENT_NOTE_MAX}
+                placeholder="Напр. телефонуйте після 18:00"
+                rows={2}
+              />
+              <div className="text-[11px] text-gray-400 text-right mt-0.5">{clientNote.length}/{CLIENT_NOTE_MAX}</div>
+            </div>
             <div><Label>Оголошена вартість ({declaredCurrencyLabel}) <FieldHint text="Оцініть вартість своєї посилки" /></Label><Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} /></div>
 
             {/* Додаткові послуги — кожна вмикається чекбоксом, % і суми
@@ -881,6 +922,16 @@ export default function NewOrderPage() {
               />
             </CardContent>
           </Card>
+        )}
+
+        {/* ТЗ docx 04.10.26: рейсу до вибраної країни немає — попереджаємо до
+            створення (замовлення створити все одно можна; рейс прив'яжеться, щойно
+            його заведуть). */}
+        {noTripForCountry && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm text-orange-800">
+            ⚠️ {NO_TRIP_MESSAGE.replace(OPERATOR_PHONE, '')}
+            <a href={`tel:${OPERATOR_PHONE}`} className="font-semibold underline">{OPERATOR_PHONE}</a>
+          </div>
         )}
 
         {/* Перевірка 15.09.26: помилка стояла внизу довгої форми поза екраном —

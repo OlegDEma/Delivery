@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDateTime } from '@/lib/utils/format';
+import { statusLabel } from '@/lib/parcels/status-label';
 
 interface TrackingResult {
   internalNumber: string;
@@ -15,6 +16,9 @@ interface TrackingResult {
   direction: string;
   totalPlacesCount: number;
   createdAt: string;
+  /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
+  createdSource?: string | null;
+  createdByRole?: string | null;
   receiverCity: string | null;
   statusHistory: {
     status: ParcelStatusType;
@@ -94,7 +98,7 @@ export default function TrackingPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-mono">{result.internalNumber}</CardTitle>
                 <Badge className={STATUS_COLORS[result.status]}>
-                  {STATUS_LABELS[result.status]}
+                  {statusLabel(result.status, { createdSource: result.createdSource, createdByRole: result.createdByRole })}
                 </Badge>
               </div>
               <div className="text-xs text-gray-400 mt-1">
@@ -120,7 +124,7 @@ export default function TrackingPage() {
                     </div>
                     <div className="pb-2">
                       <div className="text-sm font-medium">
-                        {STATUS_LABELS[h.status] || h.status}
+                        {statusLabel(h.status, { createdSource: result.createdSource, createdByRole: result.createdByRole })}
                       </div>
                       <div className="text-xs text-gray-400">{formatDateTime(h.changedAt)}</div>
                       {h.notes && <div className="text-xs text-gray-500">{h.notes}</div>}

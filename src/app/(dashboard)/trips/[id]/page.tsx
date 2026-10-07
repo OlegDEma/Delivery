@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { statusLabel } from '@/lib/parcels/status-label';
 import { formatDateWithWeekday, formatWeight } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { useAuth } from '@/lib/hooks/use-auth';
@@ -36,6 +37,9 @@ interface TripParcel {
   declaredValue: number | null;
   collectionMethod: string | null;
   collectionAddress: string | null;
+  /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
+  createdSource?: string | null;
+  createdBy?: { role: string } | null;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
   // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
@@ -401,7 +405,7 @@ export default function TripDetailPage() {
                     )}
                     <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
                     <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
-                      {STATUS_LABELS[p.status]}
+                      {statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
                     </Badge>
                   </div>
                   <div className="text-sm">

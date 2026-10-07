@@ -2439,6 +2439,7 @@ export const ParcelScalarFieldEnum = {
   totalCost: 'totalCost',
   costCurrency: 'costCurrency',
   npTtn: 'npTtn',
+  clientNote: 'clientNote',
   npTrackingStatus: 'npTrackingStatus',
   status: 'status',
   createdSource: 'createdSource',

@@ -16,6 +16,7 @@ import { AddressEditor, type AddressEditorState } from '@/components/parcels/add
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatCurrency, formatDateTime } from '@/lib/utils/format';
+import { statusLabel } from '@/lib/parcels/status-label';
 
 interface Address {
   id: string;
@@ -36,6 +37,9 @@ interface ParcelRef {
   internalNumber: string;
   status: ParcelStatusType;
   createdAt: string;
+  /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
+  createdSource?: string | null;
+  createdBy?: { role: string } | null;
 }
 
 interface ClientStats {
@@ -494,7 +498,7 @@ export default function ClientDetailPage() {
                 <span className="font-mono text-sm">{p.internalNumber}</span>
                 <div className="flex items-center gap-2">
                   <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
-                    {STATUS_LABELS[p.status]}
+                    {statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
                   </Badge>
                   <span className="text-xs text-gray-400">{formatDate(p.createdAt)}</span>
                 </div>

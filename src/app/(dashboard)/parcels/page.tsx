@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState, useCallback } from 'react';
+import { useAuth } from '@/lib/hooks/use-auth';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
@@ -14,6 +15,8 @@ import { statusLabel } from '@/lib/parcels/status-label';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { formatDate } from '@/lib/utils/format';
 import { tripRouteLabel } from '@/lib/constants/countries';
+import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { rememberOpenedParcel, useReturnToParcel, readListState, saveListState } from '@/lib/hooks/use-return-to-parcel';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
 import { X } from 'lucide-react';
@@ -32,6 +35,9 @@ interface ParcelListItem {
   totalCost: number | null;
   isPaid: boolean;
   createdAt: string;
+  /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
+  createdSource?: string | null;
+  createdBy?: { role: string } | null;
   sender: { phone: string; firstName: string; lastName: string };
   receiver: { phone: string; firstName: string; lastName: string };
   receiverAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; landmark: string | null; npWarehouseNum: string | null; deliveryMethod: string } | null;
@@ -45,6 +51,13 @@ interface ParcelListItem {
   collectedBy?: { id: string; fullName: string } | null;
   /** Хто призначений на доставку (assignedCourier) — для контексту. */
   assignedCourier?: { id: string; fullName: string } | null;
+}
+
+// ТЗ docx 04.10.26: повернення до відкритої посилки + збережений стан списку.
+const RETURN_KEY = 'parcels:lastOpened';
+const LIST_STATE_KEY = 'parcels:listState';
+interface ParcelsListState {
+  search: string; statusFilter: string; dateFrom: string; courierFilter: string; page: number;
 }
 
 // Спец-значення для фільтра по кур'єру: «всі» / «без кур'єра».
@@ -86,9 +99,17 @@ function ParcelsContent() {
   // Read initial filter state from URL so deep-links from the dashboard cards
   // (e.g. "?status=in_transit", "?dateFrom=2026-04-16") pre-filter the list.
   const searchParams = useSearchParams();
-  const initialStatus = searchParams.get('status') || 'all';
-  const initialDateFrom = searchParams.get('dateFrom') || '';
-  const initialSearch = searchParams.get('q') || '';
+  // ТЗ docx 04.10.26: після виходу з посилки список має відкритись у тому ж стані
+  // (фільтри + сторінка), інакше посилки з 2-ї сторінки вже не буде видно.
+  // Deep-link з дашборду (параметри в URL) має пріоритет над збереженим станом.
+  const hasUrlFilters = ['status', 'dateFrom', 'q'].some((k) => searchParams.has(k));
+  const saved = hasUrlFilters ? null : readListState<ParcelsListState>(LIST_STATE_KEY);
+  const initialStatus = searchParams.get('status') || saved?.statusFilter || 'all';
+  const initialDateFrom = searchParams.get('dateFrom') || saved?.dateFrom || '';
+  const initialSearch = searchParams.get('q') || saved?.search || '';
+  const { role } = useAuth();
+  // ТЗ docx 04.10.26: прийняти оплату пакетом може лише Суперадмін.
+  const isSuperAdmin = role === 'super_admin';
 
   const [parcels, setParcels] = useState<ParcelListItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -96,16 +117,21 @@ function ParcelsContent() {
   const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
   const [dateFrom, setDateFrom] = useState(initialDateFrom);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(saved?.page || 1);
   const [pages, setPages] = useState(1);
   // За ТЗ клієнта: замість фільтра «дата/вага/номер» — фільтр «по кур'єру,
   // який приймав посилку». Дефолт — «Без кур'єра» (прибрати розгорнутий
   // загальний список, показувати ще не прив'язані).
-  const [courierFilter, setCourierFilter] = useState<string>(COURIER_ALL);
+  const [courierFilter, setCourierFilter] = useState<string>(saved?.courierFilter || COURIER_ALL);
   const [couriers, setCouriers] = useState<{ id: string; fullName: string }[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkStatus, setBulkStatus] = useState<string>('');
   const [bulkWorking, setBulkWorking] = useState(false);
+  const [bulkPayOpen, setBulkPayOpen] = useState(false);
+
+  useEffect(() => {
+    saveListState<ParcelsListState>(LIST_STATE_KEY, { search, statusFilter, dateFrom, courierFilter, page });
+  }, [search, statusFilter, dateFrom, courierFilter, page]);
 
   // Load available couriers for the filter dropdown (once).
   useEffect(() => {
@@ -157,6 +183,9 @@ function ParcelsContent() {
     };
   }, [fetchParcels]);
 
+  // ТЗ docx 04.10.26: посилка, з якої щойно повернулись, — по центру екрана і підсвічена.
+  const highlightedId = useReturnToParcel(RETURN_KEY, !loading && parcels.length > 0);
+
   function toggleSelection(id: string) {
     setSelectedIds(prev => {
       const next = new Set(prev);
@@ -169,22 +198,28 @@ function ParcelsContent() {
     setSelectedIds(new Set());
   }
 
-  async function handleBulkPaid() {
+  // ТЗ docx 04.10.26: пакетна оплата — лише Суперадмін; на кожну посилку
+  // створюється прихід у Касі (спосіб оплати обирається тут же).
+  async function handleBulkPaid(paymentMethod: 'cash' | 'cashless') {
     if (selectedIds.size === 0) return;
     setBulkWorking(true);
     try {
       const res = await fetch('/api/parcels/bulk-paid', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ parcelIds: Array.from(selectedIds), isPaid: true }),
+        body: JSON.stringify({ parcelIds: Array.from(selectedIds), paymentMethod }),
       });
       if (res.ok) {
         const data = await res.json();
-        toast.success(`Оновлено: ${data.updated}`);
+        toast.success(
+          `Оплату прийнято: ${data.updated}` + (data.skipped ? ` (вже оплачені пропущено: ${data.skipped})` : ''),
+        );
+        setBulkPayOpen(false);
         clearSelection();
         fetchParcels();
       } else {
-        toast.error('Помилка оновлення');
+        const err = await res.json().catch(() => null);
+        toast.error(err?.error || 'Помилка прийому оплати');
       }
     } catch {
       toast.error('Помилка оновлення');
@@ -215,29 +250,6 @@ function ParcelsContent() {
       toast.error('Помилка зміни статусу');
     } finally {
       setBulkWorking(false);
-    }
-  }
-
-  async function handleQuickPaid(e: React.MouseEvent, id: string) {
-    e.preventDefault();
-    e.stopPropagation();
-    // ТЗ docx 28.09.26: раніше це був значок 💰 без підпису, і один випадковий
-    // тап у списку одразу позначав посилку оплаченою. Перепитуємо.
-    if (!confirm('Позначити цю посилку оплаченою?')) return;
-    try {
-      const res = await fetch('/api/parcels/bulk-paid', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ parcelIds: [id], isPaid: true }),
-      });
-      if (res.ok) {
-        toast.success('Позначено оплаченим');
-        fetchParcels();
-      } else {
-        toast.error('Помилка');
-      }
-    } catch {
-      toast.error('Помилка');
     }
   }
 
@@ -356,9 +368,26 @@ function ParcelsContent() {
       {selectedIds.size > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3 flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium">Вибрано: {selectedIds.size}</span>
-          <Button size="sm" variant="outline" onClick={handleBulkPaid} disabled={bulkWorking}>
-            Позначити оплаченим
-          </Button>
+          {isSuperAdmin && (
+            bulkPayOpen ? (
+              <span className="inline-flex flex-wrap items-center gap-1">
+                <span className="text-xs text-gray-600">Оплата:</span>
+                <Button size="sm" variant="outline" onClick={() => handleBulkPaid('cash')} disabled={bulkWorking}>
+                  💵 Готівка
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => handleBulkPaid('cashless')} disabled={bulkWorking}>
+                  💳 Безготівково
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setBulkPayOpen(false)} disabled={bulkWorking}>
+                  Скасувати
+                </Button>
+              </span>
+            ) : (
+              <Button size="sm" variant="outline" onClick={() => setBulkPayOpen(true)} disabled={bulkWorking}>
+                Прийняти оплату ({selectedIds.size})
+              </Button>
+            )
+          )}
           <Select value={bulkStatus} onValueChange={(v) => { const s = v ?? ''; setBulkStatus(s); if (s) handleBulkStatus(s); }}>
             <SelectTrigger className="w-52 h-8">
               <SelectValue placeholder="Змінити статус" />
@@ -393,21 +422,28 @@ function ParcelsContent() {
               // ТЗ docx 26.07.26 (п.1): сторони — зі знімка для accepted+.
               const pt = parcelParties(p);
               return (
-                <div key={p.id} className="flex items-start gap-2 p-3 hover:bg-gray-50 transition-colors">
+                <div
+                  key={p.id}
+                  data-parcel-id={p.id}
+                  className={cn(
+                    'flex items-start gap-2 p-3 hover:bg-gray-50 transition-colors',
+                    highlightedId === p.id && 'bg-amber-50 ring-2 ring-inset ring-amber-300',
+                  )}
+                >
                   <div className="pt-1" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={checked}
                       onCheckedChange={() => toggleSelection(p.id)}
                     />
                   </div>
-                  <Link href={`/parcels/${p.id}`} className="block flex-1 min-w-0">
+                  <Link href={`/parcels/${p.id}`} onClick={() => rememberOpenedParcel(RETURN_KEY, p.id)} className="block flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         {/* flex-wrap so long status badges don't overflow on mobile */}
                         <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                          <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
+                          <span className="font-mono text-sm font-medium">{displayParcelNumber(p.internalNumber)}</span>
                           <Badge className={`text-xs whitespace-normal text-left h-auto py-0.5 ${STATUS_COLORS[p.status]}`}>
-                            {statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction })}
+                            {statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
                           </Badge>
                           {/* ТЗ docx 03.10.26 (п.4): «Після введення ТТН Клієнтом він
                               повинен відображатись … і тут у будь-якого працівника» —
@@ -432,7 +468,7 @@ function ParcelsContent() {
                             </Badge>
                           )}
                         </div>
-                        {/* Receiver block first per ТЗ: Кому/Куди → Від кого/Звідки */}
+                        {/* Кому/Куди (ТЗ). */}
                         <div className="text-sm">
                           <span className="text-gray-500 font-medium">Кому:</span>{' '}
                           <span>{pt.receiver.lastName} {pt.receiver.firstName}</span>
@@ -451,24 +487,8 @@ function ParcelsContent() {
                             {pt.receiver.address.npWarehouseNum ? ` (НП №${pt.receiver.address.npWarehouseNum})` : ''}
                           </div>
                         )}
-                        <div className="text-sm mt-1">
-                          <span className="text-gray-500 font-medium">Від кого:</span>{' '}
-                          <span>{pt.sender.lastName} {pt.sender.firstName}</span>
-                          <span className="text-gray-400 ml-1">{pt.sender.phone}</span>
-                        </div>
-                        {pt.sender.address && (
-                          <div className="text-xs text-gray-500">
-                            <span className="text-gray-400">Звідки:</span>{' '}
-                            {pt.sender.address.city}
-                            {pt.sender.address.street ? `, ${pt.sender.address.street}` : ''}
-                            {pt.sender.address.building ? ` ${pt.sender.address.building}` : ''}
-                            {/* ТЗ docx 01.07.26: індекс для не-UA сторони. */}
-                            {pt.sender.address.postalCode ? `, ${pt.sender.address.postalCode}` : ''}
-                            {/* ТЗ docx 02.07.26 (D1): орієнтир (коли вказано). */}
-                            {pt.sender.address.landmark ? ` (${pt.sender.address.landmark})` : ''}
-                            {pt.sender.address.npWarehouseNum ? ` (НП №${pt.sender.address.npWarehouseNum})` : ''}
-                          </div>
-                        )}
+                        {/* ТЗ docx 04.10.26: «в цілях економії місця (особливо у смартфоні)
+                            не відображай „Від кого“» — лишаємо шапку посилки та «Кому». */}
                         {/* ТЗ — поряд з посилкою показуємо хто її прийняв
                             (collectedBy). Допомагає розуміти контекст без
                             переходу в деталі. */}
@@ -489,16 +509,8 @@ function ParcelsContent() {
                       </div>
                     </div>
                   </Link>
-                  {!p.isPaid && (
-                    <button
-                      type="button"
-                      onClick={(e) => handleQuickPaid(e, p.id)}
-                      title="Позначити оплаченим"
-                      className="shrink-0 px-2 py-1 rounded border border-green-200 text-green-700 hover:bg-green-50 text-xs font-medium leading-none whitespace-nowrap"
-                    >
-                      💰 Оплачено
-                    </button>
-                  )}
+                  {/* ТЗ docx 04.10.26: кнопку «💰 Оплачено» в рядку прибрано — оплату
+                      кожної посилки приймають окремо, у самій посилці. */}
                 </div>
               );
             })}

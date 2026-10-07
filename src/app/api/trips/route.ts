@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { JOURNEY_TRIP_MUTATION_ROLES } from '@/lib/constants/roles';
 import { autoAdvanceTrips } from '@/lib/services/trip-status';
+import { linkOrphanDraftParcels } from '@/lib/parcels/nearest-trip';
 
 // GET /api/trips — staff can view
 export async function GET(request: NextRequest) {
@@ -88,6 +89,9 @@ export async function POST(request: NextRequest) {
       _count: { select: { parcels: true } },
     },
   });
+
+  // ТЗ docx 04.10.26: «Створені» посилки без рейсу — до найближчого рейсу.
+  await linkOrphanDraftParcels();
 
   return NextResponse.json(trip, { status: 201 });
 }

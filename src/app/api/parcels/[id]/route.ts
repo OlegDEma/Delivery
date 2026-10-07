@@ -16,6 +16,7 @@ import { isUuid } from '@/lib/validators/common';
 import { canEditParcelData, canEditParcelParties, editLockReason } from '@/lib/parcels/edit-lock';
 import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
+import { isNoTripForCountry } from '@/lib/parcels/nearest-trip';
 
 // GET /api/parcels/[id]
 export async function GET(
@@ -46,7 +47,7 @@ export async function GET(
       },
       trip: { select: { id: true, departureDate: true, country: true, direction: true } },
       assignedCourier: { select: { id: true, fullName: true } },
-      createdBy: { select: { fullName: true } },
+      createdBy: { select: { fullName: true, role: true } },
       collectionPoint: {
         select: {
           id: true,
@@ -89,8 +90,17 @@ export async function GET(
     : [];
   const actorMap = new Map(actors.map((a) => [a.id, a.fullName]));
 
+  // ТЗ docx 04.10.26: попередження «Повідомте оператора…» — лише коли рейсу до
+  // країни справді немає (а не просто посилка ще не прив'язана).
+  const noTripForCountry = !parcel.tripId && await isNoTripForCountry(
+    parcel.direction,
+    parcel.senderAddress?.country ?? parcel.sender?.country,
+    parcel.receiverAddress?.country ?? parcel.receiver?.country,
+  );
+
   return NextResponse.json({
     ...parcel,
+    noTripForCountry,
     auditLog: auditEntries.map((a) => ({
       id: a.id,
       event: a.event,

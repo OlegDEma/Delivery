@@ -17,10 +17,41 @@ interface StatusContext {
   tripCountry?: string | null;
   /** Напрямок — fallback коли рейсу ще нема. */
   direction?: string | null;
+  /** ТЗ docx 04.10.26: джерело створення (client_web / client_telegram / worker). */
+  createdSource?: string | null;
+  /** ТЗ docx 04.10.26: роль того, хто створив посилку (profiles.role). */
+  createdByRole?: string | null;
+}
+
+// ТЗ docx 04.10.26: «Створена клієнтом», «Створена водієм», «Створена суперадміном»…
+const CREATED_BY_SUFFIX: Record<string, string> = {
+  client: 'клієнтом',
+  driver_courier: 'водієм',
+  super_admin: 'суперадміном',
+  admin: 'адміністратором',
+  cashier: 'касиром',
+  warehouse_worker: 'працівником складу',
+};
+
+/**
+ * ТЗ docx 04.10.26: «Додай у цьому (лише у цьому) статусі до слова „Створена“
+ * пояснення ким саме створена». Клієнтське джерело має пріоритет над роллю —
+ * замовлення з сайту/Telegram завжди «клієнтом».
+ */
+function createdBySuffix(ctx: StatusContext): string | null {
+  if (ctx.createdSource === 'client_web' || ctx.createdSource === 'client_telegram') {
+    return CREATED_BY_SUFFIX.client;
+  }
+  return (ctx.createdByRole && CREATED_BY_SUFFIX[ctx.createdByRole]) || null;
 }
 
 export function statusLabel(status: ParcelStatusType | string, ctx: StatusContext = {}): string {
   const base = STATUS_LABELS[status as ParcelStatusType] || String(status);
+
+  if (status === 'draft') {
+    const suffix = createdBySuffix(ctx);
+    return suffix ? `${base} ${suffix}` : base;
+  }
 
   // Вибираємо країну призначення:
   // - Для «_to_ua» призначення завжди UA (Україна)

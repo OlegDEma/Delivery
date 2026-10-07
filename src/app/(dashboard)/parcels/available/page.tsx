@@ -10,6 +10,7 @@ import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/const
 import { formatDate } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { statusLabel } from '@/lib/parcels/status-label';
 
 interface ParcelItem {
   id: string;
@@ -20,7 +21,9 @@ interface ParcelItem {
   totalWeight: number | null;
   totalCost: number | null;
   createdAt: string;
+  /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
   createdSource: string;
+  createdBy?: { role: string } | null;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { city: string; street: string | null } | null;
@@ -119,7 +122,7 @@ export default function AvailableParcelsPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
-                    <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{STATUS_LABELS[p.status]}</Badge>
+                    <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}</Badge>
                     {p.createdSource === 'client_web' && <Badge variant="secondary" className="text-xs">Сайт</Badge>}
                   </div>
                   <div className="text-sm">

@@ -33,6 +33,8 @@ import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { toast } from 'sonner';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
+import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { NO_TRIP_MESSAGE, OPERATOR_PHONE } from '@/lib/parcels/no-trip';
 
 interface ParcelDetail {
   id: string;
@@ -57,6 +59,10 @@ interface ParcelDetail {
   needsPackaging: boolean;
   doorstepDelivery: boolean;
   npTtn: string | null;
+  /** ТЗ docx 04.10.26: рейсу до країни посилки в базі немає взагалі (з API). */
+  noTripForCountry?: boolean;
+  /** ТЗ docx 04.10.26 (п.3): нотатка Клієнта, введена при створенні замовлення. */
+  clientNote: string | null;
   npTrackingStatus: string | null;
   estimatedDeliveryStart: string | null;
   estimatedDeliveryEnd: string | null;
@@ -123,7 +129,7 @@ interface ParcelDetail {
   photos?: string[];
   trip: { id: string; departureDate: string; country: string; direction: string } | null;
   assignedCourier: { id: string; fullName: string } | null;
-  createdBy: { fullName: string } | null;
+  createdBy: { fullName: string; role: string } | null;
   // Collection
   collectionMethod: string | null;
   isMultiParcelPickup: boolean | null;
@@ -331,7 +337,7 @@ export default function ParcelDetailPage() {
     <div className="max-w-3xl space-y-4">
       <Breadcrumbs items={[
         { label: 'Посилки', href: '/parcels' },
-        { label: parcel.internalNumber },
+        { label: displayParcelNumber(parcel.internalNumber) },
       ]} />
 
       {/* Client order — awaiting confirmation */}
@@ -364,21 +370,45 @@ export default function ParcelDetailPage() {
       {/* Header — ІТН та ТТН поряд у самому верху (за ТЗ). */}
       <div>
         <div className="flex items-center gap-3 mb-1 flex-wrap">
-          <h1 className="text-xl font-bold font-mono">{parcel.internalNumber}</h1>
+          {/* ТЗ docx 04.10.26: дату створення з шапки прибрано — замість неї номер
+              рейсу, за яким закріплена посилка. Олівець — редагування рейсу/кур'єра
+              (раніше був у рядку «Рейс | Кур'єр» внизу картки, який ТЗ прибрало). */}
+          <h1 className="text-xl font-bold font-mono">
+            {displayParcelNumber(parcel.internalNumber)}
+            {parcel.trip && <>, Рейс: {formatDate(parcel.trip.departureDate)}({parcel.trip.country})</>}
+          </h1>
+          <button
+            type="button"
+            onClick={() => setEditTrip((v) => !v)}
+            className="text-blue-600 hover:text-blue-800 inline-flex items-center"
+            title="Редагувати рейс/кур'єра"
+            aria-label="Редагувати рейс/кур'єра"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
           <Badge className={STATUS_COLORS[parcel.status]}>
-            {statusLabel(parcel.status, { tripCountry: parcel.trip?.country, direction: parcel.direction })}
+            {statusLabel(parcel.status, {
+              tripCountry: parcel.trip?.country, direction: parcel.direction,
+              createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role,
+            })}
           </Badge>
         </div>
+        {/* ТЗ docx 04.10.26: рейсу до цієї країни в базі немає взагалі.
+            Якщо рейс є, але стара посилка (до автоприв'язки) ще не прив'язана, — нейтральний рядок. */}
+        {!parcel.trip && !parcel.noTripForCountry && (
+          <div className="text-sm text-gray-500 mb-1">Рейс ще не призначено — призначте олівцем біля номера.</div>
+        )}
+        {!parcel.trip && parcel.noTripForCountry && (
+          <div className="text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1 mb-1">
+            {NO_TRIP_MESSAGE.replace(OPERATOR_PHONE, '')}
+            <a href={`tel:${OPERATOR_PHONE}`} className="font-medium underline">{OPERATOR_PHONE}</a>
+          </div>
+        )}
         {/* ТЗ docx 17.08.26 (Частина перша): код країни доставки · кількість місць · рейс. */}
         <div className="text-sm text-gray-700 mb-1 flex items-center gap-1.5 flex-wrap">
           {destCC && <><span className="font-medium">{destCC}</span><span className="text-gray-300">·</span></>}
           <span>{placesLabel(parcel.totalPlacesCount)}</span>
-          {parcel.trip && (
-            <>
-              <span className="text-gray-300">·</span>
-              <span>Рейс: {formatDate(parcel.trip.departureDate)}({parcel.trip.country})</span>
-            </>
-          )}
+          {/* Рейс тепер у самій шапці (ТЗ docx 04.10.26) — тут не дублюємо. */}
         </div>
         {/* ТЗ docx 03.10.26 (п.1): «Поки що не відображати ІТН, поки не розробили
             правила його формування» — прибрано і в Працівника, а не лише в Клієнта
@@ -410,6 +440,49 @@ export default function ParcelDetailPage() {
           <span className="text-gray-300">|</span>
           <span>{formatDateTime(parcel.createdAt)}</span>
           {parcel.createdBy && <span className="text-gray-400">· {parcel.createdBy.fullName}</span>}
+        </div>
+        {/* ТЗ docx 04.10.26 (п.3): нотатка, яку Клієнт залишив при створенні замовлення. */}
+        {parcel.clientNote && (
+          <div className="mt-1 text-sm bg-amber-50 border border-amber-200 rounded px-2 py-1">
+            <span className="text-amber-800 font-medium">Нотатка клієнта:</span>{' '}
+            <span className="whitespace-pre-wrap break-words">{parcel.clientNote}</span>
+          </div>
+        )}
+
+        {/* Редактор рейсу/кур'єра — відкривається олівцем у шапці (ТЗ docx 04.10.26). */}
+        <div className="text-sm">
+          {editTrip && (
+            <div className="mt-3 space-y-2 border-t pt-3">
+              <TripSelector
+                trips={trips}
+                direction={parcel.direction as 'eu_to_ua' | 'ua_to_eu'}
+                selectedTripId={parcel.trip?.id || ''}
+                onChange={(tripId) => handleAssignTrip(tripId)}
+                compact
+                // ТЗ docx 21.07.26 (п.2): лише рейси з країни Відправника.
+                senderCountry={parcel.sender?.country || parcel.senderAddress?.country || null}
+              />
+              <div>
+                <Label className="text-xs">Кур&apos;єр</Label>
+                <Select
+                  value={parcel.assignedCourier?.id || '_none'}
+                  onValueChange={(v) => handleAssignCourier(v === '_none' ? '' : (v ?? ''))}
+                >
+                  <SelectTrigger>
+                    <SelectValue>
+                      {parcel.assignedCourier ? parcel.assignedCourier.fullName : 'Не призначено'}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">Не призначено</SelectItem>
+                    {couriers.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Inline TTN editor */}
@@ -681,67 +754,8 @@ export default function ParcelDetailPage() {
       {/* ТЗ E4: «Спосіб прийому посилки звідси забрати. Залишити лише для
           створення Нової посилки». Блок раніше показувався тут — прибрано. */}
 
-      {/* Рейс — показуємо лише дату фактичного рейсу + кур'єра без Card-wrapper'а. */}
-      <div className="text-sm py-1 border-y">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <span className="text-gray-500">Рейс:</span>{' '}
-            {parcel.trip ? (
-              <span className="font-medium">
-                {new Date(parcel.trip.departureDate).toLocaleDateString('uk-UA')}
-                <span className="text-gray-400 ml-1">({parcel.trip.country})</span>
-              </span>
-            ) : (
-              <span className="text-gray-400">Не прив&apos;язано</span>
-            )}
-            <span className="text-gray-300 mx-2">|</span>
-            <span className="text-gray-500">Кур&apos;єр:</span>{' '}
-            <span className="font-medium">
-              {parcel.assignedCourier?.fullName || <span className="text-gray-400">Не призначено</span>}
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setEditTrip((v) => !v)}
-            className="text-blue-600 hover:text-blue-800 inline-flex items-center"
-            title="Редагувати рейс/кур'єра"
-          >
-            <Pencil className="w-3 h-3" />
-          </button>
-        </div>
-          {editTrip && (
-            <div className="mt-3 space-y-2 border-t pt-3">
-              <TripSelector
-                trips={trips}
-                direction={parcel.direction as 'eu_to_ua' | 'ua_to_eu'}
-                selectedTripId={parcel.trip?.id || ''}
-                onChange={(tripId) => handleAssignTrip(tripId)}
-                compact
-                // ТЗ docx 21.07.26 (п.2): лише рейси з країни Відправника.
-                senderCountry={parcel.sender?.country || parcel.senderAddress?.country || null}
-              />
-              <div>
-                <Label className="text-xs">Кур&apos;єр</Label>
-                <Select
-                  value={parcel.assignedCourier?.id || '_none'}
-                  onValueChange={(v) => handleAssignCourier(v === '_none' ? '' : (v ?? ''))}
-                >
-                  <SelectTrigger>
-                    <SelectValue>
-                      {parcel.assignedCourier ? parcel.assignedCourier.fullName : 'Не призначено'}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="_none">Не призначено</SelectItem>
-                    {couriers.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-      </div>
+      {/* ТЗ docx 04.10.26: рядок «Рейс: … | Кур'єр: …» внизу картки прибрано
+          (і в Клієнта, і в Працівника). Редагування рейсу/кур'єра — олівцем у шапці. */}
 
       {/* Фото і нотатки — компактні кнопки-дії (замість повноцінних карток). */}
       <div className="flex gap-2 flex-wrap">
@@ -854,7 +868,7 @@ export default function ParcelDetailPage() {
                 </div>
                 <div className="pb-3">
                   <div className="text-sm font-medium">
-                    {statusLabel(h.status, { tripCountry: parcel.trip?.country, direction: parcel.direction })}
+                    {statusLabel(h.status, { tripCountry: parcel.trip?.country, direction: parcel.direction, createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role })}
                   </div>
                   <div className="text-xs text-gray-400">
                     {formatDateTime(h.changedAt)}

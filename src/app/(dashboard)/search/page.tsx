@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatWeight } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { statusLabel } from '@/lib/parcels/status-label';
 
 interface SearchResult {
   id: string;
@@ -20,6 +21,9 @@ interface SearchResult {
   totalPlacesCount: number;
   npTtn: string | null;
   createdAt: string;
+  /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
+  createdSource?: string | null;
+  createdBy?: { role: string } | null;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { city: string; street: string | null } | null;
@@ -181,7 +185,7 @@ export default function SearchPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
-                  <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{STATUS_LABELS[p.status]}</Badge>
+                  <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}</Badge>
                 </div>
                 <div className="text-sm">
                   <span className="text-gray-500">Від:</span> {pt.sender.lastName} {pt.sender.firstName}

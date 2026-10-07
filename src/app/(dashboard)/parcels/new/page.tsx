@@ -287,6 +287,31 @@ export default function NewParcelPage() {
     }
   }, [direction, selectedTripId, trips, senderCountry]);
 
+  // ТЗ docx 04.10.26: «посилка автоматично прив'язується до найближчого наявного
+  // рейсу». Поки Працівник сам не вибрав рейс — підставляємо найближчий: той самий
+  // напрямок, EU-країна (EU→UA — країна Відправника, UA→EU — Отримувача),
+  // «Заплановано»/«В дорозі», дата не раніше сьогодні. Вибір лишається за ним —
+  // можна клікнути інший рейс або «Без рейсу».
+  const receiverEuCountry = (() => {
+    const addr = receiver?.addresses.find((a) => a.id === receiverAddressId) ?? receiver?.addresses[0];
+    return addr?.country || null;
+  })();
+  const nearestTripId = (() => {
+    const euCountry = direction === 'eu_to_ua' ? senderCountry : receiverEuCountry;
+    if (!euCountry || euCountry === 'UA') return '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const candidates = trips
+      .filter((t) =>
+        t.direction === direction &&
+        t.country === euCountry &&
+        (t.status === 'planned' || t.status === 'in_progress') &&
+        new Date(t.departureDate).getTime() >= today.getTime())
+      .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+    return candidates[0]?.id ?? '';
+  })();
+  const effectiveTripId = tripDateMode === 'trip' ? (selectedTripId || nearestTripId) : '';
+
   // EU-країна для live-калькулятора вартості. Для eu_to_ua вона може бути
   // визначена ОБРАНИМ РЕЙСОМ — навіть якщо в картці відправника країна ще
   // не збережена (типово коли відправника створюють разом із посилкою).
@@ -296,7 +321,7 @@ export default function NewParcelPage() {
     || sender?.addresses[0]?.country
     || (direction === 'eu_to_ua'
         ? (() => {
-            const t = trips.find(tr => tr.id === selectedTripId);
+            const t = trips.find(tr => tr.id === effectiveTripId);
             return t?.country && t.country !== 'UA' ? t.country : null;
           })()
         : null);
@@ -453,7 +478,12 @@ export default function NewParcelPage() {
       return;
     }
 
-    if (tripDateMode === 'trip' && !selectedTripId) {
+    // ТЗ docx 04.10.26: якщо рейсів у списку немає зовсім (Водій бачить лише рейси
+    // своїх поїздок) — не блокуємо: сервер сам прив'яже найближчий рейс.
+    const hasSelectableTrips = trips.some(
+      (t) => t.direction === direction && (t.status === 'planned' || t.status === 'in_progress'),
+    );
+    if (tripDateMode === 'trip' && !effectiveTripId && hasSelectableTrips) {
       setError('Виберіть рейс зі списку або натисніть «Без рейсу»');
       return;
     }
@@ -525,7 +555,9 @@ export default function NewParcelPage() {
         doorstepDelivery: canDoorstep && doorstepDelivery,
         sendInvoice,
         invoicePhone: sendInvoice && invoicePhone ? invoicePhone : undefined,
-        tripId: selectedTripId || undefined,
+        tripId: effectiveTripId || undefined,
+        // ТЗ docx 04.10.26: свідомо «Без рейсу» — сервер не прив'язує автоматично.
+        withoutTrip: tripDateMode === 'custom' ? true : undefined,
         // Collection (EU→UA only — server ignores otherwise)
         collectionMethod: direction === 'eu_to_ua' && collection.method ? collection.method : undefined,
         collectionPointId: collection.method === 'pickup_point' ? collection.pointId || undefined : undefined,
@@ -1047,12 +1079,19 @@ export default function NewParcelPage() {
               <TripSelector
                 trips={trips}
                 direction={direction}
-                selectedTripId={selectedTripId}
+                selectedTripId={effectiveTripId}
                 onChange={setSelectedTripId}
                 allowNone={false}
                 // ТЗ docx 21.07.26 (п.2): лише рейси з країни Відправника.
                 senderCountry={senderCountry}
               />
+            )}
+            {/* ТЗ docx 04.10.26: Водій бачить лише рейси своїх поїздок — пояснюємо,
+                що посилку все одно буде прив'язано до найближчого рейсу. */}
+            {tripDateMode === 'trip' && !effectiveTripId && (
+              <div className="text-xs text-blue-700 bg-blue-50 rounded p-2 border border-blue-200">
+                Посилку буде автоматично прив&apos;язано до найближчого рейсу в цьому напрямку.
+              </div>
             )}
 
             {tripDateMode === 'custom' && (

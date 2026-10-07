@@ -453,6 +453,8 @@ model Parcel {
   totalCost             Decimal?      @map("total_cost") @db.Decimal(10, 2)
   costCurrency          String        @default("EUR") @map("cost_currency")
   npTtn                 String?       @map("np_ttn")
+  /// ТЗ docx 04.10.26 (п.3): нотатка Клієнта до 150 знаків, введена при створенні замовлення.
+  clientNote            String?       @map("client_note") @db.VarChar(150)
   npTrackingStatus      String?       @map("np_tracking_status")
   status                ParcelStatus  @default(draft)
   createdSource         CreatedSource @default(worker) @map("created_source")
