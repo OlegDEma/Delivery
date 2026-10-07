@@ -88,8 +88,21 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
   const pathname = request.nextUrl.pathname;
+
+  // 07.10.26 («password reset не працює»): якщо адреса /reset-password не в
+  // списку Redirect URLs Supabase, лінк з листа веде на Site URL (корінь сайту)
+  // з ?code=… / ?token_hash=… — і код губився на редіректі на /login. Інших
+  // email-лінків з кодом у застосунку немає (реєстрація — з автологіном), тож
+  // такий запит на корінь/логін — це скидання пароля: передаємо на /reset-password.
+  const sp = request.nextUrl.searchParams;
+  if ((pathname === '/' || pathname === '/login') && (sp.has('code') || sp.get('type') === 'recovery')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/reset-password';
+    return NextResponse.redirect(url);
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
 
   const isPublicPage = PUBLIC_PREFIXES.some(p => pathname.startsWith(p));
 
