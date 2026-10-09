@@ -18,6 +18,7 @@ import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { formatDate } from '@/lib/utils/format';
+import { formatItn } from '@/lib/utils/itn';
 
 export type MessageChannel = 'sms' | 'viber' | 'whatsapp';
 
@@ -46,8 +47,9 @@ export function buildConfirmationBody(parcel: {
   return [
     `Посилка ${label}`,
     parcel.trip ? `Рейс: ${formatDate(parcel.trip.departureDate)}(${parcel.trip.country})` : null,
-    // ТЗ docx 03.10.26 (п.1): ІТН у тексті для Клієнта більше не друкуємо —
-    // правила його формування ще не розроблені. Замість нього — ТТН, коли є.
+    // ТЗ docx 07.10.26: рядок «ІТН: …» (формат ТЗ 17.08.26) повернуто — правила
+    // формування ІТН затверджено (10 цифр, X-XX-XXXXXX-X). ТТН — додатково, коли є.
+    `ІТН: ${formatItn(parcel.itn)}`,
     parcel.npTtn ? `ТТН: ${parcel.npTtn}` : null,
     `Отримувач: ${p.receiver.lastName} ${p.receiver.firstName}, ${p.receiver.phone}`,
     `Відправник: ${p.sender.lastName} ${p.sender.firstName}, ${p.sender.phone}`,
@@ -56,8 +58,8 @@ export function buildConfirmationBody(parcel: {
     cost > 0 ? `Вартість: ${cost.toFixed(2)} EUR` : null,
     `Напрямок: ${parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}`,
     parcel.description ? `Опис: ${parcel.description}` : null,
-    // Посилання — за внутрішнім номером/ТТН, щоб ІТН не «витікав» у тексті.
-    `Відстежити: ${baseUrl()}/tracking?q=${encodeURIComponent(parcel.npTtn || parcel.internalNumber)}`,
+    // ТЗ docx 07.10.26: посилання на відстеження — за ІТН.
+    `Відстежити: ${baseUrl()}/tracking?q=${encodeURIComponent(parcel.itn)}`,
   ].filter((l) => l !== null).join('\n');
 }
 

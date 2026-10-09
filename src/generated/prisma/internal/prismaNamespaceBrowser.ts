@@ -254,6 +254,7 @@ export type VehicleScalarFieldEnum = (typeof VehicleScalarFieldEnum)[keyof typeo
 export const ParcelScalarFieldEnum = {
   id: 'id',
   itn: 'itn',
+  itnLegacy: 'itnLegacy',
   internalNumber: 'internalNumber',
   sequentialNumber: 'sequentialNumber',
   shortNumber: 'shortNumber',

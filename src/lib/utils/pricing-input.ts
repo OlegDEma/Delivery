@@ -20,6 +20,8 @@ export function buildPricingInput(config: PricingConfig): PricingConfigInput {
     insuranceEnabled: config.insuranceEnabled,
     // DB stores fraction (0..1, e.g. 0.01 = 1%). Calculator wants whole-percent.
     insurancePercent: Number(config.insuranceRate) * 100,
+    // ТЗ docx 08.10.26: поріг автострахування з Тарифів (поле «Мінімальна оголошена вартість»).
+    insuranceAutoThresholdEur: Number(config.insuranceThreshold),
     packagingEnabled: config.packagingEnabled,
     packagingPer10kg: Number(config.packagingPer10kg),
     packagingPrices: parsePackagingPrices(config.packagingPrices),

@@ -397,6 +397,8 @@ model Vehicle {
 model Parcel {
   id                    String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   itn                   String        @unique
+  /// ТЗ docx 07.10.26: старий 14-значний ІТН (до переходу на 10-значний) — для пошуку за вже надрукованими QR.
+  itnLegacy             String?       @map("itn_legacy")
   internalNumber        String        @map("internal_number")
   sequentialNumber      Int           @map("sequential_number")
   shortNumber           Int?          @map("short_number")
@@ -586,7 +588,7 @@ model PricingConfig {
   /// При factualFrac = 0.0 поведінка ідентична `volumetric` (max).
   /// При factualFrac = 0.5 поведінка ідентична `average`.
   weightCustomFactualFraction Decimal @default(0.5) @map("weight_custom_factual_fraction") @db.Decimal(4, 3)
-  insuranceThreshold   Decimal     @default(25.00) @map("insurance_threshold") @db.Decimal(10, 2)
+  insuranceThreshold   Decimal     @default(20.00) @map("insurance_threshold") @db.Decimal(10, 2)
   insuranceRate        Decimal     @default(0.01) @map("insurance_rate") @db.Decimal(5, 4)
   insuranceEnabled     Boolean     @default(true) @map("insurance_enabled")
   packagingEnabled     Boolean     @default(true) @map("packaging_enabled")

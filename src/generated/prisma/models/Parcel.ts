@@ -65,6 +65,7 @@ export type ParcelSumAggregateOutputType = {
 export type ParcelMinAggregateOutputType = {
   id: string | null
   itn: string | null
+  itnLegacy: string | null
   internalNumber: string | null
   sequentialNumber: number | null
   shortNumber: number | null
@@ -127,6 +128,7 @@ export type ParcelMinAggregateOutputType = {
 export type ParcelMaxAggregateOutputType = {
   id: string | null
   itn: string | null
+  itnLegacy: string | null
   internalNumber: string | null
   sequentialNumber: number | null
   shortNumber: number | null
@@ -189,6 +191,7 @@ export type ParcelMaxAggregateOutputType = {
 export type ParcelCountAggregateOutputType = {
   id: number
   itn: number
+  itnLegacy: number
   internalNumber: number
   sequentialNumber: number
   shortNumber: number
@@ -292,6 +295,7 @@ export type ParcelSumAggregateInputType = {
 export type ParcelMinAggregateInputType = {
   id?: true
   itn?: true
+  itnLegacy?: true
   internalNumber?: true
   sequentialNumber?: true
   shortNumber?: true
@@ -354,6 +358,7 @@ export type ParcelMinAggregateInputType = {
 export type ParcelMaxAggregateInputType = {
   id?: true
   itn?: true
+  itnLegacy?: true
   internalNumber?: true
   sequentialNumber?: true
   shortNumber?: true
@@ -416,6 +421,7 @@ export type ParcelMaxAggregateInputType = {
 export type ParcelCountAggregateInputType = {
   id?: true
   itn?: true
+  itnLegacy?: true
   internalNumber?: true
   sequentialNumber?: true
   shortNumber?: true
@@ -568,6 +574,7 @@ export type ParcelGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 export type ParcelGroupByOutputType = {
   id: string
   itn: string
+  itnLegacy: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber: number | null
@@ -656,6 +663,7 @@ export type ParcelWhereInput = {
   NOT?: Prisma.ParcelWhereInput | Prisma.ParcelWhereInput[]
   id?: Prisma.UuidFilter<"Parcel"> | string
   itn?: Prisma.StringFilter<"Parcel"> | string
+  itnLegacy?: Prisma.StringNullableFilter<"Parcel"> | string | null
   internalNumber?: Prisma.StringFilter<"Parcel"> | string
   sequentialNumber?: Prisma.IntFilter<"Parcel"> | number
   shortNumber?: Prisma.IntNullableFilter<"Parcel"> | number | null
@@ -738,6 +746,7 @@ export type ParcelWhereInput = {
 export type ParcelOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   itn?: Prisma.SortOrder
+  itnLegacy?: Prisma.SortOrderInput | Prisma.SortOrder
   internalNumber?: Prisma.SortOrder
   sequentialNumber?: Prisma.SortOrder
   shortNumber?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -823,6 +832,7 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ParcelWhereInput | Prisma.ParcelWhereInput[]
   OR?: Prisma.ParcelWhereInput[]
   NOT?: Prisma.ParcelWhereInput | Prisma.ParcelWhereInput[]
+  itnLegacy?: Prisma.StringNullableFilter<"Parcel"> | string | null
   internalNumber?: Prisma.StringFilter<"Parcel"> | string
   sequentialNumber?: Prisma.IntFilter<"Parcel"> | number
   shortNumber?: Prisma.IntNullableFilter<"Parcel"> | number | null
@@ -905,6 +915,7 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
 export type ParcelOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   itn?: Prisma.SortOrder
+  itnLegacy?: Prisma.SortOrderInput | Prisma.SortOrder
   internalNumber?: Prisma.SortOrder
   sequentialNumber?: Prisma.SortOrder
   shortNumber?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -978,6 +989,7 @@ export type ParcelScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ParcelScalarWhereWithAggregatesInput | Prisma.ParcelScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"Parcel"> | string
   itn?: Prisma.StringWithAggregatesFilter<"Parcel"> | string
+  itnLegacy?: Prisma.StringNullableWithAggregatesFilter<"Parcel"> | string | null
   internalNumber?: Prisma.StringWithAggregatesFilter<"Parcel"> | string
   sequentialNumber?: Prisma.IntWithAggregatesFilter<"Parcel"> | number
   shortNumber?: Prisma.IntNullableWithAggregatesFilter<"Parcel"> | number | null
@@ -1043,6 +1055,7 @@ export type ParcelScalarWhereWithAggregatesInput = {
 export type ParcelCreateInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -1116,6 +1129,7 @@ export type ParcelCreateInput = {
 export type ParcelUncheckedCreateInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -1189,6 +1203,7 @@ export type ParcelUncheckedCreateInput = {
 export type ParcelUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1262,6 +1277,7 @@ export type ParcelUpdateInput = {
 export type ParcelUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1335,6 +1351,7 @@ export type ParcelUncheckedUpdateInput = {
 export type ParcelCreateManyInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -1400,6 +1417,7 @@ export type ParcelCreateManyInput = {
 export type ParcelUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1456,6 +1474,7 @@ export type ParcelUpdateManyMutationInput = {
 export type ParcelUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1539,6 +1558,7 @@ export type StringNullableListFilter<$PrismaModel = never> = {
 export type ParcelCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   itn?: Prisma.SortOrder
+  itnLegacy?: Prisma.SortOrder
   internalNumber?: Prisma.SortOrder
   sequentialNumber?: Prisma.SortOrder
   shortNumber?: Prisma.SortOrder
@@ -1622,6 +1642,7 @@ export type ParcelAvgOrderByAggregateInput = {
 export type ParcelMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   itn?: Prisma.SortOrder
+  itnLegacy?: Prisma.SortOrder
   internalNumber?: Prisma.SortOrder
   sequentialNumber?: Prisma.SortOrder
   shortNumber?: Prisma.SortOrder
@@ -1684,6 +1705,7 @@ export type ParcelMaxOrderByAggregateInput = {
 export type ParcelMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   itn?: Prisma.SortOrder
+  itnLegacy?: Prisma.SortOrder
   internalNumber?: Prisma.SortOrder
   sequentialNumber?: Prisma.SortOrder
   shortNumber?: Prisma.SortOrder
@@ -2309,6 +2331,7 @@ export type ParcelUpdateOneRequiredWithoutClaimsNestedInput = {
 export type ParcelCreateWithoutAssignedCourierInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -2381,6 +2404,7 @@ export type ParcelCreateWithoutAssignedCourierInput = {
 export type ParcelUncheckedCreateWithoutAssignedCourierInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -2463,6 +2487,7 @@ export type ParcelCreateManyAssignedCourierInputEnvelope = {
 export type ParcelCreateWithoutCreatedByInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -2535,6 +2560,7 @@ export type ParcelCreateWithoutCreatedByInput = {
 export type ParcelUncheckedCreateWithoutCreatedByInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -2617,6 +2643,7 @@ export type ParcelCreateManyCreatedByInputEnvelope = {
 export type ParcelCreateWithoutCollectedByInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -2689,6 +2716,7 @@ export type ParcelCreateWithoutCollectedByInput = {
 export type ParcelUncheckedCreateWithoutCollectedByInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -2790,6 +2818,7 @@ export type ParcelScalarWhereInput = {
   NOT?: Prisma.ParcelScalarWhereInput | Prisma.ParcelScalarWhereInput[]
   id?: Prisma.UuidFilter<"Parcel"> | string
   itn?: Prisma.StringFilter<"Parcel"> | string
+  itnLegacy?: Prisma.StringNullableFilter<"Parcel"> | string | null
   internalNumber?: Prisma.StringFilter<"Parcel"> | string
   sequentialNumber?: Prisma.IntFilter<"Parcel"> | number
   shortNumber?: Prisma.IntNullableFilter<"Parcel"> | number | null
@@ -2887,6 +2916,7 @@ export type ParcelUpdateManyWithWhereWithoutCollectedByInput = {
 export type ParcelCreateWithoutSenderInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -2959,6 +2989,7 @@ export type ParcelCreateWithoutSenderInput = {
 export type ParcelUncheckedCreateWithoutSenderInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3041,6 +3072,7 @@ export type ParcelCreateManySenderInputEnvelope = {
 export type ParcelCreateWithoutReceiverInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3113,6 +3145,7 @@ export type ParcelCreateWithoutReceiverInput = {
 export type ParcelUncheckedCreateWithoutReceiverInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3227,6 +3260,7 @@ export type ParcelUpdateManyWithWhereWithoutReceiverInput = {
 export type ParcelCreateWithoutSenderAddressInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3299,6 +3333,7 @@ export type ParcelCreateWithoutSenderAddressInput = {
 export type ParcelUncheckedCreateWithoutSenderAddressInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3381,6 +3416,7 @@ export type ParcelCreateManySenderAddressInputEnvelope = {
 export type ParcelCreateWithoutReceiverAddressInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3453,6 +3489,7 @@ export type ParcelCreateWithoutReceiverAddressInput = {
 export type ParcelUncheckedCreateWithoutReceiverAddressInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3567,6 +3604,7 @@ export type ParcelUpdateManyWithWhereWithoutReceiverAddressInput = {
 export type ParcelCreateWithoutTripInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3639,6 +3677,7 @@ export type ParcelCreateWithoutTripInput = {
 export type ParcelUncheckedCreateWithoutTripInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3737,6 +3776,7 @@ export type ParcelUpdateManyWithWhereWithoutTripInput = {
 export type ParcelCreateWithoutPlacesInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3809,6 +3849,7 @@ export type ParcelCreateWithoutPlacesInput = {
 export type ParcelUncheckedCreateWithoutPlacesInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -3897,6 +3938,7 @@ export type ParcelUpdateToOneWithWhereWithoutPlacesInput = {
 export type ParcelUpdateWithoutPlacesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3969,6 +4011,7 @@ export type ParcelUpdateWithoutPlacesInput = {
 export type ParcelUncheckedUpdateWithoutPlacesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -4041,6 +4084,7 @@ export type ParcelUncheckedUpdateWithoutPlacesInput = {
 export type ParcelCreateWithoutStatusHistoryInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -4113,6 +4157,7 @@ export type ParcelCreateWithoutStatusHistoryInput = {
 export type ParcelUncheckedCreateWithoutStatusHistoryInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -4201,6 +4246,7 @@ export type ParcelUpdateToOneWithWhereWithoutStatusHistoryInput = {
 export type ParcelUpdateWithoutStatusHistoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -4273,6 +4319,7 @@ export type ParcelUpdateWithoutStatusHistoryInput = {
 export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -4345,6 +4392,7 @@ export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
 export type ParcelCreateWithoutCollectionPointInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -4417,6 +4465,7 @@ export type ParcelCreateWithoutCollectionPointInput = {
 export type ParcelUncheckedCreateWithoutCollectionPointInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -4515,6 +4564,7 @@ export type ParcelUpdateManyWithWhereWithoutCollectionPointInput = {
 export type ParcelCreateWithoutCashEntriesInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -4587,6 +4637,7 @@ export type ParcelCreateWithoutCashEntriesInput = {
 export type ParcelUncheckedCreateWithoutCashEntriesInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -4675,6 +4726,7 @@ export type ParcelUpdateToOneWithWhereWithoutCashEntriesInput = {
 export type ParcelUpdateWithoutCashEntriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -4747,6 +4799,7 @@ export type ParcelUpdateWithoutCashEntriesInput = {
 export type ParcelUncheckedUpdateWithoutCashEntriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -4819,6 +4872,7 @@ export type ParcelUncheckedUpdateWithoutCashEntriesInput = {
 export type ParcelCreateWithoutRouteTasksInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -4891,6 +4945,7 @@ export type ParcelCreateWithoutRouteTasksInput = {
 export type ParcelUncheckedCreateWithoutRouteTasksInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -4968,6 +5023,7 @@ export type ParcelCreateOrConnectWithoutRouteTasksInput = {
 export type ParcelCreateWithoutCreatedFromTasksInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -5040,6 +5096,7 @@ export type ParcelCreateWithoutCreatedFromTasksInput = {
 export type ParcelUncheckedCreateWithoutCreatedFromTasksInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -5128,6 +5185,7 @@ export type ParcelUpdateToOneWithWhereWithoutRouteTasksInput = {
 export type ParcelUpdateWithoutRouteTasksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -5200,6 +5258,7 @@ export type ParcelUpdateWithoutRouteTasksInput = {
 export type ParcelUncheckedUpdateWithoutRouteTasksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -5283,6 +5342,7 @@ export type ParcelUpdateToOneWithWhereWithoutCreatedFromTasksInput = {
 export type ParcelUpdateWithoutCreatedFromTasksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -5355,6 +5415,7 @@ export type ParcelUpdateWithoutCreatedFromTasksInput = {
 export type ParcelUncheckedUpdateWithoutCreatedFromTasksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -5427,6 +5488,7 @@ export type ParcelUncheckedUpdateWithoutCreatedFromTasksInput = {
 export type ParcelCreateWithoutWarehouseActionsInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -5499,6 +5561,7 @@ export type ParcelCreateWithoutWarehouseActionsInput = {
 export type ParcelUncheckedCreateWithoutWarehouseActionsInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -5587,6 +5650,7 @@ export type ParcelUpdateToOneWithWhereWithoutWarehouseActionsInput = {
 export type ParcelUpdateWithoutWarehouseActionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -5659,6 +5723,7 @@ export type ParcelUpdateWithoutWarehouseActionsInput = {
 export type ParcelUncheckedUpdateWithoutWarehouseActionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -5731,6 +5796,7 @@ export type ParcelUncheckedUpdateWithoutWarehouseActionsInput = {
 export type ParcelCreateWithoutNpSyncLogsInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -5803,6 +5869,7 @@ export type ParcelCreateWithoutNpSyncLogsInput = {
 export type ParcelUncheckedCreateWithoutNpSyncLogsInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -5891,6 +5958,7 @@ export type ParcelUpdateToOneWithWhereWithoutNpSyncLogsInput = {
 export type ParcelUpdateWithoutNpSyncLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -5963,6 +6031,7 @@ export type ParcelUpdateWithoutNpSyncLogsInput = {
 export type ParcelUncheckedUpdateWithoutNpSyncLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -6035,6 +6104,7 @@ export type ParcelUncheckedUpdateWithoutNpSyncLogsInput = {
 export type ParcelCreateWithoutClaimsInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -6107,6 +6177,7 @@ export type ParcelCreateWithoutClaimsInput = {
 export type ParcelUncheckedCreateWithoutClaimsInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -6195,6 +6266,7 @@ export type ParcelUpdateToOneWithWhereWithoutClaimsInput = {
 export type ParcelUpdateWithoutClaimsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -6267,6 +6339,7 @@ export type ParcelUpdateWithoutClaimsInput = {
 export type ParcelUncheckedUpdateWithoutClaimsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -6339,6 +6412,7 @@ export type ParcelUncheckedUpdateWithoutClaimsInput = {
 export type ParcelCreateManyAssignedCourierInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -6403,6 +6477,7 @@ export type ParcelCreateManyAssignedCourierInput = {
 export type ParcelCreateManyCreatedByInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -6467,6 +6542,7 @@ export type ParcelCreateManyCreatedByInput = {
 export type ParcelCreateManyCollectedByInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -6531,6 +6607,7 @@ export type ParcelCreateManyCollectedByInput = {
 export type ParcelUpdateWithoutAssignedCourierInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -6603,6 +6680,7 @@ export type ParcelUpdateWithoutAssignedCourierInput = {
 export type ParcelUncheckedUpdateWithoutAssignedCourierInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -6675,6 +6753,7 @@ export type ParcelUncheckedUpdateWithoutAssignedCourierInput = {
 export type ParcelUncheckedUpdateManyWithoutAssignedCourierInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -6739,6 +6818,7 @@ export type ParcelUncheckedUpdateManyWithoutAssignedCourierInput = {
 export type ParcelUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -6811,6 +6891,7 @@ export type ParcelUpdateWithoutCreatedByInput = {
 export type ParcelUncheckedUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -6883,6 +6964,7 @@ export type ParcelUncheckedUpdateWithoutCreatedByInput = {
 export type ParcelUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -6947,6 +7029,7 @@ export type ParcelUncheckedUpdateManyWithoutCreatedByInput = {
 export type ParcelUpdateWithoutCollectedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7019,6 +7102,7 @@ export type ParcelUpdateWithoutCollectedByInput = {
 export type ParcelUncheckedUpdateWithoutCollectedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7091,6 +7175,7 @@ export type ParcelUncheckedUpdateWithoutCollectedByInput = {
 export type ParcelUncheckedUpdateManyWithoutCollectedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7155,6 +7240,7 @@ export type ParcelUncheckedUpdateManyWithoutCollectedByInput = {
 export type ParcelCreateManySenderInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -7219,6 +7305,7 @@ export type ParcelCreateManySenderInput = {
 export type ParcelCreateManyReceiverInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -7283,6 +7370,7 @@ export type ParcelCreateManyReceiverInput = {
 export type ParcelUpdateWithoutSenderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7355,6 +7443,7 @@ export type ParcelUpdateWithoutSenderInput = {
 export type ParcelUncheckedUpdateWithoutSenderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7427,6 +7516,7 @@ export type ParcelUncheckedUpdateWithoutSenderInput = {
 export type ParcelUncheckedUpdateManyWithoutSenderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7491,6 +7581,7 @@ export type ParcelUncheckedUpdateManyWithoutSenderInput = {
 export type ParcelUpdateWithoutReceiverInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7563,6 +7654,7 @@ export type ParcelUpdateWithoutReceiverInput = {
 export type ParcelUncheckedUpdateWithoutReceiverInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7635,6 +7727,7 @@ export type ParcelUncheckedUpdateWithoutReceiverInput = {
 export type ParcelUncheckedUpdateManyWithoutReceiverInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7699,6 +7792,7 @@ export type ParcelUncheckedUpdateManyWithoutReceiverInput = {
 export type ParcelCreateManySenderAddressInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -7763,6 +7857,7 @@ export type ParcelCreateManySenderAddressInput = {
 export type ParcelCreateManyReceiverAddressInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -7827,6 +7922,7 @@ export type ParcelCreateManyReceiverAddressInput = {
 export type ParcelUpdateWithoutSenderAddressInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7899,6 +7995,7 @@ export type ParcelUpdateWithoutSenderAddressInput = {
 export type ParcelUncheckedUpdateWithoutSenderAddressInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -7971,6 +8068,7 @@ export type ParcelUncheckedUpdateWithoutSenderAddressInput = {
 export type ParcelUncheckedUpdateManyWithoutSenderAddressInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -8035,6 +8133,7 @@ export type ParcelUncheckedUpdateManyWithoutSenderAddressInput = {
 export type ParcelUpdateWithoutReceiverAddressInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -8107,6 +8206,7 @@ export type ParcelUpdateWithoutReceiverAddressInput = {
 export type ParcelUncheckedUpdateWithoutReceiverAddressInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -8179,6 +8279,7 @@ export type ParcelUncheckedUpdateWithoutReceiverAddressInput = {
 export type ParcelUncheckedUpdateManyWithoutReceiverAddressInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -8243,6 +8344,7 @@ export type ParcelUncheckedUpdateManyWithoutReceiverAddressInput = {
 export type ParcelCreateManyTripInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -8307,6 +8409,7 @@ export type ParcelCreateManyTripInput = {
 export type ParcelUpdateWithoutTripInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -8379,6 +8482,7 @@ export type ParcelUpdateWithoutTripInput = {
 export type ParcelUncheckedUpdateWithoutTripInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -8451,6 +8555,7 @@ export type ParcelUncheckedUpdateWithoutTripInput = {
 export type ParcelUncheckedUpdateManyWithoutTripInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -8515,6 +8620,7 @@ export type ParcelUncheckedUpdateManyWithoutTripInput = {
 export type ParcelCreateManyCollectionPointInput = {
   id?: string
   itn: string
+  itnLegacy?: string | null
   internalNumber: string
   sequentialNumber: number
   shortNumber?: number | null
@@ -8579,6 +8685,7 @@ export type ParcelCreateManyCollectionPointInput = {
 export type ParcelUpdateWithoutCollectionPointInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -8651,6 +8758,7 @@ export type ParcelUpdateWithoutCollectionPointInput = {
 export type ParcelUncheckedUpdateWithoutCollectionPointInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -8723,6 +8831,7 @@ export type ParcelUncheckedUpdateWithoutCollectionPointInput = {
 export type ParcelUncheckedUpdateManyWithoutCollectionPointInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   itn?: Prisma.StringFieldUpdateOperationsInput | string
+  itnLegacy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   internalNumber?: Prisma.StringFieldUpdateOperationsInput | string
   sequentialNumber?: Prisma.IntFieldUpdateOperationsInput | number
   shortNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -8881,6 +8990,7 @@ export type ParcelCountOutputTypeCountClaimsArgs<ExtArgs extends runtime.Types.E
 export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   itn?: boolean
+  itnLegacy?: boolean
   internalNumber?: boolean
   sequentialNumber?: boolean
   shortNumber?: boolean
@@ -8964,6 +9074,7 @@ export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type ParcelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   itn?: boolean
+  itnLegacy?: boolean
   internalNumber?: boolean
   sequentialNumber?: boolean
   shortNumber?: boolean
@@ -9038,6 +9149,7 @@ export type ParcelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type ParcelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   itn?: boolean
+  itnLegacy?: boolean
   internalNumber?: boolean
   sequentialNumber?: boolean
   shortNumber?: boolean
@@ -9112,6 +9224,7 @@ export type ParcelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type ParcelSelectScalar = {
   id?: boolean
   itn?: boolean
+  itnLegacy?: boolean
   internalNumber?: boolean
   sequentialNumber?: boolean
   shortNumber?: boolean
@@ -9174,7 +9287,7 @@ export type ParcelSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "senderSnapshot" | "receiverSnapshot" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "doorstepDelivery" | "deliveryCost" | "packagingCost" | "doorstepCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "isMultiParcelPickup" | "parcelMoneyAmount" | "parcelMoneyCost" | "totalCost" | "costCurrency" | "npTtn" | "clientNote" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
+export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "itnLegacy" | "internalNumber" | "sequentialNumber" | "shortNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "senderSnapshot" | "receiverSnapshot" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "doorstepDelivery" | "deliveryCost" | "packagingCost" | "doorstepCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "isMultiParcelPickup" | "parcelMoneyAmount" | "parcelMoneyCost" | "totalCost" | "costCurrency" | "npTtn" | "clientNote" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
 export type ParcelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sender?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   senderAddress?: boolean | Prisma.Parcel$senderAddressArgs<ExtArgs>
@@ -9242,6 +9355,10 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     itn: string
+    /**
+     * ТЗ docx 07.10.26: старий 14-значний ІТН (до переходу на 10-значний) — для пошуку за вже надрукованими QR.
+     */
+    itnLegacy: string | null
     internalNumber: string
     sequentialNumber: number
     shortNumber: number | null
@@ -9787,6 +9904,7 @@ export interface Prisma__ParcelClient<T, Null = never, ExtArgs extends runtime.T
 export interface ParcelFieldRefs {
   readonly id: Prisma.FieldRef<"Parcel", 'String'>
   readonly itn: Prisma.FieldRef<"Parcel", 'String'>
+  readonly itnLegacy: Prisma.FieldRef<"Parcel", 'String'>
   readonly internalNumber: Prisma.FieldRef<"Parcel", 'String'>
   readonly sequentialNumber: Prisma.FieldRef<"Parcel", 'Int'>
   readonly shortNumber: Prisma.FieldRef<"Parcel", 'Int'>

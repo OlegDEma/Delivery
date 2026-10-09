@@ -85,6 +85,8 @@ export const createParcelSchema = z.object({
   collectionAddress: z.string().trim().max(300).optional().nullable(),
   /** Per ТЗ: при courier_pickup — true якщо 2+ посилок з цієї локації. */
   isMultiParcelPickup: z.boolean().optional().nullable(),
+  /** ТЗ docx 08.10.26: ТТН з паперової декларації НП (UA→EU), введений/відсканований Працівником. */
+  npTtn: z.string().trim().max(50).optional().nullable(),
 });
 
 /** Client portal POST /api/client-portal/orders */

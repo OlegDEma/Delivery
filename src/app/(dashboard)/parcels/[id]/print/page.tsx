@@ -6,6 +6,8 @@ import { parcelParties } from '@/lib/parcels/party-snapshot';
 import QRCode from 'qrcode';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils/format';
+import { formatItn, formatPlaceItn } from '@/lib/utils/itn';
+import { Code128 } from '@/components/shared/code128';
 
 interface PrintData {
   itn: string;
@@ -91,15 +93,21 @@ export default function PrintLabelPage() {
         const qrKey = place.itnPlace || data.itn;
         return (
           <div key={place.placeNumber} className="print-label border-2 border-black p-2 mb-4 max-w-[58mm] mx-auto text-[10px] leading-tight">
-            {/* QR + ITN */}
-            <div className="flex items-start gap-1 border-b border-black pb-1 mb-1">
-              {qrCodes[qrKey] && (
-                <img src={qrCodes[qrKey]} alt="QR" width={70} height={70} className="shrink-0" />
-              )}
-              <div className="flex-1 text-center">
-                <div className="font-mono text-[8px] break-all">{qrKey}</div>
+            {/* ТЗ docx 07.10.26 (п.2.3): ІТН — лінійним штрихкодом Code 128 (основний
+                код для сканера складу; у ньому ІТН місця «1310000144-2/3»), під ним — ІТН
+                цифрами X-XX-XXXXXX-X. Малий QR лишається для камери телефона (відкриває
+                відстеження). Короткий рейсовий номер — «звична схема» (рішення клієнта 07.10). */}
+            <div className="border-b border-black pb-1 mb-1">
+              <Code128 value={qrKey} height={34} className="w-full h-[34px]" />
+              <div className="text-center font-mono font-bold text-[12px] mt-0.5 tracking-wide">
+                {formatPlaceItn(qrKey)}
+              </div>
+              <div className="flex items-center justify-between mt-0.5">
+                {qrCodes[qrKey] && (
+                  <img src={qrCodes[qrKey]} alt="QR" width={46} height={46} className="shrink-0" />
+                )}
                 {data.shortNumber && (
-                  <div className="text-[20px] font-bold mt-0.5">#{data.shortNumber}</div>
+                  <div className="text-[20px] font-bold">#{data.shortNumber}</div>
                 )}
               </div>
             </div>
@@ -156,9 +164,9 @@ export default function PrintLabelPage() {
       <div className="print-label border-2 border-black p-2 mb-4 max-w-[58mm] mx-auto text-[10px] leading-tight">
         <div className="text-center font-bold text-[12px] mb-1">КВИТАНЦІЯ</div>
         <div className="text-center font-mono text-[11px] font-bold">{data.internalNumber}</div>
-        {/* ТЗ docx 03.10.26 (п.1): у квитанції, яку забирає Клієнт, ІТН не друкуємо —
-            правила його формування ще не розроблені. На самій етикетці код лишається:
-            це вміст QR/штрихкоду, без нього не відсканувати місце. */}
+        {/* ТЗ docx 07.10.26: ІТН на квитанції знову друкуємо — правила його формування
+            затверджено (за ТЗ 03.10.26 його тимчасово прибирали). */}
+        <div className="text-center font-mono text-[10px] mb-0.5">ІТН: {formatItn(data.itn)}</div>
         {data.npTtn && (
           <div className="text-center text-[8px] mb-1">ТТН: {data.npTtn}</div>
         )}

@@ -22,6 +22,8 @@ import { TripSelector, type TripOption } from '@/components/parcels/trip-selecto
 import { type CollectionState } from '@/components/parcels/collection-block';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
+import { INSURANCE_AUTO_THRESHOLD_EUR } from '@/lib/constants/insurance';
+import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
 
 interface SelectedClient {
   id: string;
@@ -249,6 +251,8 @@ export default function NewParcelPage() {
   const [tripDateMode, setTripDateMode] = useState<string>('trip'); // 'trip' | 'custom'
   const [trips, setTrips] = useState<TripOption[]>([]);
   const [selectedTripId, setSelectedTripId] = useState('');
+  // ТЗ docx 08.10.26: ТТН з паперової декларації НП (Україна→Європа) — вводиться або сканується камерою.
+  const [npTtn, setNpTtn] = useState('');
 
   // ТЗ §E11 (Bug 5 з docx 03.06.2026): «Розрахункова вага» у блоці підсумків
   // має рахуватись СВОЇМ правилом (custom 0.5/0.5 за замовч.), а НЕ
@@ -556,6 +560,7 @@ export default function NewParcelPage() {
         sendInvoice,
         invoicePhone: sendInvoice && invoicePhone ? invoicePhone : undefined,
         tripId: effectiveTripId || undefined,
+        npTtn: direction === 'ua_to_eu' && npTtn.trim() ? npTtn.replace(/\s/g, '') : undefined,
         // ТЗ docx 04.10.26: свідомо «Без рейсу» — сервер не прив'язує автоматично.
         withoutTrip: tripDateMode === 'custom' ? true : undefined,
         // Collection (EU→UA only — server ignores otherwise)
@@ -782,7 +787,8 @@ export default function NewParcelPage() {
               </div>
               {insuranceAuto && (
                 <div className="mt-1 text-xs text-amber-700">
-                  Обовʼязкове: оголошена вартість перевищує 50 € (ТЗ 21.09.26).
+                  Обовʼязкове: оголошена вартість перевищує {INSURANCE_AUTO_THRESHOLD_EUR} € (ТЗ 08.10.26).
+                  {/* Поріг на сервері береться з Тарифів; тут — значення за замовчуванням. */}
                 </div>
               )}
               <div className="mt-1 text-xs text-gray-500">
@@ -1066,6 +1072,32 @@ export default function NewParcelPage() {
         {/* ТЗ §E13 п.1: «Для Працівника — ця вкладка не відображається».
             Окремий блок «Спосіб прийому/видачі посилки» прибрано — вибір
             способу перенесено у вкладку «Відправник» («Спосіб відправки»). */}
+
+        {/* ТЗ docx 08.10.26 — лише «Україна → Європа»: Клієнт надіслав посилку Новою
+            поштою без замовлення в застосунку, Працівник створює посилку і має внести
+            номер ТТН з паперової декларації — без ручного набору, камерою телефону. */}
+        {direction === 'ua_to_eu' && (
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-base">Номер ТТН Нової пошти</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 pt-0 space-y-2">
+              <div className="flex gap-2 items-center">
+                <Input
+                  value={npTtn}
+                  onChange={(e) => setNpTtn(e.target.value)}
+                  placeholder="14 цифр, напр. 59000123456789"
+                  inputMode="numeric"
+                  className="font-mono"
+                />
+                <BarcodeScanButton onResult={(ttn) => setNpTtn(ttn)} label="Сканувати" />
+              </div>
+              <p className="text-xs text-gray-500">
+                Натисніть «Сканувати» і наведіть камеру на штрихкод паперової накладної — номер підставиться сам.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Trip selection */}
         <Card>

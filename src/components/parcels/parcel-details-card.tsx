@@ -291,7 +291,7 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
             при створенні, але на детальній сторінці tab-структури немає). */}
         {editing ? (
           <label className="flex items-center gap-2 text-sm py-1">
-            {/* ТЗ docx 21.09.26 (п.4): понад 50 € — вмикається саме і зняти не можна. */}
+            {/* ТЗ docx 08.10.26: понад поріг (20 €) — вмикається саме і зняти не можна. */}
             <Checkbox
               checked={insuranceApplied || insuranceAutoApplied}
               disabled={insuranceAutoApplied}

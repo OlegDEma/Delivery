@@ -21,6 +21,8 @@ export interface PricingConfigInput {
   insuranceEnabled: boolean;
   /** Whole-percent rate applied to declaredValue when insurance is opted in. */
   insurancePercent: number;
+  /** ТЗ docx 08.10.26: поріг (EUR) — до нього включно страхування не нараховується автоматично. */
+  insuranceAutoThresholdEur?: number;
 
   /** Whether the «Пакування» option is offered for this direction. */
   packagingEnabled: boolean;
@@ -236,11 +238,14 @@ export function calculateParcelCost(
   const deliveryCost = roundMoney(Math.max(baseDeliveryCost, minimumApplied));
 
   // 3. Страхування — opt-in via checkbox, % from declaredValue.
-  // ТЗ docx 21.09.26 (п.4): понад 50 € оголошеної вартості страхування
-  // вмикається АВТОМАТИЧНО — незалежно від чекбокса у формі. declaredValue тут
-  // уже в EUR (конвертація в toEur), тож для UA→EU це гривневий еквівалент.
+  // ТЗ docx 08.10.26: оголошена вартість до порогу ВКЛЮЧНО (за замовчуванням 20 €,
+  // задається в Тарифах) не страхується автоматично; понад поріг — страхування
+  // обов'язкове, незалежно від чекбокса. Якщо Клієнт відмітив чекбокс — відсоток
+  // береться завжди. declaredValue тут уже в EUR (toEur за курсом НБУ), тож для
+  // UA→EU це гривневий еквівалент.
+  const insuranceThresholdEur = config.insuranceAutoThresholdEur ?? INSURANCE_AUTO_THRESHOLD_EUR;
   const insuranceAutoApplied =
-    config.insuranceEnabled && parcel.declaredValue > INSURANCE_AUTO_THRESHOLD_EUR;
+    config.insuranceEnabled && parcel.declaredValue > insuranceThresholdEur;
   const insuranceOn = parcel.insurance || insuranceAutoApplied;
   let insuranceCost = 0;
   if (insuranceOn && config.insuranceEnabled && parcel.declaredValue > 0) {

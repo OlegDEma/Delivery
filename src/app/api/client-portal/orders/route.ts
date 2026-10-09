@@ -66,9 +66,10 @@ export async function POST(request: NextRequest) {
 
   // ТЗ docx 04.10.26 (п.3): нотатка Клієнта (до 150 знаків). Читаємо з копії
   // тіла запиту — спільна схема clientOrderSchema поле не описує і відкидає.
-  const rawNote: unknown = await request.clone().json()
-    .then((b: { clientNote?: unknown }) => b?.clientNote)
-    .catch(() => null);
+  // ТЗ docx 08.10.26: так само — підтвердження «вже передав посилку» (UA→EU).
+  const raw: { clientNote?: unknown; handedOver?: unknown } | null = await request.clone().json().catch(() => null);
+  const rawNote = raw?.clientNote;
+  const handedOver = raw?.handedOver === true;
   const clientNote = typeof rawNote === 'string' && rawNote.trim() ? rawNote.trim() : null;
   if (clientNote && clientNote.length > 150) {
     return NextResponse.json({ error: 'Нотатка — не більше 150 знаків' }, { status: 400 });
@@ -82,6 +83,26 @@ export async function POST(request: NextRequest) {
   // дефолту). Reject if missing instead of silently defaulting.
   if (!body.direction) {
     return NextResponse.json({ error: 'Виберіть напрямок' }, { status: 400 });
+  }
+
+  // ТЗ docx 08.10.26: «При створенні посилки Клієнт повинен ввести оголошену вартість».
+  if (!(Number(body.declaredValue) > 0)) {
+    return NextResponse.json({ error: 'Вкажіть оголошену вартість посилки' }, { status: 400 });
+  }
+
+  // ТЗ docx 08.10.26 — лише Україна→Європа: «Спочатку факт передачі нам посилки,
+  // потім створення посилки в застосунку». Без підтвердження передачі не створюємо;
+  // для «Пошти» номер ТТН (14 цифр НП) обов'язковий.
+  if (body.direction === 'ua_to_eu') {
+    if (!handedOver) {
+      return NextResponse.json(
+        { error: 'Спочатку передайте посилку «Посилочці», а потім оформіть замовлення' },
+        { status: 400 },
+      );
+    }
+    if (body.collectionMethod === 'external_shipping' && !/^\d{14}$/.test((body.npTtn ?? '').replace(/\s/g, ''))) {
+      return NextResponse.json({ error: 'Введіть номер ТТН Нової пошти — 14 цифр' }, { status: 400 });
+    }
   }
 
   // SECURITY: Sender must always be the authenticated client themselves.
@@ -255,7 +276,7 @@ export async function POST(request: NextRequest) {
       collectionDate: body.collectionDate ? new Date(body.collectionDate) : null,
       collectionAddress: body.collectionAddress ?? null,
       // ТЗ docx 03.10.26 (п.2): ТТН Нової пошти від Клієнта.
-      npTtn: body.npTtn ?? null,
+      npTtn: body.npTtn ? body.npTtn.replace(/\s/g, '') : null,
     });
 
     if (clientNote) {

@@ -11,6 +11,8 @@ import { statusLabel } from '@/lib/parcels/status-label';
 
 interface TrackingResult {
   internalNumber: string;
+  /** ТЗ docx 07.10.26: ІТН (X-XX-XXXXXX-X). */
+  itn?: string;
   npTtn: string | null;
   status: ParcelStatusType;
   direction: string;
@@ -79,7 +81,7 @@ export default function TrackingPage() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Номер посилки або ІТН..."
+            placeholder="ІТН (напр. 1-31-000014-4) або номер посилки"
             className="text-base"
             autoFocus
           />
@@ -101,6 +103,10 @@ export default function TrackingPage() {
                   {statusLabel(result.status, { createdSource: result.createdSource, createdByRole: result.createdByRole })}
                 </Badge>
               </div>
+              {/* ТЗ docx 07.10.26: ІТН — X-XX-XXXXXX-X. */}
+              {result.itn && (
+                <div className="text-sm font-mono text-gray-700 mt-1">ІТН {result.itn}</div>
+              )}
               <div className="text-xs text-gray-400 mt-1">
                 {result.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}
                 {result.receiverCity && ` | ${result.receiverCity}`}

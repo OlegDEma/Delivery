@@ -5,6 +5,7 @@ import { ROLES } from '@/lib/constants/roles';
 import { parseBody, createParcelSchema } from '@/lib/validators';
 import { createParcel } from '@/lib/services/parcel-creation';
 import { findNearestTrip, parcelEuCountry } from '@/lib/parcels/nearest-trip';
+import { checkItnQuery, INVALID_ITN_MESSAGE } from '@/lib/utils/itn';
 import { logger } from '@/lib/logger';
 import { kyivDateRange } from '@/lib/utils/tz';
 import type { Prisma } from '@/generated/prisma/client';
@@ -237,13 +238,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Невалідна дата (очікується YYYY-MM-DD)' }, { status: 400 });
     }
   }
-  if (q) {
-    // If query looks like place ITN (contains -), also search by base ITN
+  // ТЗ docx 07.10.26 (п.2): номер, схожий на 10-значний ІТН, спершу перевіряємо за
+  // Луном — неправильний відхиляємо одразу, без запиту до БД.
+  const itnQuery = q ? checkItnQuery(q) : null;
+  if (itnQuery?.looksLikeItn && !itnQuery.valid) {
+    return NextResponse.json({ error: INVALID_ITN_MESSAGE }, { status: 400 });
+  }
+  if (itnQuery?.looksLikeItn) {
+    where.OR = [{ itn: itnQuery.itn }];
+  } else if (q) {
+    // Код місця старого формату «26000013159128-1/3» → базовий ІТН до дефіса.
     const baseItn = q.includes('-') ? q.split('-')[0] : null;
 
     where.OR = [
       { itn: { contains: q } },
-      ...(baseItn ? [{ itn: { contains: baseItn } }] : []),
+      // ТЗ 07.10.26: старий 14-значний ІТН (на вже надрукованих QR) — теж шукаємо.
+      { itnLegacy: { contains: q } },
+      ...(baseItn && baseItn.length >= 6 ? [{ itn: { contains: baseItn } }, { itnLegacy: baseItn }] : []),
       { internalNumber: { contains: q, mode: 'insensitive' as const } },
       { npTtn: { contains: q } },
       { places: { some: { itnPlace: q } } },
@@ -417,6 +428,8 @@ export async function POST(request: NextRequest) {
       collectionDate: parsed.collectionDate ? new Date(parsed.collectionDate) : null,
       collectionAddress: parsed.collectionAddress ?? null,
       isMultiParcelPickup: parsed.isMultiParcelPickup ?? null,
+      // ТЗ docx 08.10.26: ТТН з паперової декларації (Працівник сканує камерою).
+      npTtn: parsed.npTtn ? parsed.npTtn.replace(/\s/g, '') : null,
     });
 
     // Send invoice SMS — best-effort, non-blocking. Per ТЗ: «на телефонний

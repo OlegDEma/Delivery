@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { checkItnQuery, formatItn, INVALID_ITN_MESSAGE } from '@/lib/utils/itn';
 
 // GET /api/tracking?q=... — public, no auth required
 export async function GET(request: NextRequest) {
@@ -11,20 +12,32 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Вкажіть номер посилки' }, { status: 400 });
   }
 
+  // ТЗ docx 07.10.26 (п.2): 10-значний ІТН спершу перевіряємо за Луном —
+  // неправильний номер відхиляємо без запиту до БД.
+  const itnQuery = checkItnQuery(q);
+  if (itnQuery.looksLikeItn && !itnQuery.valid) {
+    return NextResponse.json({ error: INVALID_ITN_MESSAGE }, { status: 400 });
+  }
+
   // Search by ITN, internal number, or NP TTN
   const parcel = await prisma.parcel.findFirst({
     where: {
       deletedAt: null,
-      OR: [
-        { itn: q },
-        ...(q.includes('-') ? [{ itn: q.split('-')[0] }] : []),
-        { internalNumber: { contains: q, mode: 'insensitive' } },
-        { npTtn: q },
-        { places: { some: { itnPlace: q } } },
-      ],
+      OR: itnQuery.looksLikeItn
+        ? [{ itn: itnQuery.itn }]
+        : [
+            { itn: q },
+            // ТЗ 07.10.26: старий 14-значний ІТН з уже надрукованих QR.
+            { itnLegacy: q },
+            ...(q.includes('-') ? [{ itn: q.split('-')[0] }, { itnLegacy: q.split('-')[0] }] : []),
+            { internalNumber: { contains: q, mode: 'insensitive' } },
+            { npTtn: q },
+            { places: { some: { itnPlace: q } } },
+          ],
     },
     select: {
       internalNumber: true,
+      itn: true,
       npTtn: true,
       status: true,
       direction: true,
@@ -55,6 +68,8 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     internalNumber: parcel.internalNumber,
+    // ТЗ docx 07.10.26: 10-значний ІТН у вигляді X-XX-XXXXXX-X.
+    itn: formatItn(parcel.itn),
     npTtn: parcel.npTtn || null,
     status: parcel.status,
     direction: parcel.direction,

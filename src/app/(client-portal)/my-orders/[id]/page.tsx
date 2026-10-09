@@ -10,6 +10,7 @@ import { STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { statusLabel } from '@/lib/parcels/status-label';
 import { formatDateTime, formatDate, formatCurrency } from '@/lib/utils/format';
 import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { formatItn } from '@/lib/utils/itn';
 import { NO_TRIP_MESSAGE, OPERATOR_PHONE } from '@/lib/parcels/no-trip';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { summarizePartyAddress } from '@/lib/utils/address-summary';
@@ -225,9 +226,13 @@ export default function MyOrderDetailPage() {
             <a href={`tel:${OPERATOR_PHONE}`} className="font-medium underline">{OPERATOR_PHONE}</a>
           </div>
         )}
+        {/* ТЗ docx 07.10.26: ІТН (10 цифр, X-XX-XXXXXX-X) — номер для відстеження.
+            За ТЗ 03.10.26 його тимчасово ховали, поки не було правил формування. */}
+        <div className="text-sm text-gray-700 mb-1 flex items-center gap-1.5">
+          <span>ІТН <span className="font-mono font-medium">{formatItn(parcel.itn)}</span></span>
+          <CopyButton text={parcel.itn} />
+        </div>
         <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
-          {/* ТЗ docx 03.10.26 (п.1): ІТН Клієнту не показуємо — правила його
-              формування ще не розроблені. (п.4) Замість нього — ТТН. */}
           {/* ТЗ docx 03.10.26 (п.2): номер ТТН Клієнт може додати і змінити. */}
           {editTtn ? (
             <span className="inline-flex items-center gap-1">

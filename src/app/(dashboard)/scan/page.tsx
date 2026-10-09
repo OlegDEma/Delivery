@@ -32,9 +32,14 @@ export default function ScanPage() {
     setScanning(true);
 
     try {
-      const { Html5Qrcode } = await import('html5-qrcode');
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode');
 
-      const scanner = new Html5Qrcode('qr-reader');
+      // ТЗ docx 07.10.26: на етикетці ІТН — лінійний Code 128 (+ малий QR).
+      // Явно вмикаємо обидва формати; рамка ширша за висоту — під лінійний код.
+      const scanner = new Html5Qrcode('qr-reader', {
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.CODE_128],
+        verbose: false,
+      });
       html5QrCodeRef.current = scanner;
       scannerRunningRef.current = true;
 
@@ -42,8 +47,7 @@ export default function ScanPage() {
         { facingMode: 'environment' },
         {
           fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1,
+          qrbox: { width: 300, height: 180 },
         },
         (decodedText) => {
           handleQRResult(decodedText);
@@ -98,6 +102,11 @@ export default function ScanPage() {
         router.push(`/parcels/${data.parcels[0].id}`);
         return;
       }
+    } else if (res.status === 400) {
+      // ТЗ docx 07.10.26: ІТН не пройшов перевірку Луна — «Невірний формат номера».
+      const data = await res.json().catch(() => null);
+      setError(data?.error || 'Невірний формат номера');
+      return;
     }
     // If not found in our parcels — go to tracking
     router.push(`/tracking?q=${encodeURIComponent(query)}`);

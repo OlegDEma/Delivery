@@ -29,6 +29,8 @@ interface ConfigForm {
   weightCustomFactualFraction: string;
   insuranceEnabled: boolean;
   insurancePercent: string;        // displayed as whole-percent (1 = 1%)
+  /** ТЗ docx 08.10.26: оголошена вартість (EUR), до якої ВКЛЮЧНО страхування не нараховується автоматично. */
+  insuranceThreshold: string;
   packagingEnabled: boolean;
   packagingPer10kg: string;
   /** Per ТЗ §53 — нижній tier «Пакет%» (сума ≤ порогу). */
@@ -59,6 +61,7 @@ interface ApiPricingConfig {
   weightCustomFactualFraction: string | number;
   insuranceEnabled: boolean;
   insuranceRate: string | number;
+  insuranceThreshold: string | number;
   packagingEnabled: boolean;
   packagingPer10kg: string | number;
   parcelMoneyPercent: string | number;
@@ -86,6 +89,7 @@ function toForm(c: ApiPricingConfig): ConfigForm {
     // DB stores fraction (0..1), UI shows percent (0..100). Round to avoid
     // floating-point noise like 0.029999... → 2.9999999%.
     insurancePercent: ((Number(c.insuranceRate) || 0) * 100).toFixed(2).replace(/\.?0+$/, '') || '0',
+    insuranceThreshold: String(c.insuranceThreshold ?? '20'),
     packagingEnabled: !!c.packagingEnabled,
     packagingPer10kg: String(c.packagingPer10kg ?? '0'),
     parcelMoneyPercent: String(c.parcelMoneyPercent ?? '0'),
@@ -159,6 +163,7 @@ export default function PricingPage() {
       { key: 'doorstepPrice',               label: 'Доставка до порога (€)',       min: 0, max: 1000 },
       { key: 'packagingPer10kg',            label: 'Пакування (€/10кг)',           min: 0, max: 1000 },
       { key: 'insurancePercent',            label: 'Страхування (%)',              min: 0, max: 100 },
+      { key: 'insuranceThreshold',          label: 'Мінімальна оголошена вартість (EUR)', min: 0, max: 100000 },
       { key: 'parcelMoneyPercent',          label: 'Пакет % (≤ порогу)',           min: 0, max: 100 },
       { key: 'parcelMoneyPercentHigh',      label: 'Пакет % (> порогу)',           min: 0, max: 100 },
       { key: 'parcelMoneyThreshold',        label: 'Поріг суми Пакета (EUR)',      min: 0, max: 1000000 },
@@ -189,6 +194,8 @@ export default function PricingPage() {
         insuranceEnabled:     c.insuranceEnabled,
         // UI is whole-percent; DB stores 0..1 fraction.
         insuranceRate:        (parseNum(c.insurancePercent) ?? 0) / 100,
+        // ТЗ docx 08.10.26: поріг автострахування.
+        insuranceThreshold:   parseNum(c.insuranceThreshold),
         packagingEnabled:     c.packagingEnabled,
         packagingPer10kg:     parseNum(c.packagingPer10kg),
         parcelMoneyPercent:     parseNum(c.parcelMoneyPercent),
@@ -467,6 +474,24 @@ export default function PricingPage() {
                       max="100"
                       value={config.insurancePercent}
                       onChange={(e) => update(config.id, 'insurancePercent', e.target.value)}
+                      disabled={!config.insuranceEnabled}
+                    />
+                  </div>
+                  {/* ТЗ docx 08.10.26: «У послузі Страхування треба додати поле, де буде
+                      відображатись величина оголошеної вартості посилки, до якої включно
+                      страхування автоматично не нараховуватиметься». */}
+                  <div>
+                    <Label className="text-xs">
+                      Мінімальна оголошена вартість, EUR{' '}
+                      <FieldHint text="До цієї суми ВКЛЮЧНО страхування автоматично не нараховується (лише якщо клієнт сам відмітив чекбокс). Понад неї — страхування обов'язкове. Для напрямку Україна→Європа — еквівалент у гривнях за курсом НБУ." />
+                    </Label>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min="0"
+                      value={config.insuranceThreshold}
+                      onChange={(e) => update(config.id, 'insuranceThreshold', e.target.value)}
                       disabled={!config.insuranceEnabled}
                     />
                   </div>

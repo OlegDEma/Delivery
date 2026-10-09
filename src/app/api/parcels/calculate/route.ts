@@ -65,6 +65,8 @@ export async function POST(request: NextRequest) {
     // Echo configured rates so the UI can render context-aware hints
     // (e.g. "Страхування: 1% від 100€ = 1€"). Optional client-side use.
     insurancePercent: pricingInput.insurancePercent,
+    // ТЗ docx 08.10.26: поріг автострахування (EUR) — для підказок у формі.
+    insuranceThresholdEur: pricingInput.insuranceAutoThresholdEur,
     packagingPer10kg: pricingInput.packagingPer10kg,
     parcelMoneyPercent: pricingInput.parcelMoneyPercent,
     pickupPointPrice: pricingInput.pickupPointPrice,

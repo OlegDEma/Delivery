@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatWeight } from '@/lib/utils/format';
 import { CostCalculator } from '@/components/parcels/cost-calculator';
+import { formatPlaceItn } from '@/lib/utils/itn';
 
 interface Place {
   id: string;
@@ -228,8 +229,9 @@ export function ParcelPlacesCard({
               <div key={d.id} className="border rounded-md p-2 bg-gray-50">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">Місце #{d.placeNumber}</span>
-                  {/* ТЗ docx 03.10.26 (п.1): код місця походить від ІТН, тож не
-                      показуємо його нікому — ні Клієнту, ні Працівнику. */}
+                  {/* ТЗ docx 07.10.26: код місця (ІТН + «-N/M») знову показуємо —
+                      правила формування ІТН затверджено (ховали за ТЗ 03.10.26). */}
+                  {d.itnPlace && <span className="text-[10px] font-mono text-gray-400">{formatPlaceItn(d.itnPlace)}</span>}
                 </div>
                 <div className="grid grid-cols-4 gap-1">
                   <div>
@@ -322,11 +324,11 @@ export function ParcelPlacesCard({
                 <div key={place.placeNumber} className="flex items-center justify-between text-sm border-b pb-1 last:border-0">
                   <div>
                     <span className="font-medium">#{place.placeNumber}</span>
-                    {/* ТЗ docx 03.10.26 (п.1): «поки що не відображати ІТН, поки не
-                        розробили правила його формування» — номер місця походить
-                        від ІТН. Правка 04.10.26: ховаємо і від Працівника теж
-                        (раніше лишали йому). На етикетці код друкується далі —
-                        це вміст QR/штрихкоду для сканування. */}
+                    {/* ТЗ docx 07.10.26: код місця (ІТН + «-N/M») знову показуємо
+                        обом сторонам — правила формування ІТН затверджено. */}
+                    {place.itnPlace && (
+                      <span className="ml-2 text-xs font-mono text-gray-400">{formatPlaceItn(place.itnPlace)}</span>
+                    )}
                     {place.needsPackaging && (
                       <Badge variant="secondary" className="ml-2 text-xs">
                         {place.packagingDone ? 'Запаковано' : 'Пакування'}

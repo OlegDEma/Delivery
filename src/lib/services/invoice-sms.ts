@@ -21,6 +21,7 @@
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { formatItn } from '@/lib/utils/itn';
 
 export interface InvoiceContext {
   /** Recipient party — who's getting the SMS. */
@@ -68,7 +69,8 @@ export function renderInvoiceTemplate(
   const data: Record<string, string> = {
     name: ctx.name,
     amount: ctx.amount.toFixed(2),
-    itn: ctx.itn,
+    // ТЗ docx 07.10.26: ІТН у тексті — у вигляді X-XX-XXXXXX-X.
+    itn: formatItn(ctx.itn),
     internalNumber: ctx.internalNumber,
     npTtn: ctx.npTtn ?? '',
     bankName: bank.bankName ?? '',

@@ -18,7 +18,7 @@ import { calculateParcelCost } from '@/lib/utils/pricing';
 import { buildPricingInput } from '@/lib/utils/pricing-input';
 import { toEur } from '@/lib/utils/currency';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
-import { generateInternalNumber, generatePlaceITN, withItnRetry } from '@/lib/utils/itn';
+import { generateInternalNumber, generatePlaceITN, buildItn10 } from '@/lib/utils/itn';
 import { logger } from '@/lib/logger';
 
 export interface ParcelPlaceInput {
@@ -320,9 +320,13 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
       }
     }
 
-    // 3. Create parcel with ITN-retry.
-    const parcel = await withItnRetry<{ id: string; itn: string }>(
-      (itn) => tx.parcel.create({
+    // 3. ТЗ docx 07.10.26: 10-значний ІТН — напрямок + код ЄС-країни + глобальний
+    //    порядковий номер (послідовність parcel_itn_seq, не обнуляється щороку) +
+    //    контрольна цифра Луна. Номер детермінований, тож повторів-ретраїв не треба.
+    //    ЄС-країна — та сама, що визначає тариф (рейс → пункт збору → адреса).
+    const [{ nextval }] = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('parcel_itn_seq')`;
+    const itn = buildItn10(input.direction, pricingCountry, Number(nextval));
+    const parcel = await tx.parcel.create({
         data: {
           itn,
           // ТЗ docx 03.10.26 (п.2, п.4): ТТН, введений Клієнтом при відправці поштою.
@@ -396,10 +400,7 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
           },
         },
         select: { id: true, itn: true },
-      }),
-      currentYear,
-      seqNum,
-    );
+      });
 
     // 4. Bump address usage counts.
     if (input.senderAddressId) {

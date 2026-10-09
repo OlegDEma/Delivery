@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { statusLabel } from '@/lib/parcels/status-label';
 import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { formatItn } from '@/lib/utils/itn';
 import { formatDate } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 
@@ -84,9 +85,12 @@ export default function MyOrdersPage() {
               <div className="flex items-start justify-between mb-1">
                 <div>
                   <div className="font-mono text-sm font-medium">{displayParcelNumber(o.internalNumber)}</div>
-                  {/* ТЗ docx 03.10.26 (п.1): ІТН Клієнту НЕ показуємо, поки не
-                      розроблені правила його формування. (п.4) Замість нього —
-                      ТТН, введений Клієнтом. */}
+                  {/* ТЗ docx 07.10.26: ІТН знову показуємо (10 цифр, X-XX-XXXXXX-X) —
+                      правила формування затверджено; за ТЗ 03.10.26 його ховали.
+                      (03.10.26 п.4) ТТН, введений Клієнтом, — додатково. */}
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    ІТН <span className="font-mono">{formatItn(o.itn)}</span>
+                  </div>
                   {o.npTtn && (
                     <div className="text-xs text-gray-400 mt-0.5">
                       ТТН: <span className="font-mono">{o.npTtn}</span>

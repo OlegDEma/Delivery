@@ -34,7 +34,9 @@ import { TripSelector, type TripOption } from '@/components/parcels/trip-selecto
 import { toast } from 'sonner';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { formatItn } from '@/lib/utils/itn';
 import { NO_TRIP_MESSAGE, OPERATOR_PHONE } from '@/lib/parcels/no-trip';
+import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
 
 interface ParcelDetail {
   id: string;
@@ -289,11 +291,11 @@ export default function ParcelDetailPage() {
   // ТЗ docx 08.08.26: текст ПІДТВЕРДЖЕННЯ (зведення посилки) для WhatsApp/Viber —
   // ЛИШЕ деталі відправлення (сторони, місця, вартість, напрямок), БЕЗ блоку
   // оплати/кур'єра/історії статусів (див. зображення у ТЗ).
-  // ТЗ docx 03.10.26 (п.1): ІТН не показуємо, поки не розроблені правила його
-  // формування — тож і посилання на відстеження будуємо за внутрішнім номером
-  // (роут /api/tracking шукає і по ньому, і по ТТН).
+  // ТЗ docx 07.10.26: правила формування ІТН затверджено (10 цифр з контрольною
+  // цифрою Луна) — ІТН знову показуємо (його ховали за ТЗ 03.10.26 п.1), і
+  // посилання на відстеження будуємо за ним.
   const trackingUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/tracking?q=${encodeURIComponent(parcel.npTtn || parcel.internalNumber)}`
+    ? `${window.location.origin}/tracking?q=${encodeURIComponent(parcel.itn)}`
     : '';
   // ТЗ docx 17.08.26 (Частина третя, за фото): формат підтвердження —
   //   Посилка <номер без суфікса місць «1/2»>
@@ -301,12 +303,13 @@ export default function ParcelDetailPage() {
   //   Отримувач / Відправник / Місць: N   (без ваги)
   //   <порожній рядок>
   //   Вартість / Напрямок / Опис / Відстежити
-  // Рядок «ІТН: …» прибрано за ТЗ docx 03.10.26 (п.1); замість нього — ТТН, коли є.
+  // Рядок «ІТН: …» (ТЗ 17.08.26) повернуто за ТЗ docx 07.10.26; ТТН — додатково, коли є.
   // Суфікс кількості місць («135 Amstetten 1/2, …» → «135 Amstetten, …») прибираємо.
   const parcelLabel = parcel.internalNumber.replace(/\s\d+(?:\/\d+)?,/, ',');
   const confirmationMessage = [
     `Посилка ${parcelLabel}`,
     parcel.trip ? `Рейс: ${formatDate(parcel.trip.departureDate)}(${parcel.trip.country})` : null,
+    `ІТН: ${formatItn(parcel.itn)}`,
     parcel.npTtn ? `ТТН: ${parcel.npTtn}` : null,
     `Отримувач: ${parties.receiver.lastName} ${parties.receiver.firstName}, ${parties.receiver.phone}`,
     `Відправник: ${parties.sender.lastName} ${parties.sender.firstName}, ${parties.sender.phone}`,
@@ -409,11 +412,12 @@ export default function ParcelDetailPage() {
           {destCC && <><span className="font-medium">{destCC}</span><span className="text-gray-300">·</span></>}
           <span>{placesLabel(parcel.totalPlacesCount)}</span>
           {/* Рейс тепер у самій шапці (ТЗ docx 04.10.26) — тут не дублюємо. */}
+          {/* ТЗ docx 07.10.26: ІТН (10 цифр, X-XX-XXXXXX-X) знову показуємо — правила
+              його формування затверджено (за ТЗ 03.10.26 його тимчасово ховали). */}
+          <span className="text-gray-300">·</span>
+          <span>ІТН <span className="font-mono font-medium">{formatItn(parcel.itn)}</span></span>
+          <CopyButton text={parcel.itn} />
         </div>
-        {/* ТЗ docx 03.10.26 (п.1): «Поки що не відображати ІТН, поки не розробили
-            правила його формування» — прибрано і в Працівника, а не лише в Клієнта
-            (правка 04.10.26 після зауваження: ІТН було видно в кабінеті).
-            Код лишається на етикетці/в QR і в пошуку — він потрібен для сканування. */}
         <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
           {parcel.npTtn ? (
             <>
@@ -494,6 +498,8 @@ export default function ParcelDetailPage() {
               placeholder="20000000000000"
               className="font-mono max-w-xs"
             />
+            {/* ТЗ docx 08.10.26: ТТН з паперової декларації — камерою, без ручного набору. */}
+            <BarcodeScanButton onResult={(ttn) => setNpTtn(ttn)} label="Сканувати" />
             <Button size="sm" onClick={async () => { await handleSaveNpTtn(); setEditTtn(false); }} disabled={saving}>
               Зберегти
             </Button>

@@ -22,6 +22,7 @@ import { normalizeCityForMatch } from '@/lib/utils/transliterate';
 import { isCourierAllowed, isPostalAllowed, isPickupPointAllowed, type ServiceRule } from '@/lib/utils/logistics-availability';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
+import { INSURANCE_AUTO_THRESHOLD_EUR } from '@/lib/constants/insurance';
 
 interface PlaceData {
   weight: string;
@@ -155,6 +156,11 @@ export default function NewOrderPage() {
   const [npTtn, setNpTtn] = useState('');
   // ТЗ docx 04.10.26 (п.3): нотатка — вільний текст до 150 знаків.
   const [clientNote, setClientNote] = useState('');
+  // ТЗ docx 08.10.26 (лише Україна→Європа): «Спочатку факт передачі нам посилки,
+  // потім створення посилки в застосунку» — питання «Ви вже передали…?».
+  const [handedOver, setHandedOver] = useState<'' | 'yes' | 'no'>('');
+  const needsHandover = direction === 'ua_to_eu';
+  const handoverBlocked = needsHandover && handedOver !== 'yes';
   // ТЗ docx 04.10.26: чи є рейс до вибраної країни (посилка до нього прив'яжеться
   // автоматично). Ключ «напрямок:країна» — щоб не показати застарілу відповідь.
   const [tripCheck, setTripCheck] = useState<{ key: string; hasTrip: boolean } | null>(null);
@@ -358,6 +364,20 @@ export default function NewOrderPage() {
     if (!collectionMethod) {
       setError("Оберіть, як Ви передасте нам посилку (розділ «Як Ви передасте нам посилку?»)"); return;
     }
+    // ТЗ docx 08.10.26 (Україна→Європа): спершу передача посилки, потім замовлення;
+    // для «Пошти» — обов'язковий номер ТТН (без нього посилку не знайти на складі).
+    if (needsHandover) {
+      if (handedOver !== 'yes') {
+        setError('Спочатку передайте посилку «Посилочці» (Новою поштою або кур\'єру у Львові), а потім оформіть замовлення.'); return;
+      }
+      if (collectionMethod === 'external_shipping' && !/^\d{14}$/.test(npTtn.replace(/\s/g, ''))) {
+        setError('Введіть номер ТТН Нової пошти — 14 цифр з Вашої накладної.'); return;
+      }
+    }
+    // ТЗ docx 08.10.26: «При створенні посилки Клієнт повинен ввести оголошену вартість».
+    if (!(Number(declaredValue) > 0)) {
+      setError(`Вкажіть оголошену вартість посилки (${declaredCurrencyLabel})`); return;
+    }
     setSaving(true);
 
     // ТЗ §b: умовні поля «Як ви передасте» складаємо в єдиний рядок
@@ -414,6 +434,8 @@ export default function NewOrderPage() {
           npTtn: npTtn.trim() || undefined,
           // ТЗ docx 04.10.26 (п.3): нотатка Клієнта.
           clientNote: clientNote.trim() || undefined,
+          // ТЗ docx 08.10.26: Клієнт підтвердив, що вже передав посилку (UA→EU).
+          handedOver: needsHandover ? handedOver === 'yes' : undefined,
           collectionAddress: composedCollectionAddress,
         }),
       });
@@ -511,6 +533,48 @@ export default function NewOrderPage() {
             </Select>
           </CardContent>
         </Card>
+
+        {/* ТЗ docx 08.10.26 — лише «Україна → Європа»: «При спробі Клієнта створити
+            посилку з України у Європу має звучати запитання: „Ви вже передали своє
+            відправлення «Посилочці»?“». Без «Так» замовлення не створюється. */}
+        {needsHandover && (
+          <Card className={handedOver === 'yes' ? '' : 'border-orange-300'}>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-base">Ви вже передали своє відправлення «Посилочці»?</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 pt-0 space-y-3">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={handedOver === 'yes' ? 'default' : 'outline'}
+                  onClick={() => setHandedOver('yes')}
+                >
+                  Так, вже передав(ла)
+                </Button>
+                <Button
+                  type="button"
+                  variant={handedOver === 'no' ? 'default' : 'outline'}
+                  onClick={() => setHandedOver('no')}
+                >
+                  Ні, ще не передав(ла)
+                </Button>
+              </div>
+              {handedOver === 'yes' && (
+                <p className="text-xs text-gray-600">
+                  Нижче оберіть, як Ви передали посилку: для «Відправки поштою» обовʼязково вкажіть номер ТТН,
+                  «Виклик курʼєра» — якщо віддали посилку нашому курʼєру у Львові.
+                </p>
+              )}
+              {handedOver === 'no' && (
+                <div className="text-sm bg-orange-50 border border-orange-200 rounded p-3 space-y-1 text-orange-900">
+                  <div className="font-semibold">Спочатку передайте посилку, а потім оформіть замовлення.</div>
+                  <div>• Новою поштою на нашу адресу: Львів, Нова пошта, відділення №1, ФОП Добровольський Андрій Ярославович, тел. +380673320502 — після відправки поверніться сюди з номером ТТН.</div>
+                  <div>• Або віддайте посилку нашому курʼєру у Львові.</div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Receiver — ТЗ (docx 14.05.26 §b): порядок став
             напрямок → Отримувач → Відправник → «Як ви передасте». */}
@@ -787,13 +851,24 @@ export default function NewOrderPage() {
               />
               <div className="text-[11px] text-gray-400 text-right mt-0.5">{clientNote.length}/{CLIENT_NOTE_MAX}</div>
             </div>
-            <div><Label>Оголошена вартість ({declaredCurrencyLabel}) <FieldHint text="Оцініть вартість своєї посилки" /></Label><Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} /></div>
+            <div>
+              <Label>Оголошена вартість ({declaredCurrencyLabel}) * <FieldHint text="Оцініть вартість своєї посилки" /></Label>
+              <Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} />
+              {/* ТЗ docx 08.10.26: «При введенні оголошеної вартості Клієнт повинен
+                  отримати (побачити) попередження». Оголошена вартість — обов'язкова. */}
+              <p className="text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-1">
+                ⚠️ Відповідальність фірми обмежується величиною оголошеної вартості посилки.
+                <span className="block font-normal text-amber-700">
+                  До {INSURANCE_AUTO_THRESHOLD_EUR} € включно{direction === 'ua_to_eu' ? ' (еквівалент у гривнях за курсом НБУ)' : ''} страхування не нараховується; понад цю суму — обов&apos;язкове.
+                </span>
+              </p>
+            </div>
 
             {/* Додаткові послуги — кожна вмикається чекбоксом, % і суми
                 визначаються тарифом для напрямку. Тексти підказок — per ТЗ §E10. */}
             <div className="space-y-2 pt-2 border-t">
-              {/* ТЗ docx 21.09.26 (п.4): понад 50 € оголошеної вартості страхування
-                  вмикається автоматично і зняти його не можна. */}
+              {/* ТЗ docx 08.10.26: понад поріг з Тарифів (20 €) страхування вмикається
+                  автоматично і зняти його не можна; нижче — лише за чекбоксом. */}
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox
                   checked={insurance || insuranceAuto}
@@ -804,7 +879,7 @@ export default function NewOrderPage() {
               </label>
               {insuranceAuto && (
                 <p className="text-xs text-amber-700 pl-6">
-                  Обовʼязкове: оголошена вартість перевищує 50 € — страхування вже враховане у вартості.
+                  Обовʼязкове: оголошена вартість перевищує {INSURANCE_AUTO_THRESHOLD_EUR} € — страхування вже враховане у вартості.
                 </p>
               )}
               <label className="flex items-center gap-2 text-sm">
@@ -938,7 +1013,13 @@ export default function NewOrderPage() {
             клієнт її не бачив. Тепер при появі помилки прокручуємо до неї. */}
         {error && <div ref={errorRef} className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 scroll-mt-4">{error}</div>}
 
-        <Button type="submit" className="w-full h-12 text-base" disabled={saving}>
+        {/* ТЗ docx 08.10.26: для «Україна → Європа» оформити можна лише після передачі. */}
+        {handoverBlocked && (
+          <p className="text-sm text-orange-800 text-center">
+            Щоб оформити замовлення, дайте відповідь «Так» на питання «Ви вже передали своє відправлення «Посилочці»?» угорі форми.
+          </p>
+        )}
+        <Button type="submit" className="w-full h-12 text-base" disabled={saving || handoverBlocked}>
           {saving ? 'Створення...' : 'Створити замовлення'}
         </Button>
 

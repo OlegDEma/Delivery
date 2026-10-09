@@ -128,6 +128,7 @@ function ParcelsContent() {
   const [bulkStatus, setBulkStatus] = useState<string>('');
   const [bulkWorking, setBulkWorking] = useState(false);
   const [bulkPayOpen, setBulkPayOpen] = useState(false);
+  const [searchError, setSearchError] = useState('');
 
   useEffect(() => {
     saveListState<ParcelsListState>(LIST_STATE_KEY, { search, statusFilter, dateFrom, courierFilter, page });
@@ -167,6 +168,14 @@ function ParcelsContent() {
         setParcels(data.parcels);
         setTotal(data.total);
         setPages(data.pages);
+        setSearchError('');
+      } else {
+        // ТЗ docx 07.10.26: «Невірний формат номера» (ІТН не пройшов перевірку Луна).
+        const data = await res.json().catch(() => null);
+        setParcels([]);
+        setTotal(0);
+        setPages(1);
+        setSearchError(data?.error || 'Помилка пошуку');
       }
     } catch (e) {
       if (e instanceof DOMException && e.name === 'AbortError') return;
@@ -409,7 +418,7 @@ function ParcelsContent() {
       ) : parcels.length === 0 ? (
         search || statusFilter !== 'all' || dateFrom ? (
           <div className="bg-white rounded-lg border">
-            <div className="text-center py-8 text-gray-500">Нічого не знайдено</div>
+            <div className="text-center py-8 text-gray-500">{searchError || 'Нічого не знайдено'}</div>
           </div>
         ) : (
           <EmptyState title="Ще немає посилок" actionLabel="Створити посилку" actionHref="/parcels/new" />
