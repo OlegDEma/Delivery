@@ -859,7 +859,7 @@ export default function NewOrderPage() {
               <p className="text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-1">
                 ⚠️ Відповідальність фірми обмежується величиною оголошеної вартості посилки.
                 <span className="block font-normal text-amber-700">
-                  До {INSURANCE_AUTO_THRESHOLD_EUR} € включно{direction === 'ua_to_eu' ? ' (еквівалент у гривнях за курсом НБУ)' : ''} страхування не нараховується; понад цю суму — обов&apos;язкове.
+                  {`До ${INSURANCE_AUTO_THRESHOLD_EUR} € включно${direction === 'ua_to_eu' ? ' (еквівалент у гривнях за курсом НБУ)' : ''} страхування не нараховується; понад цю суму — обов'язкове.`}
                 </span>
               </p>
             </div>
