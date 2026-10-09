@@ -98,9 +98,26 @@ export async function GET(
     parcel.receiverAddress?.country ?? parcel.receiver?.country,
   );
 
+  // ТЗ docx 08.10.26: поріг автострахування задається в Тарифах. Картка «Деталі»
+  // блокує чекбокс «Страхування» за цим порогом — беремо його з того самого тарифу,
+  // яким PATCH перераховує вартість (країна: рейс → пункт збору → адреса сторони).
+  const tripCountryIfEu = parcel.trip?.country && parcel.trip.country !== 'UA' ? parcel.trip.country : null;
+  const pricingCountry = parcel.direction === 'eu_to_ua'
+    ? (tripCountryIfEu || parcel.collectionPoint?.country || parcel.senderAddress?.country)
+    : (tripCountryIfEu || parcel.receiverAddress?.country);
+  const pricingForThreshold = pricingCountry && pricingCountry !== 'UA'
+    ? await prisma.pricingConfig.findFirst({
+        where: { direction: parcel.direction, country: pricingCountry, isActive: true },
+        orderBy: { createdAt: 'desc' },
+        select: { insuranceThreshold: true },
+      })
+    : null;
+  const insuranceThresholdEur = pricingForThreshold ? Number(pricingForThreshold.insuranceThreshold) : null;
+
   return NextResponse.json({
     ...parcel,
     noTripForCountry,
+    insuranceThresholdEur,
     auditLog: auditEntries.map((a) => ({
       id: a.id,
       event: a.event,

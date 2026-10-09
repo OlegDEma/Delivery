@@ -54,6 +54,12 @@ interface CostCalculatorProps {
    * страхування вже враховане.
    */
   onInsuranceAutoApplied?: (auto: boolean) => void;
+  /**
+   * ТЗ docx 08.10.26: поріг автострахування задається в Тарифах — віддаємо формі
+   * значення з тарифу напрямку, щоб підказка «до N € включно» не розходилась із
+   * розрахунком, коли адмін змінить поріг.
+   */
+  onInsuranceThreshold?: (thresholdEur: number) => void;
   saved?: {
     deliveryCost: number | string | null;
     insuranceCost: number | string | null;
@@ -81,6 +87,8 @@ interface CostBreakdown {
   insuranceCost: number;
   /** ТЗ docx 21.09.26 (п.4): страхування ввімкнулось автоматично (понад 50 €). */
   insuranceAutoApplied?: boolean;
+  /** ТЗ docx 08.10.26: поріг автострахування (EUR) з тарифу. */
+  insuranceThresholdEur?: number;
   packagingCost: number;
   /** ТЗ docx 29.06.26: надбавка «Доставка до порога будинку». */
   doorstepCost: number;
@@ -167,6 +175,9 @@ export function CostCalculator(props: CostCalculatorProps) {
           setError('');
           // ТЗ docx 21.09.26 (п.4): віддаємо формі прапорець авто-страхування.
           props.onInsuranceAutoApplied?.(!!data.insuranceAutoApplied);
+          if (Number.isFinite(data.insuranceThresholdEur)) {
+            props.onInsuranceThreshold?.(Number(data.insuranceThresholdEur));
+          }
         } else {
           setCost(null);
           // ТЗ docx 12.07.26: Клієнту — нейтральний текст; staff'у — 404

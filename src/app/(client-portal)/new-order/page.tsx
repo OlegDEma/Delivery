@@ -120,6 +120,9 @@ export default function NewOrderPage() {
   // ТЗ docx 21.09.26 (п.4): понад 50 € (для UA→EU — гривневий еквівалент)
   // страхування обовʼязкове — сервер вмикає його сам, а тут блокуємо чекбокс.
   const [insuranceAuto, setInsuranceAuto] = useState(false);
+  // ТЗ docx 08.10.26: поріг автострахування — з тарифу напрямку (через калькулятор);
+  // константа — лише значення, поки тариф ще не завантажено.
+  const [insuranceThresholdEur, setInsuranceThresholdEur] = useState(INSURANCE_AUTO_THRESHOLD_EUR);
   const [needsPackaging, setNeedsPackaging] = useState(false);
   // ТЗ docx 01.07.26: opt-in чекбокс «Доставка до порога будинку» (клієнт теж бачить).
   const [doorstepDelivery, setDoorstepDelivery] = useState(false);
@@ -859,7 +862,7 @@ export default function NewOrderPage() {
               <p className="text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-1">
                 ⚠️ Відповідальність фірми обмежується величиною оголошеної вартості посилки.
                 <span className="block font-normal text-amber-700">
-                  {`До ${INSURANCE_AUTO_THRESHOLD_EUR} € включно${direction === 'ua_to_eu' ? ' (еквівалент у гривнях за курсом НБУ)' : ''} страхування не нараховується; понад цю суму — обов'язкове.`}
+                  {`До ${insuranceThresholdEur} € включно${direction === 'ua_to_eu' ? ' (еквівалент у гривнях за курсом НБУ)' : ''} страхування не нараховується; понад цю суму — обов'язкове.`}
                 </span>
               </p>
             </div>
@@ -879,7 +882,7 @@ export default function NewOrderPage() {
               </label>
               {insuranceAuto && (
                 <p className="text-xs text-amber-700 pl-6">
-                  Обовʼязкове: оголошена вартість перевищує {INSURANCE_AUTO_THRESHOLD_EUR} € — страхування вже враховане у вартості.
+                  Обовʼязкове: оголошена вартість перевищує {insuranceThresholdEur} € — страхування вже враховане у вартості.
                 </p>
               )}
               <label className="flex items-center gap-2 text-sm">
@@ -994,6 +997,7 @@ export default function NewOrderPage() {
                 receiverCity={receiverCity || null}
                 clientFacing
                 onInsuranceAutoApplied={setInsuranceAuto}
+                onInsuranceThreshold={setInsuranceThresholdEur}
               />
             </CardContent>
           </Card>

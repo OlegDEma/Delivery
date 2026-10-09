@@ -63,6 +63,8 @@ interface ParcelDetail {
   npTtn: string | null;
   /** ТЗ docx 04.10.26: рейсу до країни посилки в базі немає взагалі (з API). */
   noTripForCountry?: boolean;
+  /** ТЗ docx 08.10.26: поріг автострахування (EUR) з тарифу посилки. */
+  insuranceThresholdEur?: number | null;
   /** ТЗ docx 04.10.26 (п.3): нотатка Клієнта, введена при створенні замовлення. */
   clientNote: string | null;
   npTrackingStatus: string | null;

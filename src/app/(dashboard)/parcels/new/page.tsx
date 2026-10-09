@@ -207,6 +207,9 @@ export default function NewParcelPage() {
   // Прапорець приходить з «Розрахунку вартості» — блокуємо чекбокс, щоб
   // оператор не знімав те, що вже враховано в сумі.
   const [insuranceAuto, setInsuranceAuto] = useState(false);
+  // ТЗ docx 08.10.26: поріг автострахування — з тарифу напрямку (через калькулятор);
+  // константа — лише значення, поки тариф ще не завантажено.
+  const [insuranceThresholdEur, setInsuranceThresholdEur] = useState(INSURANCE_AUTO_THRESHOLD_EUR);
 
   // «Пакет» (per ТЗ) — sender's cash transfer to receiver. The amount is NOT
   // a delivery cost; the calculator computes a % fee from it instead. Empty
@@ -787,8 +790,7 @@ export default function NewParcelPage() {
               </div>
               {insuranceAuto && (
                 <div className="mt-1 text-xs text-amber-700">
-                  Обовʼязкове: оголошена вартість перевищує {INSURANCE_AUTO_THRESHOLD_EUR} € (ТЗ 08.10.26).
-                  {/* Поріг на сервері береться з Тарифів; тут — значення за замовчуванням. */}
+                  Обовʼязкове: оголошена вартість перевищує {insuranceThresholdEur} € (ТЗ 08.10.26).
                 </div>
               )}
               <div className="mt-1 text-xs text-gray-500">
@@ -1172,6 +1174,7 @@ export default function NewParcelPage() {
           declaredValueCurrency={declaredCurrency}
           insurance={insurance}
           onInsuranceAutoApplied={setInsuranceAuto}
+          onInsuranceThreshold={setInsuranceThresholdEur}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
           isDoorstepDelivery={canDoorstep && doorstepDelivery}
           isAddressDelivery={receiver?.addresses[0]?.deliveryMethod === 'address'}

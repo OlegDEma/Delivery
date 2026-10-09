@@ -36,6 +36,8 @@ interface ParcelDetailsCardProps {
     assignedCourier: { id: string; fullName: string } | null;
     estimatedDeliveryStart: string | null;
     estimatedDeliveryEnd: string | null;
+    /** ТЗ docx 08.10.26: поріг автострахування (EUR) з тарифу посилки; null — тарифу нема. */
+    insuranceThresholdEur?: number | null;
   };
   onUpdate: () => void;
   /** Блокує редагування деталей — після accepted_for_transport_* */
@@ -79,7 +81,9 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
     if (!declaredIsUah) return raw;
     return uahPerEur ? raw / uahPerEur : 0;
   })();
-  const insuranceAutoApplied = declaredEur > INSURANCE_AUTO_THRESHOLD_EUR;
+  // ТЗ docx 08.10.26: поріг — з Тарифів (як і в розрахунку на сервері).
+  const insuranceThresholdEur = parcel.insuranceThresholdEur ?? INSURANCE_AUTO_THRESHOLD_EUR;
+  const insuranceAutoApplied = declaredEur > insuranceThresholdEur;
   // Stored as string so user can clear the field while editing (per fix
   // applied to admin tariffs editor — `Number('')` would snap back to 0).
   const [parcelMoneyAmount, setParcelMoneyAmount] = useState(
@@ -300,7 +304,7 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
             Страхування
             {insuranceAutoApplied && (
               <span className="text-xs text-gray-500">
-                (обовʼязкове: оголошена вартість понад {INSURANCE_AUTO_THRESHOLD_EUR} €)
+                (обовʼязкове: оголошена вартість понад {insuranceThresholdEur} €)
               </span>
             )}
           </label>
