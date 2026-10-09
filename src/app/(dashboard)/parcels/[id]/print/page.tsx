@@ -152,7 +152,8 @@ export default function PrintLabelPage() {
                 {data.payer === 'sender' ? 'Від' : 'Отр'} |
                 {data.paymentMethod === 'cash' ? 'Гот' : 'Б/г'}
                 {data.paymentInUkraine ? ' UA' : ''}
-                {data.declaredValue ? ` | Вар: ${Number(data.declaredValue).toFixed(0)}€` : ''}
+                {/* ТЗ docx 08.10.26: для Україна→Європа оголошена вартість — у гривнях. */}
+                {data.declaredValue ? ` | Вар: ${Number(data.declaredValue).toFixed(0)}${data.declaredValueCurrency === 'UAH' ? ' грн' : '€'}` : ''}
               </div>
               <div>{formatDate(data.createdAt)}{data.createdBy ? ` | ${data.createdBy.fullName}` : ''}</div>
             </div>
