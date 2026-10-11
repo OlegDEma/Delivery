@@ -21,9 +21,18 @@ import { cn } from '@/lib/utils';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { type CollectionState } from '@/components/parcels/collection-block';
 import { PhoneInput } from '@/components/shared/phone-input';
-import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
+import { isPickupPointPricing, isAddressDeliveryPricing } from '@/lib/utils/pricing-flags';
 import { INSURANCE_AUTO_THRESHOLD_EUR } from '@/lib/constants/insurance';
 import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
+import { tripRouteLabel } from '@/lib/constants/countries';
+import { formatDate } from '@/lib/utils/format';
+
+// ТЗ docx 09.10.26 (п.4): опис відправлення за замовчуванням.
+const DEFAULT_DESCRIPTION = 'Побутові речі';
+// ТЗ docx 09.10.26 (п.5): платник за замовчуванням за напрямком.
+function defaultPayer(direction: string): 'sender' | 'receiver' {
+  return direction === 'ua_to_eu' ? 'receiver' : 'sender';
+}
 
 interface SelectedClient {
   id: string;
@@ -85,7 +94,7 @@ export default function NewParcelPage() {
       setDirection(data.direction);
       setShipmentType(data.shipmentType);
       setDescription(data.description || '');
-      setPayer(data.payer);
+      setPayerChoice(data.payer);
       setPaymentMethod(data.paymentMethod);
       setPaymentInUkraine(data.paymentInUkraine);
       // ТЗ docx 28.09.26 (скарга «скопіював N5 → N6, у Водія її нема»): копія
@@ -191,14 +200,16 @@ export default function NewParcelPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [shipmentType, setShipmentType] = useState<string>('parcels_cargo');
-  const [description, setDescription] = useState('');
+  // ТЗ docx 09.10.26 (п.4): «Опис відправлення» за замовчуванням — «Побутові речі»
+  // (можна змінити).
+  const [description, setDescription] = useState(DEFAULT_DESCRIPTION);
 
   // Auto-fill description when shipment type changes
   function handleShipmentTypeChange(val: string) {
     setShipmentType(val);
     if (val === 'documents') setDescription('Документи');
     else if (val === 'tires_wheels') setDescription('Шини та диски');
-    else if (description === 'Документи' || description === 'Шини та диски') setDescription('');
+    else if (description === 'Документи' || description === 'Шини та диски') setDescription(DEFAULT_DESCRIPTION);
   }
   const [declaredValue, setDeclaredValue] = useState('');
   const [insurance, setInsurance] = useState(false);
@@ -220,7 +231,10 @@ export default function NewParcelPage() {
   // Currency for declared value depends on sender's country (UA → грн, EU → €).
   // Якщо sender ще не обраний — спираємось на напрямок: ua_to_eu означає
   // що відправник в Україні (грн), eu_to_ua — у EU (євро).
-  const senderCountry = sender?.country || sender?.addresses[0]?.country || null;
+  // Країна — з ОБРАНОЇ адреси відправлення (клієнт може жити в Нідерландах, а
+  // відправляти з Києва), а вже потім — з картки клієнта.
+  const senderCountry = (sender?.addresses.find((a) => a.id === senderAddressId) ?? sender?.addresses[0])?.country
+    || sender?.country || null;
   const senderInUA = senderCountry === 'UA' || (!senderCountry && direction === 'ua_to_eu');
   // ТЗ docx 02.07.26 (D4): «Доставка до порога будинку» доступна ЛИШЕ для напрямку
   // Європа→Україна І лише при Адресній доставці Отримувача. Інакше — ховаємо чекбокс
@@ -239,7 +253,10 @@ export default function NewParcelPage() {
   const [places, setPlaces] = useState<PlaceData[]>([emptyPlace()]);
 
   // Payment
-  const [payer, setPayer] = useState<string>('sender');
+  // ТЗ docx 09.10.26 (п.5): платник за замовчуванням — «Україна→Європа» Отримувач,
+  // «Європа→Україна» Відправник. Поки Працівник не обрав сам — слідуємо за напрямком.
+  const [payerChoice, setPayerChoice] = useState<string | null>(null);
+  const payer = payerChoice ?? defaultPayer(direction);
   const [paymentMethod, setPaymentMethod] = useState<string>('cash');
   const [paymentInUkraine, setPaymentInUkraine] = useState(false);
   const [needsPackaging, setNeedsPackaging] = useState(false);
@@ -254,6 +271,20 @@ export default function NewParcelPage() {
   const [tripDateMode, setTripDateMode] = useState<string>('trip'); // 'trip' | 'custom'
   const [trips, setTrips] = useState<TripOption[]>([]);
   const [selectedTripId, setSelectedTripId] = useState('');
+  // ТЗ docx 09.10.26 (п.1): посилка створюється «з середовища» рейсу (?tripId=…) —
+  // автоматично прив'язується до нього, список рейсів («ковбасу») не показуємо.
+  // Читаємо ?tripId після монтування — на сервері URL-параметрів немає, інакше
+  // розбіжність гідрації.
+  const [lockedTripId, setLockedTripId] = useState<string>('');
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('tripId');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (t) setLockedTripId(t);
+  }, []);
+  const lockedTrip = lockedTripId ? trips.find((t) => t.id === lockedTripId) ?? null : null;
+  useEffect(() => {
+    if (lockedTrip && lockedTrip.direction !== direction) setDirection(lockedTrip.direction);
+  }, [lockedTrip, direction]);
   // ТЗ docx 08.10.26: ТТН з паперової декларації НП (Україна→Європа) — вводиться або сканується камерою.
   const [npTtn, setNpTtn] = useState('');
 
@@ -285,24 +316,25 @@ export default function NewParcelPage() {
   // Відправника — інакше знімаємо вибір, щоб прихований рейс не лишився обраним
   // (напр. оператор перемкнув відправника з Австрії на Нідерланди).
   useEffect(() => {
-    if (!selectedTripId) return;
+    if (!selectedTripId || lockedTripId) return;
     const selected = trips.find(t => t.id === selectedTripId);
     if (!selected) return;
     const departure = selected.direction === 'eu_to_ua' ? selected.country : 'UA';
     if (selected.direction !== direction || (senderCountry && departure !== senderCountry)) {
       setSelectedTripId('');
     }
-  }, [direction, selectedTripId, trips, senderCountry]);
+  }, [direction, selectedTripId, trips, senderCountry, lockedTripId]);
 
   // ТЗ docx 04.10.26: «посилка автоматично прив'язується до найближчого наявного
   // рейсу». Поки Працівник сам не вибрав рейс — підставляємо найближчий: той самий
   // напрямок, EU-країна (EU→UA — країна Відправника, UA→EU — Отримувача),
   // «Заплановано»/«В дорозі», дата не раніше сьогодні. Вибір лишається за ним —
   // можна клікнути інший рейс або «Без рейсу».
-  const receiverEuCountry = (() => {
-    const addr = receiver?.addresses.find((a) => a.id === receiverAddressId) ?? receiver?.addresses[0];
-    return addr?.country || null;
-  })();
+  // Обрані адреси сторін (за id), а не перша адреса клієнта — у клієнта бувають
+  // адреси в різних країнах (ТЗ docx 09.10.26).
+  const selectedRecvAddr = receiver?.addresses.find((a) => a.id === receiverAddressId) ?? receiver?.addresses[0] ?? null;
+  const selectedSenderAddr = sender?.addresses.find((a) => a.id === senderAddressId) ?? sender?.addresses[0] ?? null;
+  const receiverEuCountry = selectedRecvAddr?.country || null;
   const nearestTripId = (() => {
     const euCountry = direction === 'eu_to_ua' ? senderCountry : receiverEuCountry;
     if (!euCountry || euCountry === 'UA') return '';
@@ -317,7 +349,11 @@ export default function NewParcelPage() {
       .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
     return candidates[0]?.id ?? '';
   })();
-  const effectiveTripId = tripDateMode === 'trip' ? (selectedTripId || nearestTripId) : '';
+  const effectiveTripId = lockedTripId || (tripDateMode === 'trip' ? (selectedTripId || nearestTripId) : '');
+  const tripEuCountry = (() => {
+    const t = trips.find((tr) => tr.id === effectiveTripId);
+    return t?.country && t.country !== 'UA' ? t.country : null;
+  })();
 
   // EU-країна для live-калькулятора вартості. Для eu_to_ua вона може бути
   // визначена ОБРАНИМ РЕЙСОМ — навіть якщо в картці відправника країна ще
@@ -490,7 +526,7 @@ export default function NewParcelPage() {
     const hasSelectableTrips = trips.some(
       (t) => t.direction === direction && (t.status === 'planned' || t.status === 'in_progress'),
     );
-    if (tripDateMode === 'trip' && !effectiveTripId && hasSelectableTrips) {
+    if (!lockedTripId && tripDateMode === 'trip' && !effectiveTripId && hasSelectableTrips) {
       setError('Виберіть рейс зі списку або натисніть «Без рейсу»');
       return;
     }
@@ -521,7 +557,8 @@ export default function NewParcelPage() {
         // a new one if no addressId yet). Per ТЗ: «завжди зберігаємо і
         // оновлюємо останній адрес».
         receiverAddress: {
-          country: receiver.addresses[0]?.country || (direction === 'eu_to_ua' ? 'UA' : null),
+          // ТЗ docx 09.10.26: країна — з ОБРАНОЇ адреси (не з першої в списку клієнта).
+          country: selectedRecvAddr?.country || (direction === 'eu_to_ua' ? 'UA' : null),
           deliveryMethod: recvDeliveryMethod,
           postalCode: recvPostalCode || undefined,
           city: recvCity || undefined,
@@ -534,7 +571,7 @@ export default function NewParcelPage() {
         senderId: sender.id,
         senderAddressId: senderAddressId || undefined,
         senderAddress: {
-          country: sender.addresses[0]?.country || (direction === 'ua_to_eu' ? 'UA' : null),
+          country: selectedSenderAddr?.country || (direction === 'ua_to_eu' ? 'UA' : null),
           deliveryMethod: senderDeliveryMethod,
           postalCode: senderPostalCode || undefined,
           city: senderCity || undefined,
@@ -565,7 +602,7 @@ export default function NewParcelPage() {
         tripId: effectiveTripId || undefined,
         npTtn: direction === 'ua_to_eu' && npTtn.trim() ? npTtn.replace(/\s/g, '') : undefined,
         // ТЗ docx 04.10.26: свідомо «Без рейсу» — сервер не прив'язує автоматично.
-        withoutTrip: tripDateMode === 'custom' ? true : undefined,
+        withoutTrip: !lockedTripId && tripDateMode === 'custom' ? true : undefined,
         // Collection (EU→UA only — server ignores otherwise)
         collectionMethod: direction === 'eu_to_ua' && collection.method ? collection.method : undefined,
         collectionPointId: collection.method === 'pickup_point' ? collection.pointId || undefined : undefined,
@@ -636,7 +673,7 @@ export default function NewParcelPage() {
             <CardTitle className="text-base">Напрямок</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0">
-            <Select value={direction} onValueChange={(v) => setDirection(v ?? '')}>
+            <Select value={direction} onValueChange={(v) => setDirection(v ?? '')} disabled={!!lockedTripId}>
               <SelectTrigger><SelectValue>{DIRECTION_LABELS[direction]}</SelectValue></SelectTrigger>
               <SelectContent>
                 <SelectItem value="eu_to_ua">Європа → Україна</SelectItem>
@@ -656,6 +693,8 @@ export default function NewParcelPage() {
           <CardContent className="px-4 pb-4 pt-0 space-y-2 overflow-visible">
             <ClientSearch
               label="Пошук отримувача (телефон або прізвище)"
+              // ТЗ docx 09.10.26 (п.6): у полі пошуку Отримувача — цифрова клавіатура.
+              inputMode="tel"
               // ТЗ docx 21.08.26: дані ручної адреси з МЛ (якщо прийшли звідти).
               prefill={routePrefill?.role === 'receiver' ? routePrefill : null}
               onSelect={handleReceiverSelect}
@@ -774,99 +813,6 @@ export default function NewParcelPage() {
               />
             </div>
 
-            {/* Insurance — opt-in per ТЗ. % береться з тарифу. */}
-            <div className="rounded-lg border p-3 bg-gray-50">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="insurance-cb"
-                  checked={insurance || insuranceAuto}
-                  disabled={insuranceAuto}
-                  onCheckedChange={(c) => setInsurance(c === true)}
-                />
-                <Label htmlFor="insurance-cb" className="text-sm font-medium cursor-pointer">
-                  Страхування{' '}
-                  <FieldHint text="При активації до вартості посилки додається % від Оголошеної вартості." />
-                </Label>
-              </div>
-              {insuranceAuto && (
-                <div className="mt-1 text-xs text-amber-700">
-                  Обовʼязкове: оголошена вартість перевищує {insuranceThresholdEur} € (ТЗ 08.10.26).
-                </div>
-              )}
-              <div className="mt-1 text-xs text-gray-500">
-                {insurance || insuranceAuto
-                  ? (Number(declaredValue) > 0
-                      ? `Сума страхування рахується автоматично — див. блок «Розрахунок вартості» нижче.`
-                      : 'Вкажіть оголошену вартість, щоб розрахувати страхування.')
-                  : 'Не застраховано.'}
-              </div>
-            </div>
-
-            {/* Packaging — opt-in per ТЗ. €/10кг береться з тарифу. */}
-            <div className="rounded-lg border p-3 bg-gray-50">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="packaging-cb"
-                  checked={needsPackaging}
-                  onCheckedChange={(c) => setNeedsPackaging(c === true)}
-                />
-                <Label htmlFor="packaging-cb" className="text-sm font-medium cursor-pointer">
-                  Пакування{' '}
-                  <FieldHint text="Відмітьте, якщо пакунок не є у коробці, не є паралелепіпедом." />
-                </Label>
-              </div>
-            </div>
-
-            {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням.
-                При відмічанні до суми додається doorstepPrice з тарифу напрямку.
-                ТЗ docx 02.07.26 (D4): лише Європа→Україна + Адресна доставка. */}
-            {canDoorstep && (
-            <div className="rounded-lg border p-3 bg-gray-50">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="doorstep-cb"
-                  checked={doorstepDelivery}
-                  onCheckedChange={(c) => setDoorstepDelivery(c === true)}
-                />
-                <Label htmlFor="doorstep-cb" className="text-sm font-medium cursor-pointer">
-                  Доставка до порога будинку{' '}
-                  <FieldHint text="До вартості додається фіксована сума, задана в Тарифах для цього напрямку." />
-                </Label>
-              </div>
-            </div>
-            )}
-
-            {/* «Пакет» — sender transfers cash to receiver. */}
-            <div className="rounded-lg border p-3 bg-gray-50 space-y-2">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="parcel-money-cb"
-                  checked={parcelMoneyEnabled}
-                  onCheckedChange={(c) => {
-                    const enabled = c === true;
-                    setParcelMoneyEnabled(enabled);
-                    if (!enabled) setParcelMoneyAmount('');
-                  }}
-                />
-                <Label htmlFor="parcel-money-cb" className="text-sm font-medium cursor-pointer">
-                  Пакет
-                </Label>
-              </div>
-              {parcelMoneyEnabled && (
-                <div>
-                  {/* ТЗ §E10: слова «Сума передачі (EUR)» прибрано. */}
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    step="0.01"
-                    min="0"
-                    value={parcelMoneyAmount}
-                    onChange={(e) => setParcelMoneyAmount(e.target.value)}
-                    placeholder="Сума у віконці «Пакет»"
-                  />
-                </div>
-              )}
-            </div>
           </CardContent>
         </Card>
 
@@ -1013,7 +959,7 @@ export default function NewParcelPage() {
           <CardContent className="px-4 pb-4 pt-0 space-y-3">
             <div>
               <Label>Платник за доставку <FieldHint text="Хто оплачує доставку — Відправник чи Отримувач." /></Label>
-              <Select value={payer} onValueChange={(v) => setPayer(v ?? '')}>
+              <Select value={payer} onValueChange={(v) => setPayerChoice(v ?? null)}>
                 <SelectTrigger><SelectValue>{PAYER_LABELS[payer]}</SelectValue></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="sender">Відправник</SelectItem>
@@ -1101,7 +1047,21 @@ export default function NewParcelPage() {
           </Card>
         )}
 
-        {/* Trip selection */}
+        {/* ТЗ docx 09.10.26 (п.1): створення з рейсу — рейс зафіксовано, вибору немає. */}
+        {lockedTripId ? (
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-base">Рейс</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 pt-0">
+              <div className="text-sm bg-blue-50 border border-blue-200 rounded p-2">
+                {lockedTrip
+                  ? <>Посилку буде прив&apos;язано до рейсу <b>{tripRouteLabel(lockedTrip.country, lockedTrip.direction)} · {formatDate(lockedTrip.departureDate)}</b></>
+                  : 'Завантаження рейсу…'}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
         <Card>
           <CardHeader className="py-3 px-4">
             <CardTitle className="text-base">
@@ -1162,12 +1122,17 @@ export default function NewParcelPage() {
             </div>
           </CardContent>
         </Card>
+        )}
 
         {/* Cost calculation */}
         <CostCalculator
           direction={direction}
           senderCountry={calcSenderCountry}
-          receiverCountry={receiver?.addresses[0]?.country || null}
+          // ТЗ docx 09.10.26: країна/спосіб доставки — з ОБРАНОЇ адреси Отримувача; для
+          // UA→EU країну тарифу визначає рейс (як і на сервері).
+          receiverCountry={
+            (direction === 'ua_to_eu' && tripEuCountry) || selectedRecvAddr?.country || null
+          }
           actualWeight={totalWeight}
           volumetricWeight={totalVolWeight}
           declaredValue={Number(declaredValue) || 0}
@@ -1177,13 +1142,117 @@ export default function NewParcelPage() {
           onInsuranceThreshold={setInsuranceThresholdEur}
           needsPackaging={needsPackaging || places.some(p => p.needsPackaging)}
           isDoorstepDelivery={canDoorstep && doorstepDelivery}
-          isAddressDelivery={receiver?.addresses[0]?.deliveryMethod === 'address'}
+          isAddressDelivery={isAddressDeliveryPricing({ direction, receiverDeliveryMethod: recvDeliveryMethod })}
           isPickupPoint={isPickupPointPricing({ direction, collectionMethod: collection.method, receiverDeliveryMethod: recvDeliveryMethod })}
           isCourierPickup={direction === 'eu_to_ua' && collection.method === 'courier_pickup'}
           isMultiParcelPickup={!!collection.isMultiParcelPickup}
           parcelMoneyAmount={parcelMoneyEnabled ? Number(parcelMoneyAmount) || 0 : 0}
           receiverCity={recvCity}
         />
+
+        {/* ТЗ docx 11.10.26 (Створення посилки — загальна зміна): послуги об'єднано під
+            назвою «Додаткові послуги» і перенесено вниз — безпосередньо перед кнопкою
+            «Створити відправлення» (так само у Клієнта). */}
+        <Card>
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-base">Додаткові послуги</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 pt-0 space-y-3">
+            {/* Insurance — opt-in per ТЗ. % береться з тарифу. */}
+            <div className="rounded-lg border p-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="insurance-cb"
+                  checked={insurance || insuranceAuto}
+                  disabled={insuranceAuto}
+                  onCheckedChange={(c) => setInsurance(c === true)}
+                />
+                <Label htmlFor="insurance-cb" className="text-sm font-medium cursor-pointer">
+                  Страхування{' '}
+                  <FieldHint text="При активації до вартості посилки додається % від Оголошеної вартості." />
+                </Label>
+              </div>
+              {insuranceAuto && (
+                <div className="mt-1 text-xs text-amber-700">
+                  Обовʼязкове: оголошена вартість перевищує {insuranceThresholdEur} € (ТЗ 08.10.26).
+                </div>
+              )}
+              <div className="mt-1 text-xs text-gray-500">
+                {insurance || insuranceAuto
+                  ? (Number(declaredValue) > 0
+                      ? `Сума страхування рахується автоматично — див. блок «Розрахунок вартості» вище.`
+                      : 'Вкажіть оголошену вартість, щоб розрахувати страхування.')
+                  : 'Не застраховано.'}
+              </div>
+            </div>
+
+            {/* Packaging — opt-in per ТЗ. €/10кг береться з тарифу. */}
+            <div className="rounded-lg border p-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="packaging-cb"
+                  checked={needsPackaging}
+                  onCheckedChange={(c) => setNeedsPackaging(c === true)}
+                />
+                <Label htmlFor="packaging-cb" className="text-sm font-medium cursor-pointer">
+                  Пакування{' '}
+                  <FieldHint text="Відмітьте, якщо пакунок не є у коробці, не є паралелепіпедом." />
+                </Label>
+              </div>
+            </div>
+
+            {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням.
+                При відмічанні до суми додається doorstepPrice з тарифу напрямку.
+                ТЗ docx 02.07.26 (D4): лише Європа→Україна + Адресна доставка. */}
+            {canDoorstep && (
+            <div className="rounded-lg border p-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="doorstep-cb"
+                  checked={doorstepDelivery}
+                  onCheckedChange={(c) => setDoorstepDelivery(c === true)}
+                />
+                <Label htmlFor="doorstep-cb" className="text-sm font-medium cursor-pointer">
+                  Доставка до порога будинку{' '}
+                  <FieldHint text="До вартості додається фіксована сума, задана в Тарифах для цього напрямку." />
+                </Label>
+              </div>
+            </div>
+            )}
+
+            {/* «Пакет» — sender transfers cash to receiver. */}
+            <div className="rounded-lg border p-3 bg-gray-50 space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="parcel-money-cb"
+                  checked={parcelMoneyEnabled}
+                  onCheckedChange={(c) => {
+                    const enabled = c === true;
+                    setParcelMoneyEnabled(enabled);
+                    if (!enabled) setParcelMoneyAmount('');
+                  }}
+                />
+                <Label htmlFor="parcel-money-cb" className="text-sm font-medium cursor-pointer">
+                  Пакет
+                </Label>
+              </div>
+              {parcelMoneyEnabled && (
+                <div>
+                  {/* ТЗ §E10: слова «Сума передачі (EUR)» прибрано. */}
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    value={parcelMoneyAmount}
+                    onChange={(e) => setParcelMoneyAmount(e.target.value)}
+                    placeholder="Сума у віконці «Пакет»"
+                  />
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">

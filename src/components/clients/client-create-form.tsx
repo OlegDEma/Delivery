@@ -144,7 +144,13 @@ export function ClientCreateForm({
 }: ClientCreateFormProps) {
   const isEditMode = !!initialData;
   // ТЗ docx 21.08.26: країна з ручної адреси МЛ має пріоритет над дефолтом за напрямком.
+  // ТЗ docx 09.10.26: у режимі редагування без адреси «потрібного боку» (ClientSearch
+  // відфільтрував адреси іншої країни) — стартуємо з країни за напрямком, щоб нова
+  // адреса не отримала країну протилежного боку.
   const initialCountry: CountryCode = (initialData?.addresses[0]?.country as CountryCode)
+    || (initialData && initialData.addresses.length === 0 && direction && role
+        ? getDefaultCountry(direction, role, defaultCountry)
+        : null)
     || (initialData?.country as CountryCode)
     || (prefillAddress?.country as CountryCode)
     || getDefaultCountry(direction, role, defaultCountry);
@@ -645,7 +651,8 @@ export function ClientCreateForm({
             {/* ТЗ docx 20.06.26: Відправник «Пошта» → «Номер складу» (§10);
                 Отримувач «Пошта» → «Номер складу/поштомату» (§20). */}
             <Label>{role === 'sender' ? 'Номер складу' : 'Номер складу/поштомату'} *</Label>
-            <Input value={npWarehouseNum} onChange={(e) => setNpWarehouseNum(e.target.value)} required />
+            {/* ТЗ docx 09.10.26 (п.7): «Номер складу» — цифрова клавіатура. */}
+            <Input value={npWarehouseNum} onChange={(e) => setNpWarehouseNum(e.target.value)} inputMode="numeric" required />
           </div>
         )}
 

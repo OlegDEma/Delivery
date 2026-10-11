@@ -113,7 +113,8 @@ export default function NewOrderPage() {
 
   // Parcel
   const [shipmentType, setShipmentType] = useState('parcels_cargo');
-  const [description, setDescription] = useState('');
+  // ТЗ docx 09.10.26 (п.4): опис за замовчуванням — «Побутові речі» (можна змінити).
+  const [description, setDescription] = useState('Побутові речі');
   const [declaredValue, setDeclaredValue] = useState('');
   // Per ТЗ — opt-in services. Прихований 3% автоматичний бонус скасовано.
   const [insurance, setInsurance] = useState(false);
@@ -128,6 +129,8 @@ export default function NewOrderPage() {
   const [doorstepDelivery, setDoorstepDelivery] = useState(false);
   // ТЗ docx 02.07.26 (D4): доступна лише Європа→Україна + Адресна доставка Отримувача.
   const canDoorstep = direction === 'eu_to_ua' && receiverDeliveryMethod === 'address';
+  // ТЗ docx 11.10.26 (п.2): послуга «Пакування» видима Клієнту лише для «Європа→Україна».
+  const canPackaging = direction === 'eu_to_ua';
   // ТЗ docx 21.09.26 (п.4): для напрямку Україна→Європа оголошена вартість —
   // у гривнях (як у формі Працівника), для Європа→Україна — в EUR. Раніше
   // клієнту завжди писало «(EUR)», і гривнева сума йшла на сервер як EUR.
@@ -138,7 +141,10 @@ export default function NewOrderPage() {
   // з'являється лише коли оформлює Працівник. У клієнтському порталі не
   // показуємо і не відправляємо.
   const [places, setPlaces] = useState<PlaceData[]>([emptyPlace()]);
-  const [payer, setPayer] = useState('sender');
+  // ТЗ docx 09.10.26 (п.5): платник за замовчуванням — «Україна→Європа» Отримувач,
+  // «Європа→Україна» Відправник; поки Клієнт не обрав сам — слідуємо за напрямком.
+  const [payerChoice, setPayerChoice] = useState<string | null>(null);
+  const payer = payerChoice ?? (direction === 'ua_to_eu' ? 'receiver' : 'sender');
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [paymentInUkraine, setPaymentInUkraine] = useState(false);
 
@@ -413,7 +419,7 @@ export default function NewOrderPage() {
           direction, shipmentType, description,
           declaredValue: declaredValue ? Number(declaredValue) : undefined,
           declaredValueCurrency: declaredCurrency,
-          insurance: insurance || insuranceAuto, needsPackaging,
+          insurance: insurance || insuranceAuto, needsPackaging: canPackaging && needsPackaging,
           // ТЗ docx 02.07.26 (D4): не застосовуємо doorstep, якщо опція недоступна.
           doorstepDelivery: canDoorstep && doorstepDelivery,
           // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
@@ -655,7 +661,7 @@ export default function NewOrderPage() {
               </div>
             )}
             {receiverDeliveryMethod === 'np_warehouse' && (
-              <div><Label>Номер складу/поштомату *</Label><Input value={receiverNpWarehouse} onChange={(e) => setReceiverNpWarehouse(e.target.value)} placeholder="1" /></div>
+              <div><Label>Номер складу/поштомату *</Label><Input value={receiverNpWarehouse} onChange={(e) => setReceiverNpWarehouse(e.target.value)} placeholder="1" inputMode="numeric" /></div>
             )}
             {receiverDeliveryMethod === 'pickup_point' && (
               <div>
@@ -867,41 +873,6 @@ export default function NewOrderPage() {
               </p>
             </div>
 
-            {/* Додаткові послуги — кожна вмикається чекбоксом, % і суми
-                визначаються тарифом для напрямку. Тексти підказок — per ТЗ §E10. */}
-            <div className="space-y-2 pt-2 border-t">
-              {/* ТЗ docx 08.10.26: понад поріг з Тарифів (20 €) страхування вмикається
-                  автоматично і зняти його не можна; нижче — лише за чекбоксом. */}
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={insurance || insuranceAuto}
-                  disabled={insuranceAuto}
-                  onCheckedChange={(c) => setInsurance(c === true)}
-                />
-                Страхування <FieldHint text="У разі загибелі посилки відшкодовується лише сума страхування. Відмітьте чекбокс, якщо бажаєте застрахувати посилку згідно оголошеної вартості" />
-              </label>
-              {insuranceAuto && (
-                <p className="text-xs text-amber-700 pl-6">
-                  Обовʼязкове: оголошена вартість перевищує {insuranceThresholdEur} € — страхування вже враховане у вартості.
-                </p>
-              )}
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
-                Пакування <FieldHint text="Відмітьте, якщо пакунок не є у коробці" />
-              </label>
-              {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням.
-                  ТЗ docx 02.07.26 (D4): лише Європа→Україна + Адресна доставка. */}
-              {canDoorstep && (
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={doorstepDelivery} onCheckedChange={(c) => setDoorstepDelivery(c === true)} />
-                  Доставка до порога будинку <FieldHint text="До вартості додається фіксована сума з Тарифів для цього напрямку." />
-                </label>
-              )}
-              {/* Per ТЗ §E10: «Поле "Пакет" при заповненні Клієнтом
-                  відсутнє». Опція з'являється лише коли посилку оформлює
-                  Працівник. Тому в клієнтському порталі чекбокс «Пакет»
-                  не рендеримо взагалі. */}
-            </div>
           </CardContent>
         </Card>
 
@@ -912,7 +883,7 @@ export default function NewOrderPage() {
               {/* ТЗ §E11: вкладка зветься «Параметри відправлення» (однаково
                   для Працівника і Клієнта) та йде після «Відправлення». */}
               <CardTitle className="text-base">Параметри відправлення ({places.length})</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addPlace} disabled={places.length >= 10}>+</Button>
+              {/* ТЗ docx 11.10.26 (п.1): «+» і «Додати місце» — внизу, під місцем (див. нижче). */}
             </div>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-3">
@@ -933,6 +904,10 @@ export default function NewOrderPage() {
                 {volWeight(p) > 0 && <div className="text-xs text-gray-500">Об&apos;ємна вага: {volWeight(p)} кг</div>}
               </div>
             ))}
+            {/* ТЗ docx 11.10.26 (п.1): «+ Додати місце» — під останнім місцем (як у Працівника). */}
+            <Button type="button" variant="outline" size="sm" onClick={addPlace} disabled={places.length >= 10} className="w-full">
+              + Додати місце
+            </Button>
             {/* ТЗ docx 02.07.26 (D7): Фактична / Об'ємна / Розрахункова вага. */}
             <div className="text-sm space-y-0.5 border-t pt-2 mt-1">
               <div className="flex justify-between"><span className="text-gray-500">Фактична вага</span><span>{totalWeight.toFixed(2)} кг</span></div>
@@ -948,7 +923,7 @@ export default function NewOrderPage() {
         <Card>
           <CardHeader className="py-3 px-4"><CardTitle className="text-base">Оплата</CardTitle></CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-2">
-            <Select value={payer} onValueChange={(v) => setPayer(v ?? 'sender')}>
+            <Select value={payer} onValueChange={(v) => setPayerChoice(v ?? null)}>
               <SelectTrigger><SelectValue>{PAYER_LABELS[payer]}</SelectValue></SelectTrigger>
               <SelectContent>
                 <SelectItem value="sender">Відправник</SelectItem>
@@ -987,7 +962,7 @@ export default function NewOrderPage() {
                 declaredValue={Number(declaredValue) || 0}
                 declaredValueCurrency={declaredCurrency}
                 insurance={insurance}
-                needsPackaging={needsPackaging}
+                needsPackaging={canPackaging && needsPackaging}
                 isDoorstepDelivery={canDoorstep && doorstepDelivery}
                 // ТЗ docx 21.09.26 (п.3): вартість рахується згідно ВИБРАНОЇ
                 // клієнтом опції доставки Отримувача.
@@ -1017,6 +992,52 @@ export default function NewOrderPage() {
             клієнт її не бачив. Тепер при появі помилки прокручуємо до неї. */}
         {error && <div ref={errorRef} className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 scroll-mt-4">{error}</div>}
 
+        {/* ТЗ docx 11.10.26 (Створення посилки — загальна зміна): послуги об'єднано під
+            назвою «Додаткові послуги» і перенесено вниз — безпосередньо перед кнопкою
+            «Створити відправлення». */}
+        <Card>
+          <CardHeader className="py-3 px-4"><CardTitle className="text-base">Додаткові послуги</CardTitle></CardHeader>
+          <CardContent className="px-4 pb-4 pt-0">
+            {/* Додаткові послуги — кожна вмикається чекбоксом, % і суми
+                визначаються тарифом для напрямку. Тексти підказок — per ТЗ §E10. */}
+            <div className="space-y-2">
+              {/* ТЗ docx 08.10.26: понад поріг з Тарифів (20 €) страхування вмикається
+                  автоматично і зняти його не можна; нижче — лише за чекбоксом. */}
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={insurance || insuranceAuto}
+                  disabled={insuranceAuto}
+                  onCheckedChange={(c) => setInsurance(c === true)}
+                />
+                Страхування <FieldHint text="У разі загибелі посилки відшкодовується лише сума страхування. Відмітьте чекбокс, якщо бажаєте застрахувати посилку згідно оголошеної вартості" />
+              </label>
+              {insuranceAuto && (
+                <p className="text-xs text-amber-700 pl-6">
+                  Обовʼязкове: оголошена вартість перевищує {insuranceThresholdEur} € — страхування вже враховане у вартості.
+                </p>
+              )}
+              {canPackaging && (
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
+                  Пакування <FieldHint text="Відмітьте, якщо пакунок не є у коробці" />
+                </label>
+              )}
+              {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням.
+                  ТЗ docx 02.07.26 (D4): лише Європа→Україна + Адресна доставка. */}
+              {canDoorstep && (
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox checked={doorstepDelivery} onCheckedChange={(c) => setDoorstepDelivery(c === true)} />
+                  Доставка до порога будинку <FieldHint text="До вартості додається фіксована сума з Тарифів для цього напрямку." />
+                </label>
+              )}
+              {/* Per ТЗ §E10: «Поле "Пакет" при заповненні Клієнтом
+                  відсутнє». Опція з'являється лише коли посилку оформлює
+                  Працівник. Тому в клієнтському порталі чекбокс «Пакет»
+                  не рендеримо взагалі. */}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* ТЗ docx 08.10.26: для «Україна → Європа» оформити можна лише після передачі. */}
         {handoverBlocked && (
           <p className="text-sm text-orange-800 text-center">
@@ -1024,7 +1045,8 @@ export default function NewOrderPage() {
           </p>
         )}
         <Button type="submit" className="w-full h-12 text-base" disabled={saving || handoverBlocked}>
-          {saving ? 'Створення...' : 'Створити замовлення'}
+          {/* ТЗ docx 11.10.26: кнопка зветься «Створити відправлення» (як у Працівника). */}
+          {saving ? 'Створення...' : 'Створити відправлення'}
         </Button>
 
         <p className="text-xs text-gray-400 text-center">

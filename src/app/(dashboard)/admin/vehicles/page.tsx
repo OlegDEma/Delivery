@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Pencil, Trash2, Camera } from 'lucide-react';
+import { Truck, Pencil, Trash2, Camera, Eye, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils/format';
 
@@ -69,6 +69,23 @@ export default function VehiclesAdminPage() {
   const [saving, setSaving] = useState(false);
   // ТЗ docx 21.08.26: per-slot індикатор завантаження (кілька фото-документів).
   const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
+  // ТЗ docx 11.10.26: картка транспорту для перегляду (без редагування) +
+  // фото документа на повний екран.
+  const [viewId, setViewId] = useState<string | null>(null);
+  // back — куди повернутись після закриття фото (модальне вікно на час перегляду ховаємо,
+  // інакше воно перехоплює кліки поза собою).
+  const [fullPhoto, setFullPhoto] = useState<{ url: string; label: string; back: { view: string } | 'edit' | null } | null>(null);
+  function openPhoto(url: string, label: string) {
+    if (viewId) { setFullPhoto({ url, label, back: { view: viewId } }); setViewId(null); }
+    else if (open) { setFullPhoto({ url, label, back: 'edit' }); setOpen(false); }
+    else setFullPhoto({ url, label, back: null });
+  }
+  function closePhoto() {
+    const back = fullPhoto?.back;
+    setFullPhoto(null);
+    if (back === 'edit') setOpen(true);
+    else if (back) setViewId(back.view);
+  }
 
   const load = useCallback(() => {
     setLoading(true);
@@ -266,7 +283,11 @@ export default function VehiclesAdminPage() {
                           <div className="text-[11px] font-medium text-gray-600 mb-1">{label}</div>
                           {url ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={url} alt={label} className="mb-1 h-24 w-full object-cover rounded border" />
+                            <img
+                              src={url} alt={label}
+                              className="mb-1 h-24 w-full object-cover rounded border cursor-zoom-in"
+                              onClick={() => openPhoto(url, label)}
+                            />
                           ) : (
                             <div className="mb-1 h-24 w-full rounded border border-dashed bg-gray-50 flex items-center justify-center text-[10px] text-gray-400">немає</div>
                           )}
@@ -310,7 +331,7 @@ export default function VehiclesAdminPage() {
           {vehicles.map((v) => (
             <div key={v.id} className="bg-white border rounded-lg p-3">
               <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
+                <div className="min-w-0 cursor-pointer" onClick={() => setViewId(v.id)} title="Відкрити картку">
                   <div className="font-semibold flex items-center gap-1.5">
                     🚛 {v.brand} {v.model}
                     {!v.isActive && <Badge variant="secondary" className="text-[10px]">неактивний</Badge>}
@@ -318,6 +339,7 @@ export default function VehiclesAdminPage() {
                   <div className="font-mono text-sm text-gray-600">{v.regNumber}</div>
                 </div>
                 <div className="flex gap-1 shrink-0">
+                  <button type="button" onClick={() => setViewId(v.id)} className="text-gray-400 hover:text-blue-600" title="Переглянути"><Eye className="w-4 h-4" /></button>
                   <button type="button" onClick={() => openEdit(v)} className="text-gray-400 hover:text-blue-600" title="Редагувати"><Pencil className="w-4 h-4" /></button>
                   <button type="button" onClick={() => handleDelete(v)} className="text-gray-400 hover:text-red-600" title="Видалити"><Trash2 className="w-4 h-4" /></button>
                 </div>
@@ -334,6 +356,78 @@ export default function VehiclesAdminPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ТЗ docx 11.10.26: картка транспортного засобу — лише перегляд. */}
+      {(() => {
+        const v = viewId ? vehicles.find((x) => x.id === viewId) : null;
+        return (
+          <Dialog open={!!v} onOpenChange={(o) => { if (!o) setViewId(null); }}>
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+              {v && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>🚛 {v.brand} {v.model} · <span className="font-mono">{v.regNumber}</span></DialogTitle>
+                  </DialogHeader>
+                  <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+                    <dt className="text-gray-500">Стан</dt><dd>{v.isActive ? 'Активний' : 'Неактивний'}</dd>
+                    <dt className="text-gray-500">Місць усього</dt><dd>{v.totalSeats ?? '—'}{v.totalSeats != null ? ' (з водієм)' : ''}</dd>
+                    <dt className="text-gray-500">ОСЦПВ</dt><dd>{v.oscpvStart ? formatDate(v.oscpvStart) : '—'} → {v.oscpvEnd ? formatDate(v.oscpvEnd) : '—'}</dd>
+                    <dt className="text-gray-500">Зелена карта</dt><dd>{v.greenCardStart ? formatDate(v.greenCardStart) : '—'} → {v.greenCardEnd ? formatDate(v.greenCardEnd) : '—'}</dd>
+                    <dt className="text-gray-500">Техогляд</dt><dd>{v.techInspectionDate ? formatDate(v.techInspectionDate) : '—'}</dd>
+                    <dt className="text-gray-500">Наступний техогляд</dt><dd>{v.nextTechInspectionDate ? formatDate(v.nextTechInspectionDate) : '—'}</dd>
+                    {v.notes && (<><dt className="text-gray-500">Нотатки</dt><dd className="whitespace-pre-wrap">{v.notes}</dd></>)}
+                  </dl>
+                  <div className="border-t pt-2">
+                    <div className="text-xs font-medium text-gray-600 mb-1">Документи (натисніть фото, щоб збільшити)</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {PHOTO_SLOTS.map(({ slot, label, field }) => {
+                        const url = v[field];
+                        return (
+                          <div key={slot} className="border rounded p-1.5">
+                            <div className="text-[11px] text-gray-600 mb-1">{label}</div>
+                            {url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={url} alt={label}
+                                className="h-28 w-full object-cover rounded border cursor-zoom-in"
+                                onClick={() => openPhoto(url, label)}
+                              />
+                            ) : (
+                              <div className="h-28 w-full rounded border border-dashed bg-gray-50 flex items-center justify-center text-[10px] text-gray-400">немає</div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
+
+      {/* ТЗ docx 11.10.26: фото документа на повний екран (клік поза фото або ✕ — закрити). */}
+      {fullPhoto && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-2"
+          role="dialog"
+          aria-label={fullPhoto.label}
+          onClick={closePhoto}
+        >
+          <button
+            type="button"
+            className="absolute top-3 right-3 text-white/80 hover:text-white p-2"
+            aria-label="Закрити"
+            onClick={closePhoto}
+          >
+            <X className="w-7 h-7" />
+          </button>
+          <div className="absolute top-4 left-4 text-white/80 text-sm">{fullPhoto.label}</div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={fullPhoto.url} alt={fullPhoto.label} className="max-w-full max-h-full object-contain" onClick={(e) => e.stopPropagation()} />
         </div>
       )}
     </div>

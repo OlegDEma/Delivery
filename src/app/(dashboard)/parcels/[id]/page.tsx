@@ -37,6 +37,10 @@ import { displayParcelNumber } from '@/lib/parcels/display-number';
 import { formatItn } from '@/lib/utils/itn';
 import { NO_TRIP_MESSAGE, OPERATOR_PHONE } from '@/lib/parcels/no-trip';
 import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { STAFF_TRANSFER_STATUSES } from '@/lib/parcels/transfer-rules';
+import { formatJourneyNumber } from '@/lib/utils/journey-number';
+import { tripRouteLabel, parcelRouteLabel } from '@/lib/constants/countries';
 
 interface ParcelDetail {
   id: string;
@@ -44,6 +48,8 @@ interface ParcelDetail {
   internalNumber: string;
   sequentialNumber: number;
   shortNumber: number | null;
+  /** ТЗ docx 11.10.26: номер у поїздці (001…N). */
+  journeyNumber: number | null;
   direction: string;
   status: ParcelStatusType;
   /** ТЗ docx 26.07.26 (п.1): автор посилки — редагувати може лише він. */
@@ -158,6 +164,9 @@ export default function ParcelDetailPage() {
   const [npTtn, setNpTtn] = useState('');
   const [editTtn, setEditTtn] = useState(false);
   const [editTrip, setEditTrip] = useState(false);
+  // ТЗ docx 09.10.26 (п.2): перенесення на інший рейс — «Ви дійсно хочете перенести посилку?»
+  const [transferTripId, setTransferTripId] = useState<string | null>(null);
+  const [transferring, setTransferring] = useState(false);
   // ТЗ docx 28.09.26 (скарга «нотатка з акаунта водія не створюється»):
   // замість window.prompt (на смартфоні браузер може його блокувати, і помилку
   // запиту ніде не було видно) — поле просто в сторінці + показ помилки сервера.
@@ -181,12 +190,38 @@ export default function ParcelDetailPage() {
   }, []);
 
   async function handleAssignTrip(tripId: string) {
+    // ТЗ docx 09.10.26 (п.2): посилка вже в рейсі → це перенесення, спершу перепитуємо.
+    if (parcel?.trip && tripId && tripId !== parcel.trip.id) {
+      setTransferTripId(tripId);
+      return;
+    }
     await fetch(`/api/parcels/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tripId: tripId || null }),
     });
     fetchParcel();
+  }
+
+  async function handleTransfer() {
+    if (!transferTripId) return;
+    setTransferring(true);
+    const res = await fetch(`/api/parcels/${id}/transfer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tripId: transferTripId }),
+    });
+    setTransferring(false);
+    if (res.ok) {
+      toast.success('Посилку перенесено на інший рейс');
+      setTransferTripId(null);
+      setEditTrip(false);
+      fetchParcel();
+    } else {
+      const d = await res.json().catch(() => ({}));
+      toast.error(d.error || 'Не вдалося перенести посилку');
+      setTransferTripId(null);
+    }
   }
 
   async function handleAssignCourier(courierId: string) {
@@ -318,7 +353,7 @@ export default function ParcelDetailPage() {
     `Місць: ${parcel.totalPlacesCount}`,
     '', // порожній рядок за ТЗ
     parcel.totalCost ? `Вартість: ${Number(parcel.totalCost).toFixed(2)} EUR` : null,
-    `Напрямок: ${parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}`,
+    `Напрямок: ${parcelRouteLabel(parcel)}`,
     parcel.description ? `Опис: ${parcel.description}` : null,
     trackingUrl ? `Відстежити: ${trackingUrl}` : null,
   ].filter((l) => l !== null).join('\n');
@@ -382,6 +417,12 @@ export default function ParcelDetailPage() {
             {displayParcelNumber(parcel.internalNumber)}
             {parcel.trip && <>, Рейс: {formatDate(parcel.trip.departureDate)}({parcel.trip.country})</>}
           </h1>
+          {/* ТЗ docx 11.10.26: номер посилки в поїздці (001…N). */}
+          {parcel.journeyNumber != null && (
+            <span className="text-sm font-mono font-semibold bg-gray-100 rounded px-1.5 py-0.5" title="Номер посилки в поїздці">
+              № {formatJourneyNumber(parcel.journeyNumber)}
+            </span>
+          )}
           <button
             type="button"
             onClick={() => setEditTrip((v) => !v)}
@@ -455,18 +496,46 @@ export default function ParcelDetailPage() {
           </div>
         )}
 
+        {/* ТЗ docx 09.10.26 (п.2): окрема кнопка перенесення на інший рейс
+            («Прийнято до перевезення» / «В дорозі»; до прийняття — теж). */}
+        {parcel.trip && STAFF_TRANSFER_STATUSES.includes(parcel.status) && !editTrip && (
+          <div className="mt-2">
+            <Button type="button" size="sm" variant="outline" onClick={() => setEditTrip(true)}>
+              ⇄ Перенести на інший рейс
+            </Button>
+          </div>
+        )}
+
+        <ConfirmDialog
+          open={!!transferTripId}
+          title="Ви дійсно хочете перенести посилку?"
+          description={(() => {
+            const t = trips.find((x) => x.id === transferTripId);
+            return t ? <>Посилка зникне з поточного рейсу і з&apos;явиться в рейсі {tripRouteLabel(t.country, t.direction)} {formatDate(t.departureDate)}.</> : null;
+          })()}
+          confirmLabel="Так, перенести"
+          busy={transferring}
+          onConfirm={handleTransfer}
+          onCancel={() => setTransferTripId(null)}
+        />
+
         {/* Редактор рейсу/кур'єра — відкривається олівцем у шапці (ТЗ docx 04.10.26). */}
         <div className="text-sm">
           {editTrip && (
             <div className="mt-3 space-y-2 border-t pt-3">
+              {parcel.trip && (
+                <div className="text-xs text-gray-500">Оберіть рейс, на який перенести посилку:</div>
+              )}
               <TripSelector
-                trips={trips}
+                // ТЗ docx 09.10.26: перенесення — лише на рейс до тієї ж країни.
+                trips={parcel.trip ? trips.filter((t) => t.country === parcel.trip!.country) : trips}
                 direction={parcel.direction as 'eu_to_ua' | 'ua_to_eu'}
                 selectedTripId={parcel.trip?.id || ''}
                 onChange={(tripId) => handleAssignTrip(tripId)}
                 compact
-                // ТЗ docx 21.07.26 (п.2): лише рейси з країни Відправника.
-                senderCountry={parcel.sender?.country || parcel.senderAddress?.country || null}
+                // ТЗ docx 21.07.26 (п.2): лише рейси з країни Відправника. Країна — з АДРЕСИ
+                // відправлення (клієнт може жити в Нідерландах, а відправляти з Києва).
+                senderCountry={parcel.senderAddress?.country || parcel.sender?.country || null}
               />
               <div>
                 <Label className="text-xs">Кур&apos;єр</Label>

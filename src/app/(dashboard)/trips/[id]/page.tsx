@@ -18,6 +18,9 @@ import { formatDateWithWeekday, formatWeight } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { formatJourneyNumber } from '@/lib/utils/journey-number';
+import { formatDate } from '@/lib/utils/format';
 
 const TRIP_STATUSES: Record<string, { label: string; color: string }> = {
   planned: { label: 'Заплановано', color: 'bg-blue-100 text-blue-800' },
@@ -30,6 +33,8 @@ interface TripParcel {
   id: string;
   internalNumber: string;
   shortNumber: number | null;
+  /** ТЗ docx 11.10.26: наскрізний номер у поїздці (001…N). */
+  journeyNumber: number | null;
   status: ParcelStatusType;
   totalWeight: number | null;
   totalPlacesCount: number;
@@ -64,7 +69,19 @@ interface TripDetail {
   /** ТЗ docx 02.07.26 (D12): кількість місць для пасажирів (стеля пасажирів). */
   passengerCapacity: number;
   _count: { parcels: number; routeTasks: number };
+  /** ТЗ docx 11.10.26: посилки, що покинули рейс (номер лишається за ними). */
+  transfersOut: {
+    id: string;
+    journeyNumber: number | null;
+    createdAt: string;
+    parcel: { id: string; internalNumber: string; tripId: string | null };
+    toTrip: { id: string; direction: string; country: string; departureDate: string } | null;
+  }[];
 }
+
+type TripRow =
+  | { kind: 'parcel'; num: number | null; parcel: TripParcel }
+  | { kind: 'ghost'; num: number; ghost: TripDetail['transfersOut'][number] };
 
 export default function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -81,6 +98,9 @@ export default function TripDetailPage() {
   const [depDate, setDepDate] = useState('');
   const [arrDate, setArrDate] = useState('');
   const [deleting, setDeleting] = useState(false);
+  // ТЗ docx 09.10.26: «Ви дійсно хочете видалити посилку?» — власне вікно підтвердження.
+  const [removeTarget, setRemoveTarget] = useState<TripParcel | null>(null);
+  const [removing, setRemoving] = useState(false);
 
   async function fetchTrip() {
     const res = await fetch(`/api/trips/${id}`);
@@ -130,11 +150,16 @@ export default function TripDetailPage() {
   }
 
   async function handleRemoveParcel(parcelId: string) {
-    await fetch(`/api/trips/${id}`, {
+    setRemoving(true);
+    const res = await fetch(`/api/trips/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ removeParcelId: parcelId }),
     });
+    setRemoving(false);
+    setRemoveTarget(null);
+    if (res.ok) toast.success('Посилку прибрано з рейсу');
+    else { const d = await res.json().catch(() => ({})); toast.error(d.error || 'Не вдалося прибрати посилку'); }
     fetchTrip();
   }
 
@@ -143,6 +168,15 @@ export default function TripDetailPage() {
 
   const totalWeight = trip.parcels.reduce((s, p) => s + (Number(p.totalWeight) || 0), 0);
   const totalPlaces = trip.parcels.reduce((s, p) => s + p.totalPlacesCount, 0);
+
+  // ТЗ docx 11.10.26: список рейсу за номерами в поїздці; на місці посилки, яку
+  // перенесли/прибрали, лишається рядок «Перенесена до рейсу …» з тим самим номером.
+  const rows: TripRow[] = [
+    ...trip.parcels.map((p): TripRow => ({ kind: 'parcel', num: p.journeyNumber, parcel: p })),
+    ...trip.transfersOut
+      .filter((g) => g.journeyNumber != null && g.parcel.tripId !== trip.id)
+      .map((g): TripRow => ({ kind: 'ghost', num: g.journeyNumber as number, ghost: g })),
+  ].sort((a, b) => (a.num ?? Number.MAX_SAFE_INTEGER) - (b.num ?? Number.MAX_SAFE_INTEGER));
 
   return (
     <div className="max-w-3xl space-y-4">
@@ -167,13 +201,16 @@ export default function TripDetailPage() {
           }`}
         </div>
         {trip.notes && <div className="text-sm text-gray-400 mt-1">{trip.notes}</div>}
-        <div className="flex gap-2 mt-2">
-          <Button variant="outline" size="sm" onClick={() => {
-            // Open all print pages in one window
-            const ids = trip.parcels.map(p => p.id).join(',');
-            window.open(`/trips/${id}/print?ids=${ids}`, '_blank');
-          }}>
-            Друк всіх етикеток ({trip._count.parcels})
+        <div className="flex gap-2 mt-2 flex-wrap">
+          {/* ТЗ docx 09.10.26 (п.1): посилка, створена з рейсу, одразу прив'язується до нього. */}
+          {(trip.status === 'planned' || trip.status === 'in_progress') && (
+            <Link href={`/parcels/new?tripId=${trip.id}`}>
+              <Button size="sm">+ Створити посилку</Button>
+            </Link>
+          )}
+          {/* ТЗ docx 11.10.26 (п.2): друк списку посилок рейсу (A4). */}
+          <Button variant="outline" size="sm" onClick={() => window.open(`/trips/${id}/print`, '_blank')}>
+            🖨 Друк списку посилок
           </Button>
         </div>
       </div>
@@ -394,14 +431,33 @@ export default function TripDetailPage() {
         </CardHeader>
         <CardContent className="px-0 pb-0">
           <div className="divide-y">
-            {trip.parcels.map(p => {
+            {rows.map(row => {
+              if (row.kind === 'ghost') {
+                const g = row.ghost;
+                return (
+                  <div key={`g-${g.id}`} className="px-4 py-2 flex items-center gap-2 bg-gray-50 text-sm text-gray-500">
+                    <span className="text-xs bg-gray-200 px-1.5 py-0.5 rounded font-mono">{formatJourneyNumber(row.num)}</span>
+                    <span>
+                      {g.toTrip
+                        ? <>Перенесена до рейсу {tripRouteLabel(g.toTrip.country, g.toTrip.direction)} {formatDate(g.toTrip.departureDate)}</>
+                        : <>Прибрана з рейсу</>}
+                      {' · '}
+                      <Link href={`/parcels/${g.parcel.id}`} className="font-mono hover:underline">{g.parcel.internalNumber}</Link>
+                    </span>
+                  </div>
+                );
+              }
+              const p = row.parcel;
               const pt = parcelParties(p);
               return (
               <div key={p.id} className="px-4 py-3 flex items-start justify-between hover:bg-gray-50">
                 <Link href={`/parcels/${p.id}`} className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    {p.shortNumber && (
-                      <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono">#{p.shortNumber}</span>
+                    {/* ТЗ docx 11.10.26: номер у поїздці (001…N); «Створена» ще без номера. */}
+                    {p.journeyNumber != null ? (
+                      <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono font-semibold">{formatJourneyNumber(p.journeyNumber)}</span>
+                    ) : (
+                      <span className="text-[10px] text-gray-400" title="Номер присвоюється після прийняття до перевезення">без №</span>
                     )}
                     <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
                     <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
@@ -424,26 +480,41 @@ export default function TripDetailPage() {
                     <div>{p.totalWeight ? formatWeight(Number(p.totalWeight)) : '—'}</div>
                     <div className="text-xs text-gray-400">{p.totalPlacesCount} м.</div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-400 hover:text-red-600"
-                    onClick={(e) => { e.preventDefault(); handleRemoveParcel(p.id); }}
-                  >
-                    &times;
-                  </Button>
+                  {/* Прибрати посилку з рейсу може лише Суперадмін (як і керувати рейсом). */}
+                  {isSuperAdmin && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-400 hover:text-red-600"
+                      title="Видалити посилку з рейсу"
+                      onClick={(e) => { e.preventDefault(); setRemoveTarget(p); }}
+                    >
+                      &times;
+                    </Button>
+                  )}
                 </div>
               </div>
               );
             })}
             {trip.parcels.length === 0 && (
               <div className="text-center py-6 text-gray-500 text-sm">
-                Немає посилок. Прив&apos;яжіть посилки через сторінку деталей посилки.
+                Немає посилок. Створіть посилку кнопкою «+ Створити посилку» або прив&apos;яжіть через сторінку посилки.
               </div>
             )}
           </div>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={!!removeTarget}
+        title="Ви дійсно хочете видалити посилку?"
+        description={removeTarget ? <>Посилку {removeTarget.internalNumber} буде прибрано з цього рейсу (сама посилка лишиться в системі).</> : null}
+        confirmLabel="Так, видалити"
+        destructive
+        busy={removing}
+        onConfirm={() => removeTarget && handleRemoveParcel(removeTarget.id)}
+        onCancel={() => setRemoveTarget(null)}
+      />
     </div>
   );
 }

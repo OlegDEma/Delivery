@@ -47,7 +47,11 @@ export async function POST(request: NextRequest) {
       insurance: body.insurance ?? false,
       needsPackaging: body.needsPackaging ?? false,
       isDoorstepDelivery: body.isDoorstepDelivery ?? false,
-      isAddressDelivery: body.isAddressDelivery ?? false,
+      // ТЗ docx 09.10.26 (п.2 загальних): у UA→EU все, що не «Пункт видачі», —
+      // адресна доставка (мінімум NL 30 €), незалежно від того, що прийшло з форми.
+      isAddressDelivery: body.direction === 'ua_to_eu'
+        ? !body.isPickupPoint
+        : (body.isAddressDelivery ?? false),
       isPickupPoint: body.isPickupPoint ?? false,
       isCourierPickup: body.isCourierPickup ?? false,
       isMultiParcelPickup: body.isMultiParcelPickup ?? false,

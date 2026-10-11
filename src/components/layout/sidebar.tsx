@@ -106,8 +106,15 @@ export function Sidebar() {
   const { role, fullName } = useAuth();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
-  function toggleGroup(title: string) {
+  function toggleGroup(title: string, groupEl?: HTMLElement | null) {
+    const opening = !openGroups[title];
     setOpenGroups(prev => ({ ...prev, [title]: !prev[title] }));
+    // ТЗ docx 09.10.26 (Загальні зауваження, п.1): розгорнутий кореневий розділ
+    // (напр. «Адміністрування» внизу меню) одразу прокручується в центр — його папки
+    // видно без ручного скролу. setTimeout + 'auto': працює й у фоновій вкладці.
+    if (opening && groupEl) {
+      setTimeout(() => groupEl.scrollIntoView({ block: 'center', behavior: 'auto' }), 0);
+    }
   }
 
   async function handleLogout() {
@@ -173,7 +180,7 @@ export function Sidebar() {
                 isCollapsible ? (
                   <button
                     type="button"
-                    onClick={() => toggleGroup(group.title!)}
+                    onClick={(e) => toggleGroup(group.title!, e.currentTarget.parentElement)}
                     className="w-full flex items-center justify-between px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700 transition-colors"
                   >
                     <span>{group.title}</span>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ClientCreateForm, type ClientCreateMeta } from './client-create-form';
 import { PhoneInput } from '@/components/shared/phone-input';
+import { isAddressOnSide } from '@/lib/utils/pricing-flags';
 import type { CountryCode } from '@/lib/constants/countries';
 
 interface ClientResult {
@@ -59,6 +60,8 @@ interface ClientSearchProps {
    * адреси з МЛ. Форма клієнта відкривається автоматично, вже заповнена цими
    * даними — працівникові лишається дозаповнити те, чого бракує.
    */
+  /** ТЗ docx 09.10.26 (п.6): тип екранної клавіатури поля пошуку (напр. 'tel' — цифри). */
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
   prefill?: {
     phone?: string;
     firstName?: string;
@@ -71,7 +74,7 @@ interface ClientSearchProps {
   } | null;
 }
 
-export function ClientSearch({ label, onSelect, onClear, selected, direction, role, onPhoneEdit, summaryFooter, prefill }: ClientSearchProps) {
+export function ClientSearch({ label, onSelect, onClear, selected, direction, role, onPhoneEdit, summaryFooter, prefill, inputMode }: ClientSearchProps) {
   const [editingPhone, setEditingPhone] = useState(false);
   const [phoneDraft, setPhoneDraft] = useState('');
   const [query, setQuery] = useState('');
@@ -171,7 +174,16 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
     setQuery('');
     setShowDropdown(false);
     // Open the same modal as «+», prefilled — worker confirms with «Зберегти».
-    setEditCandidate(client);
+    // ТЗ docx 09.10.26: у клієнта бувають адреси в різних країнах (отримує в
+    // Нідерландах, а відправляв з Києва). Форма підставляє addresses[0] — тож першою
+    // ставимо адресу «потрібного боку» напрямку. Якщо такої немає — форма відкриється
+    // з порожньою адресою (буде ДОДАНО нову), а не перепише адресу в іншій країні.
+    if (direction && role) {
+      const onSide = client.addresses.filter((a) => isAddressOnSide(a.country, direction, role));
+      setEditCandidate({ ...client, addresses: onSide });
+    } else {
+      setEditCandidate(client);
+    }
   }
 
   function handleEditConfirmed(client: ClientResult, meta?: ClientCreateMeta) {
@@ -304,6 +316,7 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
             if (results.length > 0 || (query.length >= 2)) setShowDropdown(true);
           }}
           placeholder="Телефон або прізвище..."
+          inputMode={inputMode}
           className="text-base flex-1"
         />
         <Button

@@ -483,6 +483,7 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
                 value={value.warehouseNum ?? ''}
                 onChange={(e) => onChange({ ...value, warehouseNum: e.target.value })}
                 placeholder="Напр. 5"
+                inputMode="numeric"
               />
             </div>
           )}

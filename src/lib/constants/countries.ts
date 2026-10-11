@@ -76,3 +76,28 @@ export const SHORT_NUMBER_RANGES = {
   GEOGRAPHY: { start: 301, end: 500 },
   EU_TO_UA: { start: 501, end: 1000 },
 } as const;
+
+/**
+ * ТЗ docx 09.10.26 (Загальні зауваження, п.3): «Загальний напрямок звучить
+ * „Україна-Європа“ або „Європа-Україна“. Але в конкретній посилці, де вказано
+ * конкретну країну отримання чи відправки, має звучати конкретно: „Україна-Нідерланди“,
+ * або „Австрія-Україна“».
+ *
+ * ЄС-країна посилки — та сама, що визначає тариф: рейс → пункт збору (EU→UA) →
+ * адреса сторони в Європі. Якщо країну не визначено — загальна назва.
+ */
+export function parcelRouteLabel(p: {
+  direction: string;
+  trip?: { country: string } | null;
+  collectionPoint?: { country: string } | null;
+  senderAddress?: { country: string | null } | null;
+  receiverAddress?: { country: string | null } | null;
+}): string {
+  const pick = (c: string | null | undefined) => (c && c !== 'UA' ? c : null);
+  const eu = pick(p.trip?.country)
+    ?? (p.direction === 'eu_to_ua'
+      ? (pick(p.collectionPoint?.country) ?? pick(p.senderAddress?.country))
+      : pick(p.receiverAddress?.country));
+  const euLabel = eu ? (COUNTRY_LABELS[eu as CountryCode] || eu) : 'Європа';
+  return p.direction === 'eu_to_ua' ? `${euLabel} → Україна` : `Україна → ${euLabel}`;
+}

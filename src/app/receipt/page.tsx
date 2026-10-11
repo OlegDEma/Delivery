@@ -13,6 +13,8 @@ interface ReceiptData {
   internalNumber: string;
   status: ParcelStatusType;
   direction: string;
+  /** ТЗ docx 09.10.26: напрямок з конкретною країною (з /api/tracking). */
+  routeLabel?: string;
   totalPlacesCount: number;
   createdAt: string;
   receiverCity: string | null;
@@ -58,7 +60,7 @@ function ReceiptContent() {
             <div className="border-t pt-3 text-sm space-y-1">
               <div className="flex justify-between">
                 <span className="text-gray-500">Напрямок:</span>
-                <span>{data.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}</span>
+                <span>{data.routeLabel || (data.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа')}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Місць:</span>

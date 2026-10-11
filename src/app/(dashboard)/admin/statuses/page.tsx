@@ -6,16 +6,26 @@ import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/const
 import { STATUS_TRANSITIONS } from '@/lib/parcels/status-transitions';
 
 // Read-only довідник статусів + матриця переходів. Редагування заборонено —
-// статуси визначені в Prisma enum. Клієнт бачить що з якого в який статус
-// можна перейти, і за замовчуванням який шлях посилки.
+// статуси визначені в Prisma enum.
+//
+// ТЗ docx 09.10.26 «Адміністрування/Статуси»: у розділі мають бути лише ці статуси
+// і саме в такій послідовності (решту комбінацій «поки що прибрати»).
+const FLOW: ParcelStatusType[] = [
+  'draft',
+  'accepted_for_transport_to_ua',
+  'in_transit_to_ua',
+  'accepted_for_transport_to_eu',
+  'in_transit_to_eu',
+];
+
 export default function StatusesPage() {
-  const statuses = Object.keys(STATUS_LABELS) as ParcelStatusType[];
+  const statuses = FLOW;
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-1">Статуси посилок</h1>
       <p className="text-sm text-gray-500 mb-4">
-        Довідник усіх можливих статусів посилки та правил переходу між ними.
+        Можливі послідовні варіанти зміни статусів посилки.
         Ці правила застосовуються у «Змінити статус» на сторінці посилки.
       </p>
 

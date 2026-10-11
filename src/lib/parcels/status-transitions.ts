@@ -35,21 +35,26 @@ import type { ParcelStatusType } from '@/lib/constants/statuses';
 // лишаються в enum для сумісності з логістикою/aging, але не пропонуються
 // користувачу в dropdown — вони вмикаються автоматично через PATCH (напр.
 // bulk-status на складі) або з окремих сторінок.
+//
+// ТЗ docx 09.10.26 «Адміністрування/Статуси»: дозволені лише послідовності
+//   Створена → Прийнято до перевезення в Україну | в Європу
+//   Прийнято … в Україну → В дорозі до України → На Новій пошті | Доставлено (Україна)
+//   Прийнято … в Європу → В дорозі до Європи → Доставлено (Європа) | Не отримано
+// «Поки що наступні комбінації ПРИБРАТИ»: переходи з «На пункті збору», «На Новій
+// пошті», «Не отримано», «На складі в Європі», «Повернено», «Відмова від отримання».
 export const STATUS_TRANSITIONS: Record<ParcelStatusType, ParcelStatusType[]> = {
   draft: [
     'accepted_for_transport_to_ua',
     'accepted_for_transport_to_eu',
   ],
-  at_collection_point: [
-    'accepted_for_transport_to_ua',
-    'accepted_for_transport_to_eu',
-  ],
+  at_collection_point: [],
   // ---- EU → UA ----
   accepted_for_transport_to_ua: ['in_transit_to_ua'],
-  at_eu_warehouse: ['in_transit_to_ua'],
+  at_eu_warehouse: [],
   in_transit_to_ua: ['at_nova_poshta', 'delivered_ua'],
+  // Технічний статус (рейс EU→UA завершено) — лишаємо вихід, щоб посилки не застрягли.
   at_lviv_warehouse: ['at_nova_poshta', 'delivered_ua'],
-  at_nova_poshta: ['delivered_ua', 'not_received'],
+  at_nova_poshta: [],
   // ---- UA → EU ----
   accepted_for_transport_to_eu: ['in_transit_to_eu'],
   in_transit_to_eu: ['delivered_eu', 'not_received'],
@@ -60,7 +65,7 @@ export const STATUS_TRANSITIONS: Record<ParcelStatusType, ParcelStatusType[]> = 
   // сервер відкидає PATCH. Super_admin теж не обходить.
   delivered_ua: [],
   delivered_eu: [],
-  not_received: ['at_nova_poshta', 'delivered_ua', 'delivered_eu'],
+  not_received: [],
   refused: [],
   returned: [],
 };

@@ -61,6 +61,13 @@ export type Vehicle = Prisma.VehicleModel
  */
 export type Parcel = Prisma.ParcelModel
 /**
+ * Model ParcelTransfer
+ * ТЗ docx 09.10.26 / 11.10.26: перенесення (або видалення) посилки з рейсу. Якщо
+ * посилка вже мала номер у поїздці, цей номер лишається за записом — у списку
+ * рейсу на його місці показуємо «Перенесена до рейсу …» (нумерація не зсувається).
+ */
+export type ParcelTransfer = Prisma.ParcelTransferModel
+/**
  * Model ParcelPlace
  * 
  */

@@ -19,6 +19,7 @@ import { logger } from '@/lib/logger';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { formatDate } from '@/lib/utils/format';
 import { formatItn } from '@/lib/utils/itn';
+import { parcelRouteLabel } from '@/lib/constants/countries';
 
 export type MessageChannel = 'sms' | 'viber' | 'whatsapp';
 
@@ -35,6 +36,9 @@ export function buildConfirmationBody(parcel: {
   internalNumber: string; itn: string; npTtn?: string | null; totalPlacesCount: number;
   totalCost: unknown; direction: string; description: string | null;
   trip: { departureDate: Date | string; country: string } | null;
+  collectionPoint?: { country: string } | null;
+  senderAddress?: { country: string | null } | null;
+  receiverAddress?: { country: string | null } | null;
   // для parcelParties:
   status: string; senderSnapshot: unknown; receiverSnapshot: unknown;
   sender: { firstName: string; lastName: string; phone: string };
@@ -56,7 +60,8 @@ export function buildConfirmationBody(parcel: {
     `Місць: ${parcel.totalPlacesCount}`,
     '',
     cost > 0 ? `Вартість: ${cost.toFixed(2)} EUR` : null,
-    `Напрямок: ${parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}`,
+    // ТЗ docx 09.10.26: конкретна країна («Україна → Нідерланди»).
+    `Напрямок: ${parcelRouteLabel(parcel)}`,
     parcel.description ? `Опис: ${parcel.description}` : null,
     // ТЗ docx 07.10.26: посилання на відстеження — за ІТН.
     `Відстежити: ${baseUrl()}/tracking?q=${encodeURIComponent(parcel.itn)}`,
@@ -172,6 +177,9 @@ export async function sendConfirmation(args: SendConfirmationArgs): Promise<{
       sender: { select: { firstName: true, lastName: true, phone: true } },
       receiver: { select: { firstName: true, lastName: true, phone: true } },
       trip: { select: { departureDate: true, country: true } },
+      collectionPoint: { select: { country: true } },
+      senderAddress: { select: { country: true } },
+      receiverAddress: { select: { country: true } },
     },
   });
   if (!parcel) throw new Error('PARCEL_NOT_FOUND');

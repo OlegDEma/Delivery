@@ -16,6 +16,8 @@ interface TrackingResult {
   npTtn: string | null;
   status: ParcelStatusType;
   direction: string;
+  /** ТЗ docx 09.10.26: напрямок з конкретною країною. */
+  routeLabel?: string;
   totalPlacesCount: number;
   createdAt: string;
   /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
@@ -108,7 +110,7 @@ export default function TrackingPage() {
                 <div className="text-sm font-mono text-gray-700 mt-1">ІТН {result.itn}</div>
               )}
               <div className="text-xs text-gray-400 mt-1">
-                {result.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}
+                {result.routeLabel || (result.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа')}
                 {result.receiverCity && ` | ${result.receiverCity}`}
                 {' | '}{result.totalPlacesCount} {result.totalPlacesCount === 1 ? 'місце' : 'місць'}
               </div>

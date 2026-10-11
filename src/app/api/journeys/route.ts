@@ -291,7 +291,7 @@ export async function DELETE(request: NextRequest) {
   await prisma.$transaction(async (tx) => {
     if (tripIds.length > 0) {
       // Посилки — зберігаємо, лише відв'язуємо.
-      await tx.parcel.updateMany({ where: { tripId: { in: tripIds } }, data: { tripId: null } });
+      await tx.parcel.updateMany({ where: { tripId: { in: tripIds } }, data: { tripId: null, journeyNumber: null } });
       // Дочірні сутності рейсу з обов'язковим tripId — видаляємо.
       await tx.routeTask.deleteMany({ where: { tripId: { in: tripIds } } });
       await tx.passenger.deleteMany({ where: { tripId: { in: tripIds } } });

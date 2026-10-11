@@ -59,6 +59,7 @@ export const ModelName = {
   Passenger: 'Passenger',
   Vehicle: 'Vehicle',
   Parcel: 'Parcel',
+  ParcelTransfer: 'ParcelTransfer',
   ParcelPlace: 'ParcelPlace',
   ParcelStatusHistory: 'ParcelStatusHistory',
   PricingConfig: 'PricingConfig',
@@ -165,6 +166,7 @@ export const JourneyScalarFieldEnum = {
   vehicleInfo: 'vehicleInfo',
   vehicleId: 'vehicleId',
   passengerCapacity: 'passengerCapacity',
+  parcelCounter: 'parcelCounter',
   notes: 'notes',
   createdById: 'createdById',
   createdAt: 'createdAt',
@@ -258,6 +260,7 @@ export const ParcelScalarFieldEnum = {
   internalNumber: 'internalNumber',
   sequentialNumber: 'sequentialNumber',
   shortNumber: 'shortNumber',
+  journeyNumber: 'journeyNumber',
   direction: 'direction',
   senderId: 'senderId',
   senderAddressId: 'senderAddressId',
@@ -318,6 +321,19 @@ export const ParcelScalarFieldEnum = {
 } as const
 
 export type ParcelScalarFieldEnum = (typeof ParcelScalarFieldEnum)[keyof typeof ParcelScalarFieldEnum]
+
+
+export const ParcelTransferScalarFieldEnum = {
+  id: 'id',
+  parcelId: 'parcelId',
+  fromTripId: 'fromTripId',
+  toTripId: 'toTripId',
+  journeyNumber: 'journeyNumber',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type ParcelTransferScalarFieldEnum = (typeof ParcelTransferScalarFieldEnum)[keyof typeof ParcelTransferScalarFieldEnum]
 
 
 export const ParcelPlaceScalarFieldEnum = {

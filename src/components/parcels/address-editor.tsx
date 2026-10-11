@@ -149,6 +149,7 @@ export function AddressEditor({
               value={state.npWarehouseNum}
               onChange={(e) => onChange({ npWarehouseNum: e.target.value })}
               placeholder="1"
+              inputMode="numeric"
             />
           </div>
         )}

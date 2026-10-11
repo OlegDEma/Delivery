@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils/format';
 import { formatItn, formatPlaceItn } from '@/lib/utils/itn';
 import { Code128 } from '@/components/shared/code128';
+import { formatJourneyNumber } from '@/lib/utils/journey-number';
 
 interface PrintData {
   itn: string;
@@ -15,6 +16,8 @@ interface PrintData {
   npTtn: string | null;
   internalNumber: string;
   shortNumber: number | null;
+  /** ТЗ docx 11.10.26: номер у поїздці (001…N) — замість старого номера в рейсі. */
+  journeyNumber: number | null;
   direction: string;
   totalPlacesCount: number;
   totalWeight: number | null;
@@ -106,8 +109,8 @@ export default function PrintLabelPage() {
                 {qrCodes[qrKey] && (
                   <img src={qrCodes[qrKey]} alt="QR" width={46} height={46} className="shrink-0" />
                 )}
-                {data.shortNumber && (
-                  <div className="text-[20px] font-bold">#{data.shortNumber}</div>
+                {data.journeyNumber != null && (
+                  <div className="text-[20px] font-bold">№{formatJourneyNumber(data.journeyNumber)}</div>
                 )}
               </div>
             </div>

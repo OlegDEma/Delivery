@@ -21,6 +21,8 @@ import { AddressLink } from '@/components/shared/address-link';
 import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
 import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
+import { ClientTripTransfer } from '@/components/parcels/client-trip-transfer';
+import { CLIENT_TRANSFER_STATUSES } from '@/lib/parcels/transfer-rules';
 
 /**
  * Деталі посилки для Клієнта.
@@ -219,6 +221,10 @@ export default function MyOrderDetailPage() {
             Якщо рейс є, але посилку ще не прив'язано, — нейтральний рядок. */}
         {!parcel.trip && !parcel.noTripForCountry && (
           <div className="text-sm text-gray-500 mb-1">Рейс ще не призначено — оператор призначить найближчий.</div>
+        )}
+        {/* ТЗ docx 09.10.26 (п.2): Клієнт переносить замовлення на інший рейс, поки «Створена». */}
+        {CLIENT_TRANSFER_STATUSES.includes(parcel.status) && (
+          <ClientTripTransfer parcelId={parcel.id} onDone={fetchParcel} />
         )}
         {!parcel.trip && parcel.noTripForCountry && (
           <div className="text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1 mb-1">

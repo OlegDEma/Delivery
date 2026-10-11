@@ -392,6 +392,7 @@ export const ModelName = {
   Passenger: 'Passenger',
   Vehicle: 'Vehicle',
   Parcel: 'Parcel',
+  ParcelTransfer: 'ParcelTransfer',
   ParcelPlace: 'ParcelPlace',
   ParcelStatusHistory: 'ParcelStatusHistory',
   PricingConfig: 'PricingConfig',
@@ -423,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "passenger" | "vehicle" | "parcel" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeSheet" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "invoiceSettings" | "smsLog" | "serviceCity" | "descriptionSuggestion" | "auditLog" | "claim"
+    modelProps: "profile" | "client" | "clientAddress" | "journey" | "trip" | "passenger" | "vehicle" | "parcel" | "parcelTransfer" | "parcelPlace" | "parcelStatusHistory" | "pricingConfig" | "collectionPoint" | "cashRegister" | "routeSheet" | "routeTask" | "warehouseInventory" | "npSyncLog" | "yearlySequence" | "invoiceSettings" | "smsLog" | "serviceCity" | "descriptionSuggestion" | "auditLog" | "claim"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1016,6 +1017,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ParcelCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ParcelCountAggregateOutputType> | number
+        }
+      }
+    }
+    ParcelTransfer: {
+      payload: Prisma.$ParcelTransferPayload<ExtArgs>
+      fields: Prisma.ParcelTransferFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ParcelTransferFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ParcelTransferFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload>
+        }
+        findFirst: {
+          args: Prisma.ParcelTransferFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ParcelTransferFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload>
+        }
+        findMany: {
+          args: Prisma.ParcelTransferFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload>[]
+        }
+        create: {
+          args: Prisma.ParcelTransferCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload>
+        }
+        createMany: {
+          args: Prisma.ParcelTransferCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ParcelTransferCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload>[]
+        }
+        delete: {
+          args: Prisma.ParcelTransferDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload>
+        }
+        update: {
+          args: Prisma.ParcelTransferUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload>
+        }
+        deleteMany: {
+          args: Prisma.ParcelTransferDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ParcelTransferUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ParcelTransferUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload>[]
+        }
+        upsert: {
+          args: Prisma.ParcelTransferUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ParcelTransferPayload>
+        }
+        aggregate: {
+          args: Prisma.ParcelTransferAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateParcelTransfer>
+        }
+        groupBy: {
+          args: Prisma.ParcelTransferGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ParcelTransferGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ParcelTransferCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ParcelTransferCountAggregateOutputType> | number
         }
       }
     }
@@ -2314,6 +2389,7 @@ export const JourneyScalarFieldEnum = {
   vehicleInfo: 'vehicleInfo',
   vehicleId: 'vehicleId',
   passengerCapacity: 'passengerCapacity',
+  parcelCounter: 'parcelCounter',
   notes: 'notes',
   createdById: 'createdById',
   createdAt: 'createdAt',
@@ -2407,6 +2483,7 @@ export const ParcelScalarFieldEnum = {
   internalNumber: 'internalNumber',
   sequentialNumber: 'sequentialNumber',
   shortNumber: 'shortNumber',
+  journeyNumber: 'journeyNumber',
   direction: 'direction',
   senderId: 'senderId',
   senderAddressId: 'senderAddressId',
@@ -2467,6 +2544,19 @@ export const ParcelScalarFieldEnum = {
 } as const
 
 export type ParcelScalarFieldEnum = (typeof ParcelScalarFieldEnum)[keyof typeof ParcelScalarFieldEnum]
+
+
+export const ParcelTransferScalarFieldEnum = {
+  id: 'id',
+  parcelId: 'parcelId',
+  fromTripId: 'fromTripId',
+  toTripId: 'toTripId',
+  journeyNumber: 'journeyNumber',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type ParcelTransferScalarFieldEnum = (typeof ParcelTransferScalarFieldEnum)[keyof typeof ParcelTransferScalarFieldEnum]
 
 
 export const ParcelPlaceScalarFieldEnum = {
@@ -3269,6 +3359,7 @@ export type GlobalOmitConfig = {
   passenger?: Prisma.PassengerOmit
   vehicle?: Prisma.VehicleOmit
   parcel?: Prisma.ParcelOmit
+  parcelTransfer?: Prisma.ParcelTransferOmit
   parcelPlace?: Prisma.ParcelPlaceOmit
   parcelStatusHistory?: Prisma.ParcelStatusHistoryOmit
   pricingConfig?: Prisma.PricingConfigOmit

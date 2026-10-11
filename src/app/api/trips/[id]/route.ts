@@ -4,6 +4,7 @@ import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { JOURNEY_TRIP_MUTATION_ROLES } from '@/lib/constants/roles';
 import { isUuid } from '@/lib/validators/common';
 import { applyTripStatusCascade } from '@/lib/services/trip-status';
+import { ensureJourneyNumbersForTrip, moveParcelToTrip } from '@/lib/services/journey-numbering';
 
 // GET /api/trips/[id] — staff only
 export async function GET(
@@ -16,24 +17,40 @@ export async function GET(
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
+  // ТЗ docx 11.10.26: перед показом добираємо номери посилок у поїздці (001…N).
+  await ensureJourneyNumbersForTrip(id);
+
   const trip = await prisma.trip.findUnique({
     where: { id },
     include: {
+      // ТЗ docx 11.10.26: посилки, що покинули рейс, лишають свій номер із приміткою
+      // «Перенесена до рейсу …» — нумерація решти не зсувається.
+      transfersOut: {
+        orderBy: { createdAt: 'asc' },
+        select: {
+          id: true, journeyNumber: true, createdAt: true,
+          parcel: { select: { id: true, internalNumber: true, tripId: true } },
+          toTrip: { select: { id: true, direction: true, country: true, departureDate: true } },
+        },
+      },
       assignedCourier: { select: { id: true, fullName: true } },
       secondCourier: { select: { id: true, fullName: true } },
       createdBy: { select: { fullName: true } },
       parcels: {
+        where: { deletedAt: null },
         include: {
           sender: { select: { firstName: true, lastName: true, phone: true } },
           receiver: { select: { firstName: true, lastName: true, phone: true } },
-          receiverAddress: { select: { city: true, street: true, building: true, npWarehouseNum: true } },
+          // ТЗ docx 11.10.26 (п.2): для друку списку рейсу — місто/вулиця/№ дому/індекс.
+          senderAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, npWarehouseNum: true } },
+          receiverAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, npWarehouseNum: true } },
           // ТЗ docx 04.10.26: «Створена клієнтом/водієм/…».
           createdBy: { select: { role: true } },
           collectionPoint: {
             select: { id: true, name: true, city: true, address: true },
           },
         },
-        orderBy: { shortNumber: 'asc' },
+        orderBy: [{ journeyNumber: { sort: 'asc', nulls: 'last' } }, { createdAt: 'asc' }],
       },
       _count: { select: { parcels: true, routeTasks: true } },
     },
@@ -118,20 +135,15 @@ export async function PATCH(
 
   // Assign parcel to trip
   if (body.addParcelId) {
-    await prisma.parcel.update({
-      where: { id: body.addParcelId },
-      data: { tripId: id },
-    });
+    await moveParcelToTrip({ parcelId: body.addParcelId, toTripId: id, userId: user.id });
     const trip = await prisma.trip.findUnique({ where: { id }, include: { _count: { select: { parcels: true } } } });
     return NextResponse.json(trip);
   }
 
   // Remove parcel from trip
   if (body.removeParcelId) {
-    await prisma.parcel.update({
-      where: { id: body.removeParcelId },
-      data: { tripId: null },
-    });
+    // ТЗ docx 11.10.26: номер у поїздці лишається за рядком «Прибрана з рейсу».
+    await moveParcelToTrip({ parcelId: body.removeParcelId, toTripId: null, userId: user.id });
     const trip = await prisma.trip.findUnique({ where: { id }, include: { _count: { select: { parcels: true } } } });
     return NextResponse.json(trip);
   }
@@ -167,7 +179,8 @@ export async function DELETE(
   }
 
   await prisma.$transaction([
-    prisma.parcel.updateMany({ where: { tripId: id }, data: { tripId: null } }),
+    // ТЗ docx 11.10.26: номер у поїздці втрачає сенс разом із рейсом.
+    prisma.parcel.updateMany({ where: { tripId: id }, data: { tripId: null, journeyNumber: null } }),
     prisma.routeTask.deleteMany({ where: { tripId: id } }),
     prisma.passenger.deleteMany({ where: { tripId: id } }),
     prisma.trip.delete({ where: { id } }),

@@ -28,10 +28,12 @@ export type AggregateJourney = {
 
 export type JourneyAvgAggregateOutputType = {
   passengerCapacity: number | null
+  parcelCounter: number | null
 }
 
 export type JourneySumAggregateOutputType = {
   passengerCapacity: number | null
+  parcelCounter: number | null
 }
 
 export type JourneyMinAggregateOutputType = {
@@ -47,6 +49,7 @@ export type JourneyMinAggregateOutputType = {
   vehicleInfo: string | null
   vehicleId: string | null
   passengerCapacity: number | null
+  parcelCounter: number | null
   notes: string | null
   createdById: string | null
   createdAt: Date | null
@@ -66,6 +69,7 @@ export type JourneyMaxAggregateOutputType = {
   vehicleInfo: string | null
   vehicleId: string | null
   passengerCapacity: number | null
+  parcelCounter: number | null
   notes: string | null
   createdById: string | null
   createdAt: Date | null
@@ -85,6 +89,7 @@ export type JourneyCountAggregateOutputType = {
   vehicleInfo: number
   vehicleId: number
   passengerCapacity: number
+  parcelCounter: number
   notes: number
   createdById: number
   createdAt: number
@@ -95,10 +100,12 @@ export type JourneyCountAggregateOutputType = {
 
 export type JourneyAvgAggregateInputType = {
   passengerCapacity?: true
+  parcelCounter?: true
 }
 
 export type JourneySumAggregateInputType = {
   passengerCapacity?: true
+  parcelCounter?: true
 }
 
 export type JourneyMinAggregateInputType = {
@@ -114,6 +121,7 @@ export type JourneyMinAggregateInputType = {
   vehicleInfo?: true
   vehicleId?: true
   passengerCapacity?: true
+  parcelCounter?: true
   notes?: true
   createdById?: true
   createdAt?: true
@@ -133,6 +141,7 @@ export type JourneyMaxAggregateInputType = {
   vehicleInfo?: true
   vehicleId?: true
   passengerCapacity?: true
+  parcelCounter?: true
   notes?: true
   createdById?: true
   createdAt?: true
@@ -152,6 +161,7 @@ export type JourneyCountAggregateInputType = {
   vehicleInfo?: true
   vehicleId?: true
   passengerCapacity?: true
+  parcelCounter?: true
   notes?: true
   createdById?: true
   createdAt?: true
@@ -258,6 +268,7 @@ export type JourneyGroupByOutputType = {
   vehicleInfo: string | null
   vehicleId: string | null
   passengerCapacity: number
+  parcelCounter: number
   notes: string | null
   createdById: string | null
   createdAt: Date
@@ -300,6 +311,7 @@ export type JourneyWhereInput = {
   vehicleInfo?: Prisma.StringNullableFilter<"Journey"> | string | null
   vehicleId?: Prisma.UuidNullableFilter<"Journey"> | string | null
   passengerCapacity?: Prisma.IntFilter<"Journey"> | number
+  parcelCounter?: Prisma.IntFilter<"Journey"> | number
   notes?: Prisma.StringNullableFilter<"Journey"> | string | null
   createdById?: Prisma.UuidNullableFilter<"Journey"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Journey"> | Date | string
@@ -325,6 +337,7 @@ export type JourneyOrderByWithRelationInput = {
   vehicleInfo?: Prisma.SortOrderInput | Prisma.SortOrder
   vehicleId?: Prisma.SortOrderInput | Prisma.SortOrder
   passengerCapacity?: Prisma.SortOrder
+  parcelCounter?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -353,6 +366,7 @@ export type JourneyWhereUniqueInput = Prisma.AtLeast<{
   vehicleInfo?: Prisma.StringNullableFilter<"Journey"> | string | null
   vehicleId?: Prisma.UuidNullableFilter<"Journey"> | string | null
   passengerCapacity?: Prisma.IntFilter<"Journey"> | number
+  parcelCounter?: Prisma.IntFilter<"Journey"> | number
   notes?: Prisma.StringNullableFilter<"Journey"> | string | null
   createdById?: Prisma.UuidNullableFilter<"Journey"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Journey"> | Date | string
@@ -378,6 +392,7 @@ export type JourneyOrderByWithAggregationInput = {
   vehicleInfo?: Prisma.SortOrderInput | Prisma.SortOrder
   vehicleId?: Prisma.SortOrderInput | Prisma.SortOrder
   passengerCapacity?: Prisma.SortOrder
+  parcelCounter?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -405,6 +420,7 @@ export type JourneyScalarWhereWithAggregatesInput = {
   vehicleInfo?: Prisma.StringNullableWithAggregatesFilter<"Journey"> | string | null
   vehicleId?: Prisma.UuidNullableWithAggregatesFilter<"Journey"> | string | null
   passengerCapacity?: Prisma.IntWithAggregatesFilter<"Journey"> | number
+  parcelCounter?: Prisma.IntWithAggregatesFilter<"Journey"> | number
   notes?: Prisma.StringNullableWithAggregatesFilter<"Journey"> | string | null
   createdById?: Prisma.UuidNullableWithAggregatesFilter<"Journey"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Journey"> | Date | string
@@ -421,6 +437,7 @@ export type JourneyCreateInput = {
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -445,6 +462,7 @@ export type JourneyUncheckedCreateInput = {
   vehicleInfo?: string | null
   vehicleId?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
@@ -463,6 +481,7 @@ export type JourneyUpdateInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -487,6 +506,7 @@ export type JourneyUncheckedUpdateInput = {
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -508,6 +528,7 @@ export type JourneyCreateManyInput = {
   vehicleInfo?: string | null
   vehicleId?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
@@ -524,6 +545,7 @@ export type JourneyUpdateManyMutationInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -542,6 +564,7 @@ export type JourneyUncheckedUpdateManyInput = {
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -571,6 +594,7 @@ export type JourneyCountOrderByAggregateInput = {
   vehicleInfo?: Prisma.SortOrder
   vehicleId?: Prisma.SortOrder
   passengerCapacity?: Prisma.SortOrder
+  parcelCounter?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -579,6 +603,7 @@ export type JourneyCountOrderByAggregateInput = {
 
 export type JourneyAvgOrderByAggregateInput = {
   passengerCapacity?: Prisma.SortOrder
+  parcelCounter?: Prisma.SortOrder
 }
 
 export type JourneyMaxOrderByAggregateInput = {
@@ -594,6 +619,7 @@ export type JourneyMaxOrderByAggregateInput = {
   vehicleInfo?: Prisma.SortOrder
   vehicleId?: Prisma.SortOrder
   passengerCapacity?: Prisma.SortOrder
+  parcelCounter?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -613,6 +639,7 @@ export type JourneyMinOrderByAggregateInput = {
   vehicleInfo?: Prisma.SortOrder
   vehicleId?: Prisma.SortOrder
   passengerCapacity?: Prisma.SortOrder
+  parcelCounter?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -621,6 +648,7 @@ export type JourneyMinOrderByAggregateInput = {
 
 export type JourneySumOrderByAggregateInput = {
   passengerCapacity?: Prisma.SortOrder
+  parcelCounter?: Prisma.SortOrder
 }
 
 export type JourneyNullableScalarRelationFilter = {
@@ -845,6 +873,7 @@ export type JourneyCreateWithoutAssignedCourierInput = {
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -867,6 +896,7 @@ export type JourneyUncheckedCreateWithoutAssignedCourierInput = {
   vehicleInfo?: string | null
   vehicleId?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
@@ -895,6 +925,7 @@ export type JourneyCreateWithoutSecondCourierInput = {
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -917,6 +948,7 @@ export type JourneyUncheckedCreateWithoutSecondCourierInput = {
   vehicleInfo?: string | null
   vehicleId?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
@@ -945,6 +977,7 @@ export type JourneyCreateWithoutCreatedByInput = {
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -968,6 +1001,7 @@ export type JourneyUncheckedCreateWithoutCreatedByInput = {
   vehicleInfo?: string | null
   vehicleId?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1017,6 +1051,7 @@ export type JourneyScalarWhereInput = {
   vehicleInfo?: Prisma.StringNullableFilter<"Journey"> | string | null
   vehicleId?: Prisma.UuidNullableFilter<"Journey"> | string | null
   passengerCapacity?: Prisma.IntFilter<"Journey"> | number
+  parcelCounter?: Prisma.IntFilter<"Journey"> | number
   notes?: Prisma.StringNullableFilter<"Journey"> | string | null
   createdById?: Prisma.UuidNullableFilter<"Journey"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Journey"> | Date | string
@@ -1065,6 +1100,7 @@ export type JourneyCreateWithoutTripsInput = {
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1088,6 +1124,7 @@ export type JourneyUncheckedCreateWithoutTripsInput = {
   vehicleInfo?: string | null
   vehicleId?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
@@ -1121,6 +1158,7 @@ export type JourneyUpdateWithoutTripsInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1144,6 +1182,7 @@ export type JourneyUncheckedUpdateWithoutTripsInput = {
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1161,6 +1200,7 @@ export type JourneyCreateWithoutVehicleInput = {
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1183,6 +1223,7 @@ export type JourneyUncheckedCreateWithoutVehicleInput = {
   secondCourierId?: string | null
   vehicleInfo?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
@@ -1227,6 +1268,7 @@ export type JourneyCreateWithoutRouteSheetsInput = {
   status?: $Enums.TripStatus
   vehicleInfo?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1250,6 +1292,7 @@ export type JourneyUncheckedCreateWithoutRouteSheetsInput = {
   vehicleInfo?: string | null
   vehicleId?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
@@ -1283,6 +1326,7 @@ export type JourneyUpdateWithoutRouteSheetsInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1306,6 +1350,7 @@ export type JourneyUncheckedUpdateWithoutRouteSheetsInput = {
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1325,6 +1370,7 @@ export type JourneyCreateManyAssignedCourierInput = {
   vehicleInfo?: string | null
   vehicleId?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
@@ -1343,6 +1389,7 @@ export type JourneyCreateManySecondCourierInput = {
   vehicleInfo?: string | null
   vehicleId?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
@@ -1362,6 +1409,7 @@ export type JourneyCreateManyCreatedByInput = {
   vehicleInfo?: string | null
   vehicleId?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1377,6 +1425,7 @@ export type JourneyUpdateWithoutAssignedCourierInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1399,6 +1448,7 @@ export type JourneyUncheckedUpdateWithoutAssignedCourierInput = {
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1419,6 +1469,7 @@ export type JourneyUncheckedUpdateManyWithoutAssignedCourierInput = {
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1435,6 +1486,7 @@ export type JourneyUpdateWithoutSecondCourierInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1457,6 +1509,7 @@ export type JourneyUncheckedUpdateWithoutSecondCourierInput = {
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1477,6 +1530,7 @@ export type JourneyUncheckedUpdateManyWithoutSecondCourierInput = {
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1493,6 +1547,7 @@ export type JourneyUpdateWithoutCreatedByInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1516,6 +1571,7 @@ export type JourneyUncheckedUpdateWithoutCreatedByInput = {
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1536,6 +1592,7 @@ export type JourneyUncheckedUpdateManyWithoutCreatedByInput = {
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1553,6 +1610,7 @@ export type JourneyCreateManyVehicleInput = {
   secondCourierId?: string | null
   vehicleInfo?: string | null
   passengerCapacity?: number
+  parcelCounter?: number
   notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
@@ -1569,6 +1627,7 @@ export type JourneyUpdateWithoutVehicleInput = {
   status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1591,6 +1650,7 @@ export type JourneyUncheckedUpdateWithoutVehicleInput = {
   secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1611,6 +1671,7 @@ export type JourneyUncheckedUpdateManyWithoutVehicleInput = {
   secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  parcelCounter?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1670,6 +1731,7 @@ export type JourneySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   vehicleInfo?: boolean
   vehicleId?: boolean
   passengerCapacity?: boolean
+  parcelCounter?: boolean
   notes?: boolean
   createdById?: boolean
   createdAt?: boolean
@@ -1696,6 +1758,7 @@ export type JourneySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   vehicleInfo?: boolean
   vehicleId?: boolean
   passengerCapacity?: boolean
+  parcelCounter?: boolean
   notes?: boolean
   createdById?: boolean
   createdAt?: boolean
@@ -1719,6 +1782,7 @@ export type JourneySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   vehicleInfo?: boolean
   vehicleId?: boolean
   passengerCapacity?: boolean
+  parcelCounter?: boolean
   notes?: boolean
   createdById?: boolean
   createdAt?: boolean
@@ -1742,13 +1806,14 @@ export type JourneySelectScalar = {
   vehicleInfo?: boolean
   vehicleId?: boolean
   passengerCapacity?: boolean
+  parcelCounter?: boolean
   notes?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type JourneyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "departureDate" | "euArrivalDate" | "euReturnDate" | "endDate" | "status" | "assignedCourierId" | "secondCourierId" | "vehicleInfo" | "vehicleId" | "passengerCapacity" | "notes" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["journey"]>
+export type JourneyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "country" | "departureDate" | "euArrivalDate" | "euReturnDate" | "endDate" | "status" | "assignedCourierId" | "secondCourierId" | "vehicleInfo" | "vehicleId" | "passengerCapacity" | "parcelCounter" | "notes" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["journey"]>
 export type JourneyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignedCourier?: boolean | Prisma.Journey$assignedCourierArgs<ExtArgs>
   secondCourier?: boolean | Prisma.Journey$secondCourierArgs<ExtArgs>
@@ -1794,6 +1859,7 @@ export type $JourneyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     vehicleInfo: string | null
     vehicleId: string | null
     passengerCapacity: number
+    parcelCounter: number
     notes: string | null
     createdById: string | null
     createdAt: Date
@@ -2239,6 +2305,7 @@ export interface JourneyFieldRefs {
   readonly vehicleInfo: Prisma.FieldRef<"Journey", 'String'>
   readonly vehicleId: Prisma.FieldRef<"Journey", 'String'>
   readonly passengerCapacity: Prisma.FieldRef<"Journey", 'Int'>
+  readonly parcelCounter: Prisma.FieldRef<"Journey", 'Int'>
   readonly notes: Prisma.FieldRef<"Journey", 'String'>
   readonly createdById: Prisma.FieldRef<"Journey", 'String'>
   readonly createdAt: Prisma.FieldRef<"Journey", 'DateTime'>

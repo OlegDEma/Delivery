@@ -384,6 +384,8 @@ export type TripWhereInput = {
   parcels?: Prisma.ParcelListRelationFilter
   routeTasks?: Prisma.RouteTaskListRelationFilter
   passengers?: Prisma.PassengerListRelationFilter
+  transfersOut?: Prisma.ParcelTransferListRelationFilter
+  transfersIn?: Prisma.ParcelTransferListRelationFilter
 }
 
 export type TripOrderByWithRelationInput = {
@@ -417,6 +419,8 @@ export type TripOrderByWithRelationInput = {
   parcels?: Prisma.ParcelOrderByRelationAggregateInput
   routeTasks?: Prisma.RouteTaskOrderByRelationAggregateInput
   passengers?: Prisma.PassengerOrderByRelationAggregateInput
+  transfersOut?: Prisma.ParcelTransferOrderByRelationAggregateInput
+  transfersIn?: Prisma.ParcelTransferOrderByRelationAggregateInput
 }
 
 export type TripWhereUniqueInput = Prisma.AtLeast<{
@@ -453,6 +457,8 @@ export type TripWhereUniqueInput = Prisma.AtLeast<{
   parcels?: Prisma.ParcelListRelationFilter
   routeTasks?: Prisma.RouteTaskListRelationFilter
   passengers?: Prisma.PassengerListRelationFilter
+  transfersOut?: Prisma.ParcelTransferListRelationFilter
+  transfersIn?: Prisma.ParcelTransferListRelationFilter
 }, "id">
 
 export type TripOrderByWithAggregationInput = {
@@ -539,6 +545,8 @@ export type TripCreateInput = {
   parcels?: Prisma.ParcelCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferCreateNestedManyWithoutToTripInput
 }
 
 export type TripUncheckedCreateInput = {
@@ -567,6 +575,8 @@ export type TripUncheckedCreateInput = {
   parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerUncheckedCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutToTripInput
 }
 
 export type TripUpdateInput = {
@@ -595,6 +605,8 @@ export type TripUpdateInput = {
   parcels?: Prisma.ParcelUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateInput = {
@@ -623,6 +635,8 @@ export type TripUncheckedUpdateInput = {
   parcels?: Prisma.ParcelUncheckedUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUncheckedUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUncheckedUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUncheckedUpdateManyWithoutToTripNestedInput
 }
 
 export type TripCreateManyInput = {
@@ -1062,6 +1076,36 @@ export type TripUpdateOneWithoutParcelsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TripUpdateToOneWithWhereWithoutParcelsInput, Prisma.TripUpdateWithoutParcelsInput>, Prisma.TripUncheckedUpdateWithoutParcelsInput>
 }
 
+export type TripCreateNestedOneWithoutTransfersOutInput = {
+  create?: Prisma.XOR<Prisma.TripCreateWithoutTransfersOutInput, Prisma.TripUncheckedCreateWithoutTransfersOutInput>
+  connectOrCreate?: Prisma.TripCreateOrConnectWithoutTransfersOutInput
+  connect?: Prisma.TripWhereUniqueInput
+}
+
+export type TripCreateNestedOneWithoutTransfersInInput = {
+  create?: Prisma.XOR<Prisma.TripCreateWithoutTransfersInInput, Prisma.TripUncheckedCreateWithoutTransfersInInput>
+  connectOrCreate?: Prisma.TripCreateOrConnectWithoutTransfersInInput
+  connect?: Prisma.TripWhereUniqueInput
+}
+
+export type TripUpdateOneRequiredWithoutTransfersOutNestedInput = {
+  create?: Prisma.XOR<Prisma.TripCreateWithoutTransfersOutInput, Prisma.TripUncheckedCreateWithoutTransfersOutInput>
+  connectOrCreate?: Prisma.TripCreateOrConnectWithoutTransfersOutInput
+  upsert?: Prisma.TripUpsertWithoutTransfersOutInput
+  connect?: Prisma.TripWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TripUpdateToOneWithWhereWithoutTransfersOutInput, Prisma.TripUpdateWithoutTransfersOutInput>, Prisma.TripUncheckedUpdateWithoutTransfersOutInput>
+}
+
+export type TripUpdateOneWithoutTransfersInNestedInput = {
+  create?: Prisma.XOR<Prisma.TripCreateWithoutTransfersInInput, Prisma.TripUncheckedCreateWithoutTransfersInInput>
+  connectOrCreate?: Prisma.TripCreateOrConnectWithoutTransfersInInput
+  upsert?: Prisma.TripUpsertWithoutTransfersInInput
+  disconnect?: Prisma.TripWhereInput | boolean
+  delete?: Prisma.TripWhereInput | boolean
+  connect?: Prisma.TripWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TripUpdateToOneWithWhereWithoutTransfersInInput, Prisma.TripUpdateWithoutTransfersInInput>, Prisma.TripUncheckedUpdateWithoutTransfersInInput>
+}
+
 export type TripCreateNestedOneWithoutRouteTasksInput = {
   create?: Prisma.XOR<Prisma.TripCreateWithoutRouteTasksInput, Prisma.TripUncheckedCreateWithoutRouteTasksInput>
   connectOrCreate?: Prisma.TripCreateOrConnectWithoutRouteTasksInput
@@ -1101,6 +1145,8 @@ export type TripCreateWithoutAssignedCourierInput = {
   parcels?: Prisma.ParcelCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferCreateNestedManyWithoutToTripInput
 }
 
 export type TripUncheckedCreateWithoutAssignedCourierInput = {
@@ -1128,6 +1174,8 @@ export type TripUncheckedCreateWithoutAssignedCourierInput = {
   parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerUncheckedCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutToTripInput
 }
 
 export type TripCreateOrConnectWithoutAssignedCourierInput = {
@@ -1165,6 +1213,8 @@ export type TripCreateWithoutSecondCourierInput = {
   parcels?: Prisma.ParcelCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferCreateNestedManyWithoutToTripInput
 }
 
 export type TripUncheckedCreateWithoutSecondCourierInput = {
@@ -1192,6 +1242,8 @@ export type TripUncheckedCreateWithoutSecondCourierInput = {
   parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerUncheckedCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutToTripInput
 }
 
 export type TripCreateOrConnectWithoutSecondCourierInput = {
@@ -1229,6 +1281,8 @@ export type TripCreateWithoutCreatedByInput = {
   parcels?: Prisma.ParcelCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferCreateNestedManyWithoutToTripInput
 }
 
 export type TripUncheckedCreateWithoutCreatedByInput = {
@@ -1256,6 +1310,8 @@ export type TripUncheckedCreateWithoutCreatedByInput = {
   parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerUncheckedCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutToTripInput
 }
 
 export type TripCreateOrConnectWithoutCreatedByInput = {
@@ -1369,6 +1425,8 @@ export type TripCreateWithoutJourneyInput = {
   parcels?: Prisma.ParcelCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferCreateNestedManyWithoutToTripInput
 }
 
 export type TripUncheckedCreateWithoutJourneyInput = {
@@ -1396,6 +1454,8 @@ export type TripUncheckedCreateWithoutJourneyInput = {
   parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerUncheckedCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutToTripInput
 }
 
 export type TripCreateOrConnectWithoutJourneyInput = {
@@ -1449,6 +1509,8 @@ export type TripCreateWithoutPassengersInput = {
   vehicle?: Prisma.VehicleCreateNestedOneWithoutTripsInput
   parcels?: Prisma.ParcelCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferCreateNestedManyWithoutToTripInput
 }
 
 export type TripUncheckedCreateWithoutPassengersInput = {
@@ -1476,6 +1538,8 @@ export type TripUncheckedCreateWithoutPassengersInput = {
   updatedAt?: Date | string
   parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutToTripInput
 }
 
 export type TripCreateOrConnectWithoutPassengersInput = {
@@ -1519,6 +1583,8 @@ export type TripUpdateWithoutPassengersInput = {
   vehicle?: Prisma.VehicleUpdateOneWithoutTripsNestedInput
   parcels?: Prisma.ParcelUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateWithoutPassengersInput = {
@@ -1546,6 +1612,8 @@ export type TripUncheckedUpdateWithoutPassengersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   parcels?: Prisma.ParcelUncheckedUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUncheckedUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUncheckedUpdateManyWithoutToTripNestedInput
 }
 
 export type TripCreateWithoutVehicleInput = {
@@ -1573,6 +1641,8 @@ export type TripCreateWithoutVehicleInput = {
   parcels?: Prisma.ParcelCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferCreateNestedManyWithoutToTripInput
 }
 
 export type TripUncheckedCreateWithoutVehicleInput = {
@@ -1600,6 +1670,8 @@ export type TripUncheckedCreateWithoutVehicleInput = {
   parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutTripInput
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerUncheckedCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutToTripInput
 }
 
 export type TripCreateOrConnectWithoutVehicleInput = {
@@ -1653,6 +1725,8 @@ export type TripCreateWithoutParcelsInput = {
   vehicle?: Prisma.VehicleCreateNestedOneWithoutTripsInput
   routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferCreateNestedManyWithoutToTripInput
 }
 
 export type TripUncheckedCreateWithoutParcelsInput = {
@@ -1680,6 +1754,8 @@ export type TripUncheckedCreateWithoutParcelsInput = {
   updatedAt?: Date | string
   routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerUncheckedCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutToTripInput
 }
 
 export type TripCreateOrConnectWithoutParcelsInput = {
@@ -1723,6 +1799,8 @@ export type TripUpdateWithoutParcelsInput = {
   vehicle?: Prisma.VehicleUpdateOneWithoutTripsNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateWithoutParcelsInput = {
@@ -1750,6 +1828,272 @@ export type TripUncheckedUpdateWithoutParcelsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUncheckedUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUncheckedUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUncheckedUpdateManyWithoutToTripNestedInput
+}
+
+export type TripCreateWithoutTransfersOutInput = {
+  id?: string
+  direction: $Enums.Direction
+  country: $Enums.Country
+  departureDate: Date | string
+  arrivalDate?: Date | string | null
+  status?: $Enums.TripStatus
+  vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: string | null
+  shortNumberCounterNl?: number
+  shortNumberCounterVienna?: number
+  shortNumberCounterLinz?: number
+  shortNumberCounterGeo?: number
+  shortNumberCounterEuUa?: number
+  passengerCapacity?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedTripsInput
+  secondCourier?: Prisma.ProfileCreateNestedOneWithoutSecondCourierTripsInput
+  createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedTripsInput
+  journey?: Prisma.JourneyCreateNestedOneWithoutTripsInput
+  vehicle?: Prisma.VehicleCreateNestedOneWithoutTripsInput
+  parcels?: Prisma.ParcelCreateNestedManyWithoutTripInput
+  routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutTripInput
+  passengers?: Prisma.PassengerCreateNestedManyWithoutTripInput
+  transfersIn?: Prisma.ParcelTransferCreateNestedManyWithoutToTripInput
+}
+
+export type TripUncheckedCreateWithoutTransfersOutInput = {
+  id?: string
+  direction: $Enums.Direction
+  country: $Enums.Country
+  departureDate: Date | string
+  arrivalDate?: Date | string | null
+  status?: $Enums.TripStatus
+  journeyId?: string | null
+  assignedCourierId?: string | null
+  secondCourierId?: string | null
+  vehicleInfo?: string | null
+  vehicleId?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: string | null
+  shortNumberCounterNl?: number
+  shortNumberCounterVienna?: number
+  shortNumberCounterLinz?: number
+  shortNumberCounterGeo?: number
+  shortNumberCounterEuUa?: number
+  passengerCapacity?: number
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutTripInput
+  routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutTripInput
+  passengers?: Prisma.PassengerUncheckedCreateNestedManyWithoutTripInput
+  transfersIn?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutToTripInput
+}
+
+export type TripCreateOrConnectWithoutTransfersOutInput = {
+  where: Prisma.TripWhereUniqueInput
+  create: Prisma.XOR<Prisma.TripCreateWithoutTransfersOutInput, Prisma.TripUncheckedCreateWithoutTransfersOutInput>
+}
+
+export type TripCreateWithoutTransfersInInput = {
+  id?: string
+  direction: $Enums.Direction
+  country: $Enums.Country
+  departureDate: Date | string
+  arrivalDate?: Date | string | null
+  status?: $Enums.TripStatus
+  vehicleInfo?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: string | null
+  shortNumberCounterNl?: number
+  shortNumberCounterVienna?: number
+  shortNumberCounterLinz?: number
+  shortNumberCounterGeo?: number
+  shortNumberCounterEuUa?: number
+  passengerCapacity?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignedCourier?: Prisma.ProfileCreateNestedOneWithoutAssignedTripsInput
+  secondCourier?: Prisma.ProfileCreateNestedOneWithoutSecondCourierTripsInput
+  createdBy?: Prisma.ProfileCreateNestedOneWithoutCreatedTripsInput
+  journey?: Prisma.JourneyCreateNestedOneWithoutTripsInput
+  vehicle?: Prisma.VehicleCreateNestedOneWithoutTripsInput
+  parcels?: Prisma.ParcelCreateNestedManyWithoutTripInput
+  routeTasks?: Prisma.RouteTaskCreateNestedManyWithoutTripInput
+  passengers?: Prisma.PassengerCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferCreateNestedManyWithoutFromTripInput
+}
+
+export type TripUncheckedCreateWithoutTransfersInInput = {
+  id?: string
+  direction: $Enums.Direction
+  country: $Enums.Country
+  departureDate: Date | string
+  arrivalDate?: Date | string | null
+  status?: $Enums.TripStatus
+  journeyId?: string | null
+  assignedCourierId?: string | null
+  secondCourierId?: string | null
+  vehicleInfo?: string | null
+  vehicleId?: string | null
+  maxWeight?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: string | null
+  shortNumberCounterNl?: number
+  shortNumberCounterVienna?: number
+  shortNumberCounterLinz?: number
+  shortNumberCounterGeo?: number
+  shortNumberCounterEuUa?: number
+  passengerCapacity?: number
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutTripInput
+  routeTasks?: Prisma.RouteTaskUncheckedCreateNestedManyWithoutTripInput
+  passengers?: Prisma.PassengerUncheckedCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutFromTripInput
+}
+
+export type TripCreateOrConnectWithoutTransfersInInput = {
+  where: Prisma.TripWhereUniqueInput
+  create: Prisma.XOR<Prisma.TripCreateWithoutTransfersInInput, Prisma.TripUncheckedCreateWithoutTransfersInInput>
+}
+
+export type TripUpsertWithoutTransfersOutInput = {
+  update: Prisma.XOR<Prisma.TripUpdateWithoutTransfersOutInput, Prisma.TripUncheckedUpdateWithoutTransfersOutInput>
+  create: Prisma.XOR<Prisma.TripCreateWithoutTransfersOutInput, Prisma.TripUncheckedCreateWithoutTransfersOutInput>
+  where?: Prisma.TripWhereInput
+}
+
+export type TripUpdateToOneWithWhereWithoutTransfersOutInput = {
+  where?: Prisma.TripWhereInput
+  data: Prisma.XOR<Prisma.TripUpdateWithoutTransfersOutInput, Prisma.TripUncheckedUpdateWithoutTransfersOutInput>
+}
+
+export type TripUpdateWithoutTransfersOutInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
+  departureDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
+  vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterLinz?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterGeo?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterEuUa?: Prisma.IntFieldUpdateOperationsInput | number
+  passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedTripsNestedInput
+  secondCourier?: Prisma.ProfileUpdateOneWithoutSecondCourierTripsNestedInput
+  createdBy?: Prisma.ProfileUpdateOneWithoutCreatedTripsNestedInput
+  journey?: Prisma.JourneyUpdateOneWithoutTripsNestedInput
+  vehicle?: Prisma.VehicleUpdateOneWithoutTripsNestedInput
+  parcels?: Prisma.ParcelUpdateManyWithoutTripNestedInput
+  routeTasks?: Prisma.RouteTaskUpdateManyWithoutTripNestedInput
+  passengers?: Prisma.PassengerUpdateManyWithoutTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUpdateManyWithoutToTripNestedInput
+}
+
+export type TripUncheckedUpdateWithoutTransfersOutInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
+  departureDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
+  journeyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterLinz?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterGeo?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterEuUa?: Prisma.IntFieldUpdateOperationsInput | number
+  passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  parcels?: Prisma.ParcelUncheckedUpdateManyWithoutTripNestedInput
+  routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutTripNestedInput
+  passengers?: Prisma.PassengerUncheckedUpdateManyWithoutTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUncheckedUpdateManyWithoutToTripNestedInput
+}
+
+export type TripUpsertWithoutTransfersInInput = {
+  update: Prisma.XOR<Prisma.TripUpdateWithoutTransfersInInput, Prisma.TripUncheckedUpdateWithoutTransfersInInput>
+  create: Prisma.XOR<Prisma.TripCreateWithoutTransfersInInput, Prisma.TripUncheckedCreateWithoutTransfersInInput>
+  where?: Prisma.TripWhereInput
+}
+
+export type TripUpdateToOneWithWhereWithoutTransfersInInput = {
+  where?: Prisma.TripWhereInput
+  data: Prisma.XOR<Prisma.TripUpdateWithoutTransfersInInput, Prisma.TripUncheckedUpdateWithoutTransfersInInput>
+}
+
+export type TripUpdateWithoutTransfersInInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
+  departureDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
+  vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterLinz?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterGeo?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterEuUa?: Prisma.IntFieldUpdateOperationsInput | number
+  passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignedCourier?: Prisma.ProfileUpdateOneWithoutAssignedTripsNestedInput
+  secondCourier?: Prisma.ProfileUpdateOneWithoutSecondCourierTripsNestedInput
+  createdBy?: Prisma.ProfileUpdateOneWithoutCreatedTripsNestedInput
+  journey?: Prisma.JourneyUpdateOneWithoutTripsNestedInput
+  vehicle?: Prisma.VehicleUpdateOneWithoutTripsNestedInput
+  parcels?: Prisma.ParcelUpdateManyWithoutTripNestedInput
+  routeTasks?: Prisma.RouteTaskUpdateManyWithoutTripNestedInput
+  passengers?: Prisma.PassengerUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUpdateManyWithoutFromTripNestedInput
+}
+
+export type TripUncheckedUpdateWithoutTransfersInInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
+  country?: Prisma.EnumCountryFieldUpdateOperationsInput | $Enums.Country
+  departureDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
+  journeyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secondCourierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vehicleInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vehicleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxWeight?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shortNumberCounterNl?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterVienna?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterLinz?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterGeo?: Prisma.IntFieldUpdateOperationsInput | number
+  shortNumberCounterEuUa?: Prisma.IntFieldUpdateOperationsInput | number
+  passengerCapacity?: Prisma.IntFieldUpdateOperationsInput | number
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  parcels?: Prisma.ParcelUncheckedUpdateManyWithoutTripNestedInput
+  routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutTripNestedInput
+  passengers?: Prisma.PassengerUncheckedUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUncheckedUpdateManyWithoutFromTripNestedInput
 }
 
 export type TripCreateWithoutRouteTasksInput = {
@@ -1777,6 +2121,8 @@ export type TripCreateWithoutRouteTasksInput = {
   vehicle?: Prisma.VehicleCreateNestedOneWithoutTripsInput
   parcels?: Prisma.ParcelCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferCreateNestedManyWithoutToTripInput
 }
 
 export type TripUncheckedCreateWithoutRouteTasksInput = {
@@ -1804,6 +2150,8 @@ export type TripUncheckedCreateWithoutRouteTasksInput = {
   updatedAt?: Date | string
   parcels?: Prisma.ParcelUncheckedCreateNestedManyWithoutTripInput
   passengers?: Prisma.PassengerUncheckedCreateNestedManyWithoutTripInput
+  transfersOut?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutFromTripInput
+  transfersIn?: Prisma.ParcelTransferUncheckedCreateNestedManyWithoutToTripInput
 }
 
 export type TripCreateOrConnectWithoutRouteTasksInput = {
@@ -1847,6 +2195,8 @@ export type TripUpdateWithoutRouteTasksInput = {
   vehicle?: Prisma.VehicleUpdateOneWithoutTripsNestedInput
   parcels?: Prisma.ParcelUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateWithoutRouteTasksInput = {
@@ -1874,6 +2224,8 @@ export type TripUncheckedUpdateWithoutRouteTasksInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   parcels?: Prisma.ParcelUncheckedUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUncheckedUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUncheckedUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUncheckedUpdateManyWithoutToTripNestedInput
 }
 
 export type TripCreateManyAssignedCourierInput = {
@@ -1973,6 +2325,8 @@ export type TripUpdateWithoutAssignedCourierInput = {
   parcels?: Prisma.ParcelUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateWithoutAssignedCourierInput = {
@@ -2000,6 +2354,8 @@ export type TripUncheckedUpdateWithoutAssignedCourierInput = {
   parcels?: Prisma.ParcelUncheckedUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUncheckedUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUncheckedUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUncheckedUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateManyWithoutAssignedCourierInput = {
@@ -2051,6 +2407,8 @@ export type TripUpdateWithoutSecondCourierInput = {
   parcels?: Prisma.ParcelUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateWithoutSecondCourierInput = {
@@ -2078,6 +2436,8 @@ export type TripUncheckedUpdateWithoutSecondCourierInput = {
   parcels?: Prisma.ParcelUncheckedUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUncheckedUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUncheckedUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUncheckedUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateManyWithoutSecondCourierInput = {
@@ -2129,6 +2489,8 @@ export type TripUpdateWithoutCreatedByInput = {
   parcels?: Prisma.ParcelUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateWithoutCreatedByInput = {
@@ -2156,6 +2518,8 @@ export type TripUncheckedUpdateWithoutCreatedByInput = {
   parcels?: Prisma.ParcelUncheckedUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUncheckedUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUncheckedUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUncheckedUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateManyWithoutCreatedByInput = {
@@ -2231,6 +2595,8 @@ export type TripUpdateWithoutJourneyInput = {
   parcels?: Prisma.ParcelUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateWithoutJourneyInput = {
@@ -2258,6 +2624,8 @@ export type TripUncheckedUpdateWithoutJourneyInput = {
   parcels?: Prisma.ParcelUncheckedUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUncheckedUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUncheckedUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUncheckedUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateManyWithoutJourneyInput = {
@@ -2333,6 +2701,8 @@ export type TripUpdateWithoutVehicleInput = {
   parcels?: Prisma.ParcelUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateWithoutVehicleInput = {
@@ -2360,6 +2730,8 @@ export type TripUncheckedUpdateWithoutVehicleInput = {
   parcels?: Prisma.ParcelUncheckedUpdateManyWithoutTripNestedInput
   routeTasks?: Prisma.RouteTaskUncheckedUpdateManyWithoutTripNestedInput
   passengers?: Prisma.PassengerUncheckedUpdateManyWithoutTripNestedInput
+  transfersOut?: Prisma.ParcelTransferUncheckedUpdateManyWithoutFromTripNestedInput
+  transfersIn?: Prisma.ParcelTransferUncheckedUpdateManyWithoutToTripNestedInput
 }
 
 export type TripUncheckedUpdateManyWithoutVehicleInput = {
@@ -2395,12 +2767,16 @@ export type TripCountOutputType = {
   parcels: number
   routeTasks: number
   passengers: number
+  transfersOut: number
+  transfersIn: number
 }
 
 export type TripCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parcels?: boolean | TripCountOutputTypeCountParcelsArgs
   routeTasks?: boolean | TripCountOutputTypeCountRouteTasksArgs
   passengers?: boolean | TripCountOutputTypeCountPassengersArgs
+  transfersOut?: boolean | TripCountOutputTypeCountTransfersOutArgs
+  transfersIn?: boolean | TripCountOutputTypeCountTransfersInArgs
 }
 
 /**
@@ -2432,6 +2808,20 @@ export type TripCountOutputTypeCountRouteTasksArgs<ExtArgs extends runtime.Types
  */
 export type TripCountOutputTypeCountPassengersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.PassengerWhereInput
+}
+
+/**
+ * TripCountOutputType without action
+ */
+export type TripCountOutputTypeCountTransfersOutArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ParcelTransferWhereInput
+}
+
+/**
+ * TripCountOutputType without action
+ */
+export type TripCountOutputTypeCountTransfersInArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ParcelTransferWhereInput
 }
 
 
@@ -2466,6 +2856,8 @@ export type TripSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   parcels?: boolean | Prisma.Trip$parcelsArgs<ExtArgs>
   routeTasks?: boolean | Prisma.Trip$routeTasksArgs<ExtArgs>
   passengers?: boolean | Prisma.Trip$passengersArgs<ExtArgs>
+  transfersOut?: boolean | Prisma.Trip$transfersOutArgs<ExtArgs>
+  transfersIn?: boolean | Prisma.Trip$transfersInArgs<ExtArgs>
   _count?: boolean | Prisma.TripCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["trip"]>
 
@@ -2564,6 +2956,8 @@ export type TripInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   parcels?: boolean | Prisma.Trip$parcelsArgs<ExtArgs>
   routeTasks?: boolean | Prisma.Trip$routeTasksArgs<ExtArgs>
   passengers?: boolean | Prisma.Trip$passengersArgs<ExtArgs>
+  transfersOut?: boolean | Prisma.Trip$transfersOutArgs<ExtArgs>
+  transfersIn?: boolean | Prisma.Trip$transfersInArgs<ExtArgs>
   _count?: boolean | Prisma.TripCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TripIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2592,6 +2986,8 @@ export type $TripPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     parcels: Prisma.$ParcelPayload<ExtArgs>[]
     routeTasks: Prisma.$RouteTaskPayload<ExtArgs>[]
     passengers: Prisma.$PassengerPayload<ExtArgs>[]
+    transfersOut: Prisma.$ParcelTransferPayload<ExtArgs>[]
+    transfersIn: Prisma.$ParcelTransferPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3018,6 +3414,8 @@ export interface Prisma__TripClient<T, Null = never, ExtArgs extends runtime.Typ
   parcels<T extends Prisma.Trip$parcelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Trip$parcelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   routeTasks<T extends Prisma.Trip$routeTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Trip$routeTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RouteTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   passengers<T extends Prisma.Trip$passengersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Trip$passengersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PassengerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  transfersOut<T extends Prisma.Trip$transfersOutArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Trip$transfersOutArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  transfersIn<T extends Prisma.Trip$transfersInArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Trip$transfersInArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParcelTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3634,6 +4032,54 @@ export type Trip$passengersArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.PassengerScalarFieldEnum | Prisma.PassengerScalarFieldEnum[]
+}
+
+/**
+ * Trip.transfersOut
+ */
+export type Trip$transfersOutArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ParcelTransfer
+   */
+  select?: Prisma.ParcelTransferSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ParcelTransfer
+   */
+  omit?: Prisma.ParcelTransferOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ParcelTransferInclude<ExtArgs> | null
+  where?: Prisma.ParcelTransferWhereInput
+  orderBy?: Prisma.ParcelTransferOrderByWithRelationInput | Prisma.ParcelTransferOrderByWithRelationInput[]
+  cursor?: Prisma.ParcelTransferWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ParcelTransferScalarFieldEnum | Prisma.ParcelTransferScalarFieldEnum[]
+}
+
+/**
+ * Trip.transfersIn
+ */
+export type Trip$transfersInArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ParcelTransfer
+   */
+  select?: Prisma.ParcelTransferSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ParcelTransfer
+   */
+  omit?: Prisma.ParcelTransferOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ParcelTransferInclude<ExtArgs> | null
+  where?: Prisma.ParcelTransferWhereInput
+  orderBy?: Prisma.ParcelTransferOrderByWithRelationInput | Prisma.ParcelTransferOrderByWithRelationInput[]
+  cursor?: Prisma.ParcelTransferWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ParcelTransferScalarFieldEnum | Prisma.ParcelTransferScalarFieldEnum[]
 }
 
 /**

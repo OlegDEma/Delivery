@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { parcelRouteLabel } from '@/lib/constants/countries';
 
 interface ParcelDetailsCardProps {
   /** Imperative-handle — детальна сторінка відкриває редагування з шапки. */
@@ -38,6 +39,11 @@ interface ParcelDetailsCardProps {
     estimatedDeliveryEnd: string | null;
     /** ТЗ docx 08.10.26: поріг автострахування (EUR) з тарифу посилки; null — тарифу нема. */
     insuranceThresholdEur?: number | null;
+    /** ТЗ docx 09.10.26: для назви напрямку з конкретною країною («Україна → Нідерланди»). */
+    trip?: { country: string } | null;
+    collectionPoint?: { country: string } | null;
+    senderAddress?: { country: string | null } | null;
+    receiverAddress?: { country: string | null } | null;
   };
   onUpdate: () => void;
   /** Блокує редагування деталей — після accepted_for_transport_* */
@@ -167,7 +173,8 @@ export function ParcelDetailsCard({ ref, parcel, onUpdate, readOnly = false }: P
       <CardContent className="px-3 pb-3 pt-0 text-sm space-y-1">
         <div className="flex justify-between">
           <span className="text-gray-500">Напрямок</span>
-          <span>{parcel.direction === 'eu_to_ua' ? 'Європа → Україна' : 'Україна → Європа'}</span>
+          {/* ТЗ docx 09.10.26 (п.3 загальних): у конкретній посилці — конкретна країна. */}
+          <span>{parcelRouteLabel(parcel)}</span>
         </div>
 
         {/* Вид відправлення — ТЗ §E4: при редагуванні повертаємось до полів

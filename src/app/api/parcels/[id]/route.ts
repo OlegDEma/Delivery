@@ -15,8 +15,9 @@ import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transition
 import { isUuid } from '@/lib/validators/common';
 import { canEditParcelData, canEditParcelParties, editLockReason } from '@/lib/parcels/edit-lock';
 import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
-import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
+import { isPickupPointPricing, isAddressDeliveryPricing } from '@/lib/utils/pricing-flags';
 import { isNoTripForCountry } from '@/lib/parcels/nearest-trip';
+import { ensureJourneyNumbersForTrip } from '@/lib/services/journey-numbering';
 
 // GET /api/parcels/[id]
 export async function GET(
@@ -28,6 +29,12 @@ export async function GET(
 
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
+
+  // ТЗ docx 11.10.26: номер посилки в поїздці (001…N) — добираємо перед показом.
+  const tripRef = await prisma.parcel.findUnique({ where: { id }, select: { tripId: true, journeyNumber: true, status: true } });
+  if (tripRef?.tripId && tripRef.journeyNumber == null && tripRef.status !== 'draft') {
+    await ensureJourneyNumbersForTrip(tripRef.tripId);
+  }
 
   const parcel = await prisma.parcel.findFirst({
     where: { id, deletedAt: null },
@@ -324,6 +331,17 @@ export async function PATCH(
     } else {
       updateData.trip = { disconnect: true };
     }
+    // ТЗ docx 11.10.26: посилка покидає рейс — її номер у поїздці лишається за рядком
+    // «Перенесена до рейсу …», а в новій поїздці вона отримає наступний номер.
+    if (parcel.tripId && parcel.tripId !== (body.tripId || null)) {
+      await prisma.parcelTransfer.create({
+        data: {
+          parcelId: id, fromTripId: parcel.tripId, toTripId: body.tripId || null,
+          journeyNumber: parcel.journeyNumber, createdById: userId,
+        },
+      });
+      updateData.journeyNumber = null;
+    }
   }
   if (body.assignedCourierId !== undefined) {
     if (body.assignedCourierId) {
@@ -525,7 +543,8 @@ export async function PATCH(
         });
 
         if (pricing) {
-          const isAddressDelivery = receiverAddr?.deliveryMethod === 'address';
+          // ТЗ docx 09.10.26: див. isAddressDeliveryPricing (UA→EU — усе, крім пункту видачі).
+          const isAddressDelivery = isAddressDeliveryPricing({ direction: parcel.direction, receiverDeliveryMethod: receiverAddr?.deliveryMethod });
           // Recalc враховує СВІЖІ значення з body, з fallback на збережений
           // запис коли поле не торкалось у цьому PATCH.
           const declaredValue = body.declaredValue !== undefined

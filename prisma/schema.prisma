@@ -271,6 +271,8 @@ model Journey {
   // ТЗ docx 21.08.26: пасажирські (посадкові) місця задаються на ПОЇЗДКУ (спільні для
   // обох її рейсів). Кожен рейс успадковує це число (синкається на trips.passenger_capacity).
   passengerCapacity  Int        @default(0) @map("passenger_capacity")
+  // ТЗ docx 11.10.26: лічильник наскрізної нумерації посилок поїздки (не зменшується).
+  parcelCounter      Int        @default(0) @map("parcel_counter")
   notes              String?
   createdById        String?    @map("created_by") @db.Uuid
   createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz
@@ -324,6 +326,8 @@ model Trip {
   parcels          Parcel[]
   routeTasks       RouteTask[]
   passengers       Passenger[]
+  transfersOut     ParcelTransfer[] @relation("ParcelTransferFrom")
+  transfersIn      ParcelTransfer[] @relation("ParcelTransferTo")
 
   @@index([departureDate])
   @@index([assignedCourierId])
@@ -402,6 +406,11 @@ model Parcel {
   internalNumber        String        @map("internal_number")
   sequentialNumber      Int           @map("sequential_number")
   shortNumber           Int?          @map("short_number")
+  /// ТЗ docx 11.10.26: наскрізний номер посилки в ПОЇЗДЦІ (001…N): спершу рейс UA→EU,
+  /// далі EU→UA. Присвоюється, щойно посилка вийшла зі «Створена» і має рейс
+  /// (lib/services/journey-numbering). При перенесенні — скидається (старий номер
+  /// лишається в parcel_transfers як рядок «Перенесена до рейсу …»).
+  journeyNumber         Int?          @map("journey_number")
   direction             Direction
   senderId              String        @map("sender_id") @db.Uuid
   senderAddressId       String?       @map("sender_address_id") @db.Uuid
@@ -505,6 +514,8 @@ model Parcel {
   warehouseActions  WarehouseInventory[]
   npSyncLogs        NpSyncLog[]
   claims            Claim[]
+  // ТЗ docx 09.10.26 / 11.10.26: історія перенесень між рейсами.
+  transfers         ParcelTransfer[]
 
   @@index([itn])
   @@index([npTtn])
@@ -523,6 +534,28 @@ model Parcel {
   @@index([tripId, status])
   @@index([isPaid, direction])
   @@map("parcels")
+}
+
+/// ТЗ docx 09.10.26 / 11.10.26: перенесення (або видалення) посилки з рейсу. Якщо
+/// посилка вже мала номер у поїздці, цей номер лишається за записом — у списку
+/// рейсу на його місці показуємо «Перенесена до рейсу …» (нумерація не зсувається).
+model ParcelTransfer {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parcelId      String   @map("parcel_id") @db.Uuid
+  fromTripId    String   @map("from_trip_id") @db.Uuid
+  /// NULL — посилку прибрали з рейсу без перенесення.
+  toTripId      String?  @map("to_trip_id") @db.Uuid
+  journeyNumber Int?     @map("journey_number")
+  createdById   String?  @map("created_by") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  parcel   Parcel @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  fromTrip Trip   @relation("ParcelTransferFrom", fields: [fromTripId], references: [id], onDelete: Cascade)
+  toTrip   Trip?  @relation("ParcelTransferTo", fields: [toTripId], references: [id], onDelete: SetNull)
+
+  @@index([fromTripId])
+  @@index([parcelId])
+  @@map("parcel_transfers")
 }
 
 model ParcelPlace {
