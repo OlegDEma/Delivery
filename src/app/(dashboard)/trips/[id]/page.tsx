@@ -496,7 +496,7 @@ export default function TripDetailPage() {
               </div>
               );
             })}
-            {trip.parcels.length === 0 && (
+            {rows.length === 0 && (
               <div className="text-center py-6 text-gray-500 text-sm">
                 Немає посилок. Створіть посилку кнопкою «+ Створити посилку» або прив&apos;яжіть через сторінку посилки.
               </div>
