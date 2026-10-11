@@ -98,6 +98,27 @@ WhatsApp/Viber/SMS не пише «у черзі».
   транспорту **ВС1274ТВ** (`vehicles/4a8814a7…`). Відновити не можна — перезалити
   через «Транспортні засоби → Редагувати → Замінити».
 
+## Жовтень 2026
+
+### 09.10 + 11.10 (коміт `73f2239`)
+- **Нумерація в поїздці** (`parcels.journey_number`, `journeys.parcel_counter`,
+  `lib/services/journey-numbering.ts`): 001…N наскрізь — спершу UA→EU, далі EU→UA,
+  за часом створення. Присвоюється ЛІНИВО (GET рейсу/посилки) лише не-draft посилкам
+  з рейсом; не зсувається. Зміна рейсу — тільки через `moveParcelToTrip` (або PATCH
+  tripId, який теж пише `parcel_transfers`) → старий номер лишається рядком
+  «Перенесена до рейсу …». Етикетка показує №journeyNumber замість старого shortNumber.
+- Перенесення: `POST /api/parcels/[id]/transfer` (Працівник: draft/accepted/in_transit),
+  `/api/client-portal/orders/[id]/transfer` (Клієнт: лише draft). Підтвердження —
+  `components/shared/confirm-dialog.tsx` (НЕ window.confirm).
+- Друк списку рейсу `/trips/[id]/print` (A4, Arial 14, поле 2,5 см).
+- Сканер ТТН: `lib/utils/barcode-decode.ts` (BarcodeDetector → ZXing TRY_HARDER).
+- `isAddressDeliveryPricing`: для UA→EU усе, крім пункту видачі, — мінімум «Адресна».
+- Статуси: переходи з at_nova_poshta / not_received / at_eu_warehouse / at_collection_point
+  прибрано (ТЗ 09.10). Каскад «рейс EU→UA завершено → at_lviv_warehouse» ЛИШИВСЯ —
+  питання клієнту.
+- **Не перевірено наживо:** реальне перенесення посилки (не чіпав прод-посилки),
+  клієнтський портал (немає клієнт-сесії), живий сканер з камери телефону.
+
 ## Ключові архітектурні рішення, зроблені по ходу
 
 - **Місткість пасажирів — на поїздці** (`Journey.passengerCapacity`), синкається на
