@@ -8,10 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDateTime } from '@/lib/utils/format';
 import { statusLabel } from '@/lib/parcels/status-label';
-import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface TrackingResult {
-  internalNumber: string; journeyNumber?: number | null;
+  internalNumber: string;
   /** ТЗ docx 07.10.26: ІТН (X-XX-XXXXXX-X). */
   itn?: string;
   npTtn: string | null;
@@ -101,7 +100,9 @@ export default function TrackingPage() {
           <Card>
             <CardHeader className="py-3 px-4">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-mono">{parcelNumberWithJourney(result.internalNumber, result.journeyNumber)}</CardTitle>
+                <CardTitle className="text-base font-mono">{/* ТЗ docx 12.10.26: /api/tracking уже віддає номер без старого порядкового
+                    і з номером у поїздці — повторно не форматуємо (інакше «028» зріжеться). */}
+                {result.internalNumber}</CardTitle>
                 <Badge className={STATUS_COLORS[result.status]}>
                   {statusLabel(result.status, { createdSource: result.createdSource, createdByRole: result.createdByRole })}
                 </Badge>

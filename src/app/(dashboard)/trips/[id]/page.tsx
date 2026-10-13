@@ -470,7 +470,7 @@ export default function TripDetailPage() {
               return (
               <div key={p.id} className="px-4 py-3 flex items-start justify-between hover:bg-gray-50">
                 <Link href={`/parcels/${p.id}`} className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-0.5">
                     {/* ТЗ docx 11.10.26: номер у поїздці (001…N). ТЗ docx 12.10.26: номер є
                         з моменту прив'язки до рейсу (і в «Створеної»); старий порядковий
                         номер прибрано. «без №» лишається лише для рейсів поза поїздкою. */}

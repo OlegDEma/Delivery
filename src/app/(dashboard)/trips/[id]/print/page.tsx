@@ -119,10 +119,13 @@ export default function TripPrintListPage() {
         .trip-print-list td.name { font-size: 12pt; }
         .trip-print-list tbody.parcel-row { break-inside: avoid; page-break-inside: avoid; }
         .trip-print-list .sheet-page + .sheet-page { break-before: page; page-break-before: always; }
-        .trip-print-list h1 { font-size: 16pt; font-weight: bold; margin: 0 0 0.3cm; height: 0.7cm; }
+        .trip-print-list h1 { font-size: 16pt; font-weight: bold; margin: 0 0 0.3cm; line-height: 0.7cm; white-space: nowrap; }
+        /* На телефоні превʼю не стискаємо (інакше вигляд не відповідає папері) —
+           аркуш реальної ширини, горизонтальна прокрутка. */
+        @media screen { .trip-print-list .sheets { overflow-x: auto; } }
         @media screen {
           /* Превʼю = аркуш A4 з тими самими полями, щоб на екрані було видно, що влізе на папір. */
-          .trip-print-list .sheet-page { width: 21cm; max-width: 100%; box-sizing: border-box; background: #fff; padding: 2.5cm 1.5cm 1.5cm; margin: 0 auto 0.5cm; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+          .trip-print-list .sheet-page { width: 21cm; box-sizing: border-box; background: #fff; padding: 2.5cm 1.5cm 1.5cm; margin: 0 auto 0.5cm; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
         }
       `}</style>
 
@@ -136,6 +139,7 @@ export default function TripPrintListPage() {
         </span>
       </div>
 
+      <div className="sheets">
       {rows.length === 0 ? (
         <div className="sheet-page">
           <h1>Рейс {formatDate(trip.departureDate)} {tripRouteLabel(trip.country, trip.direction)}</h1>
@@ -178,7 +182,8 @@ export default function TripPrintListPage() {
                     <td rowSpan={2} className="num">{row.num != null ? `${formatJourneyNumber(row.num)}${places}` : (places ? `—${places}` : '—')}</td>
                     <td style={addrSize ? { fontSize: addrSize } : undefined}>{cityStreet || '—'}</td>
                     <td className="bld">{a?.building || ''}</td>
-                    <td className="right postal">{a?.postalCode || ''}</td>
+                    {/* ТЗ 12.10.26: індекс NL — літери великі (старі записи на кшталт «1813 tt»). */}
+                    <td className="right postal">{(a?.postalCode || '').toUpperCase()}</td>
                   </tr>
                   <tr>
                     <td className="name">{[party.lastName, party.firstName].filter(Boolean).join(' ')}</td>
@@ -191,6 +196,7 @@ export default function TripPrintListPage() {
           </table>
         </div>
       ))}
+      </div>
     </div>
   );
 }
