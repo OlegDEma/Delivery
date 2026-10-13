@@ -29,6 +29,8 @@ interface MyParcelsListState {
 interface ParcelItem {
   id: string;
   internalNumber: string;
+  /** ТЗ docx 12.10.26: номер у поїздці — замість старого порядкового. */
+  journeyNumber?: number | null;
   direction: string;
   status: ParcelStatusType;
   totalPlacesCount: number;
@@ -257,7 +259,7 @@ export default function MyParcelsPage() {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-mono text-sm font-medium">{displayParcelNumber(p.internalNumber)}</span>
+                    <span className="font-mono text-sm font-medium">{displayParcelNumber(p.internalNumber, p.journeyNumber)}</span>
                     <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}</Badge>
                     {!p.isPaid && p.totalCost && <Badge variant="destructive" className="text-xs">Не оплачено</Badge>}
                   </div>

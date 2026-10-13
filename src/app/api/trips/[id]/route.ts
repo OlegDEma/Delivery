@@ -52,6 +52,15 @@ export async function GET(
         },
         orderBy: [{ journeyNumber: { sort: 'asc', nulls: 'last' } }, { createdAt: 'asc' }],
       },
+      // ТЗ docx 12.10.26 «Логістика/Рейси»: у рейсі показуємо не лише посилки, а й пасажирів.
+      passengers: {
+        where: { deletedAt: null },
+        orderBy: [{ seatNumber: { sort: 'asc', nulls: 'last' } }, { createdAt: 'asc' }],
+        select: {
+          id: true, firstName: true, lastName: true, phone: true, seatNumber: true,
+          pickupAddress: true, dropoffAddress: true, isPaid: true,
+        },
+      },
       _count: { select: { parcels: true, routeTasks: true } },
     },
   });

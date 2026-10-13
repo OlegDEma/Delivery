@@ -12,6 +12,7 @@ import { formatDateTime, formatCurrency, formatDate } from '@/lib/utils/format';
 import { kyivYmd } from '@/lib/utils/tz';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
+import { displayParcelNumber } from '@/lib/parcels/display-number';
 
 interface Activity {
   id: string;
@@ -40,6 +41,8 @@ interface Stats {
   recentParcels: {
     id: string;
     internalNumber: string;
+    /** ТЗ docx 12.10.26: номер у поїздці — замість старого порядкового. */
+    journeyNumber?: number | null;
     status: ParcelStatusType;
     createdAt: string;
     /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
@@ -213,7 +216,7 @@ export default function DashboardPage() {
               return (
               <Link key={p.id} href={`/parcels/${p.id}`} className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50">
                 <div>
-                  <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
+                  <span className="font-mono text-sm font-medium">{displayParcelNumber(p.internalNumber, p.journeyNumber)}</span>
                   <span className="text-sm text-gray-500 ml-2">{pt.receiver.lastName} {pt.receiver.firstName}</span>
                 </div>
                 <div className="flex items-center gap-2">

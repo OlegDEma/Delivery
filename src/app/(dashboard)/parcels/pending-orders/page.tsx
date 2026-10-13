@@ -7,10 +7,11 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDate, formatWeight } from '@/lib/utils/format';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface PendingParcel {
   id: string;
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   direction: string;
   status: string;
   totalPlacesCount: number;
@@ -51,7 +52,7 @@ export default function PendingOrdersPage() {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!confirm(`Підтвердити замовлення ${parcel.internalNumber} без перевірки деталей?`)) {
+    if (!confirm(`Підтвердити замовлення ${parcelNumberWithJourney(parcel.internalNumber, parcel.journeyNumber)} без перевірки деталей?`)) {
       return;
     }
 
@@ -107,7 +108,7 @@ export default function PendingOrdersPage() {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
+                    <span className="font-mono text-sm font-medium">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</span>
                     <Badge className="text-xs bg-yellow-100 text-yellow-800">
                       Очікує підтвердження
                     </Badge>

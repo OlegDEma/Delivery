@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { FieldHint } from '@/components/shared/field-hint';
 import { AddressInput } from '@/components/parcels/address-input';
+import { formatPostalCodeInput } from '@/lib/utils/postal-code';
 
 export interface AddressEditorState {
   deliveryMethod: string; // 'address' | 'np_warehouse' | 'pickup_point'
@@ -102,8 +103,9 @@ export function AddressEditor({
             </Label>
             <Input
               value={state.postalCode}
-              onChange={(e) => onChange({ postalCode: e.target.value })}
-              placeholder="00-000"
+              // ТЗ docx 12.10.26: NL-індекс — «1234 AB».
+              onChange={(e) => onChange({ postalCode: formatPostalCodeInput(e.target.value, state.postalCode, country) })}
+              placeholder={country === 'NL' ? '1234 AB' : '00-000'}
               className="h-8"
             />
           </div>
@@ -118,8 +120,8 @@ export function AddressEditor({
             </Label>
             <Input
               value={state.postalCode}
-              onChange={(e) => onChange({ postalCode: e.target.value })}
-              placeholder="00-000"
+              onChange={(e) => onChange({ postalCode: formatPostalCodeInput(e.target.value, state.postalCode, country) })}
+              placeholder={country === 'NL' ? '1234 AB' : '00-000'}
             />
           </div>
         )}

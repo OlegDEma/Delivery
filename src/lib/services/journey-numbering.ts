@@ -7,8 +7,10 @@ import type { Prisma } from '@/generated/prisma/client';
  * спершу посилки рейсу UA→EU (Отримувачі в Нідерландах), далі EU→UA (Відправники).
  *
  * Правила:
- *  - номер отримує посилка, яка має рейс і вже вийшла зі статусу «Створена»
- *    (прийнята до перевезення) — саме тоді вона фізично стає частиною рейсу;
+ *  - номер отримує КОЖНА посилка, прив'язана до рейсу поїздки — з моменту прив'язки,
+ *    включно зі «Створеною» (ТЗ docx 12.10.26: «незалежно від того хто створив
+ *    посилку — чи Клієнт, чи хтось з Працівників, чи прив'язка відбулась
+ *    автоматично»; раніше — лише після прийняття до перевезення);
  *  - присвоєний номер незмінний: лічильник поїздки (journeys.parcel_counter) лише
  *    зростає, тож пізніше додані посилки отримують наступні номери, а старі не зсуваються;
  *  - при перенесенні посилки в інший рейс її номер лишається за рядком
@@ -24,7 +26,6 @@ export async function ensureJourneyNumbers(journeyId: string): Promise<void> {
     where: {
       deletedAt: null,
       journeyNumber: null,
-      status: { not: 'draft' },
       trip: { journeyId },
     },
   });
@@ -38,7 +39,6 @@ export async function ensureJourneyNumbers(journeyId: string): Promise<void> {
       where: {
         deletedAt: null,
         journeyNumber: null,
-        status: { not: 'draft' },
         trip: { journeyId },
       },
       select: { id: true, direction: true, createdAt: true },
@@ -66,6 +66,22 @@ export async function ensureJourneyNumbersForTrip(tripId: string | null | undefi
   if (!tripId) return;
   const trip = await prisma.trip.findUnique({ where: { id: tripId }, select: { journeyId: true } });
   if (trip?.journeyId) await ensureJourneyNumbers(trip.journeyId);
+}
+
+/**
+ * ТЗ docx 12.10.26: у списках (посилки, «Мої замовлення») номер у поїздці стоїть
+ * замість старого порядкового — тож перед показом добираємо номери для поїздок,
+ * у яких серед відібраних посилок є ще не пронумеровані.
+ */
+export async function ensureJourneyNumbersWhere(where: Prisma.ParcelWhereInput): Promise<void> {
+  const rows = await prisma.parcel.findMany({
+    where: { AND: [where, { journeyNumber: null, trip: { journeyId: { not: null } } }] },
+    select: { trip: { select: { journeyId: true } } },
+    distinct: ['tripId'],
+    take: 50,
+  });
+  const journeyIds = new Set(rows.map((r) => r.trip?.journeyId).filter((j): j is string => !!j));
+  for (const j of journeyIds) await ensureJourneyNumbers(j);
 }
 
 export { formatJourneyNumber } from '@/lib/utils/journey-number';
@@ -110,4 +126,6 @@ export async function moveParcelToTrip(
       },
     });
   });
+  // ТЗ docx 12.10.26: у новому рейсі номер — одразу з моменту прив'язки.
+  if (args.toTripId) await ensureJourneyNumbersForTrip(args.toTripId);
 }

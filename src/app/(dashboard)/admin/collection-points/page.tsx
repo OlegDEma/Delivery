@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { WEEKDAYS, WEEKDAY_LABELS, formatWorkingDays, type Weekday } from '@/lib/constants/collection';
+import { formatPostalCodeInput } from '@/lib/utils/postal-code';
 
 interface CollectionPoint {
   id: string;
@@ -234,7 +235,8 @@ export default function CollectionPointsPage() {
                 <Label>Поштовий код</Label>
                 <Input
                   value={form.postalCode}
-                  onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
+                  // ТЗ docx 12.10.26: NL-індекс — «1234 AB».
+                  onChange={(e) => setForm({ ...form, postalCode: formatPostalCodeInput(e.target.value, form.postalCode, form.country) })}
                 />
               </div>
               <PhoneInput

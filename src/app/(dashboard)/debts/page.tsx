@@ -6,10 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface DebtParcel {
   id: string;
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   totalCost: number;
   createdAt: string;
   direction: string;
@@ -93,7 +94,7 @@ export default function DebtsPage() {
                 <div className="px-3 pb-3 space-y-1">
                   {d.parcels.map(p => (
                     <Link key={p.id} href={`/parcels/${p.id}`} className="flex justify-between items-center px-3 py-1.5 bg-gray-50 rounded hover:bg-gray-100 text-sm">
-                      <span className="font-mono">{p.internalNumber}</span>
+                      <span className="font-mono">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-400">{formatDate(p.createdAt)}</span>
                         <span className="font-medium text-red-600">{formatCurrency(p.totalCost, 'EUR')}</span>

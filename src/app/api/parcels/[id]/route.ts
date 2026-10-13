@@ -31,8 +31,9 @@ export async function GET(
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
   // ТЗ docx 11.10.26: номер посилки в поїздці (001…N) — добираємо перед показом.
-  const tripRef = await prisma.parcel.findUnique({ where: { id }, select: { tripId: true, journeyNumber: true, status: true } });
-  if (tripRef?.tripId && tripRef.journeyNumber == null && tripRef.status !== 'draft') {
+  // ТЗ docx 12.10.26: і для «Створеної» — номер з моменту прив'язки до рейсу.
+  const tripRef = await prisma.parcel.findUnique({ where: { id }, select: { tripId: true, journeyNumber: true } });
+  if (tripRef?.tripId && tripRef.journeyNumber == null) {
     await ensureJourneyNumbersForTrip(tripRef.tripId);
   }
 

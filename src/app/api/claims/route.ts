@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const claims = await prisma.claim.findMany({
     where: status ? { status: status as import('@/generated/prisma/client').ClaimStatus } : {},
     include: {
-      parcel: { select: { internalNumber: true, itn: true } },
+      parcel: { select: { internalNumber: true, journeyNumber: true, itn: true } },
       client: { select: { firstName: true, lastName: true, phone: true } },
       createdBy: { select: { fullName: true } },
     },
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       createdById: user.id,
     },
     include: {
-      parcel: { select: { internalNumber: true } },
+      parcel: { select: { internalNumber: true, journeyNumber: true } },
     },
   });
 

@@ -8,9 +8,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDateTime } from '@/lib/utils/format';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface ReceiptData {
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   status: ParcelStatusType;
   direction: string;
   /** ТЗ docx 09.10.26: напрямок з конкретною країною (з /api/tracking). */
@@ -51,7 +52,7 @@ function ReceiptContent() {
         <Card>
           <CardContent className="p-6 space-y-4">
             <div className="text-center">
-              <div className="text-xl font-mono font-bold">{data.internalNumber}</div>
+              <div className="text-xl font-mono font-bold">{parcelNumberWithJourney(data.internalNumber, data.journeyNumber)}</div>
               <Badge className={`mt-2 ${STATUS_COLORS[data.status]}`}>
                 {STATUS_LABELS[data.status]}
               </Badge>

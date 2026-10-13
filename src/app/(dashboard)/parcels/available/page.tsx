@@ -11,10 +11,11 @@ import { formatDate } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { statusLabel } from '@/lib/parcels/status-label';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface ParcelItem {
   id: string;
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   status: ParcelStatusType;
   direction: string;
   totalPlacesCount: number;
@@ -121,7 +122,7 @@ export default function AvailableParcelsPage() {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
+                    <span className="font-mono text-sm font-medium">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</span>
                     <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}</Badge>
                     {p.createdSource === 'client_web' && <Badge variant="secondary" className="text-xs">Сайт</Badge>}
                   </div>

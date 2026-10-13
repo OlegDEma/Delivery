@@ -20,6 +20,7 @@ import { toEur } from '@/lib/utils/currency';
 import { isPickupPointPricing, isAddressDeliveryPricing } from '@/lib/utils/pricing-flags';
 import { generateInternalNumber, generatePlaceITN, buildItn10 } from '@/lib/utils/itn';
 import { logger } from '@/lib/logger';
+import { ensureJourneyNumbersForTrip } from '@/lib/services/journey-numbering';
 
 export interface ParcelPlaceInput {
   weight?: number;
@@ -89,6 +90,8 @@ export interface CreatedParcelSummary {
   internalNumber: string;
   sequentialNumber: number;
   shortNumber: number | null;
+  /** ТЗ docx 12.10.26: номер у поїздці (з моменту прив'язки до рейсу). */
+  journeyNumber: number | null;
   totalCost: number | null;
 }
 
@@ -445,7 +448,20 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
     source: input.createdSource, userId: input.createdById,
   });
 
-  return result;
+  // ТЗ docx 12.10.26: номер у поїздці — з моменту прив'язки до рейсу, хоч би хто
+  // створив посилку (Клієнт, Працівник, авто-прив'язка). Помилка нумерації не має
+  // зривати створення — на перегляді рейсу/посилки номер добереться ще раз.
+  let journeyNumber: number | null = null;
+  if (input.tripId) {
+    try {
+      await ensureJourneyNumbersForTrip(input.tripId);
+      journeyNumber = (await prisma.parcel.findUnique({ where: { id: result.id }, select: { journeyNumber: true } }))?.journeyNumber ?? null;
+    } catch (e) {
+      logger.error('parcel.journey_number_failed', e, { parcelId: result.id });
+    }
+  }
+
+  return { ...result, journeyNumber };
 }
 
 /**

@@ -5,6 +5,7 @@ import { isUuid } from '@/lib/validators/common';
 import { clientParcelPatchSchema } from '@/lib/validators/parcel';
 import { logger } from '@/lib/logger';
 import { isNoTripForCountry } from '@/lib/parcels/nearest-trip';
+import { ensureJourneyNumbersWhere } from '@/lib/services/journey-numbering';
 
 /**
  * GET /api/client-portal/orders/[id]
@@ -35,6 +36,9 @@ export async function GET(
   if (!profile?.phone) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const client = await prisma.client.findUnique({ where: { phone: profile.phone } });
   if (!client) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  // ТЗ docx 12.10.26: номер у поїздці — з моменту прив'язки до рейсу.
+  await ensureJourneyNumbersWhere({ id, deletedAt: null, OR: [{ senderId: client.id }, { receiverId: client.id }] });
 
   // Доступ лише до власних посилок (sender/receiver = поточний клієнт).
   const parcel = await prisma.parcel.findFirst({

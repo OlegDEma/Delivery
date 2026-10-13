@@ -22,6 +22,7 @@ import { PhoneInput } from '@/components/shared/phone-input';
 import { getBillableWeight } from '@/lib/utils/volumetric';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 /**
  * Редагування існуючої посилки. Зроблено по докс-багу від 03.06.2026:
@@ -69,6 +70,7 @@ interface ParcelData {
   status: string;
   createdById: string | null;
   internalNumber: string;
+  journeyNumber?: number | null;
   direction: string;
   shipmentType: string;
   description: string | null;
@@ -420,7 +422,8 @@ export default function EditParcelPage() {
     <div className="max-w-2xl">
       <Breadcrumbs items={[
         { label: 'Посилки', href: '/parcels' },
-        { label: parcel.internalNumber, href: `/parcels/${id}` },
+        // ТЗ docx 12.10.26: без старого порядкового номера.
+        { label: parcelNumberWithJourney(parcel.internalNumber, parcel.journeyNumber), href: `/parcels/${id}` },
         { label: 'Редагувати' },
       ]} />
       <h1 className="text-2xl font-bold mb-4">Редагувати посилку</h1>

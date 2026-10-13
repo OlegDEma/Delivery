@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     prisma.cashRegister.findMany({
       where,
       include: {
-        parcel: { select: { internalNumber: true, itn: true } },
+        parcel: { select: { internalNumber: true, journeyNumber: true, itn: true } },
         receivedBy: { select: { fullName: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         receivedById: userId,
       },
       include: {
-        parcel: { select: { internalNumber: true } },
+        parcel: { select: { internalNumber: true, journeyNumber: true } },
       },
     });
 

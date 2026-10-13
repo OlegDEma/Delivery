@@ -14,6 +14,8 @@ import { parcelParties } from '@/lib/parcels/party-snapshot';
 interface Order {
   id: string;
   internalNumber: string;
+  /** ТЗ docx 12.10.26: номер у поїздці — замість старого порядкового. */
+  journeyNumber?: number | null;
   itn: string;
   /** Per ТЗ §7 — поряд з ІТН відображаємо ТТН Нової Пошти, коли є. */
   npTtn: string | null;
@@ -84,7 +86,7 @@ export default function MyOrdersPage() {
             >
               <div className="flex items-start justify-between mb-1">
                 <div>
-                  <div className="font-mono text-sm font-medium">{displayParcelNumber(o.internalNumber)}</div>
+                  <div className="font-mono text-sm font-medium">{displayParcelNumber(o.internalNumber, o.journeyNumber)}</div>
                   {/* ТЗ docx 07.10.26: ІТН знову показуємо (10 цифр, X-XX-XXXXXX-X) —
                       правила формування затверджено; за ТЗ 03.10.26 його ховали.
                       (03.10.26 п.4) ТТН, введений Клієнтом, — додатково. */}

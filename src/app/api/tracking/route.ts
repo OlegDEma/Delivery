@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { checkItnQuery, formatItn, INVALID_ITN_MESSAGE } from '@/lib/utils/itn';
 import { parcelRouteLabel } from '@/lib/constants/countries';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 // GET /api/tracking?q=... — public, no auth required
 export async function GET(request: NextRequest) {
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
           ],
     },
     select: {
-      internalNumber: true,
+      internalNumber: true, journeyNumber: true,
       itn: true,
       npTtn: true,
       status: true,
@@ -72,7 +73,8 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({
-    internalNumber: parcel.internalNumber,
+    // ТЗ docx 12.10.26: без старого порядкового номера (номер у поїздці замість нього).
+    internalNumber: parcelNumberWithJourney(parcel.internalNumber, parcel.journeyNumber),
     // ТЗ docx 07.10.26: 10-значний ІТН у вигляді X-XX-XXXXXX-X.
     itn: formatItn(parcel.itn),
     npTtn: parcel.npTtn || null,

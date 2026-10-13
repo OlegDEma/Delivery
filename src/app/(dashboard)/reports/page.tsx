@@ -10,10 +10,11 @@ import { Label } from '@/components/ui/label';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatCurrency } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface WarehouseParcel {
   id: string;
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   totalWeight: number | null;
   totalPlacesCount: number;
   // ТЗ docx 26.07.26 (п.1): статус потрібен parcelParties, щоб брати знімок для accepted+.
@@ -52,7 +53,7 @@ interface TripReport {
   trip: TripData;
   parcels: {
     id: string;
-    internalNumber: string;
+    internalNumber: string; journeyNumber?: number | null;
     status: ParcelStatusType;
     totalWeight: number | null;
   }[];
@@ -252,7 +253,7 @@ export default function ReportsPage() {
                   return (
                   <div key={p.id} className="p-3 flex items-center justify-between">
                     <div>
-                      <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
+                      <span className="font-mono text-sm font-medium">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</span>
                       <span className="text-sm text-gray-500 ml-2">
                         {pt.receiver.lastName} {pt.receiver.firstName}
                       </span>

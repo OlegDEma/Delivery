@@ -16,6 +16,8 @@ import { ContactIcons } from '@/components/shared/contact-icons';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { toast } from 'sonner';
+import { formatPostalCodeInput } from '@/lib/utils/postal-code';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface PartyAddr {
   country: string | null;
@@ -30,7 +32,7 @@ interface PartyAddr {
 
 interface RouteItem {
   id: string;
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   shortNumber: number | null;
   status: ParcelStatusType;
   direction: string;
@@ -138,7 +140,7 @@ export default function RoutesPage() {
     routeSheetId?: string | null;
     // ТЗ docx 11.09.26: посилка, створена з цієї ручної адреси.
     createdParcelId?: string | null;
-    createdParcel?: { id: string; internalNumber: string } | null;
+    createdParcel?: { id: string; internalNumber: string; journeyNumber?: number | null } | null;
   }[]>([]);
   // ТЗ docx 08.08.26 (v12): операційне вікно для РУЧНИХ адрес у листі (статус/причина
   // зберігаються на самому RouteTask, бо посилки немає). Ключ — id задачі.
@@ -680,8 +682,8 @@ export default function RoutesPage() {
    */
   function parcelSlot(t: ManualTask): { kind: 'number'; text: string; href: string } | { kind: 'create' } | null {
     const v = addressView(t);
-    if (v.parcel) return { kind: 'number', text: v.parcel.internalNumber, href: `/parcels/${v.parcel.id}` };
-    if (t.createdParcel) return { kind: 'number', text: t.createdParcel.internalNumber, href: `/parcels/${t.createdParcel.id}` };
+    if (v.parcel) return { kind: 'number', text: parcelNumberWithJourney(v.parcel.internalNumber, v.parcel.journeyNumber), href: `/parcels/${v.parcel.id}` };
+    if (t.createdParcel) return { kind: 'number', text: parcelNumberWithJourney(t.createdParcel.internalNumber, t.createdParcel.journeyNumber), href: `/parcels/${t.createdParcel.id}` };
     if (v.status === 'Відправник') return { kind: 'create' };
     return null;
   }
@@ -737,7 +739,7 @@ export default function RoutesPage() {
         phone: d.phone || '',
         name: d.name || '',
         direction: p.direction === 'eu_to_ua' ? `${selectedJourney?.country}-UA` : `UA-${selectedJourney?.country}`,
-        number: p.internalNumber,
+        number: parcelNumberWithJourney(p.internalNumber, p.journeyNumber),
       };
     }
     return {
@@ -1113,7 +1115,7 @@ export default function RoutesPage() {
                       </div>
                       {/* ТЗ docx 11.09.26 (п.1): третій рядок — номер уже створеної посилки · іконки. */}
                       <div className="text-xs mt-0.5 ml-5 flex items-center gap-2 flex-wrap print:hidden">
-                        <Link href={`/parcels/${p.id}`} className="font-mono text-gray-900 hover:text-blue-600">{p.internalNumber}</Link>
+                        <Link href={`/parcels/${p.id}`} className="font-mono text-gray-900 hover:text-blue-600">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</Link>
                         <ContactIcons phone={d.phone} />
                       </div>
                     </div>
@@ -1207,7 +1209,8 @@ export default function RoutesPage() {
               </div>
               {/* ТЗ docx 30.08.26: Індекс | Місто */}
               <div className="grid grid-cols-2 gap-2">
-                <Input placeholder="Індекс" value={manualForm.postalCode} onChange={(e) => setManualForm(f => ({ ...f, postalCode: e.target.value }))} className="h-8 text-sm" />
+                {/* ТЗ docx 12.10.26: NL-індекс — «1234 AB». */}
+                <Input placeholder="Індекс" value={manualForm.postalCode} onChange={(e) => { const v = e.target.value; setManualForm(f => ({ ...f, postalCode: formatPostalCodeInput(v, f.postalCode, showUA ? 'UA' : selectedJourney?.country) })); }} className="h-8 text-sm" />
                 <Input placeholder="Місто" value={manualForm.manualCity} onChange={(e) => setManualForm(f => ({ ...f, manualCity: e.target.value }))} className="h-8 text-sm" />
               </div>
               {/* ТЗ docx 30.08.26: Вулиця | Номер будинку (раніше був один рядок адреси). */}

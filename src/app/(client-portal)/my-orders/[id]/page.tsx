@@ -38,6 +38,8 @@ import { CLIENT_TRANSFER_STATUSES } from '@/lib/parcels/transfer-rules';
 interface ParcelDetail {
   id: string;
   internalNumber: string;
+  /** ТЗ docx 12.10.26: номер у поїздці — замість старого порядкового. */
+  journeyNumber?: number | null;
   itn: string;
   npTtn: string | null;
   /** ТЗ docx 04.10.26: рейсу до країни посилки в базі немає взагалі (з API). */
@@ -207,7 +209,7 @@ export default function MyOrderDetailPage() {
           {/* ТЗ docx 04.10.26: дату створення з шапки прибрано — замість неї номер
               рейсу, до якого автоматично прив'язана посилка. */}
           <h1 className="text-xl font-bold font-mono">
-            {displayParcelNumber(parcel.internalNumber)}
+            {displayParcelNumber(parcel.internalNumber, parcel.journeyNumber)}
             {parcel.trip && <>, Рейс: {formatDate(parcel.trip.departureDate)}({parcel.trip.country})</>}
           </h1>
           <Badge className={STATUS_COLORS[parcel.status]}>

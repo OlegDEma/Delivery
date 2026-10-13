@@ -8,10 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { STATUS_LABELS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface ScanResult {
   id: string;
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   itn: string;
   status: ParcelStatusType;
   totalPlacesCount: number;
@@ -173,7 +174,7 @@ export default function WarehouseScanPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">{scannedParcels.length - i}</span>
-                  <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
+                  <span className="font-mono text-sm font-medium">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</span>
                 </div>
                 <div className="text-sm text-gray-600 mt-0.5">
                   {pt.receiver.lastName} {pt.receiver.firstName} | {pt.receiver.phone}

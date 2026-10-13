@@ -20,6 +20,7 @@ import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { formatDate } from '@/lib/utils/format';
 import { formatItn } from '@/lib/utils/itn';
 import { parcelRouteLabel } from '@/lib/constants/countries';
+import { messageParcelLabel } from '@/lib/parcels/display-number';
 
 export type MessageChannel = 'sms' | 'viber' | 'whatsapp';
 
@@ -33,7 +34,7 @@ function baseUrl(): string {
 
 /** ТЗ docx 17.08.26 (Частина 3): текст підтвердження — той самий, що на детальній посилки. */
 export function buildConfirmationBody(parcel: {
-  internalNumber: string; itn: string; npTtn?: string | null; totalPlacesCount: number;
+  internalNumber: string; journeyNumber?: number | null; itn: string; npTtn?: string | null; totalPlacesCount: number;
   totalCost: unknown; direction: string; description: string | null;
   trip: { departureDate: Date | string; country: string } | null;
   collectionPoint?: { country: string } | null;
@@ -45,8 +46,9 @@ export function buildConfirmationBody(parcel: {
   receiver: { firstName: string; lastName: string; phone: string };
 }): string {
   const p = parcelParties(parcel);
-  // «135 Amstetten 1/2, 17.08.26» → «135 Amstetten, 17.08.26» (без суфікса місць).
-  const label = parcel.internalNumber.replace(/\s\d+(?:\/\d+)?,/, ',');
+  // «135 Amstetten 1/2, 17.08.26» → «Amstetten, 17.08.26» (без суфікса місць);
+  // ТЗ docx 12.10.26: замість старого порядкового номера — номер у поїздці.
+  const label = messageParcelLabel(parcel.internalNumber, parcel.journeyNumber);
   const cost = parcel.totalCost != null ? Number(parcel.totalCost) : 0;
   return [
     `Посилка ${label}`,
@@ -172,7 +174,7 @@ export async function sendConfirmation(args: SendConfirmationArgs): Promise<{
   const parcel = await prisma.parcel.findUnique({
     where: { id: args.parcelId },
     select: {
-      id: true, internalNumber: true, itn: true, npTtn: true, totalPlacesCount: true, totalCost: true,
+      id: true, internalNumber: true, journeyNumber: true, itn: true, npTtn: true, totalPlacesCount: true, totalCost: true,
       direction: true, description: true, status: true, senderSnapshot: true, receiverSnapshot: true,
       sender: { select: { firstName: true, lastName: true, phone: true } },
       receiver: { select: { firstName: true, lastName: true, phone: true } },

@@ -5,6 +5,7 @@ import { canonicalPhone, normalizePhone } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
 import { parseBody, clientOrderSchema } from '@/lib/validators';
 import { createParcel } from '@/lib/services/parcel-creation';
+import { ensureJourneyNumbersWhere } from '@/lib/services/journey-numbering';
 import { findNearestTrip, parcelEuCountry } from '@/lib/parcels/nearest-trip';
 import { logger } from '@/lib/logger';
 import type { Country } from '@/generated/prisma/enums';
@@ -21,6 +22,9 @@ export async function GET() {
 
   const client = await prisma.client.findUnique({ where: { phone: profile.phone } });
   if (!client) return NextResponse.json([]);
+
+  // ТЗ docx 12.10.26: номер у поїздці — замість старого порядкового.
+  await ensureJourneyNumbersWhere({ deletedAt: null, OR: [{ senderId: client.id }, { receiverId: client.id }] });
 
   const parcels = await prisma.parcel.findMany({
     where: {

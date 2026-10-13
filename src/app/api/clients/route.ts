@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { normalizePhone } from '@/lib/utils/phone';
+import { normalizePhone, withCountryCode } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
 import { requireStaff } from '@/lib/auth/guards';
 import { phoneSchema, countrySchema, deliveryMethodSchema, safeJson } from '@/lib/validators/common';
@@ -137,7 +137,10 @@ export async function POST(request: NextRequest) {
     const msg = first ? `${first.path.join('.')}: ${first.message}` : 'Невалідні дані';
     return NextResponse.json({ error: msg }, { status: 400 });
   }
-  const { phone, firstName, lastName, middleName, clientType, organizationName, country, notes, address } = parsed.data;
+  const { firstName, lastName, middleName, clientType, organizationName, country, notes, address } = parsed.data;
+  // ТЗ docx 12.10.26: «Усі телефони… з кодом країни». Номер без «+» (напр. цифри з поля
+  // пошуку) доповнюємо кодом країни клієнта/адреси — як його показує селектор форми.
+  const phone = withCountryCode(parsed.data.phone, country || address?.country);
 
   // Check if phone already exists. Note: check + create is NOT atomic; a
   // race between two simultaneous POSTs would let both pass this check.

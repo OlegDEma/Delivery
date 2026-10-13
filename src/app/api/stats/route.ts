@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { startOfKyivToday } from '@/lib/utils/tz';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 export async function GET() {
   const supabase = await createClient();
@@ -43,11 +44,11 @@ export async function GET() {
     ]);
     const dRecentParcels = tripIds.length ? await prisma.parcel.findMany({
       where: scope, take: 5, orderBy: { createdAt: 'desc' },
-      select: { id: true, internalNumber: true, status: true, createdAt: true, createdSource: true, createdBy: { select: { role: true } }, receiver: { select: { lastName: true, firstName: true, phone: true } }, senderSnapshot: true, receiverSnapshot: true },
+      select: { id: true, internalNumber: true, journeyNumber: true, status: true, createdAt: true, createdSource: true, createdBy: { select: { role: true } }, receiver: { select: { lastName: true, firstName: true, phone: true } }, senderSnapshot: true, receiverSnapshot: true },
     }) : [];
     const dRecentActivity = tripIds.length ? await prisma.parcelStatusHistory.findMany({
       where: { parcel: { tripId: { in: tripIds } } }, take: 10, orderBy: { changedAt: 'desc' },
-      include: { parcel: { select: { internalNumber: true, id: true } }, changedBy: { select: { fullName: true } } },
+      include: { parcel: { select: { internalNumber: true, journeyNumber: true, id: true } }, changedBy: { select: { fullName: true } } },
     }) : [];
     const flights = (journey?.trips ?? []).slice().sort((a, b) => (a.direction === 'ua_to_eu' ? 0 : 1) - (b.direction === 'ua_to_eu' ? 0 : 1));
     return NextResponse.json({
@@ -57,7 +58,7 @@ export async function GET() {
       // ТЗ docx 08.08.26: «Найближчі рейси» — обидва рейси поїздки (ua_to_eu першим).
       upcomingFlights: flights.map((t) => ({ id: t.id, direction: t.direction, country: t.country, departureDate: t.departureDate, status: t.status, parcels: t._count.parcels })),
       recentParcels: dRecentParcels,
-      recentActivity: dRecentActivity.map((a) => ({ id: a.id, parcelId: a.parcel.id, parcelNumber: a.parcel.internalNumber, status: a.status, changedBy: a.changedBy?.fullName || 'Система', changedAt: a.changedAt, notes: a.notes })),
+      recentActivity: dRecentActivity.map((a) => ({ id: a.id, parcelId: a.parcel.id, parcelNumber: parcelNumberWithJourney(a.parcel.internalNumber, a.parcel.journeyNumber), status: a.status, changedBy: a.changedBy?.fullName || 'Система', changedAt: a.changedAt, notes: a.notes })),
     });
   }
 
@@ -100,7 +101,7 @@ export async function GET() {
     take: 10,
     orderBy: { changedAt: 'desc' },
     include: {
-      parcel: { select: { internalNumber: true, id: true } },
+      parcel: { select: { internalNumber: true, journeyNumber: true, id: true } },
       changedBy: { select: { fullName: true } },
     },
   });
@@ -112,7 +113,7 @@ export async function GET() {
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
-      internalNumber: true,
+      internalNumber: true, journeyNumber: true,
       status: true,
       createdAt: true,
       // ТЗ docx 04.10.26: «Створена клієнтом/водієм/…».
@@ -141,7 +142,7 @@ export async function GET() {
     recentActivity: recentActivity.map(a => ({
       id: a.id,
       parcelId: a.parcel.id,
-      parcelNumber: a.parcel.internalNumber,
+      parcelNumber: parcelNumberWithJourney(a.parcel.internalNumber, a.parcel.journeyNumber),
       status: a.status,
       changedBy: a.changedBy?.fullName || 'Система',
       changedAt: a.changedAt,

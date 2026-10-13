@@ -1,6 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -110,7 +112,20 @@ function pickFocusPassengerTripIds(list: TripSummary[]): Set<string> {
   return ids;
 }
 
+// useSearchParams() потребує Suspense-обгортки (інакше Next не зможе пререндерити сторінку).
 export default function PassengersPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-12 text-gray-500">Завантаження...</div>}>
+      <PassengersContent />
+    </Suspense>
+  );
+}
+
+function PassengersContent() {
+  // ТЗ docx 12.10.26 «Логістика/Рейси»: з рейсу можна перейти до його пасажирів
+  // (/passengers?tripId=…) і повернутись назад у той самий рейс.
+  const searchParams = useSearchParams();
+  const router = useRouter();
   // ТЗ docx 18.08.26: Водію заборонено видаляти пасажирів (API вже 403 —
   // ховаємо й кнопку). Видаляти може лише адмін/суперадмін.
   const { role } = useAuth();
@@ -128,7 +143,7 @@ export default function PassengersPage() {
   const [loadingTrips, setLoadingTrips] = useState(true);
 
   // Drill-down стан: якщо вибрано — показуємо деталі рейсу.
-  const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(() => searchParams.get('tripId'));
   const [selectedTrip, setSelectedTrip] = useState<TripDetail | null>(null);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -286,9 +301,22 @@ export default function PassengersPage() {
 
     return (
       <div>
-        <Button variant="ghost" size="sm" onClick={() => { setSelectedTripId(null); setSelectedTrip(null); }} className="mb-3">
-          <ArrowLeft className="w-4 h-4 mr-1" /> До списку рейсів
-        </Button>
+        <div className="flex flex-wrap gap-1 mb-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedTripId(null); setSelectedTrip(null);
+              if (searchParams.get('tripId')) router.replace('/passengers');
+            }}
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" /> До списку рейсів
+          </Button>
+          {/* ТЗ docx 12.10.26: перехід назад — у Деталі цього рейсу (посилки + пасажири). */}
+          <Link href={`/trips/${selectedTripId}`}>
+            <Button variant="ghost" size="sm">До рейсу (посилки) →</Button>
+          </Link>
+        </div>
 
         {loadingDetail || !trip ? (
           <div className="text-center py-12 text-gray-500">Завантаження...</div>

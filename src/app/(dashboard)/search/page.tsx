@@ -10,10 +10,11 @@ import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/const
 import { formatDate, formatWeight } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { statusLabel } from '@/lib/parcels/status-label';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface SearchResult {
   id: string;
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   itn: string;
   status: ParcelStatusType;
   direction: string;
@@ -184,7 +185,7 @@ export default function SearchPage() {
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
+                  <span className="font-mono text-sm font-medium">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</span>
                   <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}</Badge>
                 </div>
                 <div className="text-sm">

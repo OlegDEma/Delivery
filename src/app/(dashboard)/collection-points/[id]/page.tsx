@@ -24,6 +24,7 @@ import {
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { EmptyState } from '@/components/shared/empty-state';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface CollectionPointDetail {
   id: string;
@@ -45,7 +46,7 @@ interface CollectionPointDetail {
 interface ParcelAtPoint {
   id: string;
   itn: string;
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   status: ParcelStatusType;
   totalWeight: number | null;
   totalPlacesCount: number;
@@ -104,7 +105,7 @@ export default function CollectionPointDetailPage() {
         return;
       }
       const searchData = await searchRes.json();
-      const found: { id: string; internalNumber: string; direction: string }[] = searchData.parcels || [];
+      const found: { id: string; internalNumber: string; journeyNumber?: number | null; direction: string }[] = searchData.parcels || [];
 
       if (found.length === 0) {
         toast.error('Посилку не знайдено');
@@ -131,7 +132,7 @@ export default function CollectionPointDetailPage() {
       });
 
       if (acceptRes.ok) {
-        toast.success(`Посилку ${parcel.internalNumber} прийнято`);
+        toast.success(`Посилку ${parcelNumberWithJourney(parcel.internalNumber, parcel.journeyNumber)} прийнято`);
         setAcceptOpen(false);
         setAcceptQuery('');
         setAcceptNotes('');
@@ -348,7 +349,7 @@ export default function CollectionPointDetailPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-mono font-medium">{p.internalNumber}</span>
+                              <span className="font-mono font-medium">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</span>
                               <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
                                 {STATUS_LABELS[p.status]}
                               </Badge>
@@ -397,7 +398,7 @@ export default function CollectionPointDetailPage() {
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-medium">{p.internalNumber}</span>
+                        <span className="font-mono font-medium">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</span>
                         <Badge variant="secondary" className="text-xs">
                           {STATUS_LABELS[p.status]}
                         </Badge>

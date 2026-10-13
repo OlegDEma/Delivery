@@ -23,6 +23,8 @@ import { isCourierAllowed, isPostalAllowed, isPickupPointAllowed, type ServiceRu
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 import { INSURANCE_AUTO_THRESHOLD_EUR } from '@/lib/constants/insurance';
+import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { formatPostalCodeInput } from '@/lib/utils/postal-code';
 
 interface PlaceData {
   weight: string;
@@ -424,13 +426,13 @@ export default function NewOrderPage() {
           doorstepDelivery: canDoorstep && doorstepDelivery,
           // «Пакет» недоступний клієнту (ТЗ §E10) — не відправляємо.
           payer, paymentMethod, paymentInUkraine,
-          senderPhone, senderFirstName, senderLastName, senderMiddleName, senderCountry, senderCity, senderPostalCode,
+          senderPhone, senderFirstName, senderLastName, senderMiddleName, senderCountry, senderCity, senderPostalCode: senderPostalCode.trim(),
           // Перевірка 22.09.26: адреса з блоку «Виклик курʼєра» — і в адресу відправника
           // (картка посилки, Маршрутний лист), а не лише у текстовий collectionAddress.
           senderStreet: collectionMethod === 'courier_pickup' ? collectionStreet.trim() || undefined : undefined,
           senderBuilding: collectionMethod === 'courier_pickup' ? collectionBuilding.trim() || undefined : undefined,
           senderLandmark: collectionMethod === 'courier_pickup' ? collectionLandmark.trim() || undefined : undefined,
-          receiverPhone, receiverFirstName, receiverLastName, receiverMiddleName, receiverCountry, receiverCity, receiverPostalCode,
+          receiverPhone, receiverFirstName, receiverLastName, receiverMiddleName, receiverCountry, receiverCity, receiverPostalCode: receiverPostalCode.trim(),
           receiverStreet, receiverBuilding, receiverLandmark, receiverDeliveryMethod, receiverNpWarehouse, receiverPickupPointText,
           places: places.map(p => ({
             weight: Number(p.weight) || 0,
@@ -451,7 +453,8 @@ export default function NewOrderPage() {
 
       if (res.ok) {
         const parcel = await res.json();
-        setSuccessNumber(parcel.internalNumber);
+        // ТЗ docx 12.10.26: без старого порядкового номера — номер у поїздці замість нього.
+        setSuccessNumber(displayParcelNumber(parcel.internalNumber, parcel.journeyNumber));
       } else {
         const data = await res.json().catch(() => null);
         setError(data?.error || 'Не вдалося створити замовлення. Спробуйте ще раз.');
@@ -635,7 +638,8 @@ export default function NewOrderPage() {
             {/* ТЗ §4: поле «Індекс» після Населеного пункту. */}
             <div>
               <Label>Індекс</Label>
-              <Input value={receiverPostalCode} onChange={(e) => setReceiverPostalCode(e.target.value)} placeholder="00-000" />
+              {/* ТЗ docx 12.10.26: NL-індекс — «1234 AB» (пробіл після цифр, літери великі). */}
+              <Input value={receiverPostalCode} onChange={(e) => setReceiverPostalCode(formatPostalCodeInput(e.target.value, receiverPostalCode, receiverCountry))} placeholder={receiverCountry === 'NL' ? '1234 AB' : '00-000'} />
             </div>
             {/* ТЗ §b: «Спосіб доставки» = рівно 3 опції як у Працівника:
                 Адресна доставка / Пошта / Пункт видачі. «Пункт видачі» — лише
@@ -770,7 +774,7 @@ export default function NewOrderPage() {
                 живуть у картці «Як ви передасте» нижче. */}
             <div>
               <Label>Індекс</Label>
-              <Input value={senderPostalCode} onChange={(e) => setSenderPostalCode(e.target.value)} placeholder="00-000" />
+              <Input value={senderPostalCode} onChange={(e) => setSenderPostalCode(formatPostalCodeInput(e.target.value, senderPostalCode, senderCountry))} placeholder={senderCountry === 'NL' ? '1234 AB' : '00-000'} />
             </div>
           </CardContent>
         </Card>

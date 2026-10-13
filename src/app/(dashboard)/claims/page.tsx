@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatDateTime } from '@/lib/utils/format';
 import { EmptyState } from '@/components/shared/empty-state';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface Claim {
   id: string;
@@ -19,7 +20,7 @@ interface Claim {
   resolution: string | null;
   status: string;
   createdAt: string;
-  parcel: { internalNumber: string; itn: string } | null;
+  parcel: { internalNumber: string; journeyNumber?: number | null; itn: string } | null;
   client: { firstName: string; lastName: string; phone: string } | null;
   createdBy: { fullName: string } | null;
 }
@@ -137,7 +138,7 @@ export default function ClaimsPage() {
                     <Badge variant="secondary">{TYPE_LABELS[c.type] || c.type}</Badge>
                     {c.parcel && (
                       <Link href={`/parcels/${c.id}`} className="font-mono text-sm text-blue-600 hover:underline">
-                        {c.parcel.internalNumber}
+                        {parcelNumberWithJourney(c.parcel.internalNumber, c.parcel.journeyNumber)}
                       </Link>
                     )}
                   </div>

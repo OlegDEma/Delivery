@@ -17,6 +17,7 @@ import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { formatDate, formatCurrency, formatDateTime } from '@/lib/utils/format';
 import { statusLabel } from '@/lib/parcels/status-label';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface Address {
   id: string;
@@ -34,7 +35,7 @@ interface Address {
 
 interface ParcelRef {
   id: string;
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   status: ParcelStatusType;
   createdAt: string;
   /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
@@ -59,7 +60,7 @@ interface CashEntry {
   paymentMethod: string;
   paymentType: string;
   createdAt: string;
-  parcel: { id: string; internalNumber: string } | null;
+  parcel: { id: string; internalNumber: string; journeyNumber?: number | null } | null;
   receivedBy: string | null;
 }
 
@@ -336,7 +337,7 @@ export default function ClientDetailPage() {
                     <div className="text-xs text-gray-500 mt-0.5">
                       {c.parcel ? (
                         <Link href={`/parcels/${c.parcel.id}`} className="font-mono text-blue-600 hover:underline">
-                          {c.parcel.internalNumber}
+                          {parcelNumberWithJourney(c.parcel.internalNumber, c.parcel.journeyNumber)}
                         </Link>
                       ) : (
                         <span>Без посилки</span>
@@ -495,7 +496,7 @@ export default function ClientDetailPage() {
           <div className="divide-y">
             {allParcels.map(p => (
               <Link key={p.id} href={`/parcels/${p.id}`} className="flex items-center justify-between px-4 py-2 hover:bg-gray-50">
-                <span className="font-mono text-sm">{p.internalNumber}</span>
+                <span className="font-mono text-sm">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</span>
                 <div className="flex items-center gap-2">
                   <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
                     {statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}

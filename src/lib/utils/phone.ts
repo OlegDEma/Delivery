@@ -1,3 +1,5 @@
+import { COUNTRY_PHONE_CODES, type CountryCode } from '../constants/countries';
+
 /**
  * Normalize phone number: remove all non-digit characters
  * Used for searching without country code
@@ -59,4 +61,23 @@ export function canonicalPhone(phone: string): string {
   const digits = normalizePhone(phone);
   if (!digits) return '';
   return `+${digits}`;
+}
+
+/**
+ * ТЗ docx 12.10.26: «Усі телефони повинні друкуватись з кодом країни». Номер, збережений
+ * без «+» (напр. «647863741» — оператор шукав клієнта за цифрами без коду, і форма
+ * створення взяла їх як є), доповнюємо кодом країни картки/адреси. Номер з «+» —
+ * без змін; невідома країна — повертаємо як є (не вгадуємо).
+ */
+export function withCountryCode(phone: string, country: string | null | undefined): string {
+  const trimmed = (phone || '').trim();
+  if (!trimmed || trimmed.startsWith('+')) return trimmed;
+  const code = country ? COUNTRY_PHONE_CODES[country as CountryCode] : undefined;
+  if (!code) return trimmed;
+  const digits = trimmed.replace(/\D/g, '');
+  const codeDigits = code.slice(1);
+  // Уже з кодом, але без «+» («31647863741», «380671234567»).
+  if (digits.startsWith(codeDigits) && digits.length > 9) return `+${digits}`;
+  // ТЗ: «Введіть номер без нуля» — національний нуль відкидаємо («0671234567» → «+380671234567»).
+  return `${code}${digits.replace(/^0+/, '')}`;
 }

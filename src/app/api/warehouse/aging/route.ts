@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     orderBy: { createdAt: 'asc' },
     select: {
       id: true,
-      internalNumber: true,
+      internalNumber: true, journeyNumber: true,
       itn: true,
       status: true,
       totalWeight: true,

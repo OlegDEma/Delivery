@@ -21,6 +21,9 @@ import { ROLES } from '@/lib/constants/roles';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { formatJourneyNumber } from '@/lib/utils/journey-number';
 import { formatDate } from '@/lib/utils/format';
+import { displayParcelNumber, withoutOrdinal } from '@/lib/parcels/display-number';
+// ТЗ docx 12.10.26: телефони завжди з кодом країни.
+import { withCountryCode } from '@/lib/utils/phone';
 
 const TRIP_STATUSES: Record<string, { label: string; color: string }> = {
   planned: { label: 'Заплановано', color: 'bg-blue-100 text-blue-800' },
@@ -68,6 +71,11 @@ interface TripDetail {
   parcels: TripParcel[];
   /** ТЗ docx 02.07.26 (D12): кількість місць для пасажирів (стеля пасажирів). */
   passengerCapacity: number;
+  /** ТЗ docx 12.10.26: пасажири цього рейсу. */
+  passengers: {
+    id: string; firstName: string; lastName: string; phone: string; seatNumber: number | null;
+    pickupAddress: string | null; dropoffAddress: string | null; isPaid: boolean;
+  }[];
   _count: { parcels: number; routeTasks: number };
   /** ТЗ docx 11.10.26: посилки, що покинули рейс (номер лишається за ними). */
   transfersOut: {
@@ -180,6 +188,11 @@ export default function TripDetailPage() {
 
   return (
     <div className="max-w-3xl space-y-4">
+      {/* ТЗ docx 12.10.26 «Ще одне»: при прокручуванні шапка рейсу (шлях, напрямок,
+          дати, кнопки) завжди лишається видимою вгорі екрана; решта — прокручується.
+          top-14 — під мобільною панеллю, на десктопі — top-0. Відʼємні відступи +
+          фон перекривають вміст, що прокручується під шапкою. */}
+      <div className="sticky top-14 md:top-0 z-20 bg-gray-50 -mx-4 px-4 md:-mx-6 md:px-6 pt-2 pb-3 border-b print:static">
       <Breadcrumbs items={[{label: 'Рейси', href: '/trips'}, {label: 'Деталі рейсу'}]} />
       {/* Header */}
       <div>
@@ -212,7 +225,12 @@ export default function TripDetailPage() {
           <Button variant="outline" size="sm" onClick={() => window.open(`/trips/${id}/print`, '_blank')}>
             🖨 Друк списку посилок
           </Button>
+          {/* ТЗ docx 12.10.26: перехід до пасажирів рейсу (і назад — кнопкою на їхній сторінці). */}
+          <Link href={`/passengers?tripId=${trip.id}`}>
+            <Button variant="outline" size="sm">🧍 Пасажири ({trip.passengers.length})</Button>
+          </Link>
         </div>
+      </div>
       </div>
 
       {/* ТЗ docx 02.07.26 (D12): картку «Митна декларація» прибрано (ті самі
@@ -358,7 +376,7 @@ export default function TripDetailPage() {
                   <div className="text-xs text-gray-500">
                     {g.items.map(p => (
                       <Link key={p.id} href={`/parcels/${p.id}`} className="inline-block mr-2 hover:underline">
-                        {p.internalNumber}
+                        {displayParcelNumber(p.internalNumber, p.journeyNumber)}
                       </Link>
                     ))}
                   </div>
@@ -376,7 +394,7 @@ export default function TripDetailPage() {
                       const pt = parcelParties(p);
                       return (
                       <Link key={p.id} href={`/parcels/${p.id}`} className="block text-xs hover:bg-gray-50 rounded px-1">
-                        <span className="font-mono">{p.internalNumber}</span>
+                        <span className="font-mono">{displayParcelNumber(p.internalNumber, p.journeyNumber)}</span>
                         <span className="text-gray-500"> — {pt.sender.lastName} {pt.sender.firstName}</span>
                         {p.collectionAddress && (
                           <span className="text-gray-400"> · {p.collectionAddress}</span>
@@ -397,7 +415,7 @@ export default function TripDetailPage() {
                   <div className="text-xs text-gray-500">
                     {external.map(p => (
                       <Link key={p.id} href={`/parcels/${p.id}`} className="inline-block mr-2 hover:underline">
-                        {p.internalNumber}
+                        {displayParcelNumber(p.internalNumber, p.journeyNumber)}
                       </Link>
                     ))}
                   </div>
@@ -413,7 +431,7 @@ export default function TripDetailPage() {
                   <div className="text-xs text-gray-500">
                     {direct.map(p => (
                       <Link key={p.id} href={`/parcels/${p.id}`} className="inline-block mr-2 hover:underline">
-                        {p.internalNumber}
+                        {displayParcelNumber(p.internalNumber, p.journeyNumber)}
                       </Link>
                     ))}
                   </div>
@@ -442,7 +460,7 @@ export default function TripDetailPage() {
                         ? <>Перенесена до рейсу {tripRouteLabel(g.toTrip.country, g.toTrip.direction)} {formatDate(g.toTrip.departureDate)}</>
                         : <>Прибрана з рейсу</>}
                       {' · '}
-                      <Link href={`/parcels/${g.parcel.id}`} className="font-mono hover:underline">{g.parcel.internalNumber}</Link>
+                      <Link href={`/parcels/${g.parcel.id}`} className="font-mono hover:underline">{displayParcelNumber(g.parcel.internalNumber)}</Link>
                     </span>
                   </div>
                 );
@@ -453,20 +471,22 @@ export default function TripDetailPage() {
               <div key={p.id} className="px-4 py-3 flex items-start justify-between hover:bg-gray-50">
                 <Link href={`/parcels/${p.id}`} className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    {/* ТЗ docx 11.10.26: номер у поїздці (001…N); «Створена» ще без номера. */}
+                    {/* ТЗ docx 11.10.26: номер у поїздці (001…N). ТЗ docx 12.10.26: номер є
+                        з моменту прив'язки до рейсу (і в «Створеної»); старий порядковий
+                        номер прибрано. «без №» лишається лише для рейсів поза поїздкою. */}
                     {p.journeyNumber != null ? (
                       <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono font-semibold">{formatJourneyNumber(p.journeyNumber)}</span>
                     ) : (
-                      <span className="text-[10px] text-gray-400" title="Номер присвоюється після прийняття до перевезення">без №</span>
+                      <span className="text-[10px] text-gray-400" title="Рейс не прив'язаний до поїздки — номер у поїздці не присвоюється">без №</span>
                     )}
-                    <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
+                    <span className="font-mono text-sm font-medium">{withoutOrdinal(p.internalNumber)}</span>
                     <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
                       {statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
                     </Badge>
                   </div>
                   <div className="text-sm">
                     {pt.receiver.lastName} {pt.receiver.firstName}
-                    <span className="text-gray-400 ml-1">{pt.receiver.phone}</span>
+                    <span className="text-gray-400 ml-1">{withCountryCode(pt.receiver.phone, pt.receiver.address?.country)}</span>
                   </div>
                   {pt.receiver.address && (
                     <div className="text-xs text-gray-400">
@@ -505,10 +525,49 @@ export default function TripDetailPage() {
         </CardContent>
       </Card>
 
+      {/* ТЗ docx 12.10.26 «Логістика/Рейси»: у кожному рейсі — і пасажири цього рейсу,
+          з переходом до їхньої сторінки (і назад кнопкою «До рейсу»). */}
+      <Card>
+        <CardHeader className="py-3 px-4 flex flex-row items-center justify-between">
+          <CardTitle className="text-base">
+            Пасажири рейсу ({trip.passengers.length}{trip.passengerCapacity ? ` з ${trip.passengerCapacity}` : ''})
+          </CardTitle>
+          <Link href={`/passengers?tripId=${trip.id}`} className="text-sm text-blue-600 hover:underline">
+            Відкрити →
+          </Link>
+        </CardHeader>
+        <CardContent className="px-0 pb-0">
+          <div className="divide-y">
+            {trip.passengers.map((ps) => (
+              <Link key={ps.id} href={`/passengers?tripId=${trip.id}`} className="px-4 py-2 flex items-start gap-2 hover:bg-gray-50">
+                <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono font-semibold shrink-0" title="Місце">
+                  {ps.seatNumber ?? '—'}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm">
+                    {ps.lastName} {ps.firstName}
+                    <span className="text-gray-400 ml-1">{ps.phone}</span>
+                  </div>
+                  {(ps.pickupAddress || ps.dropoffAddress) && (
+                    <div className="text-xs text-gray-400">{ps.pickupAddress || '—'} → {ps.dropoffAddress || '—'}</div>
+                  )}
+                </div>
+                <Badge className={`text-xs shrink-0 ${ps.isPaid ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                  {ps.isPaid ? 'Оплачено' : 'Не оплачено'}
+                </Badge>
+              </Link>
+            ))}
+            {trip.passengers.length === 0 && (
+              <div className="text-center py-4 text-gray-500 text-sm">Пасажирів у рейсі немає.</div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       <ConfirmDialog
         open={!!removeTarget}
         title="Ви дійсно хочете видалити посилку?"
-        description={removeTarget ? <>Посилку {removeTarget.internalNumber} буде прибрано з цього рейсу (сама посилка лишиться в системі).</> : null}
+        description={removeTarget ? <>Посилку {displayParcelNumber(removeTarget.internalNumber, removeTarget.journeyNumber)} буде прибрано з цього рейсу (сама посилка лишиться в системі).</> : null}
         confirmLabel="Так, видалити"
         destructive
         busy={removing}

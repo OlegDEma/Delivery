@@ -33,7 +33,7 @@ import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { toast } from 'sonner';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
-import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { displayParcelNumber, messageParcelLabel } from '@/lib/parcels/display-number';
 import { formatItn } from '@/lib/utils/itn';
 import { NO_TRIP_MESSAGE, OPERATOR_PHONE } from '@/lib/parcels/no-trip';
 import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
@@ -341,8 +341,9 @@ export default function ParcelDetailPage() {
   //   <порожній рядок>
   //   Вартість / Напрямок / Опис / Відстежити
   // Рядок «ІТН: …» (ТЗ 17.08.26) повернуто за ТЗ docx 07.10.26; ТТН — додатково, коли є.
-  // Суфікс кількості місць («135 Amstetten 1/2, …» → «135 Amstetten, …») прибираємо.
-  const parcelLabel = parcel.internalNumber.replace(/\s\d+(?:\/\d+)?,/, ',');
+  // Суфікс кількості місць («135 Amstetten 1/2, …» → «135 Amstetten, …») прибираємо;
+  // ТЗ docx 12.10.26: старий порядковий номер — теж, замість нього номер у поїздці.
+  const parcelLabel = messageParcelLabel(parcel.internalNumber, parcel.journeyNumber);
   const confirmationMessage = [
     `Посилка ${parcelLabel}`,
     parcel.trip ? `Рейс: ${formatDate(parcel.trip.departureDate)}(${parcel.trip.country})` : null,
@@ -375,9 +376,14 @@ export default function ParcelDetailPage() {
 
   return (
     <div className="max-w-3xl space-y-4">
+      {/* ТЗ docx 12.10.26 «Переходи між сторінками»: шлях Посилки / Рейс (дата і куди) /
+          номер посилки і місто — клік по Рейсу повертає в той самий рейс без меню. */}
       <Breadcrumbs items={[
         { label: 'Посилки', href: '/parcels' },
-        { label: displayParcelNumber(parcel.internalNumber) },
+        ...(parcel.trip
+          ? [{ label: `Рейс: ${formatDate(parcel.trip.departureDate)}(${parcel.trip.country})`, href: `/trips/${parcel.trip.id}` }]
+          : []),
+        { label: displayParcelNumber(parcel.internalNumber, parcel.journeyNumber) },
       ]} />
 
       {/* Client order — awaiting confirmation */}
@@ -413,6 +419,8 @@ export default function ParcelDetailPage() {
           {/* ТЗ docx 04.10.26: дату створення з шапки прибрано — замість неї номер
               рейсу, за яким закріплена посилка. Олівець — редагування рейсу/кур'єра
               (раніше був у рядку «Рейс | Кур'єр» внизу картки, який ТЗ прибрало). */}
+          {/* ТЗ docx 12.10.26: старий порядковий номер прибрано (displayParcelNumber) —
+              номер посилки тепер «№ 001» у поїздці поруч. */}
           <h1 className="text-xl font-bold font-mono">
             {displayParcelNumber(parcel.internalNumber)}
             {parcel.trip && <>, Рейс: {formatDate(parcel.trip.departureDate)}({parcel.trip.country})</>}

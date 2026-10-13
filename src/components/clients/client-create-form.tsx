@@ -15,6 +15,8 @@ import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { isCourierAllowed, isPostalAllowed } from '@/lib/utils/logistics-availability';
 import { transliterateCity, normalizeCityForMatch } from '@/lib/utils/transliterate';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
+import { withCountryCode } from '@/lib/utils/phone';
+import { formatPostalCodeInput } from '@/lib/utils/postal-code';
 
 /**
  * ТЗ (docx 14.05.26 §a): при «Виклик кур'єра» у формі Відправника оператор
@@ -160,7 +162,10 @@ export function ClientCreateForm({
     (NonNullable<typeof initialData>['addresses'][number] & { pickupPointText?: string | null })
     | undefined;
 
-  const [phone, setPhone] = useState(initialData?.phone || initialPhone || '');
+  // ТЗ docx 12.10.26 («чому деякі телефони без коду країни?»): цифри з поля пошуку
+  // («647863741») раніше потрапляли в стан як є — селектор показував 🇳🇱 +31, а в базу
+  // йшов номер без коду. Тепер одразу доповнюємо кодом країни, яку показує селектор.
+  const [phone, setPhone] = useState(() => withCountryCode(initialData?.phone || initialPhone || '', initialCountry));
   const [firstName, setFirstName] = useState(initialData?.firstName || prefillAddress?.firstName || '');
   const [lastName, setLastName] = useState(initialData?.lastName || prefillAddress?.lastName || '');
   const [middleName, setMiddleName] = useState(initialData?.middleName || '');
@@ -336,7 +341,7 @@ export function ClientCreateForm({
         country,
         city,
         deliveryMethod,
-        postalCode: postalCode || undefined,
+        postalCode: postalCode.trim() || undefined,
       };
       const address =
         deliveryMethod === 'np_warehouse'
@@ -409,7 +414,7 @@ export function ClientCreateForm({
           // саме ClientAddress.country читає підсумок («Країна: …»).
           country,
           deliveryMethod,
-          postalCode: postalCode || null,
+          postalCode: postalCode.trim() || null,
           city,
           street: street || null,
           building: building || null,
@@ -629,8 +634,9 @@ export function ClientCreateForm({
           </Label>
           <Input
             value={postalCode}
-            onChange={(e) => setPostalCode(e.target.value)}
-            placeholder="00-000"
+            // ТЗ docx 12.10.26: NL-індекс — «1234 AB» (пробіл після цифр, літери великі).
+            onChange={(e) => setPostalCode(formatPostalCodeInput(e.target.value, postalCode, country))}
+            placeholder={country === 'NL' ? '1234 AB' : '00-000'}
           />
         </div>
       </div>

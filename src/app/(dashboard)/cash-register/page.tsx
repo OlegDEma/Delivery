@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { formatDateTime, formatCurrency } from '@/lib/utils/format';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface CashEntry {
   id: string;
@@ -18,7 +19,7 @@ interface CashEntry {
   paymentType: string;
   description: string | null;
   createdAt: string;
-  parcel: { internalNumber: string } | null;
+  parcel: { internalNumber: string; journeyNumber?: number | null } | null;
   receivedBy: { fullName: string };
 }
 
@@ -197,7 +198,7 @@ export default function CashRegisterPage() {
                   </Badge>
                 </div>
                 <div className="text-xs text-gray-500 mt-0.5">
-                  {e.description || (e.parcel ? `Посилка ${e.parcel.internalNumber}` : '—')}
+                  {e.description || (e.parcel ? `Посилка ${parcelNumberWithJourney(e.parcel.internalNumber, e.parcel.journeyNumber)}` : '—')}
                 </div>
               </div>
               <div className="text-right text-xs text-gray-400">

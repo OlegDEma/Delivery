@@ -22,6 +22,7 @@ import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { formatItn } from '@/lib/utils/itn';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 export interface InvoiceContext {
   /** Recipient party — who's getting the SMS. */
@@ -163,7 +164,7 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
   const parcel = await prisma.parcel.findUnique({
     where: { id: args.parcelId },
     select: {
-      id: true, itn: true, npTtn: true, internalNumber: true, totalCost: true,
+      id: true, itn: true, npTtn: true, internalNumber: true, journeyNumber: true, totalCost: true,
       // ТЗ docx 26.07.26 (п.1): для accepted+ ПІБ/тел беремо зі знімка (parcelParties).
       status: true, senderSnapshot: true, receiverSnapshot: true,
       sender: { select: { firstName: true, lastName: true, phone: true } },
@@ -191,7 +192,8 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
       phone,
       amount: totalCost,
       itn: parcel.itn,
-      internalNumber: parcel.internalNumber,
+      // ТЗ docx 12.10.26: у повідомленні — без старого порядкового номера.
+      internalNumber: parcelNumberWithJourney(parcel.internalNumber, parcel.journeyNumber),
       npTtn: parcel.npTtn,
     },
     {

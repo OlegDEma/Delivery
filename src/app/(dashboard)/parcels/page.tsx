@@ -26,6 +26,8 @@ interface ParcelListItem {
   id: string;
   itn: string;
   internalNumber: string;
+  /** ТЗ docx 12.10.26: номер у поїздці — замість старого порядкового. */
+  journeyNumber?: number | null;
   /** ТЗ docx 03.10.26 (п.4): ТТН Нової пошти має бути видно і в списку Працівника. */
   npTtn: string | null;
   direction: string;
@@ -450,7 +452,7 @@ function ParcelsContent() {
                       <div className="flex-1 min-w-0">
                         {/* flex-wrap so long status badges don't overflow on mobile */}
                         <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                          <span className="font-mono text-sm font-medium">{displayParcelNumber(p.internalNumber)}</span>
+                          <span className="font-mono text-sm font-medium">{displayParcelNumber(p.internalNumber, p.journeyNumber)}</span>
                           <Badge className={`text-xs whitespace-normal text-left h-auto py-0.5 ${STATUS_COLORS[p.status]}`}>
                             {statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
                           </Badge>

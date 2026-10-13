@@ -31,7 +31,7 @@ export async function GET() {
     totalDebt: number;
     parcelsCount: number;
     oldestDate: string;
-    parcels: { id: string; internalNumber: string; totalCost: number; createdAt: string; direction: string }[];
+    parcels: { id: string; internalNumber: string; journeyNumber: number | null; totalCost: number; createdAt: string; direction: string }[];
   }>();
 
   for (const p of unpaidParcels) {
@@ -44,6 +44,7 @@ export async function GET() {
     const parcelInfo = {
       id: p.id,
       internalNumber: p.internalNumber,
+      journeyNumber: p.journeyNumber,
       totalCost: Number(p.totalCost) || 0,
       createdAt: p.createdAt.toISOString(),
       direction: p.direction,

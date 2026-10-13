@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       routeSheetId: true,
       // ТЗ docx 11.09.26: номер посилки, створеної з цієї ручної адреси.
       createdParcelId: true,
-      createdParcel: { select: { id: true, internalNumber: true } },
+      createdParcel: { select: { id: true, internalNumber: true, journeyNumber: true } },
     },
   });
   return NextResponse.json(tasks);

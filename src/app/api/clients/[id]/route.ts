@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { normalizePhone } from '@/lib/utils/phone';
+import { normalizePhone, withCountryCode } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { ADMIN_ROLES } from '@/lib/constants/roles';
@@ -28,13 +28,13 @@ export async function GET(
         where: { deletedAt: null },
         take: 10,
         orderBy: { createdAt: 'desc' },
-        select: { id: true, internalNumber: true, status: true, createdAt: true, createdSource: true, createdBy: { select: { role: true } } },
+        select: { id: true, internalNumber: true, journeyNumber: true, status: true, createdAt: true, createdSource: true, createdBy: { select: { role: true } } },
       },
       receivedParcels: {
         where: { deletedAt: null },
         take: 10,
         orderBy: { createdAt: 'desc' },
-        select: { id: true, internalNumber: true, status: true, createdAt: true, createdSource: true, createdBy: { select: { role: true } } },
+        select: { id: true, internalNumber: true, journeyNumber: true, status: true, createdAt: true, createdSource: true, createdBy: { select: { role: true } } },
       },
     },
   });
@@ -107,7 +107,7 @@ export async function GET(
         paymentMethod: true,
         paymentType: true,
         createdAt: true,
-        parcel: { select: { id: true, internalNumber: true } },
+        parcel: { select: { id: true, internalNumber: true, journeyNumber: true } },
         receivedBy: { select: { fullName: true } },
       },
     }),
@@ -161,7 +161,7 @@ export async function PATCH(
 
   // Update client fields
   if (body.action === 'update') {
-    const { phone, firstName, lastName, middleName, country, notes } = body;
+    const { firstName, lastName, middleName, country, notes } = body;
     const data: {
       phone?: string;
       phoneNormalized?: string;
@@ -175,9 +175,15 @@ export async function PATCH(
     // Verify client exists before update.
     const exists = await prisma.client.findFirst({
       where: { id, deletedAt: null },
-      select: { id: true, phone: true, phoneNormalized: true },
+      select: { id: true, phone: true, phoneNormalized: true, country: true },
     });
     if (!exists) return NextResponse.json({ error: 'Клієнта не знайдено' }, { status: 404 });
+
+    // ТЗ docx 12.10.26: телефон зберігаємо лише з кодом країни (номер без «+» доповнюємо
+    // кодом країни клієнта — так само, як його показує селектор у формі).
+    const phone: string | undefined = typeof body.phone === 'string'
+      ? withCountryCode(body.phone, country ?? exists.country)
+      : body.phone;
 
     // Per ТЗ §E7: «При спробі редагувати лише телефон видає "Клієнт з таким
     // номером вже існує" і не дозволяє зберегти». Корінь — PhoneInput при

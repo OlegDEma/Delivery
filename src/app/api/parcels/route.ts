@@ -4,6 +4,7 @@ import { requireStaff } from '@/lib/auth/guards';
 import { ROLES } from '@/lib/constants/roles';
 import { parseBody, createParcelSchema } from '@/lib/validators';
 import { createParcel } from '@/lib/services/parcel-creation';
+import { ensureJourneyNumbersWhere } from '@/lib/services/journey-numbering';
 import { findNearestTrip, parcelEuCountry } from '@/lib/parcels/nearest-trip';
 import { checkItnQuery, INVALID_ITN_MESSAGE } from '@/lib/utils/itn';
 import { logger } from '@/lib/logger';
@@ -277,6 +278,9 @@ export async function GET(request: NextRequest) {
       where.OR = driverScope;
     }
   }
+
+  // ТЗ docx 12.10.26: номер у поїздці стоїть у списку замість старого порядкового.
+  await ensureJourneyNumbersWhere(where);
 
   const [parcels, total] = await Promise.all([
     prisma.parcel.findMany({

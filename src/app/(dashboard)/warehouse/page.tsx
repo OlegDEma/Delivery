@@ -10,10 +10,11 @@ import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/const
 import { formatDate } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { statusLabel } from '@/lib/parcels/status-label';
+import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 
 interface ParcelItem {
   id: string;
-  internalNumber: string;
+  internalNumber: string; journeyNumber?: number | null;
   itn: string;
   status: ParcelStatusType;
   totalPlacesCount: number;
@@ -252,7 +253,7 @@ export default function WarehousePage() {
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-mono text-sm font-medium">{p.internalNumber}</span>
+                    <span className="font-mono text-sm font-medium">{parcelNumberWithJourney(p.internalNumber, p.journeyNumber)}</span>
                     <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
                       {statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
                     </Badge>

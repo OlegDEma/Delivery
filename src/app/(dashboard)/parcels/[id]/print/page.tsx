@@ -9,6 +9,7 @@ import { formatDate } from '@/lib/utils/format';
 import { formatItn, formatPlaceItn } from '@/lib/utils/itn';
 import { Code128 } from '@/components/shared/code128';
 import { formatJourneyNumber } from '@/lib/utils/journey-number';
+import { parcelNumberWithJourney, withoutOrdinal } from '@/lib/parcels/display-number';
 
 interface PrintData {
   itn: string;
@@ -115,9 +116,10 @@ export default function PrintLabelPage() {
               </div>
             </div>
 
-            {/* Internal number - BIG */}
+            {/* Internal number - BIG. ТЗ docx 12.10.26: старий порядковий номер прибрано —
+                номер у поїздці вже надруковано великим «№001» вище. */}
             <div className="text-center font-bold text-[14px] border-b border-dashed pb-1 mb-1">
-              {data.internalNumber}
+              {withoutOrdinal(data.internalNumber)}
             </div>
 
             {/* From */}
@@ -167,7 +169,7 @@ export default function PrintLabelPage() {
       {/* Full receipt for client (print on separate page) */}
       <div className="print-label border-2 border-black p-2 mb-4 max-w-[58mm] mx-auto text-[10px] leading-tight">
         <div className="text-center font-bold text-[12px] mb-1">КВИТАНЦІЯ</div>
-        <div className="text-center font-mono text-[11px] font-bold">{data.internalNumber}</div>
+        <div className="text-center font-mono text-[11px] font-bold">{parcelNumberWithJourney(data.internalNumber, data.journeyNumber)}</div>
         {/* ТЗ docx 07.10.26: ІТН на квитанції знову друкуємо — правила його формування
             затверджено (за ТЗ 03.10.26 його тимчасово прибирали). */}
         <div className="text-center font-mono text-[10px] mb-0.5">ІТН: {formatItn(data.itn)}</div>
