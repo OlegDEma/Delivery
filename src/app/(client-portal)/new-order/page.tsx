@@ -994,7 +994,7 @@ export default function NewOrderPage() {
 
         {/* Перевірка 15.09.26: помилка стояла внизу довгої форми поза екраном —
             клієнт її не бачив. Тепер при появі помилки прокручуємо до неї. */}
-        {error && <div ref={errorRef} className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 scroll-mt-4">{error}</div>}
+        {error && <div ref={errorRef} className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 scroll-mt-28">{error}</div>}
 
         {/* ТЗ docx 11.10.26 (Створення посилки — загальна зміна): послуги об'єднано під
             назвою «Додаткові послуги» і перенесено вниз — безпосередньо перед кнопкою

@@ -34,27 +34,30 @@ export default function ClientPortalLayout({ children }: { children: React.React
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+        {/* На телефоні (375 px) пункти меню не влазили в один рядок разом з логотипом —
+            сторінка отримувала горизонтальну прокрутку (знайдено 14.10.26 при тесті ТЗ 12.10).
+            Тепер: рядок 1 — логотип + «Вийти», рядок 2 — меню на всю ширину; від sm — один рядок. */}
+        <div className="max-w-3xl mx-auto px-4 py-2 sm:py-0 sm:h-14 flex flex-wrap items-center justify-between gap-y-1">
           {/* ТЗ docx 21.09.26 (п.2): у клієнтському порталі (в т.ч. на створенні
               посилки) назва теж «ПОСИЛОЧКА». */}
           <Link href="/my-orders" className="text-lg font-extrabold brand-wordmark">ПОСИЛОЧКА</Link>
-          <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="sm:order-last text-gray-500">
+            Вийти
+          </Button>
+          <nav className="w-full sm:w-auto sm:ml-auto flex items-center gap-1">
             {NAV.map(item => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'px-3 py-1.5 text-sm rounded-lg',
+                  'flex-auto sm:flex-none min-w-0 text-center px-1 sm:px-3 py-1.5 text-[13px] sm:text-sm rounded-lg whitespace-nowrap',
                   pathname === item.href ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'
                 )}
               >
                 {item.label}
               </Link>
             ))}
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="ml-2 text-gray-500">
-              Вийти
-            </Button>
-          </div>
+          </nav>
         </div>
       </header>
       <main className="max-w-3xl mx-auto px-4 py-6">{children}</main>
