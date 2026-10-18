@@ -24,6 +24,7 @@ import { CopyButton } from '@/components/shared/copy-button';
 import { ParcelPartyEdit } from '@/components/parcels/parcel-party-edit';
 import { SendInvoiceButton } from '@/components/parcels/send-invoice-button';
 import { InvoiceHistory } from '@/components/parcels/invoice-history';
+import { ListNoteEditor } from '@/components/parcels/list-note-editor';
 import { PhoneLink } from '@/components/shared/phone-link';
 import { AddressLink } from '@/components/shared/address-link';
 import { PartyShareButtons } from '@/components/shared/party-share-buttons';
@@ -73,6 +74,8 @@ interface ParcelDetail {
   insuranceThresholdEur?: number | null;
   /** ТЗ docx 04.10.26 (п.3): нотатка Клієнта, введена при створенні замовлення. */
   clientNote: string | null;
+  /** ТЗ docx 12.10.26 (коментар клієнта): примітка Працівника для списку рейсу. */
+  listNote: string | null;
   npTrackingStatus: string | null;
   estimatedDeliveryStart: string | null;
   estimatedDeliveryEnd: string | null;
@@ -503,6 +506,14 @@ export default function ParcelDetailPage() {
             <span className="whitespace-pre-wrap break-words">{parcel.clientNote}</span>
           </div>
         )}
+        {/* ТЗ docx 12.10.26 (коментар клієнта): коротка примітка для стовпчика «Примітки»
+            друкованого списку рейсу. */}
+        <ListNoteEditor
+          parcelId={parcel.id}
+          value={parcel.listNote}
+          hasClientNote={!!parcel.clientNote}
+          onSaved={fetchParcel}
+        />
 
         {/* ТЗ docx 09.10.26 (п.2): окрема кнопка перенесення на інший рейс
             («Прийнято до перевезення» / «В дорозі»; до прийняття — теж). */}

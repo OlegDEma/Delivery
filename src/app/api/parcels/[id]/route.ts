@@ -391,6 +391,9 @@ export async function PATCH(
     updateData.estimatedDeliveryEnd = body.estimatedDeliveryEnd ? new Date(body.estimatedDeliveryEnd) : null;
   }
   if (body.shortNumber !== undefined) updateData.shortNumber = body.shortNumber;
+  // ТЗ docx 12.10.26 (коментар клієнта): примітка для списку рейсу — операційне поле
+  // (не під заморозкою даних), редагується в будь-якому статусі.
+  if (body.listNote !== undefined) updateData.listNote = body.listNote || null;
   if (body.description !== undefined) updateData.description = body.description;
   if (body.declaredValue !== undefined) updateData.declaredValue = body.declaredValue ? Number(body.declaredValue) : null;
   if (body.insuranceApplied !== undefined) updateData.insuranceApplied = body.insuranceApplied;

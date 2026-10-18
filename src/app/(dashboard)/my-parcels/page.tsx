@@ -14,7 +14,8 @@ import { formatDate, formatWeight, formatCurrency } from '@/lib/utils/format';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { euSideParty, euAddressLine } from '@/lib/parcels/eu-side';
+import { withCountryCode } from '@/lib/utils/phone';
 import { displayParcelNumber } from '@/lib/parcels/display-number';
 import { rememberOpenedParcel, useReturnToParcel, readListState, saveListState } from '@/lib/hooks/use-return-to-parcel';
 
@@ -25,6 +26,8 @@ interface MyParcelsListState {
   bucket: Bucket; search: string; statusFilter: string; dateFrom: string; dateTo: string;
   senderPhone: string; receiverPhone: string;
 }
+
+interface MyParcelAddr { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; npWarehouseNum: string | null }
 
 interface ParcelItem {
   id: string;
@@ -44,7 +47,9 @@ interface ParcelItem {
   createdBy?: { role: string } | null;
   sender: { phone: string; firstName: string; lastName: string };
   receiver: { phone: string; firstName: string; lastName: string };
-  receiverAddress: { city: string; street: string | null; npWarehouseNum: string | null } | null;
+  // ТЗ docx 15.10.26: обидві адреси — показуємо ту, що в Європі (euSideParty).
+  receiverAddress: MyParcelAddr | null;
+  senderAddress?: MyParcelAddr | null;
   trip?: { id: string; country: string | null } | null;
   // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
   senderSnapshot: unknown;
@@ -244,7 +249,7 @@ export default function MyParcelsPage() {
       ) : (
         <div className="bg-white rounded-lg border divide-y">
           {visibleParcels.map((p) => {
-            const pt = parcelParties(p);
+            const eu = euSideParty(p);
             return (
             <Link
               key={p.id}
@@ -263,14 +268,15 @@ export default function MyParcelsPage() {
                     <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}</Badge>
                     {!p.isPaid && p.totalCost && <Badge variant="destructive" className="text-xs">Не оплачено</Badge>}
                   </div>
+                  {/* ТЗ docx 15.10.26: у списках посилок поїздки — сторона й адреса в країні
+                      призначення (Європа), як у Маршрутах: UA→EU — Отримувач, EU→UA — Відправник. */}
                   <div className="text-sm">
-                    {pt.receiver.lastName} {pt.receiver.firstName}
-                    <span className="text-gray-400 ml-1">{pt.receiver.phone}</span>
+                    <span className="text-xs text-gray-500">{eu.roleLabel}:</span>{' '}
+                    {eu.party.lastName} {eu.party.firstName}
+                    <span className="text-gray-400 ml-1">{withCountryCode(eu.party.phone, eu.address?.country)}</span>
                   </div>
-                  {pt.receiver.address && (
-                    <div className="text-xs text-gray-400">
-                      {pt.receiver.address.city}{pt.receiver.address.street ? `, ${pt.receiver.address.street}` : ''}
-                    </div>
+                  {eu.address && (
+                    <div className="text-xs text-gray-400">{euAddressLine(eu.address)}</div>
                   )}
                 </div>
                 <div className="text-right shrink-0">

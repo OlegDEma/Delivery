@@ -31,6 +31,8 @@ export async function GET() {
       deletedAt: null,
       OR: [{ senderId: client.id }, { receiverId: client.id }],
     },
+    // ТЗ docx 12.10.26: службова примітка для списку рейсу Клієнту не віддається.
+    omit: { listNote: true },
     include: {
       sender: { select: { firstName: true, lastName: true, phone: true } },
       receiver: { select: { firstName: true, lastName: true, phone: true } },

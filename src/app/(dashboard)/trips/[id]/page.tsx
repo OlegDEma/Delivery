@@ -16,6 +16,7 @@ import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/const
 import { statusLabel } from '@/lib/parcels/status-label';
 import { formatDateWithWeekday, formatWeight } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { euSideParty, euAddressLine } from '@/lib/parcels/eu-side';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
@@ -32,12 +33,15 @@ const TRIP_STATUSES: Record<string, { label: string; color: string }> = {
   cancelled: { label: 'Скасовано', color: 'bg-red-100 text-red-800' },
 };
 
+interface TripPartyAddr { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; npWarehouseNum: string | null }
+
 interface TripParcel {
   id: string;
   internalNumber: string;
   shortNumber: number | null;
   /** ТЗ docx 11.10.26: наскрізний номер у поїздці (001…N). */
   journeyNumber: number | null;
+  direction: string;
   status: ParcelStatusType;
   totalWeight: number | null;
   totalPlacesCount: number;
@@ -53,7 +57,9 @@ interface TripParcel {
   // ТЗ docx 26.07.26 (п.1): знімок сторін для accepted+ (див. parcelParties).
   senderSnapshot: unknown;
   receiverSnapshot: unknown;
-  receiverAddress: { city: string; street: string | null; building: string | null; npWarehouseNum: string | null } | null;
+  // ТЗ docx 15.10.26: обидві адреси — у списку показуємо ту, що в Європі (euSideParty).
+  senderAddress: TripPartyAddr | null;
+  receiverAddress: TripPartyAddr | null;
   collectionPoint: { id: string; name: string | null; city: string; address: string } | null;
 }
 
@@ -466,34 +472,40 @@ export default function TripDetailPage() {
                 );
               }
               const p = row.parcel;
-              const pt = parcelParties(p);
+              // ТЗ docx 15.10.26: у списку посилок поїздки — завжди сторона й адреса в
+              // країні призначення (Європа), як у Маршрутах: UA→EU — Отримувач,
+              // EU→UA — Відправник. Раніше тут завжди був Отримувач (для рейсу до
+              // України — київська адреса).
+              const eu = euSideParty(p);
+              const euCountry = eu.address?.country || trip.country;
               return (
               <div key={p.id} className="px-4 py-3 flex items-start justify-between hover:bg-gray-50">
                 <Link href={`/parcels/${p.id}`} className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-0.5">
-                    {/* ТЗ docx 11.10.26: номер у поїздці (001…N). ТЗ docx 12.10.26: номер є
-                        з моменту прив'язки до рейсу (і в «Створеної»); старий порядковий
-                        номер прибрано. «без №» лишається лише для рейсів поза поїздкою. */}
+                  <div className="flex items-start gap-2">
+                    {/* ТЗ docx 11.10.26: номер у поїздці. ТЗ docx 12.10.26: номер є з моменту
+                        прив'язки до рейсу (і в «Створеної»); старий порядковий номер прибрано.
+                        «без №» лишається лише для рейсів поза поїздкою. */}
                     {p.journeyNumber != null ? (
-                      <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono font-semibold">{formatJourneyNumber(p.journeyNumber)}</span>
+                      <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono font-semibold shrink-0">{formatJourneyNumber(p.journeyNumber)}</span>
                     ) : (
-                      <span className="text-[10px] text-gray-400" title="Рейс не прив'язаний до поїздки — номер у поїздці не присвоюється">без №</span>
+                      <span className="text-[10px] text-gray-400 shrink-0 pt-0.5" title="Рейс не прив'язаний до поїздки — номер у поїздці не присвоюється">без №</span>
                     )}
-                    <span className="font-mono text-sm font-medium">{withoutOrdinal(p.internalNumber)}</span>
+                    <span className="text-sm text-gray-900 min-w-0 break-words">{euAddressLine(eu.address) || 'Адресу не вказано'}</span>
+                  </div>
+                  <div className="text-xs text-gray-900 mt-0.5">
+                    <span className="font-medium">{eu.roleLabel}:</span>{' '}
+                    {[
+                      withCountryCode(eu.party.phone, euCountry),
+                      [eu.party.lastName, eu.party.firstName].filter(Boolean).join(' '),
+                      p.direction === 'eu_to_ua' ? `${trip.country}-UA` : `UA-${trip.country}`,
+                    ].filter(Boolean).join(' · ')}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+                    <span className="font-mono text-xs text-gray-500">{withoutOrdinal(p.internalNumber)}</span>
                     <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
                       {statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
                     </Badge>
                   </div>
-                  <div className="text-sm">
-                    {pt.receiver.lastName} {pt.receiver.firstName}
-                    <span className="text-gray-400 ml-1">{withCountryCode(pt.receiver.phone, pt.receiver.address?.country)}</span>
-                  </div>
-                  {pt.receiver.address && (
-                    <div className="text-xs text-gray-400">
-                      {pt.receiver.address.city}
-                      {pt.receiver.address.street ? `, ${pt.receiver.address.street}` : ''}
-                    </div>
-                  )}
                 </Link>
                 <div className="flex items-center gap-2 shrink-0">
                   <div className="text-right text-sm">

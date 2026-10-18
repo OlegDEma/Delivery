@@ -31,6 +31,34 @@ interface Trip {
   // ТЗ docx 02.07.26 (D11): кількість місць для пасажирів + лічильник призначених.
   passengerCapacity: number;
   _count: { parcels: number; routeTasks: number; passengers: number };
+  /** ТЗ docx 15.10.26: тиждень рамки рахуємо від дати поїздки (обидва її рейси — разом). */
+  journey?: { departureDate: string } | null;
+}
+
+/**
+ * ТЗ docx 15.10.26: рейси одного тижня обводяться спільною рамкою. Тиждень — понеділок…
+ * неділя дати виїзду ПОЇЗДКИ (обидва рейси поїздки потрапляють в одну рамку, навіть якщо
+ * зворотний виїжджає вже наступного тижня); рейс без поїздки — за власною датою.
+ * Ключ — дата понеділка «РРРР-ММ-ДД» (рахуємо в UTC: дати рейсів зберігаються без часу).
+ */
+function tripWeekKey(t: Trip): string {
+  const iso = String(t.journey?.departureDate ?? t.departureDate).slice(0, 10);
+  const [y, m, d] = iso.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, (m || 1) - 1, d || 1));
+  dt.setUTCDate(dt.getUTCDate() - ((dt.getUTCDay() + 6) % 7));
+  return dt.toISOString().slice(0, 10);
+}
+
+/** Розбити впорядкований список рейсів на послідовні тижні. */
+function splitByWeek(items: Trip[]): Trip[][] {
+  const weeks: Trip[][] = [];
+  let lastKey = '';
+  for (const t of items) {
+    const k = tripWeekKey(t);
+    if (k !== lastKey || weeks.length === 0) { weeks.push([]); lastKey = k; }
+    weeks[weeks.length - 1].push(t);
+  }
+  return weeks;
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -78,6 +106,8 @@ export default function TripsPage() {
   // ТЗ docx 09.07.26: авто-фокус на рейс поточної дати при відкритті вкладки
   // + повернення «курсора» на щойно відредагований рейс після reload.
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  // ТЗ docx 15.10.26: липка шапка (заголовок + фільтри) — її висоту враховує автоскрол.
+  const headerRef = useRef<HTMLDivElement>(null);
   const didInitialFocus = useRef(false);
   const pendingFocusId = useRef<string | null>(null);
   const [bulkSaving, setBulkSaving] = useState(false);
@@ -161,7 +191,13 @@ export default function TripsPage() {
     if (!id) return;
     const el = rowRefs.current.get(id);
     if (!el) return;
-    el.scrollIntoView({ behavior: 'auto', block: 'start' }); // ТЗ docx 20.08.26: вгору екрана
+    // ТЗ docx 20.08.26: рядок — угору екрана. ТЗ docx 15.10.26: шапка тепер липка, тож
+    // ставимо рядок одразу ПІД неї (scrollIntoView сховав би його під шапкою).
+    const header = headerRef.current;
+    const headerBottom = header
+      ? (parseFloat(getComputedStyle(header).top) || 0) + header.offsetHeight
+      : 0;
+    window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - headerBottom - 8), behavior: 'auto' });
     el.classList.add('ring-2', 'ring-blue-400', 'ring-offset-1');
     setTimeout(() => el.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-1'), 2200);
   }
@@ -298,7 +334,11 @@ export default function TripsPage() {
     (!filterCountry || t.country === filterCountry) &&
     (!filterDirection || t.direction === filterDirection)
   // ТЗ docx 20.08.26: хронологічний порядок — раніші рейси вгорі, пізніші нижче.
-  ).sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+  // ТЗ docx 15.10.26: спершу за тижнем (щоб рейси тижня йшли разом під однією рамкою),
+  // далі — за датою.
+  ).sort((a, b) =>
+    tripWeekKey(a).localeCompare(tripWeekKey(b))
+    || new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
   const groups: { key: string; label: string; items: Trip[] }[] = (() => {
     if (groupBy === 'none') return [{ key: '', label: '', items: filteredTrips }];
     const map = new Map<string, Trip[]>();
@@ -322,7 +362,10 @@ export default function TripsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      {/* ТЗ docx 15.10.26: «При прокрутці рейсів угору шапка не ховається» — заголовок
+          і панель фільтрів закріплені вгорі (як шапка рейсу; top-14 — під мобільною шапкою). */}
+      <div ref={headerRef} className="sticky top-14 md:top-0 z-20 bg-gray-50 -mx-4 px-4 md:-mx-6 md:px-6 pt-2 pb-1 mb-3 border-b">
+      <div className="flex items-center justify-between mb-3">
         <h1 className="text-2xl font-bold">Рейси</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           {/* ТЗ docx 08.08.26: Водію заборонено створювати рейси. */}
@@ -374,7 +417,9 @@ export default function TripsPage() {
 
       {/* ТЗ docx 02.07.26 (D11): панель групового вибору + групування. */}
       {!loading && trips.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3 mb-3 text-sm">
+        // ТЗ docx 15.10.26: шапка липка — на телефоні фільтри в один рядок із горизонтальною
+        // прокруткою, інакше закріплена шапка займала б третину екрана.
+        <div className="flex flex-nowrap md:flex-wrap items-center gap-3 mb-1 text-sm overflow-x-auto md:overflow-visible pb-1 md:pb-0 [&>*]:shrink-0">
           <label className="flex items-center gap-2 cursor-pointer">
             <Checkbox checked={allSelected} onCheckedChange={() => toggleAllVisible()} />
             Вибрати всі
@@ -436,6 +481,7 @@ export default function TripsPage() {
           )}
         </div>
       )}
+      </div>
 
       {loading ? (
         <ListSkeleton />
@@ -455,8 +501,11 @@ export default function TripsPage() {
                   {group.label} ({group.items.length})
                 </div>
               )}
-              <div className="bg-white rounded-lg border divide-y">
-                {group.items.map(trip => (
+              {/* ТЗ docx 15.10.26: рейси одного тижня — у спільній рамці. */}
+              <div className="space-y-2">
+              {splitByWeek(group.items).map(week => (
+              <div key={tripWeekKey(week[0])} data-week={tripWeekKey(week[0])} className="bg-white rounded-lg border-2 border-gray-800 divide-y">
+                {week.map(trip => (
                   <div
                     key={trip.id}
                     ref={(el) => { if (el) rowRefs.current.set(trip.id, el); else rowRefs.current.delete(trip.id); }}
@@ -525,6 +574,8 @@ export default function TripsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+              ))}
               </div>
             </div>
           ))}

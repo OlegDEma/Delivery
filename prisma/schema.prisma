@@ -272,6 +272,8 @@ model Journey {
   // обох її рейсів). Кожен рейс успадковує це число (синкається на trips.passenger_capacity).
   passengerCapacity  Int        @default(0) @map("passenger_capacity")
   // ТЗ docx 11.10.26: лічильник наскрізної нумерації посилок поїздки (не зменшується).
+  // Із ТЗ 12.10.26 (діапазони 001–100 / 101–200 / … / 501–600 …) НЕ використовується —
+  // наступний номер рахується з уже виданих у діапазоні (lib/services/journey-numbering).
   parcelCounter      Int        @default(0) @map("parcel_counter")
   notes              String?
   createdById        String?    @map("created_by") @db.Uuid
@@ -466,6 +468,10 @@ model Parcel {
   npTtn                 String?       @map("np_ttn")
   /// ТЗ docx 04.10.26 (п.3): нотатка Клієнта до 150 знаків, введена при створенні замовлення.
   clientNote            String?       @map("client_note") @db.VarChar(150)
+  /// ТЗ docx 12.10.26 (коментар клієнта): коротка примітка Працівника для стовпчика
+  /// «Примітки» друкованого списку рейсу («буду після 18:00»). Порожня — у список іде
+  /// clientNote. Клієнту не показується (у клієнтських API — omit).
+  listNote              String?       @map("list_note") @db.VarChar(60)
   npTrackingStatus      String?       @map("np_tracking_status")
   status                ParcelStatus  @default(draft)
   createdSource         CreatedSource @default(worker) @map("created_source")

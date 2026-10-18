@@ -176,6 +176,8 @@ export const updateParcelSchema = z.object({
   estimatedDeliveryStart: z.string().optional().nullable(),
   estimatedDeliveryEnd: z.string().optional().nullable(),
   shortNumber: z.number().int().min(0).max(10000).optional().nullable(),
+  /** ТЗ docx 12.10.26 (коментар клієнта): примітка для стовпчика «Примітки» списку рейсу. */
+  listNote: z.string().trim().max(60, 'Примітка для списку — до 60 знаків').optional().nullable(),
   description: z.string().trim().max(500).optional().nullable(),
   declaredValue: moneySchema.optional().nullable(),
   /** Insurance opt-in checkbox state (per ТЗ — editable post-creation). */

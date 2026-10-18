@@ -1,25 +1,33 @@
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@/generated/prisma/client';
+import { logger } from '@/lib/logger';
+import { parcelParties } from '@/lib/parcels/party-snapshot';
+import { assignJourneyNumbers, journeyNumberRangeKey } from '@/lib/utils/journey-number';
 
 /**
  * ТЗ docx 11.10.26 «Логістика/Рейси/Деталі рейсу», п.1 — локальна нумерація посилок
- * в одній ПОЇЗДЦІ («Україна-Нідерланди-Україна»): 001…N наскрізь через обидва рейси —
- * спершу посилки рейсу UA→EU (Отримувачі в Нідерландах), далі EU→UA (Відправники).
+ * в одній ПОЇЗДЦІ (тиждень «Україна-Нідерланди-Україна»).
+ *
+ * ТЗ docx 12.10.26 (відповідь клієнта в коментарі до 12.10.26): замість наскрізного
+ * 001…N — окремі діапазони за напрямком / країною / містом (Україна→Нідерланди 001–100,
+ * Україна→Австрія: Відень 101–200, Лінц 201–300, решта 301–400; Нідерланди→Україна
+ * 501–600, Австрія→Україна 601–700). Діапазони — lib/utils/journey-number.
  *
  * Правила:
  *  - номер отримує КОЖНА посилка, прив'язана до рейсу поїздки — з моменту прив'язки,
- *    включно зі «Створеною» (ТЗ docx 12.10.26: «незалежно від того хто створив
- *    посилку — чи Клієнт, чи хтось з Працівників, чи прив'язка відбулась
- *    автоматично»; раніше — лише після прийняття до перевезення);
- *  - присвоєний номер незмінний: лічильник поїздки (journeys.parcel_counter) лише
- *    зростає, тож пізніше додані посилки отримують наступні номери, а старі не зсуваються;
- *  - при перенесенні посилки в інший рейс її номер лишається за рядком
- *    «Перенесена до рейсу …» (parcel_transfers), а в новій поїздці вона отримує
- *    наступний вільний номер.
+ *    включно зі «Створеною» (ТЗ docx 12.10.26);
+ *  - присвоєний номер незмінний: наступна посилка діапазону отримує «найбільший уже
+ *    виданий у діапазоні + 1» — з урахуванням видалених посилок і рядків «Перенесена до
+ *    рейсу …», тож номери не повторюються і не зсуваються;
+ *  - при перенесенні посилки в інший рейс старий номер у неї забирається (лишається
+ *    лише рядком «Перенесена до рейсу …», parcel_transfers), а в новій поїздці вона
+ *    отримує наступний номер свого діапазону;
+ *  - якщо діапазон за тиждень вичерпано — наступний вільний після 1000, щоб посилка не
+ *    лишилась без номера.
  *
- * Номери присвоюються «ліниво» — при перегляді рейсу/посилки/списку для друку. Так
- * нумерація не залежить від того, яким шляхом посилку прийняли (картка, сканер,
- * масова зміна статусу, каскад рейсу).
+ * Номери присвоюються «ліниво» — при перегляді рейсу/посилки/списку для друку і одразу
+ * після створення/перенесення. Так нумерація не залежить від того, яким шляхом посилку
+ * прийняли (картка, сканер, масова зміна статусу, каскад рейсу).
  */
 export async function ensureJourneyNumbers(journeyId: string): Promise<void> {
   const pending = await prisma.parcel.count({
@@ -41,22 +49,43 @@ export async function ensureJourneyNumbers(journeyId: string): Promise<void> {
         journeyNumber: null,
         trip: { journeyId },
       },
-      select: { id: true, direction: true, createdAt: true },
+      select: {
+        id: true, direction: true, createdAt: true, status: true,
+        senderSnapshot: true, receiverSnapshot: true,
+        senderAddress: { select: { country: true, city: true, postalCode: true } },
+        receiverAddress: { select: { country: true, city: true, postalCode: true } },
+        trip: { select: { country: true } },
+      },
     });
     if (parcels.length === 0) return;
-    // Спершу UA→EU, потім EU→UA; всередині — за часом створення посилки.
-    parcels.sort((a, b) => {
-      if (a.direction !== b.direction) return a.direction === 'ua_to_eu' ? -1 : 1;
-      return a.createdAt.getTime() - b.createdAt.getTime();
+
+    // Уже видані номери поїздки: посилки (і видалені — їхні етикетки могли надрукувати)
+    // та рядки «Перенесена до рейсу …» з рейсів цієї поїздки.
+    const [numbered, ghosts] = await Promise.all([
+      tx.parcel.findMany({
+        where: { journeyNumber: { not: null }, trip: { journeyId } },
+        select: { journeyNumber: true },
+      }),
+      tx.parcelTransfer.findMany({
+        where: { journeyNumber: { not: null }, fromTrip: { journeyId } },
+        select: { journeyNumber: true },
+      }),
+    ]);
+    const used = [...numbered, ...ghosts].map((r) => r.journeyNumber as number);
+
+    // У межах діапазону — за часом створення посилки.
+    parcels.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    const pendingKeys = parcels.map((p) => {
+      // Для Україна→Австрія місто (Відень/Лінц/решта) — за адресою Отримувача.
+      const parties = parcelParties(p);
+      const euSide = p.direction === 'ua_to_eu' ? parties.receiver : parties.sender;
+      return { id: p.id, key: journeyNumberRangeKey(p.direction, p.trip?.country, euSide.address) };
     });
-    const journey = await tx.journey.update({
-      where: { id: journeyId },
-      data: { parcelCounter: { increment: parcels.length } },
-      select: { parcelCounter: true },
-    });
-    let next = journey.parcelCounter - parcels.length + 1;
-    for (const p of parcels) {
-      await tx.parcel.update({ where: { id: p.id }, data: { journeyNumber: next++ } });
+    for (const a of assignJourneyNumbers(pendingKeys, used)) {
+      if (a.overflow) {
+        logger.warn('journey_numbering.range_exhausted', { journeyId, parcelId: a.id, assigned: a.num });
+      }
+      await tx.parcel.update({ where: { id: a.id }, data: { journeyNumber: a.num } });
     }
   });
 }
