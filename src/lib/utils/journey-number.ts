@@ -65,25 +65,40 @@ export function assignJourneyNumbers(
 }
 
 /** Перше слово назви міста без номерів районів: «Wien 10», «Wien-Favoriten» → «wien». */
+/**
+ * Назви Відня/Лінца, як вони реально лежать у базі: латиниця, екзонім (Відень→Wien) і
+ * ПОСИМВОЛЬНА транслітерація кирилиці — поле міста транслітерується на blur, а таблиця
+ * екзонімів спрацьовує лише на «голе» слово, тож «Відень 10» зберігається як «Viden 10»,
+ * «Вена 22» — «Vena 22», «Лінц-Урфар» — «Lints-Urfar», «у Відні» — «U Vidni».
+ */
+const VIENNA_NAMES = new Set(['wien', 'vienna', 'vienne', 'viden', 'vyden', 'vidni', 'vena']);
+const LINZ_NAMES = new Set(['linz', 'lints', 'lynts', 'linc']);
+/** Службові слова перед назвою: «м. Відень», «місто Лінц», «A-1100 Wien», «у Відні». */
+const CITY_PREFIX_WORDS = new Set(['m', 'mist', 'misto', 'g', 'gorod', 'a', 'u', 'v', 'stadt', 'city']);
+
+/** Перше значуще слово назви міста: без номерів районів, індексів і службових слів. */
 function cityBase(city: string | null | undefined): string {
-  const n = normalizeCityForMatch(city, 'AT');
-  return n.replace(/[\d.,()]/g, ' ').trim().split(/[\s\-–]+/)[0] ?? '';
+  const words = normalizeCityForMatch(city, 'AT')
+    .replace(/[\d.,()'’"«»]/g, ' ')
+    .split(/[\s\-–]+/)
+    .filter(Boolean);
+  return words.find((w) => !CITY_PREFIX_WORDS.has(w)) ?? '';
 }
 
-/** Місто Австрії для діапазону: Відень / Лінц / решта (за назвою, без назви — за індексом). */
+/** Місто Австрії для діапазону: Відень / Лінц / решта (за назвою, інакше — за індексом). */
 export function austrianCityGroup(
   addr: { city?: string | null; postalCode?: string | null } | null | undefined,
 ): 'vienna' | 'linz' | 'geo' {
   const base = cityBase(addr?.city);
-  // «Wiener Neustadt» дає base «wiener» — це інше місто, у Відень не потрапляє.
-  if (base === 'wien' || base === 'vienna') return 'vienna';
-  if (base === 'linz') return 'linz';
-  if (!base) {
-    const pc = (addr?.postalCode ?? '').replace(/\s/g, '');
-    // Індекси Відня — 1010…1239 (уся «1-ша» зона), Лінца — 4010…4040.
-    if (/^1\d{3}$/.test(pc)) return 'vienna';
-    if (/^40[1-4]0$/.test(pc)) return 'linz';
-  }
+  // Порівнюємо ПЕРШЕ значуще слово: «Wiener Neustadt» (base «wiener») і «Schwechat bei
+  // Wien» — інші міста, у Відень не потрапляють.
+  if (VIENNA_NAMES.has(base)) return 'vienna';
+  if (LINZ_NAMES.has(base)) return 'linz';
+  // Назва не впізнана (порожня, лише район «Favoriten», одрук) — за індексом:
+  // Відень — уся зона 1xxx (1010…1239), Лінц — 4010…4040.
+  const pc = (addr?.postalCode ?? '').replace(/\s/g, '').replace(/^A-?/i, '');
+  if (/^1\d{3}$/.test(pc)) return 'vienna';
+  if (/^40[1-4]0$/.test(pc)) return 'linz';
   return 'geo';
 }
 

@@ -84,6 +84,7 @@ export default function TripPrintListPage() {
   const [trip, setTrip] = useState<PrintTrip | null>(null);
   const [error, setError] = useState('');
   const sheetsRef = useRef<HTMLDivElement>(null);
+  const clipWarnRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     fetch(`/api/trips/${id}`)
@@ -98,16 +99,45 @@ export default function TripPrintListPage() {
   useLayoutEffect(() => {
     const root = sheetsRef.current;
     if (!root) return;
+    const clipped: string[] = [];
     root.querySelectorAll<HTMLElement>('[data-fit]').forEach((el) => {
       const min = Number(el.dataset.fitMin || 8);
+      const multiline = el.classList.contains('note-text');
       let size = Number(el.dataset.fit);
       el.style.fontSize = `${size}pt`;
-      const overflows = () => el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+      delete el.dataset.clipped;
+      // Ширину тексту міряємо Range без округлень: scrollWidth/clientWidth — цілі пікселі,
+      // а «…» браузер ставить уже при переповненні на частку пікселя. Запас 1 px — бо
+      // метрики шрифту на папері трохи інші, ніж на екрані. Примітка переноситься на
+      // кілька рядків — для неї важить лише висота.
+      const overflows = () => {
+        if (el.scrollHeight > el.clientHeight + 1) return true;
+        if (multiline) return false;
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        return range.getBoundingClientRect().width > el.getBoundingClientRect().width - 1;
+      };
       while (overflows() && size > min) {
         size -= 0.5;
         el.style.fontSize = `${size}pt`;
       }
+      if (overflows()) {
+        // Не вмістилось і найменшим кеглем: в однорядкових клітинках браузер ставить «…»
+        // сам (text-overflow), у примітці — обрізаємо по цілому рядку з «…» (line-clamp).
+        el.dataset.clipped = '1';
+        if (multiline) {
+          const linePx = (size * 96) / 72 * 1.1;
+          el.style.setProperty('--lines', String(Math.max(1, Math.floor(el.clientHeight / linePx))));
+        }
+        if (el.dataset.label) clipped.push(el.dataset.label);
+      }
     });
+    // Підказка Працівнику (на папір не друкується): що саме не вмістилось повністю.
+    if (clipWarnRef.current) {
+      clipWarnRef.current.textContent = clipped.length
+        ? `Не вмістилось повністю (на папері з «…»): ${clipped.join(', ')}. Для приміток впишіть коротку «Примітку для списку» в картці посилки.`
+        : '';
+    }
   }, [trip]);
 
   if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
@@ -155,6 +185,7 @@ export default function TripPrintListPage() {
         .trip-print-list .fit { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         /* Примітка: до трьох рядків у клітинці висотою 1,2 см (обидва рядки запису). */
         .trip-print-list .note-text { height: 1.12cm; overflow: hidden; white-space: normal; overflow-wrap: anywhere; line-height: 1.1; }
+        .trip-print-list .note-text[data-clipped] { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--lines, 4); }
         .trip-print-list .postal { text-align: left; }
         .trip-print-list .phone { text-align: right; }
         .trip-print-list tbody.parcel-row { break-inside: avoid; page-break-inside: avoid; }
@@ -177,6 +208,7 @@ export default function TripPrintListPage() {
         <span className="text-sm text-gray-500" style={{ fontFamily: 'inherit', fontSize: 13 }}>
           Записів: {rows.length} · аркушів А4: {Math.max(1, sheets.length)}
         </span>
+        <span ref={clipWarnRef} className="basis-full text-amber-700 empty:hidden" style={{ fontFamily: 'inherit', fontSize: 13 }} />
       </div>
 
       <div className="sheets" ref={sheetsRef}>
@@ -232,6 +264,7 @@ export default function TripPrintListPage() {
               const places = row.p.totalPlacesCount > 1 ? `/${row.p.totalPlacesCount}` : '';
               // «Лише основне»: коротка примітка Працівника для списку, інакше — нотатка Клієнта.
               const note = (row.p.listNote || row.p.clientNote || '').replace(/\s+/g, ' ').trim();
+              const numLabel = row.num != null ? formatJourneyNumber(row.num) : '—';
               return (
                 <tbody key={row.p.id} className="parcel-row">
                   <tr>
@@ -239,17 +272,17 @@ export default function TripPrintListPage() {
                       <div className="fit" data-fit="14">{row.num != null ? `${formatJourneyNumber(row.num)}${places}` : (places ? `—${places}` : '—')}</div>
                     </td>
                     <td rowSpan={2} className="note">
-                      {note && <div className="note-text" data-fit="11" data-fit-min="7">{note}</div>}
+                      {note && <div className="note-text" data-fit="11" data-fit-min="7" data-label={`№${numLabel} — примітка`}>{note}</div>}
                     </td>
-                    <td><div className="fit" data-fit="14">{cityStreet || '—'}</div></td>
+                    <td><div className="fit" data-fit="14" data-label={`№${numLabel} — адреса`}>{cityStreet || '—'}</div></td>
                     <td><div className="fit" data-fit="14">{a?.building || ''}</div></td>
                     {/* ТЗ 12.10.26: індекс NL — літери великі (старі записи на кшталт «1813 tt»). */}
                     <td><div className="fit postal" data-fit="14">{(a?.postalCode || '').toUpperCase()}</div></td>
                   </tr>
                   <tr>
-                    <td><div className="fit" data-fit="12">{[party.lastName, party.firstName].filter(Boolean).join(' ')}</div></td>
+                    <td><div className="fit" data-fit="12" data-label={`№${numLabel} — прізвище та імʼя`}>{[party.lastName, party.firstName].filter(Boolean).join(' ')}</div></td>
                     <td></td>
-                    <td><div className="fit phone" data-fit="14">{withCountryCode(party.phone, a?.country)}</div></td>
+                    <td><div className="fit phone" data-fit="14" data-label={`№${numLabel} — телефон`}>{withCountryCode(party.phone, a?.country)}</div></td>
                   </tr>
                 </tbody>
               );

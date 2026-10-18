@@ -35,8 +35,20 @@ export async function GET(request: NextRequest) {
       secondCourier: { select: { id: true, fullName: true } },
       // ТЗ docx 02.07.26 (D11): passengers — щоб попереджати при заниженні місць.
       _count: { select: { parcels: true, routeTasks: true, passengers: true } },
-      // ТЗ docx 15.10.26: рамки «рейси одного тижня» рахуються від дати поїздки.
-      journey: { select: { departureDate: true } },
+      // ТЗ docx 15.10.26: рамки «рейси одного тижня» рахуються від виїзду поїздки з
+      // України — беремо дату її рейсу UA→EU (journeys.departure_date не оновлюється,
+      // коли рейс переносять кнопкою «Редагувати» на /trips).
+      journey: {
+        select: {
+          departureDate: true,
+          trips: {
+            where: { direction: 'ua_to_eu' },
+            orderBy: { departureDate: 'asc' },
+            take: 1,
+            select: { departureDate: true },
+          },
+        },
+      },
     },
     orderBy: { departureDate: 'desc' },
     take: 50,

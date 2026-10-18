@@ -31,18 +31,19 @@ interface Trip {
   // ТЗ docx 02.07.26 (D11): кількість місць для пасажирів + лічильник призначених.
   passengerCapacity: number;
   _count: { parcels: number; routeTasks: number; passengers: number };
-  /** ТЗ docx 15.10.26: тиждень рамки рахуємо від дати поїздки (обидва її рейси — разом). */
-  journey?: { departureDate: string } | null;
+  /** ТЗ docx 15.10.26: тиждень рамки рахуємо від виїзду поїздки (обидва її рейси — разом). */
+  journey?: { departureDate: string; trips?: { departureDate: string }[] } | null;
 }
 
 /**
  * ТЗ docx 15.10.26: рейси одного тижня обводяться спільною рамкою. Тиждень — понеділок…
- * неділя дати виїзду ПОЇЗДКИ (обидва рейси поїздки потрапляють в одну рамку, навіть якщо
- * зворотний виїжджає вже наступного тижня); рейс без поїздки — за власною датою.
- * Ключ — дата понеділка «РРРР-ММ-ДД» (рахуємо в UTC: дати рейсів зберігаються без часу).
+ * неділя виїзду ПОЇЗДКИ з України, тобто дати її рейсу UA→EU (обидва рейси поїздки
+ * потрапляють в одну рамку, навіть якщо зворотний виїжджає вже наступного тижня; і рамка
+ * слідує за рейсом, якщо його перенесли на інший тиждень). Рейс без поїздки — за власною
+ * датою. Ключ — дата понеділка «РРРР-ММ-ДД» (у UTC: дати рейсів зберігаються без часу).
  */
 function tripWeekKey(t: Trip): string {
-  const iso = String(t.journey?.departureDate ?? t.departureDate).slice(0, 10);
+  const iso = String(t.journey?.trips?.[0]?.departureDate ?? t.journey?.departureDate ?? t.departureDate).slice(0, 10);
   const [y, m, d] = iso.split('-').map(Number);
   const dt = new Date(Date.UTC(y, (m || 1) - 1, d || 1));
   dt.setUTCDate(dt.getUTCDate() - ((dt.getUTCDay() + 6) % 7));
