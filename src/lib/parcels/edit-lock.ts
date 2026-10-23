@@ -33,6 +33,21 @@ export function canEditParcelParties(user: { role: string }): boolean {
   return user.role !== 'client';
 }
 
+/**
+ * ТЗ docx 20.10.26 (Створення посилки Клієнтом): Клієнт може редагувати замовлення,
+ * яке САМ оформив у порталі, і лише «до зміни статусу на „Прийнята до перевезення“ —
+ * тобто коли Працівник перевірив її». Після цього — лише оператор.
+ */
+export function canClientEditOrder(
+  parcel: { status: string; createdById: string | null },
+  userId: string,
+): boolean {
+  return parcel.status === 'draft' && parcel.createdById === userId;
+}
+
+export const CLIENT_EDIT_LOCKED_MESSAGE =
+  'Редагувати можна лише власне замовлення і лише до того, як його прийнято до перевезення. Зверніться до оператора.';
+
 /** Людський текст причини блокування — для тостів/банерів. */
 export function editLockReason(): string {
   return 'Редагувати можна лише посилку у статусі «Створена», і лише її автором.';

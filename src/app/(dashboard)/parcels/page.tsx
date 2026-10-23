@@ -15,7 +15,8 @@ import { statusLabel } from '@/lib/parcels/status-label';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { formatDate } from '@/lib/utils/format';
 import { tripRouteLabel } from '@/lib/constants/countries';
-import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { formatItn } from '@/lib/utils/itn';
+import { formatJourneyNumber } from '@/lib/utils/journey-number';
 import { rememberOpenedParcel, useReturnToParcel, readListState, saveListState } from '@/lib/hooks/use-return-to-parcel';
 import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
@@ -452,7 +453,11 @@ function ParcelsContent() {
                       <div className="flex-1 min-w-0">
                         {/* flex-wrap so long status badges don't overflow on mobile */}
                         <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                          <span className="font-mono text-sm font-medium">{displayParcelNumber(p.internalNumber, p.journeyNumber)}</span>
+                          {/* ТЗ docx 20.10.26 (Замовлення/Посилки): «У цій вкладці повинні відображатись
+                              унікальні номери посилок. Першим має йти ІТН (замість локального номера),
+                              після нього ТТН, якщо є». Локальний номер — лише в прив'язці до рейсу
+                              (див. бейдж рейсу нижче). */}
+                          <span className="font-mono text-sm font-medium">{formatItn(p.itn)}</span>
                           <Badge className={`text-xs whitespace-normal text-left h-auto py-0.5 ${STATUS_COLORS[p.status]}`}>
                             {statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
                           </Badge>
@@ -471,11 +476,14 @@ function ParcelsContent() {
                           {p.isPaid
                             ? <Badge className="text-xs bg-green-100 text-green-800">Оплачено</Badge>
                             : <Badge className="text-xs bg-amber-100 text-amber-800">Не сплачено</Badge>}
-                          {/* ТЗ docx 08.08.26 (G7): помітка — яким рейсом посилка перевозилася. */}
+                          {/* ТЗ docx 08.08.26 (G7): помітка — яким рейсом посилка перевозилася.
+                              ТЗ docx 20.10.26: локальний номер (у поїздці) — лише тут, через слеш
+                              після напрямку рейсу і його дати: «UA → NL · 13.10.26/028». */}
                           {p.trip && (
                             <Badge variant="secondary" className="text-xs whitespace-nowrap">
                               🚌 {tripRouteLabel(p.trip.country ?? '', p.trip.direction ?? '', { mode: 'code' })}
                               {p.trip.departureDate ? ` · ${formatDate(p.trip.departureDate)}` : ''}
+                              {p.journeyNumber != null ? `/${formatJourneyNumber(p.journeyNumber)}` : ''}
                             </Badge>
                           )}
                         </div>

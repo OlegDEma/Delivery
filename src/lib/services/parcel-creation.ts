@@ -14,7 +14,7 @@
 import type { Country, Direction, ShipmentType, Payer, PaymentMethod, CreatedSource, ParcelStatus, CollectionMethod, DeliveryMethod } from '@/generated/prisma/enums';
 import { prisma } from '@/lib/prisma';
 import { calculateVolumetricWeight, volumetricWeightFromVolume, roundWeight } from '@/lib/utils/volumetric';
-import { calculateParcelCost } from '@/lib/utils/pricing';
+import { calculateParcelCost, type CostBreakdown } from '@/lib/utils/pricing';
 import { buildPricingInput } from '@/lib/utils/pricing-input';
 import { toEur } from '@/lib/utils/currency';
 import { isPickupPointPricing, isAddressDeliveryPricing } from '@/lib/utils/pricing-flags';
@@ -187,7 +187,7 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
   //  EU→UA: trip.country (EU side) → collectionPoint.country → senderAddr.country
   //  UA→EU: trip.country → receiverAddr.country
   // Sender's registered country may be UA even though they physically send from NL.
-  let pricingCountry: Country | null = null;
+  let tripCountry: Country | null = null;
   if (input.tripId) {
     const trip = await prisma.trip.findUnique({
       where: { id: input.tripId },
@@ -198,21 +198,7 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
     if (trip && (trip.status === 'completed' || trip.status === 'cancelled')) {
       throw new Error(`TRIP_NOT_ACCEPTING:${trip.status}`);
     }
-    if (trip && trip.country !== 'UA') pricingCountry = trip.country;
-  }
-  if (!pricingCountry && input.direction === 'eu_to_ua' && input.collectionPointId) {
-    const cp = await prisma.collectionPoint.findUnique({
-      where: { id: input.collectionPointId },
-      select: { country: true },
-    });
-    if (cp && cp.country !== 'UA') pricingCountry = cp.country;
-  }
-  if (!pricingCountry) {
-    const addr = input.direction === 'eu_to_ua'
-      ? (senderData?.addresses[0] ?? null)
-      : (receiverAddrForPricing ?? receiver?.addresses[0] ?? null);
-    const country = addr?.country ?? null;
-    if (country && country !== 'UA') pricingCountry = country;
+    tripCountry = trip?.country ?? null;
   }
 
   // Per ТЗ §11: «При отриманні з України та передачі в Україну одномоментно
@@ -227,77 +213,38 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
     senderAddressId: input.senderAddressId ?? null,
   });
 
-  let deliveryCost = 0;
-  let packagingCost = 0;
-  let insuranceCost = 0;
-  let addressDeliveryCost = 0;
-  let pickupPointCost = 0;
-  let parcelMoneyCost = 0;
-  let doorstepCost = 0;
-  let totalCost = 0;
+  // ТЗ docx 20.10.26: розрахунок винесено в priceParcel — той самий виклик робить
+  // редагування замовлення Клієнтом, тож сума після правки = сума при створенні.
+  const { pricingCountry, breakdown } = await priceParcel({
+    direction: input.direction,
+    tripCountry,
+    collectionPointId: input.collectionPointId ?? null,
+    collectionMethod: input.collectionMethod ?? null,
+    senderAddressCountry: senderData?.addresses[0]?.country ?? null,
+    receiverAddress: receiverAddrForPricing ?? receiver?.addresses[0] ?? null,
+    receiverCity: receiver?.addresses[0]?.city ?? null,
+    totalWeight,
+    totalVolWeight,
+    declaredValue: input.declaredValue ?? null,
+    declaredValueCurrency: input.declaredValueCurrency || 'EUR',
+    insurance: input.insurance === true,
+    needsPackaging: input.needsPackaging ?? false,
+    doorstepDelivery: input.doorstepDelivery ?? false,
+    isMultiParcelPickup: !!input.isMultiParcelPickup,
+    parcelMoneyAmount: input.parcelMoneyAmount ?? null,
+    isBothDirections,
+  });
+  const deliveryCost = breakdown?.deliveryCost ?? 0;
+  const packagingCost = breakdown?.packagingCost ?? 0;
+  const doorstepCost = breakdown?.doorstepCost ?? 0;
+  const insuranceCost = breakdown?.insuranceCost ?? 0;
   // ТЗ docx 21.09.26 (п.4): страхування понад 50 € вмикається автоматично —
   // прапорець беремо з розрахунку, щоб у посилці стояло insuranceApplied=true.
-  let insuranceAutoApplied = false;
-  if (pricingCountry) {
-    const config = await prisma.pricingConfig.findFirst({
-      where: { country: pricingCountry, direction: input.direction, isActive: true },
-      orderBy: { createdAt: 'desc' },
-    });
-    if (config) {
-      const deliveryMethod = (receiverAddrForPricing?.deliveryMethod ?? receiver?.addresses[0]?.deliveryMethod) as DeliveryMethod | undefined;
-      // Перевід declaredValue з UAH в EUR — інакше 2500 грн × 3% дають
-      // 75 «EUR» страхування (бо весь розрахунок ведеться в EUR).
-      const declaredValueEur = input.declaredValue
-        ? await toEur(Number(input.declaredValue), input.declaredValueCurrency || 'EUR')
-        : 0;
-      const breakdown = calculateParcelCost(
-        buildPricingInput(config),
-        {
-          actualWeight: totalWeight,
-          volumetricWeight: totalVolWeight,
-          declaredValue: declaredValueEur,
-          // ТЗ: insurance/packaging — opt-in checkboxes. Default off when
-          // caller didn't pass an explicit boolean (e.g. legacy admin form
-          // before retrofit). Pricing config gates whether the option is
-          // even allowed for the direction.
-          insurance: input.insurance === true,
-          needsPackaging: input.needsPackaging ?? false,
-          // ТЗ docx 01.07.26: doorstep — за явним opt-in чекбоксом.
-          isDoorstepDelivery: input.doorstepDelivery ?? false,
-          // ТЗ docx 09.10.26: див. isAddressDeliveryPricing (UA→EU — усе, крім пункту видачі).
-          isAddressDelivery: isAddressDeliveryPricing({ direction: input.direction, receiverDeliveryMethod: deliveryMethod }),
-          // ТЗ docx 28.09.26: мінімум «Пункт збору» діє і коли Отримувач сам
-          // забирає посилку з пункту видачі (не лише коли Відправник привозить).
-          isPickupPoint: isPickupPointPricing({
-            direction: input.direction,
-            collectionMethod: input.collectionMethod,
-            receiverDeliveryMethod: deliveryMethod,
-          }),
-          isCourierPickup:
-            input.direction === 'eu_to_ua' && input.collectionMethod === 'courier_pickup',
-          isMultiParcelPickup:
-            input.collectionMethod === 'courier_pickup' && !!input.isMultiParcelPickup,
-          isBothDirections,
-          parcelMoneyAmount: input.parcelMoneyAmount ? Number(input.parcelMoneyAmount) : 0,
-          // Per ТЗ §49/§50 — знижена ціна за кг коли Отримувач у Львові.
-          receiverCity: receiver?.addresses[0]?.city ?? null,
-        }
-      );
-      deliveryCost = breakdown.deliveryCost;
-      packagingCost = breakdown.packagingCost;
-      doorstepCost = breakdown.doorstepCost;
-      insuranceCost = breakdown.insuranceCost;
-      insuranceAutoApplied = breakdown.insuranceAutoApplied;
-      addressDeliveryCost = breakdown.addressDeliveryCost;
-      pickupPointCost = breakdown.pickupPointCost;
-      parcelMoneyCost = breakdown.parcelMoneyCost;
-      totalCost = breakdown.totalCost;
-    } else {
-      logger.warn('parcel.create.pricing_not_found', {
-        country: pricingCountry, direction: input.direction,
-      });
-    }
-  }
+  const insuranceAutoApplied = breakdown?.insuranceAutoApplied ?? false;
+  const addressDeliveryCost = breakdown?.addressDeliveryCost ?? 0;
+  const pickupPointCost = breakdown?.pickupPointCost ?? 0;
+  const parcelMoneyCost = breakdown?.parcelMoneyCost ?? 0;
+  const totalCost = breakdown?.totalCost ?? 0;
 
   // Now run the transactional bit: sequence + short number counter + create.
   const result = await prisma.$transaction(async (tx) => {
@@ -464,6 +411,109 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
   return { ...result, journeyNumber };
 }
 
+export interface PriceParcelInput {
+  direction: Direction;
+  /** Країна рейсу (якщо посилка прив'язана до рейсу). */
+  tripCountry: Country | null;
+  collectionPointId: string | null;
+  collectionMethod: CollectionMethod | null;
+  /** Країна адреси Відправника — для EU→UA, коли немає рейсу/пункту збору. */
+  senderAddressCountry: Country | null;
+  /** Адреса Отримувача: країна — для UA→EU, спосіб доставки — для мінімумів. */
+  receiverAddress: { country: Country | null; deliveryMethod: DeliveryMethod | null } | null;
+  /** Per ТЗ §49/§50 — знижена ціна за кг, коли Отримувач у Львові. */
+  receiverCity: string | null;
+  totalWeight: number;
+  totalVolWeight: number;
+  declaredValue: number | null;
+  declaredValueCurrency: string;
+  insurance: boolean;
+  needsPackaging: boolean;
+  doorstepDelivery: boolean;
+  isMultiParcelPickup: boolean;
+  parcelMoneyAmount: number | null;
+  isBothDirections: boolean;
+}
+
+/**
+ * Розрахунок вартості посилки за тарифом — спільний для створення (createParcel) і
+ * редагування замовлення Клієнтом (ТЗ docx 20.10.26), щоб після правки сума була
+ * рівно такою, якою була б при створенні з тими самими даними.
+ *
+ * Країна тарифу: рейс (ЄС) → для EU→UA пункт збору → адреса сторони в ЄС
+ * (EU→UA — Відправник, UA→EU — Отримувач). Немає тарифу — breakdown = null.
+ */
+export async function priceParcel(input: PriceParcelInput): Promise<{
+  pricingCountry: Country | null;
+  breakdown: CostBreakdown | null;
+}> {
+  let pricingCountry: Country | null = null;
+  if (input.tripCountry && input.tripCountry !== 'UA') pricingCountry = input.tripCountry;
+  if (!pricingCountry && input.direction === 'eu_to_ua' && input.collectionPointId) {
+    const cp = await prisma.collectionPoint.findUnique({
+      where: { id: input.collectionPointId },
+      select: { country: true },
+    });
+    if (cp && cp.country !== 'UA') pricingCountry = cp.country;
+  }
+  if (!pricingCountry) {
+    const country = input.direction === 'eu_to_ua'
+      ? input.senderAddressCountry
+      : (input.receiverAddress?.country ?? null);
+    if (country && country !== 'UA') pricingCountry = country;
+  }
+  if (!pricingCountry) return { pricingCountry, breakdown: null };
+
+  const config = await prisma.pricingConfig.findFirst({
+    where: { country: pricingCountry, direction: input.direction, isActive: true },
+    orderBy: { createdAt: 'desc' },
+  });
+  if (!config) {
+    logger.warn('parcel.create.pricing_not_found', {
+      country: pricingCountry, direction: input.direction,
+    });
+    return { pricingCountry, breakdown: null };
+  }
+  const deliveryMethod = input.receiverAddress?.deliveryMethod ?? undefined;
+  // Перевід declaredValue з UAH в EUR — інакше 2500 грн × 3% дають
+  // 75 «EUR» страхування (бо весь розрахунок ведеться в EUR).
+  const declaredValueEur = input.declaredValue
+    ? await toEur(Number(input.declaredValue), input.declaredValueCurrency || 'EUR')
+    : 0;
+  const breakdown = calculateParcelCost(
+    buildPricingInput(config),
+    {
+      actualWeight: input.totalWeight,
+      volumetricWeight: input.totalVolWeight,
+      declaredValue: declaredValueEur,
+      // ТЗ: insurance/packaging — opt-in checkboxes. Default off when
+      // caller didn't pass an explicit boolean. Pricing config gates whether
+      // the option is even allowed for the direction.
+      insurance: input.insurance,
+      needsPackaging: input.needsPackaging,
+      // ТЗ docx 01.07.26: doorstep — за явним opt-in чекбоксом.
+      isDoorstepDelivery: input.doorstepDelivery,
+      // ТЗ docx 09.10.26: див. isAddressDeliveryPricing (UA→EU — усе, крім пункту видачі).
+      isAddressDelivery: isAddressDeliveryPricing({ direction: input.direction, receiverDeliveryMethod: deliveryMethod }),
+      // ТЗ docx 28.09.26: мінімум «Пункт збору» діє і коли Отримувач сам
+      // забирає посилку з пункту видачі (не лише коли Відправник привозить).
+      isPickupPoint: isPickupPointPricing({
+        direction: input.direction,
+        collectionMethod: input.collectionMethod,
+        receiverDeliveryMethod: deliveryMethod,
+      }),
+      isCourierPickup:
+        input.direction === 'eu_to_ua' && input.collectionMethod === 'courier_pickup',
+      isMultiParcelPickup:
+        input.collectionMethod === 'courier_pickup' && input.isMultiParcelPickup,
+      isBothDirections: input.isBothDirections,
+      parcelMoneyAmount: input.parcelMoneyAmount ? Number(input.parcelMoneyAmount) : 0,
+      receiverCity: input.receiverCity,
+    }
+  );
+  return { pricingCountry, breakdown };
+}
+
 /**
  * Pick the right short-number counter on the trip record based on direction
  * and receiver country. The city-based distinction (Vienna vs Linz) is a
@@ -505,7 +555,7 @@ function counterBase(counterField: string): number {
  *
  * Повертає true коли знайдено — тоді калькулятор застосує `minBothDirections`.
  */
-async function detectBothDirections(args: {
+export async function detectBothDirections(args: {
   senderId: string;
   receiverId: string;
   direction: Direction;

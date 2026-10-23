@@ -32,8 +32,9 @@ import { CLIENT_TRANSFER_STATUSES } from '@/lib/parcels/transfer-rules';
  * (/parcels/[id]): блок ОТРИМУВАЧ/ВІДПРАВНИК, «Пункт збору», «Параметри
  * відправлення» з розрахунком вартості (спільні компоненти ParcelPlacesCard/
  * ParcelDetailsCard — гарантія ідентичності), «Деталі», «Оплата». Без
- * staff-контролів: редагування, зміна статусу, приймання оплати, рахунки —
- * лише у Працівника.
+ * staff-контролів: зміна статусу, приймання оплати, рахунки — лише у Працівника.
+ * ТЗ docx 20.10.26: власне замовлення Клієнт редагує кнопкою «Редагувати», поки
+ * воно не прийняте до перевезення (окрема сторінка /my-orders/[id]/edit).
  */
 interface ParcelDetail {
   id: string;
@@ -44,6 +45,8 @@ interface ParcelDetail {
   npTtn: string | null;
   /** ТЗ docx 04.10.26: рейсу до країни посилки в базі немає взагалі (з API). */
   noTripForCountry?: boolean;
+  /** ТЗ docx 20.10.26: власне замовлення, ще не прийняте до перевезення — можна редагувати. */
+  canClientEdit?: boolean;
   /** ТЗ docx 04.10.26 (п.3): нотатка, яку Клієнт залишив при створенні. */
   clientNote: string | null;
   direction: string;
@@ -219,6 +222,15 @@ export default function MyOrderDetailPage() {
             })}
           </Badge>
         </div>
+        {/* ТЗ docx 20.10.26: «Це має бути кнопка „Редагувати“, яка дає можливість змінювати
+            будь-які дані посилки» — лише поки замовлення не прийняте до перевезення. */}
+        {parcel.canClientEdit && (
+          <div className="mb-2">
+            <Link href={`/my-orders/${parcel.id}/edit`}>
+              <Button size="sm">✏️ Редагувати</Button>
+            </Link>
+          </div>
+        )}
         {/* ТЗ docx 04.10.26: рейсу до вибраної країни в базі немає взагалі.
             Якщо рейс є, але посилку ще не прив'язано, — нейтральний рядок. */}
         {!parcel.trip && !parcel.noTripForCountry && (

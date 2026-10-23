@@ -8,6 +8,7 @@ import { createParcel } from '@/lib/services/parcel-creation';
 import { ensureJourneyNumbersWhere } from '@/lib/services/journey-numbering';
 import { findNearestTrip, parcelEuCountry } from '@/lib/parcels/nearest-trip';
 import { logger } from '@/lib/logger';
+import { findOrCreateSenderAddress, findOrCreateReceiverAddress } from '@/lib/services/client-order-addresses';
 import type { Country } from '@/generated/prisma/enums';
 
 // GET /api/client-portal/orders — get client's orders
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // Sender address: dedupe per client by (country, city, street, building).
+  // Sender address: dedupe per client (див. findOrCreateSenderAddress).
   // Перевірка 22.09.26 (перші замовлення клієнта на проді): вулиця/будинок/орієнтир,
   // які клієнт вводить у блоці «Виклик курʼєра», раніше потрапляли ЛИШЕ у текстове
   // поле collectionAddress — картка посилки і Маршрутний лист (беруть адресу
@@ -138,34 +139,14 @@ export async function POST(request: NextRequest) {
   // зберігаємо і в адресі відправника — так само, як робить форма Працівника.
   let senderAddressId: string | null = null;
   if (body.senderCity) {
-    const senderCountry = (body.senderCountry ?? 'UA') as Country;
-    const sStreet = body.senderStreet || null;
-    const sBuilding = body.senderBuilding || null;
-    const existingSenderAddr = await prisma.clientAddress.findFirst({
-      where: {
-        clientId: sender.id,
-        country: senderCountry,
-        city: body.senderCity,
-        street: sStreet,
-        building: sBuilding,
-      },
+    senderAddressId = await findOrCreateSenderAddress(sender.id, {
+      country: (body.senderCountry ?? 'UA') as Country,
+      city: body.senderCity,
+      street: body.senderStreet,
+      building: body.senderBuilding,
+      landmark: body.senderLandmark,
+      postalCode: body.senderPostalCode,
     });
-    if (existingSenderAddr) {
-      senderAddressId = existingSenderAddr.id;
-    } else {
-      const addr = await prisma.clientAddress.create({
-        data: {
-          clientId: sender.id,
-          country: senderCountry,
-          city: body.senderCity,
-          street: sStreet,
-          building: sBuilding,
-          landmark: body.senderLandmark || null,
-          postalCode: body.senderPostalCode || null,
-        },
-      });
-      senderAddressId = addr.id;
-    }
   }
 
   // Find or create receiver — normalize the phone first so "+38 050…" and
@@ -188,55 +169,21 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // Receiver address: same dedupe strategy.
+  // Receiver address: same dedupe strategy (див. findOrCreateReceiverAddress —
+  // ТЗ docx 15.07.26 п.2: лише поля обраного способу доставки).
   let receiverAddressId: string | null = null;
   if (body.receiverCity) {
-    const receiverCountry = (body.receiverCountry ?? 'UA') as Country;
-    const rMethod = body.receiverDeliveryMethod || 'address';
-    // ТЗ docx 15.07.26 (п.2): зберігаємо у БД ЛИШЕ поля, релевантні обраному
-    // способу доставки — щоб стара НП/пункт видачі не «зависали» після зміни на
-    // Адресну (і навпаки). Дзеркалить staff-шлях (parcel-party-edit addAddress),
-    // тож у сховищі немає нерелевантних «хвостів», а не лише у підсумку.
-    const rStreet = rMethod === 'address' ? (body.receiverStreet || null) : null;
-    const rBuilding = rMethod === 'address' ? (body.receiverBuilding || null) : null;
-    const rLandmark = rMethod === 'address' ? (body.receiverLandmark || null) : null;
-    const rNp = rMethod === 'np_warehouse' ? (body.receiverNpWarehouse || null) : null;
-    const rPickup = rMethod === 'pickup_point' ? (body.receiverPickupPointText || null) : null;
-    // Dedupe включає спосіб + усі релевантні йому поля — щоб гейтована адреса
-    // не «злилася» з записом іншого способу (напр. pickup_point зі street=null,
-    // np=null не збігся з іншим pickup_point, що має інший текст пункту).
-    const existingReceiverAddr = await prisma.clientAddress.findFirst({
-      where: {
-        clientId: receiver.id,
-        country: receiverCountry,
-        city: body.receiverCity,
-        deliveryMethod: rMethod,
-        street: rStreet,
-        building: rBuilding,
-        npWarehouseNum: rNp,
-        pickupPointText: rPickup,
-      },
+    receiverAddressId = await findOrCreateReceiverAddress(receiver.id, {
+      country: (body.receiverCountry ?? 'UA') as Country,
+      city: body.receiverCity,
+      deliveryMethod: body.receiverDeliveryMethod || 'address',
+      street: body.receiverStreet,
+      building: body.receiverBuilding,
+      landmark: body.receiverLandmark,
+      postalCode: body.receiverPostalCode,
+      npWarehouseNum: body.receiverNpWarehouse,
+      pickupPointText: body.receiverPickupPointText,
     });
-    if (existingReceiverAddr) {
-      receiverAddressId = existingReceiverAddr.id;
-    } else {
-      const addr = await prisma.clientAddress.create({
-        data: {
-          clientId: receiver.id,
-          country: receiverCountry,
-          city: body.receiverCity,
-          street: rStreet,
-          // ТЗ docx 20.06.26 §19: Будинок + Орієнтир Отримувача.
-          building: rBuilding,
-          landmark: rLandmark,
-          postalCode: body.receiverPostalCode || null,
-          npWarehouseNum: rNp,
-          pickupPointText: rPickup,
-          deliveryMethod: rMethod,
-        },
-      });
-      receiverAddressId = addr.id;
-    }
   }
 
   // ТЗ docx 04.10.26: посилка, створена Клієнтом, одразу прив'язується до

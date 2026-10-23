@@ -18,6 +18,10 @@ import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { toast } from 'sonner';
 import { formatPostalCodeInput } from '@/lib/utils/postal-code';
 import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
+import { formatJourneyNumber } from '@/lib/utils/journey-number';
+import { withCountryCode } from '@/lib/utils/phone';
+import type { PrintListRow } from '@/components/shared/print-list-sheets';
+import { ROUTES_PRINT_KEY_PREFIX, type RoutesPrintPayload } from './print/payload';
 
 interface PartyAddr {
   country: string | null;
@@ -38,6 +42,9 @@ interface RouteItem {
   direction: string;
   totalWeight: number | null;
   totalPlacesCount: number;
+  /** ТЗ docx 20.10.26: стовпчик «Примітки» у друкованому МЛ — як у списку рейсу. */
+  listNote?: string | null;
+  clientNote?: string | null;
   assignedCourierId: string | null;
   estimatedDeliveryStart: string | null;
   estimatedDeliveryEnd: string | null;
@@ -86,6 +93,11 @@ function sheetLabel(date: string): string {
   const wd = d.toLocaleDateString("uk-UA", { weekday: "short" }).replace(/\.$/, "");
   const dmy = d.toLocaleDateString("uk-UA", { day: "2-digit", month: "2-digit", year: "2-digit" });
   return `МЛ - ${wd.charAt(0).toUpperCase()}${wd.slice(1)}, ${dmy}`;
+}
+
+/** Ключ знімка друку МЛ (див. openPrint) — унікальний для кожного натискання 🖨. */
+function nextPrintKey(): string {
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }
 
 /** UA → {EU} → UA · дата — компактний лейбл поїздки для селектора. */
@@ -606,25 +618,32 @@ export default function RoutesPage() {
     const m = /^\s*(\d+)/.exec(n);
     return m ? Number(m[1]) : Number.MAX_SAFE_INTEGER;
   };
+  /**
+   * ТЗ docx 12.10.26: старий порядковий номер на екрані більше не показується — водій бачить
+   * номер посилки в поїздці («028»). Тож «Номер» сортує саме за ним; старий порядковий —
+   * лише запасний ключ для посилок без номера в поїздці.
+   */
+  const byParcelNumber = (a: RouteItem, b: RouteItem) =>
+    (a.journeyNumber ?? Number.MAX_SAFE_INTEGER) - (b.journeyNumber ?? Number.MAX_SAFE_INTEGER) ||
+    parcelOrdinal(a.internalNumber) - parcelOrdinal(b.internalNumber) ||
+    a.internalNumber.localeCompare(b.internalNumber);
+  const parcelGroupKey = (p: RouteItem) => {
+    if (groupMode === 'postal') return partyInCountry(p, showUA).addr?.postalCode || 'Без індексу';
+    if (groupMode === 'city') return partyInCountry(p, showUA).addr?.city || 'Без міста';
+    return '';
+  };
+  const manualGroupKey = (t: ManualTask) => {
+    if (groupMode === 'postal') return t.postalCode || 'Без індексу';
+    if (groupMode === 'city') return t.manualCity || 'Без міста';
+    return '';
+  };
   const groupedGeneral = (() => {
-    const parcelKey = (p: RouteItem) => {
-      if (groupMode === 'postal') return partyInCountry(p, showUA).addr?.postalCode || 'Без індексу';
-      if (groupMode === 'city') return partyInCountry(p, showUA).addr?.city || 'Без міста';
-      return '';
-    };
-    const manualKey = (t: ManualTask) => {
-      if (groupMode === 'postal') return t.postalCode || 'Без індексу';
-      if (groupMode === 'city') return t.manualCity || 'Без міста';
-      return '';
-    };
+    const parcelKey = parcelGroupKey;
+    const manualKey = manualGroupKey;
     if (groupMode === 'number') {
       return [{
         key: '',
-        parcels: [...generalParcels].sort(
-          (a, b) =>
-            parcelOrdinal(a.internalNumber) - parcelOrdinal(b.internalNumber) ||
-            a.internalNumber.localeCompare(b.internalNumber),
-        ),
+        parcels: [...generalParcels].sort(byParcelNumber),
         manuals: manualGeneral,
       }];
     }
@@ -641,6 +660,29 @@ export default function RoutesPage() {
       .sort((a, b) => a.label.localeCompare(b.label, 'uk'))
       .map(({ label, parcels, manuals }) => ({ key: label, parcels, manuals }));
   })();
+
+  /**
+   * ТЗ docx 20.10.26: «Можливість групування застосовувати як до Маршрутів, так і до
+   * Маршрутних листів». Адреси листа впорядковуємо тією ж ознакою (Місто / Індекс / Номер),
+   * що й загальний список: групи — за абеткою, усередині групи — у порядку додавання;
+   * для «Номер» — посилки за номером у поїздці, ручні адреси — після них.
+   */
+  function orderSheetTasks(tasks: ManualTask[]): ManualTask[] {
+    const parcelOf = (t: ManualTask) => (t.parcelId ? parcelById.get(t.parcelId) ?? null : null);
+    if (groupMode === 'number') {
+      const withParcel = tasks.filter(t => parcelOf(t));
+      const rest = tasks.filter(t => !parcelOf(t));
+      return [...withParcel.sort((a, b) => byParcelNumber(parcelOf(a)!, parcelOf(b)!)), ...rest];
+    }
+    const keyOf = (t: ManualTask) => {
+      const p = parcelOf(t);
+      return normKey(p ? parcelGroupKey(p) : manualGroupKey(t));
+    };
+    return tasks
+      .map((t, i) => ({ t, i, k: keyOf(t) }))
+      .sort((a, b) => a.k.localeCompare(b.k, 'uk') || a.i - b.i)
+      .map(x => x.t);
+  }
 
   // ТЗ docx 02.09.26: класти адреси можна лише у СВОЇ листи.
   const mySheets = sheets.filter(s => s.canMutate);
@@ -785,6 +827,92 @@ export default function RoutesPage() {
     return `/parcels/new?${params.toString()}`;
   }
 
+  /**
+   * ТЗ docx 20.10.26: запис друкованого МЛ — у форматі списку рейсу. № — номер посилки в
+   * поїздці (з кількістю місць «003/2»), у «Примітках» — статус адреси (Відправник /
+   * Отримувач / Пасажир: МЛ змішує обидва напрямки) і коротка примітка посилки.
+   */
+  function printRowOf(t: ManualTask | null, parcel: RouteItem | null): PrintListRow {
+    const p = parcel ?? (t?.parcelId ? parcelById.get(t.parcelId) ?? null : null);
+    if (p) {
+      const d = partyInCountry(p, showUA);
+      const a = d.addr;
+      const num = p.journeyNumber != null ? formatJourneyNumber(p.journeyNumber) : '';
+      const places = p.totalPlacesCount > 1 ? `/${p.totalPlacesCount}` : '';
+      // Українська сторона може мати лише відділення НП (без вулиці).
+      const street = a?.street || (a?.npWarehouseNum ? `НП №${a.npWarehouseNum}` : '');
+      return {
+        kind: 'record',
+        key: t?.id ?? p.id,
+        num: num ? `${num}${places}` : (places ? `—${places}` : ''),
+        label: num ? `№${num}` : (a?.city || d.name),
+        noteLead: d.roleLabel,
+        note: (p.listNote || p.clientNote || '').replace(/\s+/g, ' ').trim(),
+        cityStreet: [a?.city, street].filter(Boolean).join(', '),
+        building: a?.building || '',
+        postal: (a?.postalCode || '').toUpperCase(),
+        name: d.name.trim(),
+        phone: withCountryCode(d.phone, a?.country),
+      };
+    }
+    const m = t as ManualTask;
+    const created = m.createdParcel?.journeyNumber != null ? formatJourneyNumber(m.createdParcel.journeyNumber) : '';
+    const name = [m.manualLastName, m.manualFirstName].filter(Boolean).join(' ') || m.manualName || '';
+    return {
+      kind: 'record',
+      key: m.id,
+      num: created,
+      label: created ? `№${created}` : (m.manualCity || name || 'ручна адреса'),
+      noteLead: manualStatusLabel(m),
+      note: '',
+      cityStreet: [m.manualCity, m.manualStreet || m.addressText].filter(Boolean).join(', '),
+      building: m.manualBuilding || '',
+      postal: (m.postalCode || '').toUpperCase(),
+      name,
+      phone: withCountryCode(m.manualPhone || '', stayHere),
+    };
+  }
+
+  /**
+   * Відкрити друк у новій вкладці (як друк списку рейсу). Записи вже впорядковані так,
+   * як на екрані, — передаємо їх через localStorage (вкладка друку того самого сайту).
+   */
+  function openPrint(title: string, rows: PrintListRow[]) {
+    const key = nextPrintKey();
+    const payload: RoutesPrintPayload = { title, addressHeader: 'Адреса, прізвище та імʼя', rows };
+    try {
+      // Старі знімки друку прибираємо — потрібен лише щойно відкритий.
+      for (let i = window.localStorage.length - 1; i >= 0; i--) {
+        const k = window.localStorage.key(i);
+        if (k?.startsWith(ROUTES_PRINT_KEY_PREFIX)) window.localStorage.removeItem(k);
+      }
+      window.localStorage.setItem(ROUTES_PRINT_KEY_PREFIX + key, JSON.stringify(payload));
+    } catch {
+      toast.error('Не вдалося підготувати друк (сховище браузера недоступне)');
+      return;
+    }
+    window.open(`/routes/print?key=${key}`, '_blank');
+  }
+
+  const journeyTitle = selectedJourney
+    ? `UA → ${COUNTRY_LABELS[selectedJourney.country as CountryCode] || selectedJourney.country} → UA`
+    : '';
+  const stayNote = showUA ? ' · адреси в Україні' : '';
+
+  function printSheet(sheet: (typeof sheets)[number]) {
+    const rows = orderSheetTasks(sheet.tasks).map(t => printRowOf(t, null));
+    openPrint(`${sheetLabel(sheet.date)} · ${journeyTitle}${sheet.ownerName ? ` · ${sheet.ownerName}` : ''}${stayNote}`, rows);
+  }
+
+  function printGeneral() {
+    const rows: PrintListRow[] = [];
+    for (const grp of groupedGeneral) {
+      for (const p of grp.parcels) rows.push(printRowOf(null, p));
+      for (const t of grp.manuals) rows.push(printRowOf(t, null));
+    }
+    openPrint(`Загальний список адрес · ${journeyTitle}${selectedJourney ? ` · ${formatDate(selectedJourney.departureDate)}` : ''}${stayNote}`, rows);
+  }
+
   return (
     <div>
       <div className="flex items-start justify-between mb-4">
@@ -809,7 +937,12 @@ export default function RoutesPage() {
             </div>
           )}
         </div>
-        <Button variant="outline" size="sm" onClick={() => window.print()}>Друкувати</Button>
+        {/* ТЗ docx 20.10.26: друк — шаблоном списку рейсу. Відкрито МЛ — друкується він,
+            інакше — загальний список адрес (у вибраному групуванні). */}
+        <Button variant="outline" size="sm" disabled={!selectedJourney} onClick={() => {
+          const open = sheets.find(s => s.id === expandedSheet);
+          if (open) printSheet(open); else printGeneral();
+        }}>Друкувати</Button>
       </div>
 
       {/* ТЗ docx 21.08.26: селектор поїздок — лише Суперадміну (бачить усі поїздки).
@@ -947,8 +1080,9 @@ export default function RoutesPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs text-gray-400">{sheet.tasks.length}</span>
                   {isExpanded && (<>
-                    <span role="button" tabIndex={0} className="h-6 px-1.5 flex items-center text-xs text-gray-600 hover:text-gray-900 print:hidden"
-                      onClick={(e) => { e.stopPropagation(); window.print(); }}>🖨</span>
+                    {/* ТЗ docx 20.10.26: друк МЛ тим самим шаблоном, що й список рейсу. */}
+                    <span role="button" tabIndex={0} title="Друкувати Маршрутний лист" className="h-6 px-1.5 flex items-center text-xs text-gray-600 hover:text-gray-900 print:hidden"
+                      onClick={(e) => { e.stopPropagation(); printSheet(sheet); }}>🖨</span>
                     {/* ТЗ docx 02.09.26: видалити можна ЛИШЕ свій лист. */}
                     {sheet.canMutate && (
                       <span role="button" tabIndex={0} className="h-6 px-1.5 flex items-center text-xs text-red-500 hover:text-red-700 print:hidden"
@@ -958,7 +1092,8 @@ export default function RoutesPage() {
                 </div>
               </button>
               <div className={`divide-y ${isExpanded ? '' : 'hidden'}`}>
-                {sheet.tasks.map((t, ti) => {
+                {/* ТЗ docx 20.10.26: групування (Місто / Індекс / Номер) діє і в листі. */}
+                {orderSheetTasks(sheet.tasks).map((t, ti) => {
                   const p = t.parcelId ? parcelById.get(t.parcelId) : null;
                   const isManual = !t.parcelId;
                   // ТЗ docx 03.09.26: єдиний вигляд запису — і посилка, і ручна адреса.
