@@ -207,8 +207,12 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
     (m === COLLECTION_METHODS.PICKUP_POINT && !pickupPointAvailableForClient) ||
     (m === COLLECTION_METHODS.COURIER_PICKUP && !courierPickupAvailableForClient) ||
     (m === COLLECTION_METHODS.EXTERNAL_SHIPPING && !externalShippingAvailableForClient);
+  // ТЗ docx 26.10.26: «Так, вже передав(ла)» → «Кур'єром» можна обрати і там, де «Виклик
+  // курʼєра» не пропонується (посилку вже віддали курʼєру). Тож при редагуванні такого
+  // замовлення вже обраний спосіб лишаємо видимим, інакше картка «зникала» і нічого не
+  // було виділено.
   const visibleMethods = (hideOthers ? METHODS.filter(m => m === value.method) : METHODS)
-    .filter(m => !clientFacing || !isMethodForbiddenForClient(m));
+    .filter(m => !clientFacing || !isMethodForbiddenForClient(m) || m === value.method);
 
   // Перевірка 15.09.26 (перший прогін «як справжній клієнт» на чистій базі): коли для
   // міста відправника дозволено ЛИШЕ ОДИН спосіб (напр. Amsterdam — тільки «Виклик
@@ -236,9 +240,10 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {visibleMethods.map(m => {
             const on = value.method === m;
-            const disabled =
+            // Обраний спосіб не блокуємо (див. visibleMethods вище) — він лише показується вибраним.
+            const disabled = !on && (
               (m === COLLECTION_METHODS.COURIER_PICKUP && !courierPickupAvailableForClient) ||
-              (m === COLLECTION_METHODS.EXTERNAL_SHIPPING && !externalShippingAvailableForClient);
+              (m === COLLECTION_METHODS.EXTERNAL_SHIPPING && !externalShippingAvailableForClient));
 
             return (
               <button
