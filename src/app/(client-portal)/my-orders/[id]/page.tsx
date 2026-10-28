@@ -23,6 +23,10 @@ import { ParcelDetailsCard } from '@/components/parcels/parcel-details-card';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 import { ClientTripTransfer } from '@/components/parcels/client-trip-transfer';
 import { CLIENT_TRANSFER_STATUSES } from '@/lib/parcels/transfer-rules';
+import { isTerminal } from '@/lib/parcels/status-transitions';
+import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
+import { TTN_AFTER_SHIPPING_REMINDER } from '@/lib/parcels/ttn-reminder';
+import { Camera, StickyNote } from 'lucide-react';
 
 /**
  * Деталі посилки для Клієнта.
@@ -104,7 +108,10 @@ interface ParcelDetail {
     volumetricWeight: number | null; needsPackaging: boolean;
     packagingDone: boolean; itnPlace: string | null;
   }[];
-  statusHistory: { status: string; changedAt: string; notes: string | null }[];
+  /** ТЗ docx 26.10.26: isNote — нотатка («Додати нотатку»), а не зміна статусу. */
+  statusHistory: { status: string; changedAt: string; notes: string | null; isNote?: boolean }[];
+  /** ТЗ docx 26.10.26 (п.1): фото посилки (видаляються автоматично після «Доставлено»). */
+  photos?: string[];
   trip: { departureDate: string; country: string } | null;
   assignedCourier: { id: string; fullName: string } | null;
   collectionPoint: {
@@ -133,6 +140,12 @@ export default function MyOrderDetailPage() {
   const [ttnDraft, setTtnDraft] = useState('');
   const [savingTtn, setSavingTtn] = useState(false);
   const [ttnError, setTtnError] = useState('');
+  // ТЗ docx 26.10.26 (п.1): фото посилки і нотатка — «у будь-кого, хто створює посилку».
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [addingNote, setAddingNote] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [extrasError, setExtrasError] = useState('');
 
   const fetchParcel = useCallback(() => {
     fetch(`/api/client-portal/orders/${id}`)
@@ -174,6 +187,53 @@ export default function MyOrderDetailPage() {
   useEffect(() => {
     fetch('/api/pricing').then(r => (r.ok ? r.json() : [])).then(setPricingConfigs).catch(() => {});
   }, []);
+
+  // ТЗ docx 26.10.26 (п.1): «Додати фото» — той самий перелік фото посилки, що й у Працівника.
+  async function uploadPhoto(file: File | undefined) {
+    if (!file) return;
+    setUploadingPhoto(true);
+    setExtrasError('');
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`/api/client-portal/orders/${id}/photos`, { method: 'POST', body: fd });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setExtrasError(data?.error || 'Не вдалося завантажити фото');
+        return;
+      }
+      fetchParcel();
+    } catch {
+      setExtrasError('Немає звʼязку з сервером. Спробуйте ще раз.');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
+  // ТЗ docx 26.10.26 (п.1): «Додати нотатку» — як у Працівника (запис в історії посилки).
+  async function addNote() {
+    setAddingNote(true);
+    setExtrasError('');
+    try {
+      const res = await fetch(`/api/client-portal/orders/${id}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: noteDraft }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setExtrasError(data?.error || 'Не вдалося додати нотатку');
+        return;
+      }
+      setNoteOpen(false);
+      setNoteDraft('');
+      fetchParcel();
+    } catch {
+      setExtrasError('Немає звʼязку з сервером. Спробуйте ще раз.');
+    } finally {
+      setAddingNote(false);
+    }
+  }
 
   if (loading) {
     return <div className="text-center py-12 text-gray-500">Завантаження...</div>;
@@ -263,6 +323,8 @@ export default function MyOrderDetailPage() {
                 className="border rounded px-2 py-0.5 text-xs font-mono w-44"
                 autoFocus
               />
+              {/* ТЗ docx 26.10.26: номер ТТН можна сфотографувати — він розпізнається цифрами. */}
+              <BarcodeScanButton onResult={(ttn) => setTtnDraft(ttn)} label="Фото ТТН" />
               <Button size="sm" className="h-6 text-xs px-2" onClick={saveTtn} disabled={savingTtn}>
                 {savingTtn ? '…' : 'Зберегти'}
               </Button>
@@ -304,6 +366,13 @@ export default function MyOrderDetailPage() {
           <span>{formatDateTime(parcel.createdAt)}</span>
         </div>
         {ttnError && <div className="text-xs text-red-600 mt-1">{ttnError}</div>}
+        {/* ТЗ docx 26.10.26: посилку відправляють Новою поштою, а ТТН ще не введено — нагадуємо. */}
+        {parcel.direction === 'ua_to_eu' && parcel.collectionMethod === 'external_shipping' && !parcel.npTtn
+          && parcel.status === 'draft' && !editTtn && (
+          <p className="mt-1.5 text-sm font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1.5 leading-snug">
+            📌 {TTN_AFTER_SHIPPING_REMINDER}
+          </p>
+        )}
         {/* ТЗ docx 04.10.26 (п.3): нотатка Клієнта до замовлення. */}
         {parcel.clientNote && (
           <div className="mt-1 text-sm bg-amber-50 border border-amber-200 rounded px-2 py-1">
@@ -447,6 +516,62 @@ export default function MyOrderDetailPage() {
 
       {/* ТЗ docx 04.10.26: рядок «Рейс: … | Кур'єр: …» прибрано — рейс тепер у шапці. */}
 
+      {/* ТЗ docx 26.10.26 (п.1): «Можливість додати фото посилки та створити нотатку має бути
+          у будь-кого, хто створює посилку. Реалізація стандартна» — ті самі кнопки, що в
+          Працівника. Після «Доставлено» фото видаляються автоматично, тож тоді кнопок немає. */}
+      {!isTerminal(parcel.status) && (
+        <div className="flex gap-2 flex-wrap">
+          <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md bg-white transition-colors ${uploadingPhoto ? 'opacity-60' : 'cursor-pointer hover:bg-gray-50'}`}>
+            <Camera className="w-4 h-4 text-gray-500" />
+            {uploadingPhoto ? 'Завантаження…' : 'Додати фото'}
+            {parcel.photos?.length ? (
+              <span className="ml-1 text-xs bg-blue-100 text-blue-700 px-1.5 rounded-full">{parcel.photos.length}</span>
+            ) : null}
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              disabled={uploadingPhoto}
+              onChange={(e) => { uploadPhoto(e.target.files?.[0]); e.target.value = ''; }}
+            />
+          </label>
+          <Button size="sm" variant="outline" onClick={() => { setNoteDraft(''); setNoteOpen(true); }}>
+            <StickyNote className="w-4 h-4 mr-1" /> Додати нотатку
+          </Button>
+        </div>
+      )}
+      {noteOpen && (
+        <div className="border rounded-lg p-3 space-y-2 bg-amber-50/50">
+          <div className="text-xs text-gray-600">Нотатка до посилки</div>
+          <input
+            value={noteDraft}
+            onChange={(e) => setNoteDraft(e.target.value.slice(0, 150))}
+            maxLength={150}
+            placeholder="Напр. телефонуйте після 18:00"
+            className="w-full border rounded-md px-3 py-1.5 text-sm bg-white"
+            autoFocus
+          />
+          <div className="flex gap-2">
+            <Button size="sm" disabled={addingNote || !noteDraft.trim()} onClick={addNote}>
+              {addingNote ? 'Збереження…' : 'Зберегти нотатку'}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setNoteOpen(false)} disabled={addingNote}>Скасувати</Button>
+          </div>
+        </div>
+      )}
+      {extrasError && <div className="text-sm text-red-600">{extrasError}</div>}
+      {parcel.photos?.length ? (
+        <div className="flex gap-2 flex-wrap">
+          {parcel.photos.map((url, i) => (
+            <a key={url} href={url} target="_blank" rel="noopener noreferrer">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt={`Фото ${i + 1}`} className="w-16 h-16 object-cover rounded-lg border hover:opacity-80" />
+            </a>
+          ))}
+        </div>
+      ) : null}
+
       <Card>
         <CardHeader className="py-2 px-3"><CardTitle className="text-sm">Історія статусів</CardTitle></CardHeader>
         <CardContent className="px-3 pb-3 pt-0">
@@ -454,7 +579,8 @@ export default function MyOrderDetailPage() {
             {parcel.statusHistory.map((h, i) => (
               <div key={i} className="text-sm">
                 <div className="font-medium">
-                  {statusLabel(h.status, { tripCountry: parcel.trip?.country, direction: parcel.direction, createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role })}
+                  {/* ТЗ docx 26.10.26: нотатка — окремий запис, статус вона не змінює. */}
+                  {h.isNote ? '📝 Нотатка' : statusLabel(h.status, { tripCountry: parcel.trip?.country, direction: parcel.direction, createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role })}
                 </div>
                 <div className="text-xs text-gray-400">{formatDateTime(h.changedAt)}</div>
                 {h.notes && <div className="text-xs text-gray-500 mt-0.5">{h.notes}</div>}

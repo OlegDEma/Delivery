@@ -21,6 +21,7 @@ import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
 import { formatJourneyNumber } from '@/lib/utils/journey-number';
 import { withCountryCode } from '@/lib/utils/phone';
 import type { PrintListRow } from '@/components/shared/print-list-sheets';
+import { parcelListNote, type NoteEntry } from '@/lib/parcels/list-note';
 import { ROUTES_PRINT_KEY_PREFIX, type RoutesPrintPayload } from './print/payload';
 
 interface PartyAddr {
@@ -42,8 +43,8 @@ interface RouteItem {
   direction: string;
   totalWeight: number | null;
   totalPlacesCount: number;
-  /** ТЗ docx 20.10.26: стовпчик «Примітки» у друкованому МЛ — як у списку рейсу. */
-  listNote?: string | null;
+  /** ТЗ docx 20.10.26 / 26.10.26: стовпчик «Примітки» у друкованому МЛ — нотатки посилки (isNote). */
+  statusHistory?: NoteEntry[];
   clientNote?: string | null;
   assignedCourierId: string | null;
   estimatedDeliveryStart: string | null;
@@ -830,7 +831,7 @@ export default function RoutesPage() {
   /**
    * ТЗ docx 20.10.26: запис друкованого МЛ — у форматі списку рейсу. № — номер посилки в
    * поїздці (з кількістю місць «003/2»), у «Примітках» — статус адреси (Відправник /
-   * Отримувач / Пасажир: МЛ змішує обидва напрямки) і коротка примітка посилки.
+   * Отримувач / Пасажир: МЛ змішує обидва напрямки) і нотатки посилки (ТЗ docx 26.10.26).
    */
   function printRowOf(t: ManualTask | null, parcel: RouteItem | null): PrintListRow {
     const p = parcel ?? (t?.parcelId ? parcelById.get(t.parcelId) ?? null : null);
@@ -847,7 +848,8 @@ export default function RoutesPage() {
         num: num ? `${num}${places}` : (places ? `—${places}` : ''),
         label: num ? `№${num}` : (a?.city || d.name),
         noteLead: d.roleLabel,
-        note: (p.listNote || p.clientNote || '').replace(/\s+/g, ' ').trim(),
+        // ТЗ docx 26.10.26: у «Примітках» — саме нотатки посилки (форма Клієнта + «Додати нотатку»).
+        note: parcelListNote(p),
         cityStreet: [a?.city, street].filter(Boolean).join(', '),
         building: a?.building || '',
         postal: (a?.postalCode || '').toUpperCase(),

@@ -5,6 +5,7 @@ import { JOURNEY_TRIP_MUTATION_ROLES } from '@/lib/constants/roles';
 import { isUuid } from '@/lib/validators/common';
 import { applyTripStatusCascade } from '@/lib/services/trip-status';
 import { ensureJourneyNumbersForTrip, moveParcelToTrip } from '@/lib/services/journey-numbering';
+import { NOTE_ENTRIES_SELECT } from '@/lib/parcels/list-note';
 
 // GET /api/trips/[id] — staff only
 export async function GET(
@@ -49,6 +50,8 @@ export async function GET(
           collectionPoint: {
             select: { id: true, name: true, city: true, address: true },
           },
+          // ТЗ docx 26.10.26: нотатки посилки — для стовпчика «Примітки» друку списку.
+          statusHistory: NOTE_ENTRIES_SELECT,
         },
         orderBy: [{ journeyNumber: { sort: 'asc', nulls: 'last' } }, { createdAt: 'asc' }],
       },

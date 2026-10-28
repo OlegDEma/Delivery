@@ -25,6 +25,7 @@ import { formatDate } from '@/lib/utils/format';
 import { displayParcelNumber, withoutOrdinal } from '@/lib/parcels/display-number';
 // ТЗ docx 12.10.26: телефони завжди з кодом країни.
 import { withCountryCode } from '@/lib/utils/phone';
+import { orderTripItems, TRIP_GROUP_MODES, type TripGroupMode } from '@/lib/parcels/trip-grouping';
 
 const TRIP_STATUSES: Record<string, { label: string; color: string }> = {
   planned: { label: 'Заплановано', color: 'bg-blue-100 text-blue-800' },
@@ -115,6 +116,8 @@ export default function TripDetailPage() {
   // ТЗ docx 09.10.26: «Ви дійсно хочете видалити посилку?» — власне вікно підтвердження.
   const [removeTarget, setRemoveTarget] = useState<TripParcel | null>(null);
   const [removing, setRemoving] = useState(false);
+  // ТЗ docx 26.10.26: групування списку посилок рейсу (як у Маршрутах); друк — за ним же.
+  const [groupMode, setGroupMode] = useState<TripGroupMode>('number');
 
   async function fetchTrip() {
     const res = await fetch(`/api/trips/${id}`);
@@ -185,12 +188,17 @@ export default function TripDetailPage() {
 
   // ТЗ docx 11.10.26: список рейсу за номерами в поїздці; на місці посилки, яку
   // перенесли/прибрали, лишається рядок «Перенесена до рейсу …» з тим самим номером.
-  const rows: TripRow[] = [
-    ...trip.parcels.map((p): TripRow => ({ kind: 'parcel', num: p.journeyNumber, parcel: p })),
-    ...trip.transfersOut
-      .filter((g) => g.journeyNumber != null && g.parcel.tripId !== trip.id)
-      .map((g): TripRow => ({ kind: 'ghost', num: g.journeyNumber as number, ghost: g })),
-  ].sort((a, b) => (a.num ?? Number.MAX_SAFE_INTEGER) - (b.num ?? Number.MAX_SAFE_INTEGER));
+  // ТЗ docx 26.10.26: групування Місто / Індекс (адреса в країні призначення) / Номер.
+  // При Місто/Індекс рядки «Перенесена…» (без адреси) — у кінці.
+  const parcelRows = trip.parcels.map((p): TripRow => ({ kind: 'parcel', num: p.journeyNumber, parcel: p }));
+  const ghostRows = trip.transfersOut
+    .filter((g) => g.journeyNumber != null && g.parcel.tripId !== trip.id)
+    .map((g): TripRow => ({ kind: 'ghost', num: g.journeyNumber as number, ghost: g }));
+  const rowAddr = (r: TripRow) => (r.kind === 'parcel' ? euSideParty(r.parcel).address : null);
+  const rowNum = (r: TripRow) => r.num;
+  const rows: TripRow[] = groupMode === 'number'
+    ? orderTripItems([...parcelRows, ...ghostRows], 'number', rowAddr, rowNum)
+    : [...orderTripItems(parcelRows, groupMode, rowAddr, rowNum), ...orderTripItems(ghostRows, 'number', rowAddr, rowNum)];
 
   return (
     <div className="max-w-3xl space-y-4">
@@ -228,7 +236,8 @@ export default function TripDetailPage() {
             </Link>
           )}
           {/* ТЗ docx 11.10.26 (п.2): друк списку посилок рейсу (A4). */}
-          <Button variant="outline" size="sm" onClick={() => window.open(`/trips/${id}/print`, '_blank')}>
+          {/* ТЗ docx 26.10.26: список для друку — відповідно до вибраного групування. */}
+          <Button variant="outline" size="sm" onClick={() => window.open(`/trips/${id}/print?group=${groupMode}`, '_blank')}>
             🖨 Друк списку посилок
           </Button>
           {/* ТЗ docx 12.10.26: перехід до пасажирів рейсу (і назад — кнопкою на їхній сторінці). */}
@@ -450,8 +459,19 @@ export default function TripDetailPage() {
 
       {/* Parcels list */}
       <Card>
-        <CardHeader className="py-3 px-4">
+        <CardHeader className="py-3 px-4 flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-base">Посилки рейсу</CardTitle>
+          {/* ТЗ docx 26.10.26: «Створити можливість групування в Рейсах як і в Маршрутах»
+              (ті самі віконечка: Місто, Індекс, Номер посилки). */}
+          <div className="flex items-center gap-1.5 text-sm">
+            <span className="text-gray-500">Групувати:</span>
+            {TRIP_GROUP_MODES.map((m) => (
+              <button key={m.value} type="button" onClick={() => setGroupMode(m.value)}
+                className={`px-2 py-1 rounded border text-xs ${groupMode === m.value ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-gray-300 hover:bg-gray-50'}`}>
+                {m.label}
+              </button>
+            ))}
+          </div>
         </CardHeader>
         <CardContent className="px-0 pb-0">
           <div className="divide-y">

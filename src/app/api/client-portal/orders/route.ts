@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { canonicalPhone, normalizePhone } from '@/lib/utils/phone';
 import { capitalize } from '@/lib/utils/format';
 import { parseBody, clientOrderSchema } from '@/lib/validators';
+import { isValidNpTtn } from '@/lib/parcels/ttn-reminder';
 import { createParcel } from '@/lib/services/parcel-creation';
 import { ensureJourneyNumbersWhere } from '@/lib/services/journey-numbering';
 import { findNearestTrip, parcelEuCountry } from '@/lib/parcels/nearest-trip';
@@ -97,19 +98,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Вкажіть оголошену вартість посилки' }, { status: 400 });
   }
 
-  // ТЗ docx 08.10.26 — лише Україна→Європа: «Спочатку факт передачі нам посилки,
-  // потім створення посилки в застосунку». Без підтвердження передачі не створюємо;
-  // для «Пошти» номер ТТН (14 цифр НП) обов'язковий.
-  if (body.direction === 'ua_to_eu') {
-    if (!handedOver) {
-      return NextResponse.json(
-        { error: 'Спочатку передайте посилку «Посилочці», а потім оформіть замовлення' },
-        { status: 400 },
-      );
-    }
-    if (body.collectionMethod === 'external_shipping' && !/^\d{14}$/.test((body.npTtn ?? '').replace(/\s/g, ''))) {
-      return NextResponse.json({ error: 'Введіть номер ТТН Нової пошти — 14 цифр' }, { status: 400 });
-    }
+  // ТЗ docx 26.10.26 — Україна→Європа: оформити можна і до передачі посилки («Ні, ще не
+  // передав(ла)»; ТЗ 08.10.26 це забороняло). Номер ТТН більше не обовʼязковий — Клієнту
+  // нагадуємо ввести його після відправки; але введений номер — рівно 14 цифр НП.
+  if (body.direction === 'ua_to_eu' && body.collectionMethod === 'external_shipping'
+    && body.npTtn?.trim() && !isValidNpTtn(body.npTtn)) {
+    return NextResponse.json({ error: 'Номер ТТН Нової пошти — 14 цифр' }, { status: 400 });
   }
 
   // SECURITY: Sender must always be the authenticated client themselves.
@@ -223,7 +217,13 @@ export async function POST(request: NextRequest) {
       createdById: user.id,
       createdSource: 'client_web',
       status: 'draft',
-      statusNote: 'Створено клієнтом на сайті',
+      // ТЗ docx 26.10.26: відповідь «Ви вже передали…?» — в історію посилки, щоб Працівник
+      // бачив, чи посилка вже в нас, чи її ще треба забрати / чекати з пошти.
+      statusNote: body.direction === 'ua_to_eu' && raw?.handedOver !== undefined
+        ? `Створено клієнтом на сайті. ${handedOver
+          ? `Клієнт уже передав посилку ${body.collectionMethod === 'external_shipping' ? 'Новою поштою' : "кур'єру"}`
+          : 'Клієнт ще не передав посилку'}`
+        : 'Створено клієнтом на сайті',
       collectionMethod: body.collectionMethod ?? null,
       collectionPointId: body.collectionPointId ?? null,
       collectionDate: body.collectionDate ? new Date(body.collectionDate) : null,

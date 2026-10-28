@@ -84,15 +84,19 @@ export async function decodeCanvasZx(canvas: HTMLCanvasElement): Promise<string 
   return null;
 }
 
-/** Намалювати джерело в канвас заданої ширини; rotate: 0 | 90 (за год. стрілкою) | -90. */
-function drawScaled(src: CanvasImageSource, srcW: number, srcH: number, targetW: number, rotate: 0 | 90 | -90): HTMLCanvasElement {
-  const scale = Math.min(1, targetW / srcW);
+/**
+ * Намалювати джерело в канвас заданої ширини; rotate: 0 | 90 (за год. стрілкою) | -90.
+ * maxScale > 1 — дозволити збільшення (для OCR малих фото).
+ */
+function drawScaled(src: CanvasImageSource, srcW: number, srcH: number, targetW: number, rotate: 0 | 90 | -90, maxScale = 1): HTMLCanvasElement {
+  const scale = Math.min(maxScale, targetW / srcW);
   const w = Math.max(1, Math.round(srcW * scale));
   const h = Math.max(1, Math.round(srcH * scale));
   const c = document.createElement('canvas');
   c.width = rotate ? h : w;
   c.height = rotate ? w : h;
   const ctx = c.getContext('2d', { willReadFrequently: true })!;
+  ctx.imageSmoothingQuality = 'high';
   if (rotate === 90) {
     ctx.translate(c.width, 0);
     ctx.rotate(Math.PI / 2);
@@ -104,21 +108,102 @@ function drawScaled(src: CanvasImageSource, srcW: number, srcH: number, targetW:
   return c;
 }
 
-/** Повний прохід по фото: нативно → ZXing (масштаби × повороти). */
-export async function decodeImageFile(file: Blob): Promise<string | null> {
+/**
+ * ТЗ docx 26.10.26: «Було б дуже добре мати можливість фотографувати номер ТТН з подальшим
+ * його розпізнаванням… При фотографуванні ТТН останній повинен бути розпізнаний і
+ * відображатися в цифровому форматі, а не у графічному».
+ *
+ * З тексту, розпізнаного на фото, — номер ТТН: 14 цифр, які на накладній друкують групами
+ * («20 4512 3456 7890»). Беремо послідовні групи цифр одного рядка, що разом дають рівно
+ * 14 цифр (так відсікаються сусідні числа, які OCR «приклеїв» до номера); номери НП
+ * починаються з 20 або 59 — такі в пріоритеті.
+ */
+export function extractTtnFromText(text: string): string | null {
+  const found: string[] = [];
+  for (const line of text.split('\n')) {
+    for (const run of line.match(/\d+(?:[ \-–]\d+)*/g) ?? []) {
+      const groups = run.split(/[ \-–]/);
+      for (let i = 0; i < groups.length; i++) {
+        let digits = '';
+        for (let j = i; j < groups.length && digits.length < 14; j++) {
+          digits += groups[j];
+          if (digits.length === 14) found.push(digits);
+        }
+      }
+    }
+  }
+  return found.find((d) => /^(20|59)/.test(d)) ?? found[0] ?? null;
+}
+
+type Tess = typeof import('tesseract.js');
+let tessPromise: Promise<Tess> | null = null;
+
+/** Фото для OCR: довша сторона ~2000 px (цифри накладної — 20–40 px заввишки), відтінки сірого. */
+function drawForOcr(src: ImageBitmap, rotate: 0 | 90 | -90): HTMLCanvasElement {
+  const k = 2000 / Math.max(src.width, src.height);
+  return toGray(drawScaled(src, src.width, src.height, Math.round(src.width * k), rotate, 2));
+}
+
+function toGray(c: HTMLCanvasElement): HTMLCanvasElement {
+  const ctx = c.getContext('2d', { willReadFrequently: true })!;
+  const img = ctx.getImageData(0, 0, c.width, c.height);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const y = (d[i] * 299 + d[i + 1] * 587 + d[i + 2] * 114) / 1000;
+    d[i] = d[i + 1] = d[i + 2] = y;
+  }
+  ctx.putImageData(img, 0, 0);
+  return c;
+}
+
+/**
+ * Розпізнати надрукований номер ТТН на фото (OCR, tesseract.js). Модель і рушій
+ * завантажуються з CDN лише при першому використанні, далі — з кешу браузера.
+ * Порядок спроб: як є → розріджений текст → фото боком (±90°).
+ */
+export async function recognizeTtnDigits(src: ImageBitmap): Promise<string | null> {
+  const T = await (tessPromise ??= import('tesseract.js'));
+  const worker = await T.createWorker('eng', T.OEM.LSTM_ONLY);
+  try {
+    const attempts: { rotate: 0 | 90 | -90; psm: string }[] = [
+      { rotate: 0, psm: T.PSM.AUTO },
+      { rotate: 0, psm: T.PSM.SPARSE_TEXT },
+      { rotate: 90, psm: T.PSM.AUTO },
+      { rotate: -90, psm: T.PSM.AUTO },
+    ];
+    for (const a of attempts) {
+      await worker.setParameters({ tessedit_pageseg_mode: a.psm as never });
+      const { data } = await worker.recognize(drawForOcr(src, a.rotate));
+      const ttn = extractTtnFromText(data.text);
+      if (ttn) return ttn;
+    }
+    return null;
+  } finally {
+    await worker.terminate().catch(() => {});
+  }
+}
+
+/**
+ * Повний прохід по фото: штрихкод (нативно → ZXing, масштаби × повороти), а якщо його
+ * не видно чи не читається — надрукований номер ТТН цифрами (OCR, ТЗ docx 26.10.26).
+ * onStage — щоб показати Клієнту, що зараз триває довше розпізнавання цифр.
+ */
+export async function decodeImageFile(file: Blob, onStage?: (stage: 'barcode' | 'ocr') => void): Promise<string | null> {
   const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' } as ImageBitmapOptions)
     .catch(() => createImageBitmap(file));
   try {
+    onStage?.('barcode');
     const native = await detectNative(bmp);
-    if (native) return native;
+    if (native && extractNpTtn(native)) return native;
     for (const rotate of [0, 90, -90] as const) {
       for (const width of [1600, 1000, 2400, 700]) {
         const canvas = drawScaled(bmp, bmp.width, bmp.height, width, rotate);
         const text = await decodeCanvasZx(canvas);
-        if (text) return text;
+        if (text && extractNpTtn(text)) return text;
       }
     }
-    return null;
+    onStage?.('ocr');
+    return await recognizeTtnDigits(bmp);
   } finally {
     bmp.close?.();
   }

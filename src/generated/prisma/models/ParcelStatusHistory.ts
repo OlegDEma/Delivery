@@ -32,6 +32,7 @@ export type ParcelStatusHistoryMinAggregateOutputType = {
   changedAt: Date | null
   notes: string | null
   location: string | null
+  isNote: boolean | null
 }
 
 export type ParcelStatusHistoryMaxAggregateOutputType = {
@@ -42,6 +43,7 @@ export type ParcelStatusHistoryMaxAggregateOutputType = {
   changedAt: Date | null
   notes: string | null
   location: string | null
+  isNote: boolean | null
 }
 
 export type ParcelStatusHistoryCountAggregateOutputType = {
@@ -52,6 +54,7 @@ export type ParcelStatusHistoryCountAggregateOutputType = {
   changedAt: number
   notes: number
   location: number
+  isNote: number
   _all: number
 }
 
@@ -64,6 +67,7 @@ export type ParcelStatusHistoryMinAggregateInputType = {
   changedAt?: true
   notes?: true
   location?: true
+  isNote?: true
 }
 
 export type ParcelStatusHistoryMaxAggregateInputType = {
@@ -74,6 +78,7 @@ export type ParcelStatusHistoryMaxAggregateInputType = {
   changedAt?: true
   notes?: true
   location?: true
+  isNote?: true
 }
 
 export type ParcelStatusHistoryCountAggregateInputType = {
@@ -84,6 +89,7 @@ export type ParcelStatusHistoryCountAggregateInputType = {
   changedAt?: true
   notes?: true
   location?: true
+  isNote?: true
   _all?: true
 }
 
@@ -167,6 +173,7 @@ export type ParcelStatusHistoryGroupByOutputType = {
   changedAt: Date
   notes: string | null
   location: string | null
+  isNote: boolean
   _count: ParcelStatusHistoryCountAggregateOutputType | null
   _min: ParcelStatusHistoryMinAggregateOutputType | null
   _max: ParcelStatusHistoryMaxAggregateOutputType | null
@@ -198,6 +205,7 @@ export type ParcelStatusHistoryWhereInput = {
   changedAt?: Prisma.DateTimeFilter<"ParcelStatusHistory"> | Date | string
   notes?: Prisma.StringNullableFilter<"ParcelStatusHistory"> | string | null
   location?: Prisma.StringNullableFilter<"ParcelStatusHistory"> | string | null
+  isNote?: Prisma.BoolFilter<"ParcelStatusHistory"> | boolean
   parcel?: Prisma.XOR<Prisma.ParcelScalarRelationFilter, Prisma.ParcelWhereInput>
   changedBy?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
 }
@@ -210,6 +218,7 @@ export type ParcelStatusHistoryOrderByWithRelationInput = {
   changedAt?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
+  isNote?: Prisma.SortOrder
   parcel?: Prisma.ParcelOrderByWithRelationInput
   changedBy?: Prisma.ProfileOrderByWithRelationInput
 }
@@ -225,6 +234,7 @@ export type ParcelStatusHistoryWhereUniqueInput = Prisma.AtLeast<{
   changedAt?: Prisma.DateTimeFilter<"ParcelStatusHistory"> | Date | string
   notes?: Prisma.StringNullableFilter<"ParcelStatusHistory"> | string | null
   location?: Prisma.StringNullableFilter<"ParcelStatusHistory"> | string | null
+  isNote?: Prisma.BoolFilter<"ParcelStatusHistory"> | boolean
   parcel?: Prisma.XOR<Prisma.ParcelScalarRelationFilter, Prisma.ParcelWhereInput>
   changedBy?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
 }, "id">
@@ -237,6 +247,7 @@ export type ParcelStatusHistoryOrderByWithAggregationInput = {
   changedAt?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
+  isNote?: Prisma.SortOrder
   _count?: Prisma.ParcelStatusHistoryCountOrderByAggregateInput
   _max?: Prisma.ParcelStatusHistoryMaxOrderByAggregateInput
   _min?: Prisma.ParcelStatusHistoryMinOrderByAggregateInput
@@ -253,6 +264,7 @@ export type ParcelStatusHistoryScalarWhereWithAggregatesInput = {
   changedAt?: Prisma.DateTimeWithAggregatesFilter<"ParcelStatusHistory"> | Date | string
   notes?: Prisma.StringNullableWithAggregatesFilter<"ParcelStatusHistory"> | string | null
   location?: Prisma.StringNullableWithAggregatesFilter<"ParcelStatusHistory"> | string | null
+  isNote?: Prisma.BoolWithAggregatesFilter<"ParcelStatusHistory"> | boolean
 }
 
 export type ParcelStatusHistoryCreateInput = {
@@ -261,6 +273,7 @@ export type ParcelStatusHistoryCreateInput = {
   changedAt?: Date | string
   notes?: string | null
   location?: string | null
+  isNote?: boolean
   parcel: Prisma.ParcelCreateNestedOneWithoutStatusHistoryInput
   changedBy?: Prisma.ProfileCreateNestedOneWithoutStatusChangesInput
 }
@@ -273,6 +286,7 @@ export type ParcelStatusHistoryUncheckedCreateInput = {
   changedAt?: Date | string
   notes?: string | null
   location?: string | null
+  isNote?: boolean
 }
 
 export type ParcelStatusHistoryUpdateInput = {
@@ -281,6 +295,7 @@ export type ParcelStatusHistoryUpdateInput = {
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isNote?: Prisma.BoolFieldUpdateOperationsInput | boolean
   parcel?: Prisma.ParcelUpdateOneRequiredWithoutStatusHistoryNestedInput
   changedBy?: Prisma.ProfileUpdateOneWithoutStatusChangesNestedInput
 }
@@ -293,6 +308,7 @@ export type ParcelStatusHistoryUncheckedUpdateInput = {
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isNote?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ParcelStatusHistoryCreateManyInput = {
@@ -303,6 +319,7 @@ export type ParcelStatusHistoryCreateManyInput = {
   changedAt?: Date | string
   notes?: string | null
   location?: string | null
+  isNote?: boolean
 }
 
 export type ParcelStatusHistoryUpdateManyMutationInput = {
@@ -311,6 +328,7 @@ export type ParcelStatusHistoryUpdateManyMutationInput = {
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isNote?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ParcelStatusHistoryUncheckedUpdateManyInput = {
@@ -321,6 +339,7 @@ export type ParcelStatusHistoryUncheckedUpdateManyInput = {
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isNote?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ParcelStatusHistoryListRelationFilter = {
@@ -341,6 +360,7 @@ export type ParcelStatusHistoryCountOrderByAggregateInput = {
   changedAt?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   location?: Prisma.SortOrder
+  isNote?: Prisma.SortOrder
 }
 
 export type ParcelStatusHistoryMaxOrderByAggregateInput = {
@@ -351,6 +371,7 @@ export type ParcelStatusHistoryMaxOrderByAggregateInput = {
   changedAt?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   location?: Prisma.SortOrder
+  isNote?: Prisma.SortOrder
 }
 
 export type ParcelStatusHistoryMinOrderByAggregateInput = {
@@ -361,6 +382,7 @@ export type ParcelStatusHistoryMinOrderByAggregateInput = {
   changedAt?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   location?: Prisma.SortOrder
+  isNote?: Prisma.SortOrder
 }
 
 export type ParcelStatusHistoryCreateNestedManyWithoutChangedByInput = {
@@ -453,6 +475,7 @@ export type ParcelStatusHistoryCreateWithoutChangedByInput = {
   changedAt?: Date | string
   notes?: string | null
   location?: string | null
+  isNote?: boolean
   parcel: Prisma.ParcelCreateNestedOneWithoutStatusHistoryInput
 }
 
@@ -463,6 +486,7 @@ export type ParcelStatusHistoryUncheckedCreateWithoutChangedByInput = {
   changedAt?: Date | string
   notes?: string | null
   location?: string | null
+  isNote?: boolean
 }
 
 export type ParcelStatusHistoryCreateOrConnectWithoutChangedByInput = {
@@ -502,6 +526,7 @@ export type ParcelStatusHistoryScalarWhereInput = {
   changedAt?: Prisma.DateTimeFilter<"ParcelStatusHistory"> | Date | string
   notes?: Prisma.StringNullableFilter<"ParcelStatusHistory"> | string | null
   location?: Prisma.StringNullableFilter<"ParcelStatusHistory"> | string | null
+  isNote?: Prisma.BoolFilter<"ParcelStatusHistory"> | boolean
 }
 
 export type ParcelStatusHistoryCreateWithoutParcelInput = {
@@ -510,6 +535,7 @@ export type ParcelStatusHistoryCreateWithoutParcelInput = {
   changedAt?: Date | string
   notes?: string | null
   location?: string | null
+  isNote?: boolean
   changedBy?: Prisma.ProfileCreateNestedOneWithoutStatusChangesInput
 }
 
@@ -520,6 +546,7 @@ export type ParcelStatusHistoryUncheckedCreateWithoutParcelInput = {
   changedAt?: Date | string
   notes?: string | null
   location?: string | null
+  isNote?: boolean
 }
 
 export type ParcelStatusHistoryCreateOrConnectWithoutParcelInput = {
@@ -555,6 +582,7 @@ export type ParcelStatusHistoryCreateManyChangedByInput = {
   changedAt?: Date | string
   notes?: string | null
   location?: string | null
+  isNote?: boolean
 }
 
 export type ParcelStatusHistoryUpdateWithoutChangedByInput = {
@@ -563,6 +591,7 @@ export type ParcelStatusHistoryUpdateWithoutChangedByInput = {
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isNote?: Prisma.BoolFieldUpdateOperationsInput | boolean
   parcel?: Prisma.ParcelUpdateOneRequiredWithoutStatusHistoryNestedInput
 }
 
@@ -573,6 +602,7 @@ export type ParcelStatusHistoryUncheckedUpdateWithoutChangedByInput = {
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isNote?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByInput = {
@@ -582,6 +612,7 @@ export type ParcelStatusHistoryUncheckedUpdateManyWithoutChangedByInput = {
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isNote?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ParcelStatusHistoryCreateManyParcelInput = {
@@ -591,6 +622,7 @@ export type ParcelStatusHistoryCreateManyParcelInput = {
   changedAt?: Date | string
   notes?: string | null
   location?: string | null
+  isNote?: boolean
 }
 
 export type ParcelStatusHistoryUpdateWithoutParcelInput = {
@@ -599,6 +631,7 @@ export type ParcelStatusHistoryUpdateWithoutParcelInput = {
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isNote?: Prisma.BoolFieldUpdateOperationsInput | boolean
   changedBy?: Prisma.ProfileUpdateOneWithoutStatusChangesNestedInput
 }
 
@@ -609,6 +642,7 @@ export type ParcelStatusHistoryUncheckedUpdateWithoutParcelInput = {
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isNote?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ParcelStatusHistoryUncheckedUpdateManyWithoutParcelInput = {
@@ -618,6 +652,7 @@ export type ParcelStatusHistoryUncheckedUpdateManyWithoutParcelInput = {
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isNote?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -630,6 +665,7 @@ export type ParcelStatusHistorySelect<ExtArgs extends runtime.Types.Extensions.I
   changedAt?: boolean
   notes?: boolean
   location?: boolean
+  isNote?: boolean
   parcel?: boolean | Prisma.ParcelDefaultArgs<ExtArgs>
   changedBy?: boolean | Prisma.ParcelStatusHistory$changedByArgs<ExtArgs>
 }, ExtArgs["result"]["parcelStatusHistory"]>
@@ -642,6 +678,7 @@ export type ParcelStatusHistorySelectCreateManyAndReturn<ExtArgs extends runtime
   changedAt?: boolean
   notes?: boolean
   location?: boolean
+  isNote?: boolean
   parcel?: boolean | Prisma.ParcelDefaultArgs<ExtArgs>
   changedBy?: boolean | Prisma.ParcelStatusHistory$changedByArgs<ExtArgs>
 }, ExtArgs["result"]["parcelStatusHistory"]>
@@ -654,6 +691,7 @@ export type ParcelStatusHistorySelectUpdateManyAndReturn<ExtArgs extends runtime
   changedAt?: boolean
   notes?: boolean
   location?: boolean
+  isNote?: boolean
   parcel?: boolean | Prisma.ParcelDefaultArgs<ExtArgs>
   changedBy?: boolean | Prisma.ParcelStatusHistory$changedByArgs<ExtArgs>
 }, ExtArgs["result"]["parcelStatusHistory"]>
@@ -666,9 +704,10 @@ export type ParcelStatusHistorySelectScalar = {
   changedAt?: boolean
   notes?: boolean
   location?: boolean
+  isNote?: boolean
 }
 
-export type ParcelStatusHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parcelId" | "status" | "changedById" | "changedAt" | "notes" | "location", ExtArgs["result"]["parcelStatusHistory"]>
+export type ParcelStatusHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parcelId" | "status" | "changedById" | "changedAt" | "notes" | "location" | "isNote", ExtArgs["result"]["parcelStatusHistory"]>
 export type ParcelStatusHistoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parcel?: boolean | Prisma.ParcelDefaultArgs<ExtArgs>
   changedBy?: boolean | Prisma.ParcelStatusHistory$changedByArgs<ExtArgs>
@@ -696,6 +735,11 @@ export type $ParcelStatusHistoryPayload<ExtArgs extends runtime.Types.Extensions
     changedAt: Date
     notes: string | null
     location: string | null
+    /**
+     * ТЗ docx 26.10.26: запис — нотатка («Додати нотатку» Працівника чи Клієнта), а не зміна
+     * статусу. Саме нотатки друкуються у стовпчику «Примітки» списку рейсу / МЛ.
+     */
+    isNote: boolean
   }, ExtArgs["result"]["parcelStatusHistory"]>
   composites: {}
 }
@@ -1128,6 +1172,7 @@ export interface ParcelStatusHistoryFieldRefs {
   readonly changedAt: Prisma.FieldRef<"ParcelStatusHistory", 'DateTime'>
   readonly notes: Prisma.FieldRef<"ParcelStatusHistory", 'String'>
   readonly location: Prisma.FieldRef<"ParcelStatusHistory", 'String'>
+  readonly isNote: Prisma.FieldRef<"ParcelStatusHistory", 'Boolean'>
 }
     
 

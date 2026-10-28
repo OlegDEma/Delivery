@@ -18,6 +18,7 @@ import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
 import { isPickupPointPricing, isAddressDeliveryPricing } from '@/lib/utils/pricing-flags';
 import { isNoTripForCountry } from '@/lib/parcels/nearest-trip';
 import { ensureJourneyNumbersForTrip } from '@/lib/services/journey-numbering';
+import { purgeParcelPhotos, PHOTO_PURGE_STATUSES } from '@/lib/services/parcel-photos';
 
 // GET /api/parcels/[id]
 export async function GET(
@@ -235,6 +236,9 @@ export async function PATCH(
           changedById: userId,
           notes: body.statusNote || null,
           location: body.location || null,
+          // ТЗ docx 26.10.26: «Додати нотатку» — запис без зміни статусу; саме такі
+          // записи друкуються у «Примітках» списку рейсу.
+          isNote: body.status === parcel.status && !!body.statusNote?.trim(),
         },
       },
     };
@@ -286,6 +290,11 @@ export async function PATCH(
       where: { id },
       data: statusUpdateData,
     });
+    // ТЗ docx 26.10.26: «Після заміни статусу на „Доставлено“ фото посилки (лише саме фото)
+    // автоматично видаляється». Нотатки лишаються.
+    if (body.status !== parcel.status && PHOTO_PURGE_STATUSES.includes(body.status as ParcelStatus)) {
+      await purgeParcelPhotos(prisma, [id], userId);
+    }
     return NextResponse.json(updated);
   }
 
@@ -393,7 +402,6 @@ export async function PATCH(
   if (body.shortNumber !== undefined) updateData.shortNumber = body.shortNumber;
   // ТЗ docx 12.10.26 (коментар клієнта): примітка для списку рейсу — операційне поле
   // (не під заморозкою даних), редагується в будь-якому статусі.
-  if (body.listNote !== undefined) updateData.listNote = body.listNote || null;
   if (body.description !== undefined) updateData.description = body.description;
   if (body.declaredValue !== undefined) updateData.declaredValue = body.declaredValue ? Number(body.declaredValue) : null;
   if (body.insuranceApplied !== undefined) updateData.insuranceApplied = body.insuranceApplied;

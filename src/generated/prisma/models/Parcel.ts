@@ -10097,8 +10097,8 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     clientNote: string | null
     /**
      * ТЗ docx 12.10.26 (коментар клієнта): коротка примітка Працівника для стовпчика
-     * «Примітки» друкованого списку рейсу («буду після 18:00»). Порожня — у список іде
-     * clientNote. Клієнту не показується (у клієнтських API — omit).
+     * «Примітки» друкованого списку рейсу. ТЗ docx 26.10.26: більше не використовується —
+     * у «Примітки» йдуть нотатки (ParcelStatusHistory.isNote); колонку лишено (не заповнена).
      */
     listNote: string | null
     npTrackingStatus: string | null

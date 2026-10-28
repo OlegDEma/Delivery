@@ -7,6 +7,7 @@ import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
 import type { ParcelStatusType } from '@/lib/constants/statuses';
 import { ROLES } from '@/lib/constants/roles';
 import { logger } from '@/lib/logger';
+import { purgeParcelPhotos, PHOTO_PURGE_STATUSES } from '@/lib/services/parcel-photos';
 
 // POST /api/parcels/bulk-status — change status for multiple parcels (staff only)
 //
@@ -91,6 +92,11 @@ export async function POST(request: NextRequest) {
       })
     )
   );
+
+  // ТЗ docx 26.10.26: після «Доставлено» фото посилки видаляються автоматично.
+  if (PHOTO_PURGE_STATUSES.includes(status as ParcelStatus)) {
+    await purgeParcelPhotos(prisma, parcelIds as string[], user.id);
+  }
 
   return NextResponse.json({ updated: results.length });
 }

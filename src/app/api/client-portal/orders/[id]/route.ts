@@ -15,6 +15,7 @@ import { priceParcel, detectBothDirections } from '@/lib/services/parcel-creatio
 import { findOrCreateSenderAddress, findOrCreateReceiverAddress } from '@/lib/services/client-order-addresses';
 import { canClientEditOrder, CLIENT_EDIT_LOCKED_MESSAGE } from '@/lib/parcels/edit-lock';
 import { writeAuditLog } from '@/lib/audit';
+import { isValidNpTtn } from '@/lib/parcels/ttn-reminder';
 import type { Country } from '@/generated/prisma/enums';
 
 /**
@@ -75,7 +76,8 @@ export async function GET(
       places: { orderBy: { placeNumber: 'asc' } },
       statusHistory: {
         orderBy: { changedAt: 'desc' },
-        select: { status: true, changedAt: true, notes: true },
+        // ТЗ docx 26.10.26: isNote — щоб показати нотатку окремо від зміни статусу.
+        select: { status: true, changedAt: true, notes: true, isNote: true },
       },
       trip: { select: { departureDate: true, country: true } },
       // ТЗ docx 04.10.26: «Створена клієнтом/водієм/…» — потрібна лише роль автора.
@@ -191,10 +193,11 @@ export async function PUT(
   if (!(Number(body.declaredValue) > 0)) {
     return NextResponse.json({ error: 'Вкажіть оголошену вартість посилки' }, { status: 400 });
   }
-  // ТЗ docx 08.10.26 (Україна→Європа): для «Пошти» номер ТТН обов'язковий.
+  // ТЗ docx 26.10.26 (Україна→Європа): ТТН не обовʼязковий (Клієнт вводить його після
+  // відправки), але введений номер — рівно 14 цифр НП.
   if (direction === 'ua_to_eu' && body.collectionMethod === 'external_shipping'
-    && !/^\d{14}$/.test((body.npTtn ?? '').replace(/\s/g, ''))) {
-    return NextResponse.json({ error: 'Введіть номер ТТН Нової пошти — 14 цифр' }, { status: 400 });
+    && body.npTtn?.trim() && !isValidNpTtn(body.npTtn)) {
+    return NextResponse.json({ error: 'Номер ТТН Нової пошти — 14 цифр' }, { status: 400 });
   }
   if (!body.senderCity) {
     return NextResponse.json({ error: 'Вкажіть Ваш населений пункт у розділі «Відправник»' }, { status: 400 });

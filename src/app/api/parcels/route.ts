@@ -5,6 +5,7 @@ import { ROLES } from '@/lib/constants/roles';
 import { parseBody, createParcelSchema } from '@/lib/validators';
 import { createParcel } from '@/lib/services/parcel-creation';
 import { ensureJourneyNumbersWhere } from '@/lib/services/journey-numbering';
+import { NOTE_ENTRIES_SELECT } from '@/lib/parcels/list-note';
 import { findNearestTrip, parcelEuCountry } from '@/lib/parcels/nearest-trip';
 import { checkItnQuery, INVALID_ITN_MESSAGE } from '@/lib/utils/itn';
 import { logger } from '@/lib/logger';
@@ -302,6 +303,8 @@ export async function GET(request: NextRequest) {
         assignedCourier: { select: { id: true, fullName: true } },
         // ТЗ docx 04.10.26: «Створена клієнтом/водієм/суперадміном» — роль автора.
         createdBy: { select: { role: true } },
+        // ТЗ docx 26.10.26: нотатки — для «Приміток» друкованого Маршрутного листа.
+        statusHistory: NOTE_ENTRIES_SELECT,
       },
       orderBy: { [sortBy]: sortOrderParam },
       skip: (page - 1) * limit,

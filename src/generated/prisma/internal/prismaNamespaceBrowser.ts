@@ -367,7 +367,8 @@ export const ParcelStatusHistoryScalarFieldEnum = {
   changedById: 'changedById',
   changedAt: 'changedAt',
   notes: 'notes',
-  location: 'location'
+  location: 'location',
+  isNote: 'isNote'
 } as const
 
 export type ParcelStatusHistoryScalarFieldEnum = (typeof ParcelStatusHistoryScalarFieldEnum)[keyof typeof ParcelStatusHistoryScalarFieldEnum]

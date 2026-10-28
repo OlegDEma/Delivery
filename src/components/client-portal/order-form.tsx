@@ -26,6 +26,10 @@ import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 import { INSURANCE_AUTO_THRESHOLD_EUR } from '@/lib/constants/insurance';
 import { displayParcelNumber } from '@/lib/parcels/display-number';
 import { formatPostalCodeInput } from '@/lib/utils/postal-code';
+import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
+import {
+  TTN_ENTER_REQUEST, TTN_AFTER_SHIPPING_REMINDER, TTN_MISSING_REMINDER, isValidNpTtn,
+} from '@/lib/parcels/ttn-reminder';
 
 interface PlaceData {
   weight: string;
@@ -124,7 +128,12 @@ export function OrderForm({ editId }: { editId?: string }) {
   useEffect(() => {
     if (error) errorRef.current?.scrollIntoView({ behavior: "auto", block: "center" });
   }, [error]);
-  const [successNumber, setSuccessNumber] = useState<string | null>(null);
+  // ТЗ docx 26.10.26: після створення — номер, id (перехід у замовлення: фото, нотатка, ТТН)
+  // і нагадування про ТТН, якщо посилка йде Новою поштою, а номера ще немає.
+  const [created, setCreated] = useState<{ id: string; number: string; ttnReminder: string | null } | null>(null);
+  const [successTtn, setSuccessTtn] = useState('');
+  const [successTtnState, setSuccessTtnState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [successTtnError, setSuccessTtnError] = useState('');
   const [pricingConfigs, setPricingConfigs] = useState<PricingConfig[]>([]);
   // ТЗ docx 02.07.26 (D8): правила Логістики — щоб ховати заборонені для
   // Країни/НП способи доставки Отримувача (Адресна/Пошта).
@@ -219,15 +228,42 @@ export function OrderForm({ editId }: { editId?: string }) {
   const [npTtn, setNpTtn] = useState('');
   // ТЗ docx 04.10.26 (п.3): нотатка — вільний текст до 150 знаків.
   const [clientNote, setClientNote] = useState('');
-  // ТЗ docx 08.10.26 (лише Україна→Європа): «Спочатку факт передачі нам посилки,
-  // потім створення посилки в застосунку» — питання «Ви вже передали…?».
+  // ТЗ docx 08.10.26 (лише Україна→Європа): питання «Ви вже передали своє відправлення
+  // «Посилочці»?». ТЗ docx 26.10.26: від відповіді залежить продовження форми:
+  //  «Так» → «Як ви передали нам посилку?» — «Кур'єром» / «Поштою» (+ номер ТТН), без
+  //          блоку «Як Ви передасте нам посилку?»;
+  //  «Ні»  → звичайна форма з блоком «Як Ви передасте нам посилку?» (раніше «Ні»
+  //          забороняло оформлення — тепер оформити можна).
   const [handedOver, setHandedOver] = useState<'' | 'yes' | 'no'>('');
-  // ТЗ docx 20.10.26: при редагуванні посилку вже передано — питання не ставимо.
+  const [handoverWay, setHandoverWay] = useState<'' | 'courier' | 'post'>('');
+  // ТЗ docx 20.10.26: при редагуванні питання не ставимо — спосіб передачі вже обрано.
   const needsHandover = direction === 'ua_to_eu' && !isEdit;
-  const handoverBlocked = needsHandover && handedOver !== 'yes';
   // ТЗ docx 04.10.26: чи є рейс до вибраної країни (посилка до нього прив'яжеться
   // автоматично). Ключ «напрямок:країна» — щоб не показати застарілу відповідь.
   const [tripCheck, setTripCheck] = useState<{ key: string; hasTrip: boolean } | null>(null);
+
+  // ТЗ docx 26.10.26: зміна відповіді «Ви вже передали…?» скидає спосіб передачі — його
+  // задає наступне питання («Так») або блок «Як Ви передасте нам посилку?» («Ні»).
+  function answerHandedOver(next: 'yes' | 'no') {
+    if (next === handedOver) return;
+    setHandedOver(next);
+    setHandoverWay('');
+    setCollectionMethod('');
+    setCollectionPointId('');
+    setCollectionStreet('');
+    setCollectionBuilding('');
+    setCollectionLandmark('');
+    setCollectionWarehouse('');
+    setNpTtn('');
+  }
+
+  // ТЗ docx 26.10.26 («Так»): «Як ви передали нам посилку?» — «Кур'єром» (віддали нашому
+  // курʼєру) / «Поштою» (відправили Новою поштою — далі номер ТТН).
+  function answerHandoverWay(next: 'courier' | 'post') {
+    setHandoverWay(next);
+    setCollectionMethod(next === 'courier' ? 'courier_pickup' : 'external_shipping');
+    if (next === 'courier') setNpTtn('');
+  }
 
   // Автопідставляння країн за напрямком (ТЗ §E8). Виноситься в колбек,
   // щоб не дзеркалити стейт у useEffect — react-hooks/set-state-in-effect.
@@ -485,18 +521,21 @@ export function OrderForm({ editId }: { editId?: string }) {
     if (!senderCity.trim()) {
       setError('Вкажіть Ваш населений пункт у розділі «Відправник»'); return;
     }
+    // ТЗ docx 26.10.26 (Україна→Європа): спершу — відповідь на «Ви вже передали…?» і, для
+    // «Так», на «Як ви передали нам посилку?».
+    if (needsHandover && !handedOver) {
+      setError('Дайте відповідь на питання «Ви вже передали своє відправлення «Посилочці»?» угорі форми'); return;
+    }
+    if (needsHandover && handedOver === 'yes' && !handoverWay) {
+      setError("Оберіть, як Ви передали нам посилку: «Кур'єром» чи «Поштою»"); return;
+    }
     if (!collectionMethod) {
       setError("Оберіть, як Ви передасте нам посилку (розділ «Як Ви передасте нам посилку?»)"); return;
     }
-    // ТЗ docx 08.10.26 (Україна→Європа): спершу передача посилки, потім замовлення;
-    // для «Пошти» — обов'язковий номер ТТН (без нього посилку не знайти на складі).
-    if (needsHandover) {
-      if (handedOver !== 'yes') {
-        setError('Спочатку передайте посилку «Посилочці» (Новою поштою або кур\'єру у Львові), а потім оформіть замовлення.'); return;
-      }
-      if (collectionMethod === 'external_shipping' && !/^\d{14}$/.test(npTtn.replace(/\s/g, ''))) {
-        setError('Введіть номер ТТН Нової пошти — 14 цифр з Вашої накладної.'); return;
-      }
+    // ТЗ docx 26.10.26: номер ТТН більше не обовʼязковий (якщо його немає — нагадаємо після
+    // оформлення), але введений номер має бути справжнім номером НП.
+    if (direction === 'ua_to_eu' && collectionMethod === 'external_shipping' && npTtn.trim() && !isValidNpTtn(npTtn)) {
+      setError('Номер ТТН Нової пошти — 14 цифр. Перевірте номер або залиште поле порожнім і введіть його пізніше.'); return;
     }
     // ТЗ docx 08.10.26: «При створенні посилки Клієнт повинен ввести оголошену вартість».
     if (!(Number(declaredValue) > 0)) {
@@ -555,11 +594,11 @@ export function OrderForm({ editId }: { editId?: string }) {
             height: Number(p.height) || undefined,
           })),
           collectionMethod, collectionPointId, collectionDate,
-          // ТЗ docx 03.10.26 (п.2, п.4): ТТН зберігаємо в посилці.
-          npTtn: npTtn.trim() || undefined,
+          // ТЗ docx 03.10.26 (п.2, п.4): ТТН зберігаємо в посилці (лише для відправки поштою).
+          npTtn: collectionMethod === 'external_shipping' ? npTtn.replace(/\s/g, '') || undefined : undefined,
           // ТЗ docx 04.10.26 (п.3): нотатка Клієнта.
           clientNote: clientNote.trim() || undefined,
-          // ТЗ docx 08.10.26: Клієнт підтвердив, що вже передав посилку (UA→EU).
+          // ТЗ docx 08.10.26 / 26.10.26: відповідь «Ви вже передали…?» (UA→EU) — в історію посилки.
           handedOver: needsHandover ? handedOver === 'yes' : undefined,
           collectionAddress: composedCollectionAddress,
         }),
@@ -571,8 +610,16 @@ export function OrderForm({ editId }: { editId?: string }) {
         setEditSaved(true);
       } else if (res.ok) {
         const parcel = await res.json();
+        // ТЗ docx 26.10.26: посилка йде Новою поштою (UA→EU), а ТТН ще немає — нагадування:
+        // «Ні» → «Після відправки посилки Новою поштою…»; «Так» → «Ви не ввели номер ТТН…».
+        // Відповідь createParcel не містить npTtn — беремо номер, який форма щойно відправила.
+        const ttnMissing = direction === 'ua_to_eu' && collectionMethod === 'external_shipping' && !npTtn.replace(/\s/g, '');
         // ТЗ docx 12.10.26: без старого порядкового номера — номер у поїздці замість нього.
-        setSuccessNumber(displayParcelNumber(parcel.internalNumber, parcel.journeyNumber));
+        setCreated({
+          id: parcel.id,
+          number: displayParcelNumber(parcel.internalNumber, parcel.journeyNumber),
+          ttnReminder: ttnMissing ? (handedOver === 'yes' ? TTN_MISSING_REMINDER : TTN_AFTER_SHIPPING_REMINDER) : null,
+        });
       } else {
         const data = await res.json().catch(() => null);
         setError(data?.error || (editId ? 'Не вдалося зберегти зміни. Спробуйте ще раз.' : 'Не вдалося створити замовлення. Спробуйте ще раз.'));
@@ -581,6 +628,32 @@ export function OrderForm({ editId }: { editId?: string }) {
       setError('Немає звʼязку з сервером. Перевірте інтернет і спробуйте ще раз.');
     } finally {
       setSaving(false);
+    }
+  }
+
+  // ТЗ docx 26.10.26: ТТН можна ввести одразу на екрані «Замовлення створено» (або пізніше
+  // в самому замовленні).
+  async function saveSuccessTtn() {
+    if (!created) return;
+    if (!isValidNpTtn(successTtn)) { setSuccessTtnError('Номер ТТН Нової пошти — 14 цифр'); return; }
+    setSuccessTtnState('saving');
+    setSuccessTtnError('');
+    try {
+      const res = await fetch(`/api/client-portal/orders/${created.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ npTtn: successTtn.replace(/\s/g, '') }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setSuccessTtnError(data?.error || 'Не вдалося зберегти ТТН');
+        setSuccessTtnState('idle');
+        return;
+      }
+      setSuccessTtnState('saved');
+    } catch {
+      setSuccessTtnError('Немає звʼязку з сервером. Спробуйте ще раз.');
+      setSuccessTtnState('idle');
     }
   }
 
@@ -662,18 +735,50 @@ export function OrderForm({ editId }: { editId?: string }) {
     );
   }
 
-  if (successNumber) {
+  if (created) {
     return (
       <div className="max-w-lg mx-auto text-center py-12">
         <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-bold text-green-800 mb-2">Замовлення створено</h2>
           <p className="text-green-700">
             {/* Перевірка 15.09.26: SWC «зʼїдав» пробіл після номера («…2026сформовано») — ставимо явно. */}
-            Попереднє відправлення N{successNumber}{' '}сформовано. Кур&apos;єр перевірить Ваші дані.
+            Попереднє відправлення N{created.number}{' '}сформовано. Кур&apos;єр перевірить Ваші дані.
           </p>
         </div>
-        <Button onClick={() => router.push('/my-orders')} className="w-full h-12 text-base">
-          Переглянути мої замовлення
+        {/* ТЗ docx 26.10.26: «Ні» + «Відправка поштою» — після «Створити відправлення» одна фраза
+            «Після відправки посилки Новою поштою… введіть номер ТТН…»; «Так» + «Поштою» без ТТН —
+            нагадування ще раз після оформлення. Номер можна ввести тут або пізніше в замовленні. */}
+        {created.ttnReminder && successTtnState !== 'saved' && (
+          <div className="text-left mb-6 space-y-2">
+            <p className="text-sm font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded px-3 py-2 leading-snug">
+              📌 {created.ttnReminder}
+            </p>
+            <div className="flex gap-2 items-center flex-wrap">
+              <Input
+                value={successTtn}
+                onChange={(e) => setSuccessTtn(e.target.value)}
+                placeholder="Номер ТТН, 14 цифр"
+                inputMode="numeric"
+                className="font-mono flex-1 min-w-[10rem]"
+              />
+              <BarcodeScanButton onResult={(ttn) => setSuccessTtn(ttn)} label="Фото ТТН" />
+              <Button type="button" onClick={saveSuccessTtn} disabled={successTtnState === 'saving' || !successTtn.trim()}>
+                {successTtnState === 'saving' ? 'Збереження…' : 'Зберегти ТТН'}
+              </Button>
+            </div>
+            {successTtnError && <p className="text-xs text-red-600">{successTtnError}</p>}
+          </div>
+        )}
+        {successTtnState === 'saved' && (
+          <p className="text-sm text-green-700 mb-6">Номер ТТН збережено — за ним ми знайдемо Вашу посилку.</p>
+        )}
+        {/* ТЗ docx 26.10.26 (п.1): фото посилки і нотатки — у самому замовленні. */}
+        <Button onClick={() => router.push(`/my-orders/${created.id}`)} className="w-full h-12 text-base mb-2">
+          Переглянути замовлення
+        </Button>
+        <p className="text-xs text-gray-500 mb-4">У замовленні можна додати фото посилки і нотатку.</p>
+        <Button variant="outline" onClick={() => router.push('/my-orders')} className="w-full">
+          Мої замовлення
         </Button>
       </div>
     );
@@ -712,40 +817,71 @@ export function OrderForm({ editId }: { editId?: string }) {
 
         {/* ТЗ docx 08.10.26 — лише «Україна → Європа»: «При спробі Клієнта створити
             посилку з України у Європу має звучати запитання: „Ви вже передали своє
-            відправлення «Посилочці»?“». Без «Так» замовлення не створюється. */}
+            відправлення «Посилочці»?“». ТЗ docx 26.10.26: пояснювальні тексти під кнопками
+            прибрано; «Так» → «Як ви передали нам посилку?» (Кур'єром / Поштою + ТТН);
+            «Ні» → звичайна форма з блоком «Як Ви передасте нам посилку?». */}
         {needsHandover && (
-          <Card className={handedOver === 'yes' ? '' : 'border-orange-300'}>
+          <Card className={handedOver ? '' : 'border-orange-300'}>
             <CardHeader className="py-3 px-4">
               <CardTitle className="text-base">Ви вже передали своє відправлення «Посилочці»?</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4 pt-0 space-y-3">
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   type="button"
                   variant={handedOver === 'yes' ? 'default' : 'outline'}
-                  onClick={() => setHandedOver('yes')}
+                  onClick={() => answerHandedOver('yes')}
                 >
                   Так, вже передав(ла)
                 </Button>
                 <Button
                   type="button"
                   variant={handedOver === 'no' ? 'default' : 'outline'}
-                  onClick={() => setHandedOver('no')}
+                  onClick={() => answerHandedOver('no')}
                 >
                   Ні, ще не передав(ла)
                 </Button>
               </div>
               {handedOver === 'yes' && (
-                <p className="text-xs text-gray-600">
-                  Нижче оберіть, як Ви передали посилку: для «Відправки поштою» обовʼязково вкажіть номер ТТН,
-                  «Виклик курʼєра» — якщо віддали посилку нашому курʼєру у Львові.
-                </p>
-              )}
-              {handedOver === 'no' && (
-                <div className="text-sm bg-orange-50 border border-orange-200 rounded p-3 space-y-1 text-orange-900">
-                  <div className="font-semibold">Спочатку передайте посилку, а потім оформіть замовлення.</div>
-                  <div>• Новою поштою на нашу адресу: Львів, Нова пошта, відділення №1, ФОП Добровольський Андрій Ярославович, тел. +380673320502 — після відправки поверніться сюди з номером ТТН.</div>
-                  <div>• Або віддайте посилку нашому курʼєру у Львові.</div>
+                <div className="border-t pt-3 space-y-3">
+                  <div className="text-sm font-medium">Як ви передали нам посилку?</div>
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      type="button"
+                      variant={handoverWay === 'courier' ? 'default' : 'outline'}
+                      onClick={() => answerHandoverWay('courier')}
+                    >
+                      Кур&apos;єром
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={handoverWay === 'post' ? 'default' : 'outline'}
+                      onClick={() => answerHandoverWay('post')}
+                    >
+                      Поштою
+                    </Button>
+                  </div>
+                  {handoverWay === 'post' && (
+                    <div className="space-y-2">
+                      {/* ТЗ docx 26.10.26: «отримує прохання» (як у ТЗ 04.10.26 — помаранчевим,
+                          напівжирним), «далі — віконце для введення». Номер можна сфотографувати:
+                          він розпізнається і стає у віконце цифрами. */}
+                      <p className="text-sm font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1.5 leading-snug">
+                        📌 {TTN_ENTER_REQUEST}
+                      </p>
+                      <div className="flex gap-2 items-center">
+                        <Input
+                          value={npTtn}
+                          onChange={(e) => setNpTtn(e.target.value)}
+                          placeholder="Напр. 59000123456789"
+                          inputMode="numeric"
+                          className="font-mono"
+                          aria-label="Номер ТТН Нової пошти"
+                        />
+                        <BarcodeScanButton onResult={(ttn) => setNpTtn(ttn)} label="Фото ТТН" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -956,7 +1092,9 @@ export function OrderForm({ editId }: { editId?: string }) {
             трьох карток (після «Відправник»). Має бути РОЗГОРНУТА (усі способи
             видно). Умовні поля: Виклик кур'єра → Вулиця/Будинок/Орієнтир;
             Пошта → Номер складу; Пункт збору → перелік для країни/міста. */}
-        {!!direction && (
+        {/* ТЗ docx 26.10.26: для «Україна → Європа» блок лише після «Ні, ще не передав(ла)»
+            (при «Так» спосіб передачі вже відомий — блок прибрано). */}
+        {!!direction && (!needsHandover || handedOver === 'no') && (
           <Card>
             <CardHeader className="py-3 px-4">
               <CardTitle className="text-base">Як Ви передасте нам посилку?</CardTitle>
@@ -998,6 +1136,8 @@ export function OrderForm({ editId }: { editId?: string }) {
                   }
                 }}
                 clientFacing
+                // ТЗ docx 26.10.26: ТТН у цьому блоці — лише при редагуванні (посилку вже відправлено).
+                showUaTtn={isEdit}
               />
               {collectionDayWarning && (
                 <p className="text-xs text-amber-600 mt-2">{collectionDayWarning}</p>
@@ -1215,13 +1355,9 @@ export function OrderForm({ editId }: { editId?: string }) {
           </CardContent>
         </Card>
 
-        {/* ТЗ docx 08.10.26: для «Україна → Європа» оформити можна лише після передачі. */}
-        {handoverBlocked && (
-          <p className="text-sm text-orange-800 text-center">
-            Щоб оформити замовлення, дайте відповідь «Так» на питання «Ви вже передали своє відправлення «Посилочці»?» угорі форми.
-          </p>
-        )}
-        <Button type="submit" className="w-full h-12 text-base" disabled={saving || handoverBlocked}>
+        {/* ТЗ docx 26.10.26: фразу «Щоб оформити замовлення, дайте відповідь „Так“…» прибрано —
+            оформити можна і з відповіддю «Ні». */}
+        <Button type="submit" className="w-full h-12 text-base" disabled={saving}>
           {/* ТЗ docx 11.10.26: кнопка зветься «Створити відправлення» (як у Працівника). */}
           {isEdit
             ? (saving ? 'Збереження...' : 'Зберегти зміни')

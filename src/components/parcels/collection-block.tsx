@@ -21,6 +21,8 @@ import {
 import { formatDate } from '@/lib/utils/format';
 import { isCourierAllowed, isPostalAllowed, isPickupPointAllowed } from '@/lib/utils/logistics-availability';
 import { transliterateCity, normalizeCityForMatch } from '@/lib/utils/transliterate';
+import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
+import { TTN_AFTER_SHIPPING_REMINDER } from '@/lib/parcels/ttn-reminder';
 
 export interface CollectionPointOption {
   id: string;
@@ -76,6 +78,12 @@ interface CollectionBlockProps {
   onChange: (next: CollectionState) => void;
   /** If true, shows minimal client-portal UI. If false, full staff UI. */
   clientFacing?: boolean;
+  /**
+   * ТЗ docx 26.10.26: віконце ТТН у «Відправці поштою» з України. При оформленні («Ні, ще
+   * не передав(ла)») його немає — посилку ще не відправлено; ТТН Клієнт вводить після
+   * відправки. Показуємо лише при редагуванні замовлення (необовʼязкове).
+   */
+  showUaTtn?: boolean;
 }
 
 interface ServiceCity {
@@ -95,7 +103,7 @@ const METHODS: CollectionMethod[] = [
   COLLECTION_METHODS.EXTERNAL_SHIPPING,
 ];
 
-export function CollectionBlock({ senderCountry, senderCity, value, onChange, clientFacing = false }: CollectionBlockProps) {
+export function CollectionBlock({ senderCountry, senderCity, value, onChange, clientFacing = false, showUaTtn = false }: CollectionBlockProps) {
   const [points, setPoints] = useState<CollectionPointOption[]>([]);
   const [loadingPoints, setLoadingPoints] = useState(true);
   const [serviceCities, setServiceCities] = useState<ServiceCity[]>([]);
@@ -468,44 +476,33 @@ export function CollectionBlock({ senderCountry, senderCity, value, onChange, cl
       )}
 
       {/* External shipping. ТЗ §E13/docx 14.05.26: при «Пошта» у клієнта —
-          віконце «Номер складу» (для будь-якої країни з увімкненою поштою).
-          Для UA додатково показуємо реквізити нашого складу (ФОП Добровольський
-          + НП Львів); для EU-клієнта — узагальнена підказка; для staff EU —
-          окрема підказка нижче. */}
+          віконце «Номер складу» (для EU-країн з увімкненою поштою; для України його
+          прибрано — ТЗ docx 26.10.26). Для UA показуємо реквізити нашого складу
+          (ФОП Добровольський + НП Львів); для EU-клієнта — узагальнена підказка. */}
       {value.method === 'external_shipping' && senderCountry === 'UA' && (
         <div className="border-t pt-3 space-y-3">
-          {/* ТЗ (docx 14.05.26 §b): при «Пошта» у клієнта з'являється віконце
-              «Номер складу» (склад Нової пошти, з якого клієнт відправляє). */}
-          {clientFacing && (
+          {/* ТЗ docx 26.10.26 («Ні, ще не передав(ла)» → «Відправка поштою»): «забрати
+              обовʼязкове „Номер складу“», «забрати» віконце ТТН з підказкою, «залишити»
+              адресу для відправки нижче. ТТН Клієнт вводить після відправки (у замовленні);
+              при редагуванні замовлення віконце ТТН є — необовʼязкове. */}
+          {clientFacing && showUaTtn && (
             <div>
-              <Label className="text-xs text-gray-500">Номер складу</Label>
-              <Input
-                value={value.warehouseNum ?? ''}
-                onChange={(e) => onChange({ ...value, warehouseNum: e.target.value })}
-                placeholder="Напр. 5"
-                inputMode="numeric"
-              />
-            </div>
-          )}
-          {/* ТЗ docx 03.10.26 (п.2, п.3): при відправці поштою Клієнт вводить номер ТТН. */}
-          {clientFacing && (
-            <div>
-              {/* ТЗ docx 08.10.26 (Україна→Європа): «Спочатку факт передачі нам посилки,
-                  потім створення посилки» — ТТН знову ОБОВ'ЯЗКОВИЙ (ТЗ 04.10.26 п.1
-                  робив його необов'язковим; новіше ТЗ це змінило). Цей блок показується
-                  лише відправнику з України, тобто саме для напрямку Україна→Європа. */}
-              <Label className="text-xs text-gray-500">Номер ТТН Нової пошти *</Label>
-              <Input
-                value={value.npTtn ?? ''}
-                onChange={(e) => onChange({ ...value, npTtn: e.target.value })}
-                placeholder="Напр. 59000123456789"
-                inputMode="numeric"
-              />
-              {/* ТЗ docx 04.10.26 (п.2): підказку виділено (помаранчевий, як логотип
-                  ПОСИЛОЧКА, напівжирний), щоб спонукати Клієнта ввести номер. */}
-              <p className="text-sm font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1.5 mt-1.5 leading-snug">
-                📌 Обовʼязково введіть номер ТТН з Вашої накладної Нової пошти (14 цифр) — за ним ми знайдемо Вашу посилку.
-              </p>
+              <Label className="text-xs text-gray-500">Номер ТТН Нової пошти</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  value={value.npTtn ?? ''}
+                  onChange={(e) => onChange({ ...value, npTtn: e.target.value })}
+                  placeholder="Напр. 59000123456789"
+                  inputMode="numeric"
+                  className="font-mono"
+                />
+                <BarcodeScanButton onResult={(ttn) => onChange({ ...value, npTtn: ttn })} label="Фото ТТН" />
+              </div>
+              {!value.npTtn?.trim() && (
+                <p className="text-sm font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1.5 mt-1.5 leading-snug">
+                  📌 {TTN_AFTER_SHIPPING_REMINDER}
+                </p>
+              )}
             </div>
           )}
           <div className="text-xs text-gray-700 bg-amber-50 border border-amber-200 rounded p-3 space-y-2 leading-snug">

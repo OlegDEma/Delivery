@@ -469,8 +469,8 @@ model Parcel {
   /// ТЗ docx 04.10.26 (п.3): нотатка Клієнта до 150 знаків, введена при створенні замовлення.
   clientNote            String?       @map("client_note") @db.VarChar(150)
   /// ТЗ docx 12.10.26 (коментар клієнта): коротка примітка Працівника для стовпчика
-  /// «Примітки» друкованого списку рейсу («буду після 18:00»). Порожня — у список іде
-  /// clientNote. Клієнту не показується (у клієнтських API — omit).
+  /// «Примітки» друкованого списку рейсу. ТЗ docx 26.10.26: більше не використовується —
+  /// у «Примітки» йдуть нотатки (ParcelStatusHistory.isNote); колонку лишено (не заповнена).
   listNote              String?       @map("list_note") @db.VarChar(60)
   npTrackingStatus      String?       @map("np_tracking_status")
   status                ParcelStatus  @default(draft)
@@ -600,6 +600,9 @@ model ParcelStatusHistory {
   changedAt  DateTime @default(now()) @map("changed_at") @db.Timestamptz
   notes      String?
   location   String?
+  /// ТЗ docx 26.10.26: запис — нотатка («Додати нотатку» Працівника чи Клієнта), а не зміна
+  /// статусу. Саме нотатки друкуються у стовпчику «Примітки» списку рейсу / МЛ.
+  isNote     Boolean  @default(false) @map("is_note")
 
   // Relations
   parcel    Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)

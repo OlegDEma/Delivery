@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 import { PrintListSheets, type PrintListRow } from '@/components/shared/print-list-sheets';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { formatDate } from '@/lib/utils/format';
 import { formatJourneyNumber } from '@/lib/utils/journey-number';
 import { withCountryCode } from '@/lib/utils/phone';
+import { parcelListNote, type NoteEntry } from '@/lib/parcels/list-note';
+import { orderTripItems, parseTripGroupMode } from '@/lib/parcels/trip-grouping';
 
 interface PrintAddr { country: string | null; city: string | null; street: string | null; building: string | null; postalCode: string | null }
 interface PrintParcel {
@@ -16,9 +18,9 @@ interface PrintParcel {
   journeyNumber: number | null;
   internalNumber: string;
   totalPlacesCount: number;
-  /** ТЗ docx 12.10.26 (коментар клієнта): стовпчик «Примітки». */
-  listNote: string | null;
+  /** ТЗ docx 26.10.26: стовпчик «Примітки» — нотатки посилки (форма Клієнта + «Додати нотатку»). */
   clientNote: string | null;
+  statusHistory?: NoteEntry[];
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
   senderAddress: PrintAddr | null;
@@ -59,9 +61,11 @@ interface PrintTrip {
  * ТЗ docx 12.10.26, уточнення клієнта в коментарі до дати:
  *  - поля: верх 25 мм, ліве / праве / нижнє — 10 мм;
  *  - висота запису 10–12 мм, записів на аркуші може бути більше 15 (тут — 20);
- *  - стовпчик «Примітки» праворуч від номера; номер звужено, адресу потіснено;
- *    показуємо «лише основне»: коротку примітку Працівника для списку, а якщо її
- *    немає — нотатку Клієнта (вміщуємо в клітинку меншим кеглем).
+ *  - стовпчик «Примітки» праворуч від номера; номер звужено, адресу потіснено.
+ *
+ * ТЗ docx 26.10.26: у «Примітках» — саме нотатки посилки (нотатка Клієнта з форми і
+ * «Додати нотатку»), коротку «Примітку для списку» прибрано. Порядок записів — за
+ * групуванням, вибраним у рейсі (Місто / Індекс / Номер, параметр ?group=).
  *
  * ТЗ docx 20.10.26: ПІБ — по правому краю, рамка запису трохи товща, аркуш друкується
  * цілим (вільні записи порожні). Сам шаблон — components/shared/print-list-sheets
@@ -71,7 +75,17 @@ interface PrintTrip {
  * ними водій їде на адреси).
  */
 export default function TripPrintListPage() {
+  // useSearchParams — під Suspense (вимога Next для клієнтських сторінок).
+  return (
+    <Suspense fallback={<div className="text-center py-12 text-gray-500">Завантаження…</div>}>
+      <TripPrintList />
+    </Suspense>
+  );
+}
+
+function TripPrintList() {
   const { id } = useParams<{ id: string }>();
+  const groupMode = parseTripGroupMode(useSearchParams().get('group'));
   const [trip, setTrip] = useState<PrintTrip | null>(null);
   const [error, setError] = useState('');
 
@@ -89,49 +103,53 @@ export default function TripPrintListPage() {
   // ТЗ docx 12.10.26: номер у поїздці є з моменту прив'язки до рейсу (і в «Створеної»),
   // тож у список потрапляють усі посилки рейсу. Посилки без номера (рейс поза поїздкою) —
   // у кінці, без номера.
-  type Sortable = { num: number | null; row: PrintListRow };
-  const sortable: Sortable[] = [
-    ...trip.parcels.map((p): Sortable => {
-      const party = parcelParties(p)[euSide];
-      const a = party.address;
-      // ТЗ docx 12.10.26: «003/2» — кількість місць через дріб, якщо їх більше одного.
-      const places = p.totalPlacesCount > 1 ? `/${p.totalPlacesCount}` : '';
-      const numLabel = p.journeyNumber != null ? formatJourneyNumber(p.journeyNumber) : '—';
-      return {
-        num: p.journeyNumber,
-        row: {
-          kind: 'record',
-          key: p.id,
-          num: p.journeyNumber != null ? `${numLabel}${places}` : (places ? `—${places}` : '—'),
-          label: `№${numLabel}`,
-          // «Лише основне»: коротка примітка Працівника для списку, інакше — нотатка Клієнта.
-          note: (p.listNote || p.clientNote || '').replace(/\s+/g, ' ').trim(),
-          cityStreet: [a?.city, a?.street].filter(Boolean).join(', '),
-          building: a?.building || '',
-          // ТЗ 12.10.26: індекс NL — літери великі (старі записи на кшталт «1813 tt»).
-          postal: (a?.postalCode || '').toUpperCase(),
-          name: [party.lastName, party.firstName].filter(Boolean).join(' '),
-          phone: withCountryCode(party.phone, a?.country),
-        },
-      };
-    }),
-    ...trip.transfersOut
-      .filter((g) => g.journeyNumber != null && g.parcel.tripId !== trip.id)
-      .map((g): Sortable => ({
-        num: g.journeyNumber,
-        row: {
-          kind: 'ghost',
-          key: `g-${g.id}`,
-          num: formatJourneyNumber(g.journeyNumber),
-          text: g.toTrip
-            ? `Перенесена до рейсу ${tripRouteLabel(g.toTrip.country, g.toTrip.direction)} ${formatDate(g.toTrip.departureDate)}`
-            : 'Прибрана з рейсу',
-        },
-      })),
-  ];
-  const rows = sortable
-    .sort((a, b) => (a.num ?? Number.MAX_SAFE_INTEGER) - (b.num ?? Number.MAX_SAFE_INTEGER))
-    .map((s) => s.row);
+  type Sortable = { num: number | null; addr: { city?: string | null; postalCode?: string | null } | null; row: PrintListRow };
+  const records = trip.parcels.map((p): Sortable => {
+    const party = parcelParties(p)[euSide];
+    const a = party.address;
+    // ТЗ docx 12.10.26: «003/2» — кількість місць через дріб, якщо їх більше одного.
+    const places = p.totalPlacesCount > 1 ? `/${p.totalPlacesCount}` : '';
+    const numLabel = p.journeyNumber != null ? formatJourneyNumber(p.journeyNumber) : '—';
+    return {
+      num: p.journeyNumber,
+      addr: a ?? null,
+      row: {
+        kind: 'record',
+        key: p.id,
+        num: p.journeyNumber != null ? `${numLabel}${places}` : (places ? `—${places}` : '—'),
+        label: `№${numLabel}`,
+        // ТЗ docx 26.10.26: «Примітки» — нотатки посилки.
+        note: parcelListNote(p),
+        cityStreet: [a?.city, a?.street].filter(Boolean).join(', '),
+        building: a?.building || '',
+        // ТЗ 12.10.26: індекс NL — літери великі (старі записи на кшталт «1813 tt»).
+        postal: (a?.postalCode || '').toUpperCase(),
+        name: [party.lastName, party.firstName].filter(Boolean).join(' '),
+        phone: withCountryCode(party.phone, a?.country),
+      },
+    };
+  });
+  const ghosts = trip.transfersOut
+    .filter((g) => g.journeyNumber != null && g.parcel.tripId !== trip.id)
+    .map((g): Sortable => ({
+      num: g.journeyNumber,
+      addr: null,
+      row: {
+        kind: 'ghost',
+        key: `g-${g.id}`,
+        num: formatJourneyNumber(g.journeyNumber),
+        text: g.toTrip
+          ? `Перенесена до рейсу ${tripRouteLabel(g.toTrip.country, g.toTrip.direction)} ${formatDate(g.toTrip.departureDate)}`
+          : 'Прибрана з рейсу',
+      },
+    }));
+  // ТЗ docx 26.10.26: «Номер» — рядки «Перенесена…» на місці свого номера; Місто/Індекс —
+  // посилки за групами, рядки «Перенесена…» (без адреси) — у кінці.
+  const byNum = (s: Sortable) => s.num;
+  const rows = (groupMode === 'number'
+    ? orderTripItems([...records, ...ghosts], 'number', (s) => s.addr, byNum)
+    : [...orderTripItems(records, groupMode, (s) => s.addr, byNum), ...orderTripItems(ghosts, 'number', () => null, byNum)]
+  ).map((s) => s.row);
 
   return (
     <PrintListSheets

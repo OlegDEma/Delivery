@@ -57,7 +57,10 @@ export async function GET(request: NextRequest) {
       // визначає «заморожено» за наявністю senderSnapshot, тож потрібні обидва поля).
       senderSnapshot: true,
       receiverSnapshot: true,
+      // ТЗ docx 26.10.26: нотатки посилки — внутрішні (Працівника/Клієнта), у публічне
+      // відстеження за ІТН не віддаємо — лише зміни статусу.
       statusHistory: {
+        where: { isNote: false },
         orderBy: { changedAt: 'desc' },
         select: {
           status: true,

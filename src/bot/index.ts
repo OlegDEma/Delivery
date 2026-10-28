@@ -4,6 +4,7 @@ import pg from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { normalizePhone } from '../lib/utils/phone';
 import { formatDate, formatWeight, formatCurrency } from '../lib/utils/format';
+import { purgeParcelPhotos } from '../lib/services/parcel-photos';
 
 // ============================================================
 // Types
@@ -601,6 +602,8 @@ bot.on('message:text', async (ctx) => {
         },
       },
     });
+    // ТЗ docx 26.10.26: після «Доставлено» фото посилки видаляються автоматично.
+    await purgeParcelPhotos(prisma, [parcel.id], ctx.session.profileId ?? null);
     await ctx.reply(`✅ Посилку \`${parcel.internalNumber}\` позначено як доставлену!`, { parse_mode: 'Markdown' });
     return;
   }
@@ -665,6 +668,8 @@ bot.callbackQuery(/^deliver_(.+)$/, async (ctx) => {
       },
     },
   });
+  // ТЗ docx 26.10.26: після «Доставлено» фото посилки видаляються автоматично.
+  await purgeParcelPhotos(prisma, [parcelId], ctx.session.profileId ?? null);
   await ctx.reply(`✅ Посилку доставлено!`);
 });
 
