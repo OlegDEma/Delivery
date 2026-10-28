@@ -16,7 +16,14 @@ import { createClient } from '@supabase/supabase-js';
 import { prisma } from '../src/lib/prisma';
 
 const apply = process.argv.includes('--apply');
-const TESTS = [
+// --second: повторна перевірка на проді 28.10 (чотири замовлення «ПЕРЕВІРКА 28.10 A–D» до Utrecht;
+// B тимчасово прив'язано до рейсу NL 27.10 і переведено в «Доставлено»).
+const TESTS = process.argv.includes('--second') ? [
+  { id: '2f8060c7-e4c2-4bc4-8105-a6382415f5ed', note: 'ПЕРЕВІРКА 28.10 A', receiverPhone: '+31612340003', statuses: ['draft'] },
+  { id: 'f5fdcf9c-b06a-445d-b9b1-b3e25ec21490', note: 'ПЕРЕВІРКА 28.10 B', receiverPhone: '+31612340001', statuses: ['delivered_eu'] },
+  { id: '972db3bb-c104-4ae4-8ce4-6ba4aff7c11b', note: 'ПЕРЕВІРКА 28.10 C', receiverPhone: '+31612340002', statuses: ['draft'] },
+  { id: '269badbe-5392-40f5-8a00-d4982995e24d', note: 'ПЕРЕВІРКА 28.10 D', receiverPhone: '+31612340004', statuses: ['draft'] },
+] : [
   { id: '1a1e2d5d-ef2a-4570-a68c-4a35b1a19901', note: 'ТЕСТ 26.10: нотатка з форми', receiverPhone: '+31612345678', statuses: ['delivered_eu'] },
   { id: 'ce28df7c-44e6-4690-a36a-83104107b41c', note: null, receiverPhone: '+31612345679', statuses: ['draft'] },
 ];
