@@ -59,7 +59,10 @@ async function main() {
   const { data: files } = await storage.list(`parcels/${PARCEL_ID}`);
   const storageFiles = (files ?? []).map((f) => `parcels/${PARCEL_ID}/${f.name}`);
 
-  const clients = [];
+  const clients: Array<(typeof TEST_CLIENTS)[number] & {
+    name: string; counts: { addresses: number; routeTasks: number; claims: number };
+    otherParcels: number; registered: boolean; audit: number; delete: boolean;
+  }> = [];
   for (const t of TEST_CLIENTS) {
     const client = await prisma.client.findUnique({
       where: { id: t.id },
