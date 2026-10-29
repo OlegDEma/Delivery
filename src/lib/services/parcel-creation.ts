@@ -13,7 +13,7 @@
 
 import type { Country, Direction, ShipmentType, Payer, PaymentMethod, CreatedSource, ParcelStatus, CollectionMethod, DeliveryMethod } from '@/generated/prisma/enums';
 import { prisma } from '@/lib/prisma';
-import { calculateVolumetricWeight, volumetricWeightFromVolume, roundWeight } from '@/lib/utils/volumetric';
+import { placeVolumetricWeight, roundWeight } from '@/lib/utils/volumetric';
 import { calculateParcelCost, type CostBreakdown } from '@/lib/utils/pricing';
 import { buildPricingInput } from '@/lib/utils/pricing-input';
 import { toEur } from '@/lib/utils/currency';
@@ -28,6 +28,8 @@ export interface ParcelPlaceInput {
   width?: number | null;
   height?: number | null;
   volume?: number | null;
+  /** ТЗ docx 28.10.26: об'ємна вага, введена Працівником напряму (без розмірів). */
+  volumetricWeight?: number | null;
   needsPackaging?: boolean;
 }
 
@@ -109,11 +111,9 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
     // розміри, інакше — з прямо введеного об'єму (м³ × 250). Раніше при
     // введенні лише об'єму volW лишалась 0 → на детальній «0.00 кг» і
     // занижена вартість доставки.
-    const volW = p.length && p.width && p.height
-      ? calculateVolumetricWeight(Number(p.length), Number(p.width), Number(p.height))
-      : p.volume
-        ? volumetricWeightFromVolume(Number(p.volume))
-        : 0;
+    // ТЗ docx 28.10.26: між розмірами і об'ємом — об'ємна вага, введена
+    // Працівником напряму (див. placeVolumetricWeight).
+    const volW = placeVolumetricWeight(p);
     totalWeight += w;
     totalVolWeight += volW;
     return {

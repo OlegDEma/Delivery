@@ -36,6 +36,37 @@ export function volumetricWeightFromVolume(volumeM3: number): number {
 }
 
 /**
+ * ТЗ docx 28.10.26: зворотне до volumetricWeightFromVolume — об'єм (м³) з
+ * об'ємної ваги, введеної Працівником напряму («ділення на 250»).
+ */
+export function volumeFromVolumetricWeight(volumetricWeightKg: number): number {
+  if (!Number.isFinite(volumetricWeightKg) || volumetricWeightKg <= 0) return 0;
+  return (volumetricWeightKg * VOLUMETRIC_DIVISOR) / 1_000_000;
+}
+
+type NumLike = number | string | null | undefined;
+
+/**
+ * Об'ємна вага одного місця (кг), без округлення. Пріоритет джерел:
+ *   1) Д×Ш×В — стандартний алгоритм (ТЗ 13.06.26: розміри важливіші за об'єм);
+ *   2) об'ємна вага, введена Працівником напряму (ТЗ 28.10.26) — беремо як є,
+ *      щоб не губити точність на зворотному перерахунку через об'єм
+ *      (у БД об'єм зберігається лише з 4 знаками);
+ *   3) об'єм × 250.
+ * Спільна для створення (parcel-creation) і PATCH /api/parcels/[id].
+ */
+export function placeVolumetricWeight(p: {
+  length?: NumLike; width?: NumLike; height?: NumLike;
+  volume?: NumLike; volumetricWeight?: NumLike;
+}): number {
+  const fromDims = calculateVolumetricWeight(Number(p.length) || 0, Number(p.width) || 0, Number(p.height) || 0);
+  if (fromDims > 0) return fromDims;
+  const direct = Number(p.volumetricWeight) || 0;
+  if (Number.isFinite(direct) && direct > 0) return direct;
+  return volumetricWeightFromVolume(Number(p.volume) || 0);
+}
+
+/**
  * Calculate volume in cubic meters from dimensions in centimeters.
  */
 export function calculateVolume(

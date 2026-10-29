@@ -213,7 +213,9 @@ export async function POST(request: NextRequest) {
       payer: body.payer,
       paymentMethod: body.paymentMethod,
       paymentInUkraine: body.paymentInUkraine,
-      places: body.places,
+      // ТЗ docx 28.10.26: пряма «Об'ємна вага» — лише у формі Працівника;
+      // від Клієнта її не приймаємо (рахуємо з розмірів/об'єму, як і раніше).
+      places: body.places.map((p) => ({ ...p, volumetricWeight: undefined })),
       createdById: user.id,
       createdSource: 'client_web',
       status: 'draft',

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import type { ParcelStatus } from '@/generated/prisma/enums';
 import type { Prisma } from '@/generated/prisma/client';
 import { calculateParcelCost } from '@/lib/utils/pricing';
-import { calculateVolumetricWeight, volumetricWeightFromVolume, roundWeight } from '@/lib/utils/volumetric';
+import { placeVolumetricWeight, roundWeight } from '@/lib/utils/volumetric';
 import { requireRole, requireStaff } from '@/lib/auth/guards';
 import { ADMIN_ROLES } from '@/lib/constants/roles';
 import { parseBody, updateParcelSchema } from '@/lib/validators';
@@ -463,11 +463,11 @@ export async function PATCH(
         // береться ОСТАННЄ введене. Розміри мають пріоритет; коли їх стерли —
         // рахуємо з об'єму (× 250). Об'ємна вага ніколи не нульова коли є хоч
         // одне джерело.
-        const volW = l && wd && h
-          ? calculateVolumetricWeight(l, wd, h)
-          : vol
-            ? volumetricWeightFromVolume(vol)
-            : 0;
+        // ТЗ docx 28.10.26: між розмірами і об'ємом — об'ємна вага, введена
+        // Працівником напряму (без неї 7,33 кг → об'єм 0,0293 → 7,325 кг).
+        const volW = placeVolumetricWeight({
+          length: l, width: wd, height: h, volume: vol, volumetricWeight: p.volumetricWeight,
+        });
         tw += w;
         tv += volW;
         return {

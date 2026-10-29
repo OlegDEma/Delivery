@@ -20,6 +20,8 @@ import { CollectionBlock, type CollectionState } from '@/components/parcels/coll
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { PhoneInput } from '@/components/shared/phone-input';
 import { getBillableWeight } from '@/lib/utils/volumetric';
+import { draftVolumetricWeight, draftVolumePayload, placeHasVolumeSource } from '@/lib/parcels/place-volume';
+import { PlaceVolumeInputs } from '@/components/parcels/place-volume-inputs';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
@@ -49,20 +51,14 @@ interface PlaceDraft {
   width: string;
   height: string;
   volume: string;
+  /** ТЗ docx 28.10.26: віконце «Об'ємна вага» (пов'язане з «Або об'єм»). */
+  volWeight: string;
   needsPackaging: boolean;
 }
 
 const emptyPlace = (): PlaceDraft => ({
-  weight: '', length: '', width: '', height: '', volume: '', needsPackaging: false,
+  weight: '', length: '', width: '', height: '', volume: '', volWeight: '', needsPackaging: false,
 });
-
-function calcVolWeight(p: PlaceDraft): number {
-  const l = Number(p.length) || 0;
-  const w = Number(p.width) || 0;
-  const h = Number(p.height) || 0;
-  if (l > 0 && w > 0 && h > 0) return Number(((l * w * h) / 4000).toFixed(2));
-  return 0;
-}
 
 interface ParcelData {
   id: string;
@@ -202,6 +198,9 @@ export default function EditParcelPage() {
             width: pl.width != null ? String(pl.width) : '',
             height: pl.height != null ? String(pl.height) : '',
             volume: pl.volume != null ? String(pl.volume) : '',
+            // ТЗ docx 28.10.26: збережена об'ємна вага — у віконце (без розмірів
+            // вона введена напряму або з об'єму; з розмірами віконце її перерахує).
+            volWeight: pl.volumetricWeight != null && Number(pl.volumetricWeight) > 0 ? String(Number(pl.volumetricWeight)) : '',
             needsPackaging: !!pl.needsPackaging,
           }))
         : [emptyPlace()]);
@@ -267,6 +266,10 @@ export default function EditParcelPage() {
     u[i] = { ...u[i], [field]: value };
     setPlaces(u);
   }
+  // ТЗ docx 28.10.26: «Об'ємна вага» і «Або об'єм» змінюються парою.
+  function patchPlace(i: number, patch: Partial<PlaceDraft>) {
+    setPlaces(prev => prev.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
+  }
 
   const direction = parcel?.direction || 'eu_to_ua';
   const senderCountry =
@@ -291,10 +294,7 @@ export default function EditParcelPage() {
     : places.reduce((s, p) => s + (Number(p.weight) || 0), 0);
   const totalVolWeight = useGeneralParams
     ? (Number(generalVolume) || 0) * 250
-    : places.reduce((s, p) => {
-        const vol = Number(p.volume) || 0;
-        return s + (vol > 0 ? vol * 250 : calcVolWeight(p));
-      }, 0);
+    : places.reduce((s, p) => s + draftVolumetricWeight(p), 0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -311,14 +311,13 @@ export default function EditParcelPage() {
         setError('Вкажіть вагу хоча б одного місця'); return;
       }
       // ТЗ (docx 13.06.26): кожне місце з вагою має мати Д/Ш/В АБО об'єм.
+      // ТЗ docx 28.10.26: або об'ємну вагу, введену напряму.
       const badPlace = places.findIndex(p => {
         if (Number(p.weight) <= 0) return false;
-        const hasDims = Number(p.length) > 0 && Number(p.width) > 0 && Number(p.height) > 0;
-        const hasVolume = Number(p.volume) > 0;
-        return !hasDims && !hasVolume;
+        return !placeHasVolumeSource(p);
       });
       if (badPlace !== -1) {
-        setError(`Місце ${badPlace + 1}: вкажіть довжину/ширину/висоту АБО об'єм (м³) — об'ємна вага не може бути нульовою`);
+        setError(`Місце ${badPlace + 1}: вкажіть довжину/ширину/висоту, об'ємну вагу АБО об'єм (м³) — об'ємна вага не може бути нульовою`);
         return;
       }
     }
@@ -350,7 +349,7 @@ export default function EditParcelPage() {
           length: Number(p.length) || undefined,
           width: Number(p.width) || undefined,
           height: Number(p.height) || undefined,
-          volume: Number(p.volume) || undefined,
+          ...draftVolumePayload(p),
           needsPackaging: p.needsPackaging,
         }));
 
@@ -696,17 +695,8 @@ export default function EditParcelPage() {
                         <Input type="number" step="1" min="0" value={place.height} onChange={(e) => updatePlace(i, 'height', e.target.value)} />
                       </div>
                     </div>
-                    <div>
-                      <Label className="text-xs">Або об&apos;єм (м&sup3;)</Label>
-                      <Input type="number" step="0.001" min="0" value={place.volume} onChange={(e) => updatePlace(i, 'volume', e.target.value)} className="w-40" />
-                    </div>
-                    {(calcVolWeight(place) > 0 || Number(place.volume) > 0) && (
-                      <div className="text-xs text-gray-500">
-                        Об&apos;ємна вага: <span className="font-medium">
-                          {calcVolWeight(place) > 0 ? calcVolWeight(place) : (Number(place.volume) * 250).toFixed(2)} кг
-                        </span>
-                      </div>
-                    )}
+                    {/* ТЗ docx 28.10.26: «Об'ємна вага» під «Вага», «Або об'єм» — правіше. */}
+                    <PlaceVolumeInputs place={place} onChange={(patch) => patchPlace(i, patch)} />
                   </div>
                 ))}
               </>

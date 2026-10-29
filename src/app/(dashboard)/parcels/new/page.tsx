@@ -14,6 +14,8 @@ import { ClientSearch } from '@/components/clients/client-search';
 import { type ClientCreateMeta } from '@/components/clients/client-create-form';
 import { DescriptionAutocomplete } from '@/components/parcels/description-autocomplete';
 import { CostCalculator } from '@/components/parcels/cost-calculator';
+import { PlaceVolumeInputs } from '@/components/parcels/place-volume-inputs';
+import { draftVolumetricWeight, draftVolumePayload, placeHasVolumeSource } from '@/lib/parcels/place-volume';
 import { FieldHint } from '@/components/shared/field-hint';
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
@@ -63,20 +65,14 @@ interface PlaceData {
   width: string;
   height: string;
   volume: string;
+  /** ТЗ docx 28.10.26: віконце «Об'ємна вага» (пов'язане з «Або об'єм»). */
+  volWeight: string;
   needsPackaging: boolean;
 }
 
 const emptyPlace = (): PlaceData => ({
-  weight: '', length: '', width: '', height: '', volume: '', needsPackaging: false,
+  weight: '', length: '', width: '', height: '', volume: '', volWeight: '', needsPackaging: false,
 });
-
-function calcVolWeight(p: PlaceData): number {
-  const l = Number(p.length) || 0;
-  const w = Number(p.width) || 0;
-  const h = Number(p.height) || 0;
-  if (l > 0 && w > 0 && h > 0) return Number(((l * w * h) / 4000).toFixed(2));
-  return 0;
-}
 
 export default function NewParcelPage() {
   const router = useRouter();
@@ -390,6 +386,11 @@ export default function NewParcelPage() {
     setPlaces(updated);
   }
 
+  // ТЗ docx 28.10.26: «Об'ємна вага» і «Або об'єм» змінюються парою.
+  function patchPlace(index: number, patch: Partial<PlaceData>) {
+    setPlaces(prev => prev.map((p, i) => (i === index ? { ...p, ...patch } : p)));
+  }
+
   // Auto-select last-used address (sorted by API by role+date) and fill editable fields
   function handleReceiverSelect(client: SelectedClient) {
     setReceiver(client);
@@ -478,10 +479,7 @@ export default function NewParcelPage() {
     : places.reduce((s, p) => s + (Number(p.weight) || 0), 0);
   const totalVolWeight = useGeneralParams
     ? (Number(generalVolume) || 0) * 250
-    : places.reduce((s, p) => {
-        const vol = Number(p.volume) || 0;
-        return s + (vol > 0 ? vol * 250 : calcVolWeight(p));
-      }, 0);
+    : places.reduce((s, p) => s + draftVolumetricWeight(p), 0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -504,14 +502,13 @@ export default function NewParcelPage() {
       // ТЗ (docx 13.06.26): «у будь-якому вікні об'ємна вага не може бути
       // нульовою. Має бути внесено або довжина/ширина/висота, або об'єм в м³.
       // І так для кожного місця».
+      // ТЗ docx 28.10.26: джерелом може бути й об'ємна вага, введена напряму.
       const badPlace = places.findIndex(p => {
         if (Number(p.weight) <= 0) return false; // порожнє місце ігноруємо
-        const hasDims = Number(p.length) > 0 && Number(p.width) > 0 && Number(p.height) > 0;
-        const hasVolume = Number(p.volume) > 0;
-        return !hasDims && !hasVolume;
+        return !placeHasVolumeSource(p);
       });
       if (badPlace !== -1) {
-        setError(`Місце ${badPlace + 1}: вкажіть довжину/ширину/висоту АБО об'єм (м³) — об'ємна вага не може бути нульовою`);
+        setError(`Місце ${badPlace + 1}: вкажіть довжину/ширину/висоту, об'ємну вагу АБО об'єм (м³) — об'ємна вага не може бути нульовою`);
         return;
       }
     }
@@ -624,7 +621,7 @@ export default function NewParcelPage() {
               length: Number(p.length) || undefined,
               width: Number(p.width) || undefined,
               height: Number(p.height) || undefined,
-              volume: Number(p.volume) || undefined,
+              ...draftVolumePayload(p),
               needsPackaging: p.needsPackaging,
             })),
       }),
@@ -895,17 +892,8 @@ export default function NewParcelPage() {
                         <Input type="number" step="1" min="0" value={place.height} onChange={(e) => updatePlace(i, 'height', e.target.value)} />
                       </div>
                     </div>
-                    <div>
-                      <Label className="text-xs">Або об&apos;єм (м&sup3;) <FieldHint text="Якщо об'єм відомий, можна ввести його напряму замість довжини/ширини/висоти." /></Label>
-                      <Input type="number" step="0.001" min="0" value={place.volume} onChange={(e) => updatePlace(i, 'volume', e.target.value)} className="w-40" />
-                    </div>
-                    {(calcVolWeight(place) > 0 || Number(place.volume) > 0) && (
-                      <div className="text-xs text-gray-500">
-                        Об&apos;ємна вага: <span className="font-medium">
-                          {calcVolWeight(place) > 0 ? calcVolWeight(place) : (Number(place.volume) * 250).toFixed(2)} кг
-                        </span>
-                      </div>
-                    )}
+                    {/* ТЗ docx 28.10.26: «Об'ємна вага» під «Вага», «Або об'єм» — правіше. */}
+                    <PlaceVolumeInputs place={place} onChange={(patch) => patchPlace(i, patch)} />
                     {/* Per ТЗ E11: «Поле "Потребує пакування" забрати». Опція
                         живе на parcel-рівні у блоці «Відправлення» вище. */}
                   </div>
