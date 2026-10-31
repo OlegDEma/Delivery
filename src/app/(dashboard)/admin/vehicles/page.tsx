@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Truck, Pencil, Trash2, Camera, Eye, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils/format';
+import { compressImageForUpload, PHOTO_TOO_LARGE_MESSAGE } from '@/lib/utils/image-compress';
 
 interface Vehicle {
   id: string;
@@ -157,8 +158,11 @@ export default function VehiclesAdminPage() {
     setUploadingSlot(slot);
     try {
       const fd = new FormData();
-      fd.append('file', file);
+      // Перевірка 31.10.26: фото з камери телефону більше за ліміт хостингу 4,5 МБ
+      // відхилялось — стискаємо (для документів довша сторона більша, щоб текст читався).
+      fd.append('file', await compressImageForUpload(file, { maxSide: 2600 }));
       const res = await fetch(`/api/vehicles/${editId}/photo?slot=${slot}`, { method: 'POST', body: fd });
+      if (res.status === 413) throw new Error(PHOTO_TOO_LARGE_MESSAGE);
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Помилка завантаження');
       toast.success('Фото завантажено');
       load();

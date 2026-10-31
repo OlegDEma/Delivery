@@ -26,7 +26,7 @@ import { CLIENT_TRANSFER_STATUSES } from '@/lib/parcels/transfer-rules';
 import { isTerminal } from '@/lib/parcels/status-transitions';
 import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
 import { TTN_AFTER_SHIPPING_REMINDER } from '@/lib/parcels/ttn-reminder';
-import { Camera, StickyNote } from 'lucide-react';
+import { OrderExtras } from '@/components/client-portal/order-extras';
 
 /**
  * Деталі посилки для Клієнта.
@@ -140,12 +140,6 @@ export default function MyOrderDetailPage() {
   const [ttnDraft, setTtnDraft] = useState('');
   const [savingTtn, setSavingTtn] = useState(false);
   const [ttnError, setTtnError] = useState('');
-  // ТЗ docx 26.10.26 (п.1): фото посилки і нотатка — «у будь-кого, хто створює посилку».
-  const [noteOpen, setNoteOpen] = useState(false);
-  const [noteDraft, setNoteDraft] = useState('');
-  const [addingNote, setAddingNote] = useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [extrasError, setExtrasError] = useState('');
 
   const fetchParcel = useCallback(() => {
     fetch(`/api/client-portal/orders/${id}`)
@@ -187,53 +181,6 @@ export default function MyOrderDetailPage() {
   useEffect(() => {
     fetch('/api/pricing').then(r => (r.ok ? r.json() : [])).then(setPricingConfigs).catch(() => {});
   }, []);
-
-  // ТЗ docx 26.10.26 (п.1): «Додати фото» — той самий перелік фото посилки, що й у Працівника.
-  async function uploadPhoto(file: File | undefined) {
-    if (!file) return;
-    setUploadingPhoto(true);
-    setExtrasError('');
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch(`/api/client-portal/orders/${id}/photos`, { method: 'POST', body: fd });
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        setExtrasError(data?.error || 'Не вдалося завантажити фото');
-        return;
-      }
-      fetchParcel();
-    } catch {
-      setExtrasError('Немає звʼязку з сервером. Спробуйте ще раз.');
-    } finally {
-      setUploadingPhoto(false);
-    }
-  }
-
-  // ТЗ docx 26.10.26 (п.1): «Додати нотатку» — як у Працівника (запис в історії посилки).
-  async function addNote() {
-    setAddingNote(true);
-    setExtrasError('');
-    try {
-      const res = await fetch(`/api/client-portal/orders/${id}/notes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: noteDraft }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        setExtrasError(data?.error || 'Не вдалося додати нотатку');
-        return;
-      }
-      setNoteOpen(false);
-      setNoteDraft('');
-      fetchParcel();
-    } catch {
-      setExtrasError('Немає звʼязку з сервером. Спробуйте ще раз.');
-    } finally {
-      setAddingNote(false);
-    }
-  }
 
   if (loading) {
     return <div className="text-center py-12 text-gray-500">Завантаження...</div>;
@@ -519,49 +466,9 @@ export default function MyOrderDetailPage() {
       {/* ТЗ docx 26.10.26 (п.1): «Можливість додати фото посилки та створити нотатку має бути
           у будь-кого, хто створює посилку. Реалізація стандартна» — ті самі кнопки, що в
           Працівника. Після «Доставлено» фото видаляються автоматично, тож тоді кнопок немає. */}
-      {!isTerminal(parcel.status) && (
-        <div className="flex gap-2 flex-wrap">
-          <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md bg-white transition-colors ${uploadingPhoto ? 'opacity-60' : 'cursor-pointer hover:bg-gray-50'}`}>
-            <Camera className="w-4 h-4 text-gray-500" />
-            {uploadingPhoto ? 'Завантаження…' : 'Додати фото'}
-            {parcel.photos?.length ? (
-              <span className="ml-1 text-xs bg-blue-100 text-blue-700 px-1.5 rounded-full">{parcel.photos.length}</span>
-            ) : null}
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              disabled={uploadingPhoto}
-              onChange={(e) => { uploadPhoto(e.target.files?.[0]); e.target.value = ''; }}
-            />
-          </label>
-          <Button size="sm" variant="outline" onClick={() => { setNoteDraft(''); setNoteOpen(true); }}>
-            <StickyNote className="w-4 h-4 mr-1" /> Додати нотатку
-          </Button>
-        </div>
-      )}
-      {noteOpen && (
-        <div className="border rounded-lg p-3 space-y-2 bg-amber-50/50">
-          <div className="text-xs text-gray-600">Нотатка до посилки</div>
-          <input
-            value={noteDraft}
-            onChange={(e) => setNoteDraft(e.target.value.slice(0, 150))}
-            maxLength={150}
-            placeholder="Напр. телефонуйте після 18:00"
-            className="w-full border rounded-md px-3 py-1.5 text-sm bg-white"
-            autoFocus
-          />
-          <div className="flex gap-2">
-            <Button size="sm" disabled={addingNote || !noteDraft.trim()} onClick={addNote}>
-              {addingNote ? 'Збереження…' : 'Зберегти нотатку'}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setNoteOpen(false)} disabled={addingNote}>Скасувати</Button>
-          </div>
-        </div>
-      )}
-      {extrasError && <div className="text-sm text-red-600">{extrasError}</div>}
-      {parcel.photos?.length ? (
+      {!isTerminal(parcel.status) ? (
+        <OrderExtras orderId={parcel.id} photos={parcel.photos} onChanged={fetchParcel} />
+      ) : parcel.photos?.length ? (
         <div className="flex gap-2 flex-wrap">
           {parcel.photos.map((url, i) => (
             <a key={url} href={url} target="_blank" rel="noopener noreferrer">

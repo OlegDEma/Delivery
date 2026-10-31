@@ -16,6 +16,7 @@ import { findOrCreateSenderAddress, findOrCreateReceiverAddress } from '@/lib/se
 import { canClientEditOrder, CLIENT_EDIT_LOCKED_MESSAGE } from '@/lib/parcels/edit-lock';
 import { writeAuditLog } from '@/lib/audit';
 import { isValidNpTtn } from '@/lib/parcels/ttn-reminder';
+import { handoverAnswerText, readHandedOver } from '@/lib/parcels/handover-note';
 import type { Country } from '@/generated/prisma/enums';
 
 /**
@@ -109,8 +110,11 @@ export async function GET(
 
   // ТЗ docx 20.10.26: кнопка «Редагувати» — лише автору замовлення і лише до «Прийнята».
   const canClientEdit = canClientEditOrder(parcel, user.id);
+  // ТЗ docx 26.10.26 + відповідь клієнта 30.10.26: форма «Редагувати» відновлює відповідь
+  // «Ви вже передали…?» (Україна→Європа) — і показує ту саму гілку, що й при створенні.
+  const handedOver = parcel.direction === 'ua_to_eu' ? readHandedOver(parcel.statusHistory) : null;
 
-  return NextResponse.json({ ...parcel, noTripForCountry, canClientEdit });
+  return NextResponse.json({ ...parcel, noTripForCountry, canClientEdit, handedOver });
 }
 
 /**
@@ -154,6 +158,7 @@ export async function PUT(
       receiverAddress: true,
       trip: { select: { country: true } },
       places: { orderBy: { placeNumber: 'asc' }, select: { weight: true, length: true, width: true, height: true } },
+      statusHistory: { select: { notes: true, changedAt: true } },
     },
   });
   if (!parcel) return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
@@ -162,8 +167,9 @@ export async function PUT(
     return NextResponse.json({ error: CLIENT_EDIT_LOCKED_MESSAGE }, { status: 409 });
   }
 
-  // Нотатка Клієнта — поза спільною схемою (як у POST), читаємо з копії тіла.
-  const raw: { clientNote?: unknown } | null = await request.clone().json().catch(() => null);
+  // Нотатка Клієнта і відповідь «Ви вже передали…?» — поза спільною схемою (як у POST),
+  // читаємо з копії тіла.
+  const raw: { clientNote?: unknown; handedOver?: unknown } | null = await request.clone().json().catch(() => null);
   const clientNote = typeof raw?.clientNote === 'string' && raw.clientNote.trim() ? raw.clientNote.trim() : null;
   if (clientNote && clientNote.length > 150) {
     return NextResponse.json({ error: 'Нотатка — не більше 150 знаків' }, { status: 400 });
@@ -373,6 +379,18 @@ export async function PUT(
   if ((parcel.clientNote ?? null) !== clientNote) changed.push('нотатка');
   if (parcel.payer !== (body.payer ?? parcel.payer) || parcel.paymentMethod !== (body.paymentMethod ?? parcel.paymentMethod)
     || parcel.paymentInUkraine !== (body.paymentInUkraine ?? parcel.paymentInUkraine)) changed.push('оплата');
+  // ТЗ docx 26.10.26 + відповідь клієнта 30.10.26: Клієнт може виправити і відповідь «Ви вже
+  // передали…?» — нова відповідь іде в історію посилки (Працівник орієнтується саме на неї).
+  let handoverNote: string | null = null;
+  if (direction === 'ua_to_eu' && typeof raw?.handedOver === 'boolean') {
+    const prevHanded = readHandedOver(parcel.statusHistory);
+    const prevText = prevHanded === null ? null : handoverAnswerText(prevHanded, parcel.collectionMethod);
+    const nextText = handoverAnswerText(raw.handedOver, body.collectionMethod);
+    if (nextText !== prevText) {
+      handoverNote = `Змінено клієнтом на сайті. ${nextText}`;
+      changed.push('передача посилки');
+    }
+  }
 
   const receiverCity = receiverAddress.city || 'Невідомо';
   const totalPlaces = placeBlueprints.length;
@@ -382,6 +400,11 @@ export async function PUT(
     }
     if (receiverRename) {
       await tx.client.update({ where: { id: receiver.id }, data: receiverRename });
+    }
+    if (handoverNote) {
+      await tx.parcelStatusHistory.create({
+        data: { parcelId: id, status: parcel.status, changedById: user.id, notes: handoverNote },
+      });
     }
     // Місця перестворюємо: номер місця в ІТН містить їхню кількість («…-1/3»), тож при
     // зміні кількості змінюються всі. Посилка «Створена» — етикеток і сканів ще немає.

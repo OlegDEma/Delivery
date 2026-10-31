@@ -32,6 +32,7 @@ import { ParcelPaymentCard } from '@/components/parcels/parcel-payment-card';
 import { ParcelPlacesCard } from '@/components/parcels/parcel-places-card';
 import { TripSelector, type TripOption } from '@/components/parcels/trip-selector';
 import { toast } from 'sonner';
+import { compressImageForUpload, PHOTO_TOO_LARGE_MESSAGE } from '@/lib/utils/image-compress';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 import { displayParcelNumber, messageParcelLabel } from '@/lib/parcels/display-number';
 import { formatItn } from '@/lib/utils/itn';
@@ -864,10 +865,21 @@ export default function ParcelDetailPage() {
             className="hidden"
             onChange={async (e) => {
               const file = e.target.files?.[0];
+              e.target.value = '';
               if (!file) return;
-              const formData = new FormData();
-              formData.append('file', file);
-              await fetch(`/api/parcels/${id}/photos`, { method: 'POST', body: formData });
+              // Відповідь клієнта 30.10.26 («Додати фото» — НЕ ВИКОНАНО): фото з камери телефону
+              // більше за ліміт хостингу 4,5 МБ відхилялось мовчки — стискаємо і кажемо про помилку.
+              try {
+                const formData = new FormData();
+                formData.append('file', await compressImageForUpload(file));
+                const res = await fetch(`/api/parcels/${id}/photos`, { method: 'POST', body: formData });
+                if (!res.ok) {
+                  const d = await res.json().catch(() => null);
+                  toast.error(res.status === 413 ? PHOTO_TOO_LARGE_MESSAGE : d?.error || 'Не вдалося завантажити фото');
+                }
+              } catch {
+                toast.error('Немає звʼязку з сервером. Спробуйте ще раз.');
+              }
               fetchParcel();
             }}
           />

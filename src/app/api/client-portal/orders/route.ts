@@ -10,6 +10,7 @@ import { ensureJourneyNumbersWhere } from '@/lib/services/journey-numbering';
 import { findNearestTrip, parcelEuCountry } from '@/lib/parcels/nearest-trip';
 import { logger } from '@/lib/logger';
 import { findOrCreateSenderAddress, findOrCreateReceiverAddress } from '@/lib/services/client-order-addresses';
+import { handoverAnswerText } from '@/lib/parcels/handover-note';
 import type { Country } from '@/generated/prisma/enums';
 
 // GET /api/client-portal/orders — get client's orders
@@ -222,9 +223,7 @@ export async function POST(request: NextRequest) {
       // ТЗ docx 26.10.26: відповідь «Ви вже передали…?» — в історію посилки, щоб Працівник
       // бачив, чи посилка вже в нас, чи її ще треба забрати / чекати з пошти.
       statusNote: body.direction === 'ua_to_eu' && raw?.handedOver !== undefined
-        ? `Створено клієнтом на сайті. ${handedOver
-          ? `Клієнт уже передав посилку ${body.collectionMethod === 'external_shipping' ? 'Новою поштою' : "кур'єру"}`
-          : 'Клієнт ще не передав посилку'}`
+        ? `Створено клієнтом на сайті. ${handoverAnswerText(handedOver, body.collectionMethod)}`
         : 'Створено клієнтом на сайті',
       collectionMethod: body.collectionMethod ?? null,
       collectionPointId: body.collectionPointId ?? null,

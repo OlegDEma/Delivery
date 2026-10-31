@@ -27,6 +27,7 @@ import { INSURANCE_AUTO_THRESHOLD_EUR } from '@/lib/constants/insurance';
 import { displayParcelNumber } from '@/lib/parcels/display-number';
 import { formatPostalCodeInput } from '@/lib/utils/postal-code';
 import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
+import { OrderExtras } from '@/components/client-portal/order-extras';
 import {
   TTN_ENTER_REQUEST, TTN_AFTER_SHIPPING_REMINDER, TTN_MISSING_REMINDER, isValidNpTtn,
 } from '@/lib/parcels/ttn-reminder';
@@ -73,6 +74,8 @@ const CLIENT_NOTE_MAX = 150;
 interface EditableOrder {
   status: string;
   canClientEdit?: boolean;
+  /** ТЗ docx 26.10.26: відповідь «Ви вже передали…?» з історії посилки (null — не відповідали). */
+  handedOver?: boolean | null;
   direction: string;
   shipmentType: string;
   description: string | null;
@@ -236,8 +239,10 @@ export function OrderForm({ editId }: { editId?: string }) {
   //          забороняло оформлення — тепер оформити можна).
   const [handedOver, setHandedOver] = useState<'' | 'yes' | 'no'>('');
   const [handoverWay, setHandoverWay] = useState<'' | 'courier' | 'post'>('');
-  // ТЗ docx 20.10.26: при редагуванні питання не ставимо — спосіб передачі вже обрано.
-  const needsHandover = direction === 'ua_to_eu' && !isEdit;
+  // ТЗ docx 26.10.26 + відповідь клієнта 30.10.26 (до ТЗ 20.10.26): і при редагуванні питання
+  // показуємо — з відповіддю, яку Клієнт дав при створенні (інакше форма редагування
+  // показувала гілку «Ні» з блоками, які для «Так» прибрано).
+  const needsHandover = direction === 'ua_to_eu';
   // ТЗ docx 04.10.26: чи є рейс до вибраної країни (посилка до нього прив'яжеться
   // автоматично). Ключ «напрямок:країна» — щоб не показати застарілу відповідь.
   const [tripCheck, setTripCheck] = useState<{ key: string; hasTrip: boolean } | null>(null);
@@ -357,6 +362,12 @@ export function OrderForm({ editId }: { editId?: string }) {
             setCollectionLandmark(sa?.landmark ?? '');
           }
           setNpTtn(o.npTtn ?? '');
+          // ТЗ docx 26.10.26: та сама гілка, що й при створенні. Замовлення до 26.10.26 відповіді
+          // не мають — для них звична форма («Ні»: блок «Як Ви передасте нам посилку?»).
+          if (o.direction === 'ua_to_eu') {
+            setHandedOver(o.handedOver ? 'yes' : 'no');
+            setHandoverWay(o.handedOver ? (o.collectionMethod === 'external_shipping' ? 'post' : 'courier') : '');
+          }
           setEditState('ready');
         })
         .catch(() => setEditState('error'));
@@ -774,11 +785,15 @@ export function OrderForm({ editId }: { editId?: string }) {
         {successTtnState === 'saved' && (
           <p className="text-sm text-green-700 mb-6">Номер ТТН збережено — за ним ми знайдемо Вашу посилку.</p>
         )}
-        {/* ТЗ docx 26.10.26 (п.1): фото посилки і нотатки — у самому замовленні. */}
+        {/* ТЗ docx 26.10.26 (п.1) + відповідь клієнта 30.10.26 «НЕ ВИКОНАНО»: фото посилки і
+            нотатку — одразу при створенні, як у Працівника (а не лише в самому замовленні). */}
+        <div className="text-left mb-6">
+          <div className="text-sm text-gray-700 mb-2">Додайте фото посилки або нотатку для нас:</div>
+          <OrderExtras orderId={created.id} />
+        </div>
         <Button onClick={() => router.push(`/my-orders/${created.id}`)} className="w-full h-12 text-base mb-2">
           Переглянути замовлення
         </Button>
-        <p className="text-xs text-gray-500 mb-4">У замовленні можна додати фото посилки і нотатку.</p>
         <Button variant="outline" onClick={() => router.push('/my-orders')} className="w-full">
           Мої замовлення
         </Button>
