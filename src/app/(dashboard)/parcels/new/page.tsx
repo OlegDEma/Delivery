@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getBillableWeight } from '@/lib/utils/volumetric';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,11 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClientSearch } from '@/components/clients/client-search';
-import { type ClientCreateMeta } from '@/components/clients/client-create-form';
+import { ClientCreateForm, type ClientCreateMeta } from '@/components/clients/client-create-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DescriptionAutocomplete } from '@/components/parcels/description-autocomplete';
 import { CostCalculator } from '@/components/parcels/cost-calculator';
-import { PlaceVolumeInputs } from '@/components/parcels/place-volume-inputs';
-import { draftVolumetricWeight, draftVolumePayload, placeHasVolumeSource } from '@/lib/parcels/place-volume';
+import { PlacesEditor, usePlacesDraft } from '@/components/parcels/places-editor';
+import { handleFlowEnter, focusFlowElement, focusInvalidField } from '@/lib/ui/focus-flow';
 import { FieldHint } from '@/components/shared/field-hint';
 import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
@@ -58,21 +58,6 @@ interface SelectedClient {
     usageCount: number;
   }[];
 }
-
-interface PlaceData {
-  weight: string;
-  length: string;
-  width: string;
-  height: string;
-  volume: string;
-  /** ТЗ docx 28.10.26: віконце «Об'ємна вага» (пов'язане з «Або об'єм»). */
-  volWeight: string;
-  needsPackaging: boolean;
-}
-
-const emptyPlace = (): PlaceData => ({
-  weight: '', length: '', width: '', height: '', volume: '', volWeight: '', needsPackaging: false,
-});
 
 export default function NewParcelPage() {
   const router = useRouter();
@@ -239,16 +224,17 @@ export default function NewParcelPage() {
   const declaredCurrency = senderInUA ? 'UAH' : 'EUR';
   const declaredCurrencyLabel = senderInUA ? 'грн' : 'EUR';
 
-  // General params mode
-  const [useGeneralParams, setUseGeneralParams] = useState(false);
-  const [generalWeight, setGeneralWeight] = useState('');
-  const [generalVolume, setGeneralVolume] = useState('');
-  const [generalPlaces, setGeneralPlaces] = useState('1');
+  // ТЗ docx 04.11.26 (п.8): «Параметри відправлення» — спільний блок зі сторінкою
+  // редагування (ті самі механізми: загальні параметри, додавання/копіювання місць).
+  const placesDraft = usePlacesDraft();
+  const places = placesDraft.places;
 
-  // Places
-  const [places, setPlaces] = useState<PlaceData[]>([emptyPlace()]);
+  // ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR) — у «Додаткових послугах».
+  const [npSurchargeEnabled, setNpSurchargeEnabled] = useState(false);
+  const [npSurchargeAmount, setNpSurchargeAmount] = useState('');
+  const npSurcharge = npSurchargeEnabled ? Number(npSurchargeAmount) || 0 : 0;
 
-  // Payment
+  // Payment  // Payment
   // ТЗ docx 09.10.26 (п.5): платник за замовчуванням — «Україна→Європа» Отримувач,
   // «Європа→Україна» Відправник. Поки Працівник не обрав сам — слідуємо за напрямком.
   const [payerChoice, setPayerChoice] = useState<string | null>(null);
@@ -365,32 +351,6 @@ export default function NewParcelPage() {
           })()
         : null);
 
-  function addPlace() {
-    if (places.length >= 10) return;
-    setPlaces([...places, emptyPlace()]);
-  }
-
-  function copyPlace(index: number) {
-    if (places.length >= 10) return;
-    setPlaces([...places, { ...places[index] }]);
-  }
-
-  function removePlace(index: number) {
-    if (places.length <= 1) return;
-    setPlaces(places.filter((_, i) => i !== index));
-  }
-
-  function updatePlace(index: number, field: keyof PlaceData, value: string | boolean) {
-    const updated = [...places];
-    updated[index] = { ...updated[index], [field]: value };
-    setPlaces(updated);
-  }
-
-  // ТЗ docx 28.10.26: «Об'ємна вага» і «Або об'єм» змінюються парою.
-  function patchPlace(index: number, patch: Partial<PlaceData>) {
-    setPlaces(prev => prev.map((p, i) => (i === index ? { ...p, ...patch } : p)));
-  }
-
   // Auto-select last-used address (sorted by API by role+date) and fill editable fields
   function handleReceiverSelect(client: SelectedClient) {
     setReceiver(client);
@@ -474,47 +434,81 @@ export default function NewParcelPage() {
   }
 
   // Totals
-  const totalWeight = useGeneralParams
-    ? (Number(generalWeight) || 0)
-    : places.reduce((s, p) => s + (Number(p.weight) || 0), 0);
-  const totalVolWeight = useGeneralParams
-    ? (Number(generalVolume) || 0) * 250
-    : places.reduce((s, p) => s + draftVolumetricWeight(p), 0);
+  const totalWeight = placesDraft.totalWeight;
+  const totalVolWeight = placesDraft.totalVolWeight;
+
+  // ТЗ docx 04.11.26 (п.3): пропущене віконце — нагадування + курсор у нього з підсвіткою.
+  function failAt(message: string, field: string) {
+    setError(message);
+    focusInvalidField(field);
+  }
+
+  // ТЗ docx 04.11.26 (п.1): куди йде курсор після підтвердження Отримувача / Відправника.
+  const flowEl = (selector: string) => document.querySelector<HTMLElement>(selector);
+  const afterReceiver = () => flowEl('[data-flow-id="sender-search"]') ?? flowEl('[data-field="declared-value"]');
+  const afterSender = () => flowEl('[data-field="declared-value"]');
+
+  // ТЗ docx 04.11.26 (п.6): ТТН Нової пошти → дані Відправника з НП (Україна → Європа).
+  const [npLookupBusy, setNpLookupBusy] = useState(false);
+  const [npLookupError, setNpLookupError] = useState('');
+  const [npSenderPrefill, setNpSenderPrefill] = useState<null | {
+    key: number;
+    phone: string;
+    lastName?: string; firstName?: string; middleName?: string;
+    city?: string; npWarehouseNum?: string;
+    existing: SelectedClient | null;
+  }>(null);
+
+  async function lookupNpSender(rawTtn: string) {
+    const ttn = rawTtn.replace(/\D/g, '');
+    setNpLookupError('');
+    if (ttn.length !== 14) { setNpLookupError('Номер ТТН — 14 цифр'); return; }
+    setNpLookupBusy(true);
+    try {
+      const res = await fetch(`/api/nova-poshta/ttn-sender?ttn=${ttn}`);
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data) { setNpLookupError(data?.error || 'Не вдалося отримати дані з Нової пошти'); return; }
+      // Відправник уже є в базі (за телефоном) — оновлюємо його картку, а не створюємо дубль.
+      let existing: SelectedClient | null = null;
+      if (data.phone) {
+        const found = await fetch(`/api/clients?${new URLSearchParams({ q: data.phone, limit: '5', role: 'sender' })}`)
+          .then((r) => (r.ok ? r.json() : null)).catch(() => null);
+        const digits = String(data.phone).replace(/\D/g, '');
+        existing = (found?.clients as SelectedClient[] | undefined)?.find((c) => c.phone.replace(/\D/g, '') === digits) ?? null;
+      }
+      setNpSenderPrefill({
+        key: Date.now(),
+        phone: data.phone || '',
+        lastName: data.lastName || undefined,
+        firstName: data.firstName || undefined,
+        middleName: data.middleName || undefined,
+        city: data.city || undefined,
+        npWarehouseNum: data.warehouseNumber || undefined,
+        existing,
+      });
+    } finally {
+      setNpLookupBusy(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
 
-    if (!receiver) { setError('Спочатку виберіть отримувача — введіть телефон або прізвище'); return; }
-    if (!sender) { setError('Виберіть відправника — введіть телефон або прізвище'); return; }
-
-    if (useGeneralParams) {
-      if (!generalWeight || Number(generalWeight) <= 0) { setError('Вкажіть загальну вагу'); return; }
-      // ТЗ (docx 13.06.26): об'ємна вага не може бути нульовою — у загальних
-      // параметрах це означає обов'язковий загальний об'єм.
-      if (!generalVolume || Number(generalVolume) <= 0) {
-        setError('Вкажіть загальний об\'єм (м³) — об\'ємна вага не може бути нульовою');
-        return;
-      }
-    } else {
-      const hasValidPlace = places.some(p => Number(p.weight) > 0);
-      if (!hasValidPlace) { setError('Вкажіть вагу хоча б одного місця — це обов\'язково'); return; }
-      // ТЗ (docx 13.06.26): «у будь-якому вікні об'ємна вага не може бути
-      // нульовою. Має бути внесено або довжина/ширина/висота, або об'єм в м³.
-      // І так для кожного місця».
-      // ТЗ docx 28.10.26: джерелом може бути й об'ємна вага, введена напряму.
-      const badPlace = places.findIndex(p => {
-        if (Number(p.weight) <= 0) return false; // порожнє місце ігноруємо
-        return !placeHasVolumeSource(p);
-      });
-      if (badPlace !== -1) {
-        setError(`Місце ${badPlace + 1}: вкажіть довжину/ширину/висоту, об'ємну вагу АБО об'єм (м³) — об'ємна вага не може бути нульовою`);
-        return;
-      }
-    }
+    // ТЗ docx 04.11.26 (п.3): кожне нагадування — ще й курсор у незаповнене віконце з підсвіткою.
+    if (!receiver) { failAt('Спочатку виберіть отримувача — введіть телефон або прізвище', '[data-flow-id="receiver-search"]'); return; }
+    if (!sender) { failAt('Виберіть відправника — введіть телефон або прізвище', '[data-flow-id="sender-search"]'); return; }
 
     if (!declaredValue || Number(declaredValue) <= 0) {
-      setError('Вкажіть оголошену вартість відправлення');
+      failAt('Вкажіть оголошену вартість відправлення', '[data-field="declared-value"]');
+      return;
+    }
+
+    const placesError = placesDraft.validate();
+    if (placesError) { failAt(placesError.message, placesError.field); return; }
+
+    if (npSurchargeEnabled && !(Number(npSurchargeAmount) > 0)) {
+      failAt('Вкажіть суму «Доплати за НП» (EUR) або зніміть позначку', '[data-field="np-surcharge"]');
       return;
     }
 
@@ -524,7 +518,7 @@ export default function NewParcelPage() {
       (t) => t.direction === direction && (t.status === 'planned' || t.status === 'in_progress'),
     );
     if (!lockedTripId && tripDateMode === 'trip' && !effectiveTripId && hasSelectableTrips) {
-      setError('Виберіть рейс зі списку або натисніть «Без рейсу»');
+      failAt('Виберіть рейс зі списку або натисніть «Без рейсу»', '[data-field="trip"]');
       return;
     }
 
@@ -536,7 +530,7 @@ export default function NewParcelPage() {
       collection.method === 'courier_pickup' &&
       collection.isMultiParcelPickup === null
     ) {
-      setError('Оберіть «Одна посилка» або «Дві або більше посилок» у блоці «Спосіб відправки» (вкладка «Відправник»)');
+      failAt('Оберіть «Одна посилка» або «Дві або більше посилок» у блоці «Спосіб відправки» (вкладка «Відправник»)', '[data-field="sender-card"] button');
       return;
     }
 
@@ -588,6 +582,8 @@ export default function NewParcelPage() {
           parcelMoneyEnabled && Number(parcelMoneyAmount) > 0
             ? Number(parcelMoneyAmount)
             : undefined,
+        // ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR).
+        npSurcharge: npSurcharge > 0 ? npSurcharge : undefined,
         payer,
         paymentMethod,
         paymentInUkraine,
@@ -611,19 +607,7 @@ export default function NewParcelPage() {
           collection.method === 'courier_pickup'
             ? !!collection.isMultiParcelPickup
             : undefined,
-        places: useGeneralParams
-          ? Array.from({ length: Number(generalPlaces) || 1 }, (_, i) => ({
-              weight: (Number(generalWeight) || 0) / (Number(generalPlaces) || 1),
-              volume: Number(generalVolume) > 0 ? Number(generalVolume) / (Number(generalPlaces) || 1) : undefined,
-            }))
-          : places.map(p => ({
-              weight: Number(p.weight) || 0,
-              length: Number(p.length) || undefined,
-              width: Number(p.width) || undefined,
-              height: Number(p.height) || undefined,
-              ...draftVolumePayload(p),
-              needsPackaging: p.needsPackaging,
-            })),
+        places: placesDraft.payload(),
       }),
     });
 
@@ -663,7 +647,8 @@ export default function NewParcelPage() {
       <Breadcrumbs items={[{label: 'Посилки', href: '/parcels'}, {label: 'Нова посилка'}]} />
       <h1 className="text-2xl font-bold mb-4">Нова посилка</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {/* ТЗ docx 04.11.26 (п.1): Enter / «Далі» переводить курсор за алгоритмом (data-flow). */}
+      <form onSubmit={handleSubmit} onKeyDown={handleFlowEnter} className="space-y-4">
         {/* Direction */}
         <Card>
           <CardHeader className="py-3 px-4">
@@ -692,6 +677,10 @@ export default function NewParcelPage() {
               label="Пошук отримувача (телефон або прізвище)"
               // ТЗ docx 09.10.26 (п.6): у полі пошуку Отримувача — цифрова клавіатура.
               inputMode="tel"
+              // ТЗ docx 04.11.26 (п.1): курсор одразу тут; після підтвердження — до Відправника.
+              flowId="receiver-search"
+              autoFocus
+              nextFocus={afterReceiver}
               // ТЗ docx 21.08.26: дані ручної адреси з МЛ (якщо прийшли звідти).
               prefill={routePrefill?.role === 'receiver' ? routePrefill : null}
               onSelect={handleReceiverSelect}
@@ -719,11 +708,45 @@ export default function NewParcelPage() {
               <span className="text-green-600 font-bold">Відправник</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 space-y-2 overflow-visible">
+          <CardContent className="px-4 pb-4 pt-0 space-y-2 overflow-visible" data-field="sender-card">
+            {/* ТЗ docx 04.11.26 (п.6): посилка прийшла Новою поштою (до Європи) — скануємо ТТН і
+                отримуємо з НП дані Відправника (телефон, прізвище, ім'я, місто, номер відділення);
+                форма Відправника відкривається вже заповненою — лишається «Зберегти». Той самий
+                номер зберігається як ТТН посилки (раніше — окремий блок «Номер ТТН Нової пошти»,
+                ТЗ docx 08.10.26). */}
+            {direction === 'ua_to_eu' && (
+              <div className="rounded-lg border border-red-100 bg-red-50/40 p-2 space-y-1.5">
+                <div className="text-xs font-medium text-gray-700">ТТН Нової пошти (якщо посилка прийшла Новою поштою)</div>
+                <div className="flex gap-2 items-center flex-wrap">
+                  <Input
+                    value={npTtn}
+                    onChange={(e) => {
+                      setNpTtn(e.target.value);
+                      setNpLookupError('');
+                      // Введено 14 цифр — одразу питаємо НП.
+                      if (e.target.value.replace(/\D/g, '').length === 14 && !sender) lookupNpSender(e.target.value);
+                    }}
+                    placeholder="14 цифр, напр. 59000123456789"
+                    inputMode="numeric"
+                    className="font-mono flex-1 min-w-[12rem]"
+                    data-field="np-ttn"
+                  />
+                  <BarcodeScanButton onResult={(ttn) => { setNpTtn(ttn); lookupNpSender(ttn); }} label="Сканувати" />
+                  <Button type="button" size="sm" variant="outline" disabled={npLookupBusy || npTtn.replace(/\D/g, '').length !== 14}
+                    onClick={() => lookupNpSender(npTtn)}>
+                    {npLookupBusy ? 'Запит…' : 'Дані з НП'}
+                  </Button>
+                </div>
+                {npLookupError && <div className="text-xs text-red-600">{npLookupError}</div>}
+              </div>
+            )}
             <ClientSearch
               label="Пошук відправника (телефон або прізвище)"
               // ТЗ docx 21.08.26: дані ручної адреси з МЛ (якщо прийшли звідти).
               prefill={routePrefill?.role === 'sender' ? routePrefill : null}
+              // ТЗ docx 04.11.26 (п.1): після підтвердження Відправника — «Оголошена вартість».
+              flowId="sender-search"
+              nextFocus={afterSender}
               onSelect={handleSenderSelect}
               onClear={() => { setSender(null); setSenderAddressId(''); setSenderPostalCode(''); setSenderCity(''); setSenderStreet(''); setSenderBuilding(''); setSenderNpWarehouse(''); setSenderLandmark(''); setSenderPickupPointText(''); setSenderDeliveryMethod('address'); }}
               selected={sender}
@@ -768,6 +791,57 @@ export default function NewParcelPage() {
           </CardContent>
         </Card>
 
+        {/* ТЗ docx 04.11.26 (п.6): форма Відправника, заповнена даними з Нової пошти. */}
+        <Dialog open={!!npSenderPrefill} onOpenChange={(o) => { if (!o) setNpSenderPrefill(null); }}>
+          <DialogContent
+            className="max-h-[90vh] overflow-y-auto"
+            initialFocus={() => document.querySelector<HTMLElement>('[data-np-sender-form] [data-flow-start]') ?? true}
+            finalFocus={false}
+          >
+            <DialogHeader>
+              <DialogTitle>
+                Відправник
+                <span className="text-xs font-normal text-gray-500 ml-2">— дані з Нової пошти, перевірте і збережіть</span>
+              </DialogTitle>
+            </DialogHeader>
+            {npSenderPrefill && (
+              <div data-np-sender-form="">
+                <ClientCreateForm
+                  key={npSenderPrefill.key}
+                  direction="ua_to_eu"
+                  role="sender"
+                  startAtSave
+                  initialPhone={npSenderPrefill.phone}
+                  initialData={npSenderPrefill.existing ? {
+                    ...npSenderPrefill.existing,
+                    lastName: npSenderPrefill.lastName || npSenderPrefill.existing.lastName,
+                    firstName: npSenderPrefill.firstName || npSenderPrefill.existing.firstName,
+                    middleName: npSenderPrefill.middleName || npSenderPrefill.existing.middleName,
+                    // Адреса з НП — новим записом (стару адресу клієнта не переписуємо).
+                    addresses: [{
+                      id: '', country: 'UA', city: npSenderPrefill.city || '', street: null, building: null,
+                      apartment: null, postalCode: null, landmark: null,
+                      npWarehouseNum: npSenderPrefill.npWarehouseNum || null, npPoshtamatNum: null,
+                      deliveryMethod: 'np_warehouse', usageCount: 0,
+                    }],
+                  } : undefined}
+                  prefillAddress={{
+                    lastName: npSenderPrefill.lastName, firstName: npSenderPrefill.firstName,
+                    middleName: npSenderPrefill.middleName, country: 'UA', city: npSenderPrefill.city,
+                    deliveryMethod: 'np_warehouse', npWarehouseNum: npSenderPrefill.npWarehouseNum,
+                  }}
+                  onCancel={() => setNpSenderPrefill(null)}
+                  onSuccess={(client, meta) => {
+                    setNpSenderPrefill(null);
+                    handleSenderSelect(client, meta);
+                    setTimeout(() => focusFlowElement(afterSender()), 150);
+                  }}
+                />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Shipment details */}
         <Card>
           <CardHeader className="py-3 px-4">
@@ -800,13 +874,18 @@ export default function NewParcelPage() {
                 Оголошена вартість ({declaredCurrencyLabel}){' '}
                 <FieldHint text="Загальна вартість відправлення, оголошена Відправником." />
               </Label>
+              {/* ТЗ docx 04.11.26 (п.1–2): цифрова клавіатура; далі курсор — «Вага» першого місця. */}
               <Input
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 min="0"
                 value={declaredValue}
                 onChange={(e) => setDeclaredValue(e.target.value)}
                 placeholder="0.00"
+                data-field="declared-value"
+                data-flow=""
+                enterKeyHint="next"
               />
             </div>
 
@@ -825,117 +904,12 @@ export default function NewParcelPage() {
             </div>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-3">
-            {/* Toggle: general vs detailed */}
-            <div className="flex items-center gap-2">
-              <Checkbox checked={useGeneralParams} onCheckedChange={(c) => setUseGeneralParams(c === true)} />
-              <Label className="text-sm">Загальні параметри <FieldHint text="Відмітьте для введення загальної ваги, об'єму та кількості місць замість детальних параметрів кожного місця." /></Label>
-            </div>
-
-            {useGeneralParams ? (
-              /* General params mode */
-              <div className="border rounded-lg p-3 space-y-2">
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <Label className="text-xs">Загальна вага (кг)</Label>
-                    <Input type="number" step="0.01" min="0" value={generalWeight} onChange={(e) => setGeneralWeight(e.target.value)} className="text-base" />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Загальний об&apos;єм (м&sup3;)</Label>
-                    <Input type="number" step="0.001" min="0" value={generalVolume} onChange={(e) => setGeneralVolume(e.target.value)} />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Кількість місць</Label>
-                    <Input type="number" step="1" min="1" max="10" value={generalPlaces} onChange={(e) => setGeneralPlaces(e.target.value)} />
-                  </div>
-                </div>
-                {Number(generalVolume) > 0 && (
-                  <div className="text-xs text-gray-500">
-                    Об&apos;ємна вага: <span className="font-medium">{(Number(generalVolume) * 250).toFixed(2)} кг</span> (об&apos;єм &times; 250)
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Detailed per-place mode */
-              <>
-                {places.map((place, i) => (
-                  <div key={i} className="border rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Місце {i + 1}</span>
-                      <div className="flex gap-1">
-                        <Button type="button" variant="ghost" size="sm" onClick={() => copyPlace(i)} title="Копіювати місце">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                        </Button>
-                        {places.length > 1 && (
-                          <Button type="button" variant="ghost" size="sm" onClick={() => removePlace(i)} className="text-red-500 hover:text-red-700">
-                            &times;
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      <div>
-                        <Label className="text-xs">Вага (кг)</Label>
-                        <Input type="number" step="0.01" min="0" value={place.weight} onChange={(e) => updatePlace(i, 'weight', e.target.value)} className="text-base" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Довжина (см)</Label>
-                        <Input type="number" step="1" min="0" value={place.length} onChange={(e) => updatePlace(i, 'length', e.target.value)} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Ширина (см)</Label>
-                        <Input type="number" step="1" min="0" value={place.width} onChange={(e) => updatePlace(i, 'width', e.target.value)} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Висота (см)</Label>
-                        <Input type="number" step="1" min="0" value={place.height} onChange={(e) => updatePlace(i, 'height', e.target.value)} />
-                      </div>
-                    </div>
-                    {/* ТЗ docx 28.10.26: «Об'ємна вага» під «Вага», «Або об'єм» — правіше. */}
-                    <PlaceVolumeInputs place={place} onChange={(patch) => patchPlace(i, patch)} />
-                    {/* Per ТЗ E11: «Поле "Потребує пакування" забрати». Опція
-                        живе на parcel-рівні у блоці «Відправлення» вище. */}
-                  </div>
-                ))}
-                {/* ТЗ docx 23.08.26: напис «+ Додати місце» ЗАВЖДИ знизу заповнюваного
-                    місця — при додаванні нового місця кнопка сама зсувається нижче. */}
-                <Button
-                  type="button" variant="outline" size="sm" onClick={addPlace}
-                  disabled={places.length >= 10} className="w-full"
-                >
-                  + Додати місце
-                </Button>
-              </>
-            )}
-
-            {/* Totals — Розрахункова вага по правилу тарифу (Bug 5 docx). */}
-            {(() => {
-              const cfg = pricingConfigs.find(
-                c => c.country === calcSenderCountry && c.direction === direction
-              );
-              const weightType = (cfg?.weightType || 'custom') as 'actual'|'volumetric'|'average'|'custom';
-              const ffrac = cfg?.weightCustomFactualFraction ?? 0.5;
-              const billable = getBillableWeight(totalWeight, totalVolWeight, weightType, ffrac);
-              return (
-                <div className="bg-gray-50 rounded-lg p-3 text-sm">
-                  <div className="flex justify-between">
-                    <span>Фактична вага:</span>
-                    <span className="font-medium">{totalWeight.toFixed(2)} кг</span>
-                  </div>
-                  {totalVolWeight > 0 && (
-                    <div className="flex justify-between">
-                      <span>Об&apos;ємна вага:</span>
-                      <span className="font-medium">{totalVolWeight.toFixed(2)} кг</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between font-medium border-t mt-1 pt-1">
-                    <span>Розрахункова вага:</span>
-                    <span>{billable.toFixed(2)} кг</span>
-                  </div>
-                </div>
-              );
-            })()}
+            {/* ТЗ docx 04.11.26 (п.8): спільний блок для створення і редагування. */}
+            <PlacesEditor
+              draft={placesDraft}
+              // Розрахункова вага — за правилом тарифу (Bug 5 docx).
+              weightRule={pricingConfigs.find(c => c.country === calcSenderCountry && c.direction === direction) ?? null}
+            />
           </CardContent>
         </Card>
 
@@ -1009,31 +983,8 @@ export default function NewParcelPage() {
             Окремий блок «Спосіб прийому/видачі посилки» прибрано — вибір
             способу перенесено у вкладку «Відправник» («Спосіб відправки»). */}
 
-        {/* ТЗ docx 08.10.26 — лише «Україна → Європа»: Клієнт надіслав посилку Новою
-            поштою без замовлення в застосунку, Працівник створює посилку і має внести
-            номер ТТН з паперової декларації — без ручного набору, камерою телефону. */}
-        {direction === 'ua_to_eu' && (
-          <Card>
-            <CardHeader className="py-3 px-4">
-              <CardTitle className="text-base">Номер ТТН Нової пошти</CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 pb-4 pt-0 space-y-2">
-              <div className="flex gap-2 items-center">
-                <Input
-                  value={npTtn}
-                  onChange={(e) => setNpTtn(e.target.value)}
-                  placeholder="14 цифр, напр. 59000123456789"
-                  inputMode="numeric"
-                  className="font-mono"
-                />
-                <BarcodeScanButton onResult={(ttn) => setNpTtn(ttn)} label="Сканувати" />
-              </div>
-              <p className="text-xs text-gray-500">
-                Натисніть «Сканувати» і наведіть камеру на штрихкод паперової накладної — номер підставиться сам.
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        {/* ТЗ docx 08.10.26: ТТН паперової декларації НП (Україна → Європа) — з 04.11.26 вводиться
+            /сканується в блоці «Відправник» (з нього ж підтягуються дані Відправника з НП). */}
 
         {/* ТЗ docx 09.10.26 (п.1): створення з рейсу — рейс зафіксовано, вибору немає. */}
         {lockedTripId ? (
@@ -1058,6 +1009,7 @@ export default function NewParcelPage() {
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 space-y-3">
             {tripDateMode === 'trip' && (
+              <div data-field="trip" tabIndex={-1} className="rounded-lg aria-invalid:ring-2 aria-invalid:ring-red-400 outline-none">
               <TripSelector
                 trips={trips}
                 direction={direction}
@@ -1067,6 +1019,7 @@ export default function NewParcelPage() {
                 // ТЗ docx 21.07.26 (п.2): лише рейси з країни Відправника.
                 senderCountry={senderCountry}
               />
+              </div>
             )}
             {/* ТЗ docx 04.10.26: Водій бачить лише рейси своїх поїздок — пояснюємо,
                 що посилку все одно буде прив'язано до найближчого рейсу. */}
@@ -1136,6 +1089,7 @@ export default function NewParcelPage() {
           isMultiParcelPickup={!!collection.isMultiParcelPickup}
           parcelMoneyAmount={parcelMoneyEnabled ? Number(parcelMoneyAmount) || 0 : 0}
           receiverCity={recvCity}
+          npSurcharge={npSurcharge}
         />
 
         {/* ТЗ docx 11.10.26 (Створення посилки — загальна зміна): послуги об'єднано під
@@ -1236,6 +1190,43 @@ export default function NewParcelPage() {
                     onChange={(e) => setParcelMoneyAmount(e.target.value)}
                     placeholder="Сума у віконці «Пакет»"
                   />
+                </div>
+              )}
+            </div>
+
+            {/* ТЗ docx 04.11.26 (п.5): «Доплата за НП» — введена сума (EUR) додається до
+                загальної вартості до оплати (див. «Розрахунок вартості»). */}
+            <div className="rounded-lg border p-3 bg-gray-50 space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="np-surcharge-cb"
+                  checked={npSurchargeEnabled}
+                  onCheckedChange={(c) => {
+                    const enabled = c === true;
+                    setNpSurchargeEnabled(enabled);
+                    if (!enabled) setNpSurchargeAmount('');
+                    else setTimeout(() => focusFlowElement(document.querySelector<HTMLElement>('[data-field="np-surcharge"]')), 30);
+                  }}
+                />
+                <Label htmlFor="np-surcharge-cb" className="text-sm font-medium cursor-pointer">
+                  Доплата за НП{' '}
+                  <FieldHint text="Сума в євро, на яку збільшується загальна вартість до оплати за посилку." />
+                </Label>
+              </div>
+              {npSurchargeEnabled && (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    value={npSurchargeAmount}
+                    onChange={(e) => setNpSurchargeAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="max-w-[10rem]"
+                    data-field="np-surcharge"
+                  />
+                  <span className="text-sm text-gray-600">EUR</span>
                 </div>
               )}
             </div>

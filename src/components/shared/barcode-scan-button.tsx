@@ -20,9 +20,27 @@ export { extractNpTtn };
  * розпізнаний і відображатися в цифровому форматі». На фото (знімок телефоном, файл або
  * кадр з камери) спершу шукаємо штрихкод, а якщо його немає чи він не читається —
  * розпізнаємо надруковані цифри номера (OCR). Результат — 14 цифр у віконці ТТН.
+ *
+ * ТЗ docx 03.11.26 (п.2): «не потрібно кожен раз запитувати дозволу доступу до камери».
+ * Живе сканування вмикає камеру через getUserMedia, а Safari на iPhone/iPad питає дозвіл
+ * сайту на КОЖНЕ таке ввімкнення (Android Chrome запамʼятовує дозвіл сам; сайт зберегти
+ * дозвіл за браузер не може). Тому на iPhone/iPad «Сканувати» одразу відкриває системну
+ * камеру телефону (знімок → штрихкод, а якщо не читається — цифри номера): вона дозволу
+ * сайту не потребує взагалі. Живий режим лишився запасним («Камера наживо»).
  */
+
+/** iPhone / iPad (iPadOS видає себе за Mac, але має сенсорний екран). */
+function isAppleMobile(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
 export function BarcodeScanButton({ onResult, label = 'Сканувати ТТН' }: { onResult: (ttn: string) => void; label?: string }) {
-  const [open, setOpen] = useState(false);
+  // 'live' — живе сканування камерою (getUserMedia); 'photo' — знімок системною камерою.
+  const [mode, setMode] = useState<null | 'live' | 'photo'>(null);
+  const open = mode !== null;
+  const setOpen = (v: boolean) => setMode(v ? 'live' : null);
+  const nativeInputRef = useRef<HTMLInputElement | null>(null);
   const [error, setError] = useState('');
   const [hint, setHint] = useState('');
   const [busy, setBusy] = useState(false);
@@ -43,7 +61,7 @@ export function BarcodeScanButton({ onResult, label = 'Сканувати ТТН
 
   // Живе сканування: власний потік камери + цикл розпізнавання кадрів.
   useEffect(() => {
-    if (!open) return;
+    if (mode !== 'live') return;
     let stream: MediaStream | null = null;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let stopped = false;
@@ -98,7 +116,7 @@ export function BarcodeScanButton({ onResult, label = 'Сканувати ТТН
       stream?.getTracks().forEach((t) => t.stop());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [mode]);
 
   async function onPhoto(file: Blob | null | undefined) {
     if (!file) return;
@@ -129,9 +147,33 @@ export function BarcodeScanButton({ onResult, label = 'Сканувати ТТН
 
   return (
     <>
-      <Button type="button" size="sm" variant="outline" onClick={() => { setError(''); setHint(''); setOpen(true); }}>
+      <Button
+        type="button" size="sm" variant="outline"
+        onClick={() => {
+          setError(''); setHint('');
+          // ТЗ docx 03.11.26 (п.2): на iPhone/iPad — системна камера (без запиту дозволу сайту).
+          if (isAppleMobile()) nativeInputRef.current?.click();
+          else setMode('live');
+        }}
+      >
         <Camera className="w-4 h-4 mr-1" /> {label}
       </Button>
+      {/* Системна камера телефону: файл-знімок, дозволу сайту на камеру не потрібно. */}
+      <input
+        ref={nativeInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = '';
+          if (!file) return;
+          setMode('photo');
+          onPhoto(file);
+        }}
+        data-testid="ttn-native-input"
+      />
       {open && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" role="dialog" aria-label="Сканування ТТН">
           <div className="bg-white rounded-lg p-3 w-full max-w-md space-y-2">
@@ -141,6 +183,7 @@ export function BarcodeScanButton({ onResult, label = 'Сканувати ТТН
                 <X className="w-4 h-4" />
               </button>
             </div>
+            {mode === 'live' ? (<>
             <div className="relative w-full bg-black rounded overflow-hidden" style={{ aspectRatio: '4 / 3' }}>
               <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted autoPlay />
               {/* Приціл: штрихкод має бути всередині смуги. */}
@@ -150,6 +193,11 @@ export function BarcodeScanButton({ onResult, label = 'Сканувати ТТН
               Штрихкод зчитується сам — тримайте його горизонтально в рамці, 15–20 см від камери.
               Номер (14 цифр) — натисніть «Зняти кадр» або «Сфотографувати номер ТТН».
             </p>
+            </>) : (
+              <p className="text-xs text-gray-500">
+                Знімок накладної: шукаємо штрихкод, а якщо він не читається — цифри номера (14 цифр).
+              </p>
+            )}
             {busy && (
               <p className="text-xs text-blue-700">
                 {stage === 'ocr' ? 'Розпізнаю цифри номера… (уперше — до півхвилини)' : 'Шукаю штрихкод на фото…'}
@@ -158,9 +206,16 @@ export function BarcodeScanButton({ onResult, label = 'Сканувати ТТН
             {hint && !error && !busy && <p className="text-xs text-amber-700">{hint}</p>}
             {error && <p className="text-xs text-red-600">{error}</p>}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <button type="button" onClick={captureFrame} disabled={busy} className="inline-flex items-center gap-1.5 text-sm text-blue-700 disabled:opacity-50">
-                📸 Зняти кадр
-              </button>
+              {mode === 'live' ? (
+                <button type="button" onClick={captureFrame} disabled={busy} className="inline-flex items-center gap-1.5 text-sm text-blue-700 disabled:opacity-50">
+                  📸 Зняти кадр
+                </button>
+              ) : (
+                // Запасний варіант — живе сканування (на iPhone браузер спитає дозвіл камери).
+                <button type="button" onClick={() => { setError(''); setHint(''); setMode('live'); }} disabled={busy} className="inline-flex items-center gap-1.5 text-sm text-blue-700 disabled:opacity-50">
+                  🎥 Камера наживо
+                </button>
+              )}
               <label className={`inline-flex items-center gap-1.5 text-sm text-blue-700 ${busy ? 'opacity-50' : 'cursor-pointer'}`}>
                 <Camera className="w-4 h-4" /> Сфотографувати номер ТТН
                 <input

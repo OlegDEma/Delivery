@@ -74,6 +74,8 @@ export const createParcelSchema = z.object({
   doorstepDelivery: z.boolean().optional(),
   /** «Пакет» — money sender transfers to receiver. Optional. */
   parcelMoneyAmount: moneySchema.optional().nullable(),
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR). */
+  npSurcharge: moneySchema.optional().nullable(),
   sendInvoice: z.boolean().optional(),
   /** Phone of the payer to send invoice SMS to (defaults to payer's stored phone). */
   invoicePhone: phoneSchema.optional(),
@@ -185,6 +187,8 @@ export const updateParcelSchema = z.object({
   doorstepDelivery: z.boolean().optional(),
   /** «Пакет» — money sender transfers. Setting to 0/null clears the option. */
   parcelMoneyAmount: moneySchema.optional().nullable(),
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR); 0/null — без доплати. */
+  npSurcharge: moneySchema.optional().nullable(),
   payer: payerSchema.optional(),
   paymentMethod: paymentMethodSchema.optional(),
   paymentInUkraine: z.boolean().optional(),
@@ -237,6 +241,8 @@ export const calculateCostSchema = z.object({
   isBothDirections: z.boolean().optional(),
   /** «Пакет» — amount of cash sender transfers. */
   parcelMoneyAmount: moneySchema.optional(),
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR). */
+  npSurcharge: moneySchema.optional(),
   /** Населений пункт Отримувача — для Львів-винятку §49/§50. */
   receiverCity: z.string().trim().max(200).optional().nullable(),
 });

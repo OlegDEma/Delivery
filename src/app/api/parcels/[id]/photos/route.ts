@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireStaff } from '@/lib/auth/guards';
 import { isUuid } from '@/lib/validators/common';
 import { uploadParcelPhoto, ParcelPhotoError } from '@/lib/services/parcel-photos';
+import { lockIfParcelTripCompleted } from '@/lib/trips/completed-lock';
 
 // POST /api/parcels/[id]/photos — upload photo (Працівник). Клієнт — /api/client-portal/orders/[id]/photos.
 export async function POST(
@@ -17,6 +18,9 @@ export async function POST(
 
   const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null }, select: { id: true } });
   if (!parcel) return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  const locked = await lockIfParcelTripCompleted(id);
+  if (locked) return locked;
 
   const formData = await request.formData();
   const file = formData.get('file');

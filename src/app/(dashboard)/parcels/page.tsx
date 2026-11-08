@@ -22,6 +22,7 @@ import { ListSkeleton } from '@/components/shared/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CreateParcelButton } from '@/components/parcels/create-parcel-button';
 
 interface ParcelListItem {
   id: string;
@@ -279,9 +280,8 @@ function ParcelsContent() {
           >
             <Button variant="outline" size="sm">Експорт Excel</Button>
           </a>
-          <Link href="/parcels/new">
-            <Button>+ Створити</Button>
-          </Link>
+          {/* ТЗ docx 04.11.26 (п.4): уніфікована чорна кнопка «Створити». */}
+          <CreateParcelButton />
         </div>
       </div>
 
@@ -424,7 +424,7 @@ function ParcelsContent() {
             <div className="text-center py-8 text-gray-500">{searchError || 'Нічого не знайдено'}</div>
           </div>
         ) : (
-          <EmptyState title="Ще немає посилок" actionLabel="Створити посилку" actionHref="/parcels/new" />
+          <EmptyState title="Ще немає посилок" action={<CreateParcelButton />} />
         )
       ) : (
         <>
@@ -459,7 +459,7 @@ function ParcelsContent() {
                               (див. бейдж рейсу нижче). */}
                           <span className="font-mono text-sm font-medium">{formatItn(p.itn)}</span>
                           <Badge className={`text-xs whitespace-normal text-left h-auto py-0.5 ${STATUS_COLORS[p.status]}`}>
-                            {statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
+                            {statusLabel(p.status, { tripCountry: p.trip?.country, destCountry: p.receiverAddress?.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
                           </Badge>
                           {/* ТЗ docx 03.10.26 (п.4): «Після введення ТТН Клієнтом він
                               повинен відображатись … і тут у будь-якого працівника» —

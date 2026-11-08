@@ -42,6 +42,7 @@ export type ParcelAvgAggregateOutputType = {
   pickupPointCost: runtime.Decimal | null
   parcelMoneyAmount: runtime.Decimal | null
   parcelMoneyCost: runtime.Decimal | null
+  npSurcharge: runtime.Decimal | null
   totalCost: runtime.Decimal | null
 }
 
@@ -61,6 +62,7 @@ export type ParcelSumAggregateOutputType = {
   pickupPointCost: runtime.Decimal | null
   parcelMoneyAmount: runtime.Decimal | null
   parcelMoneyCost: runtime.Decimal | null
+  npSurcharge: runtime.Decimal | null
   totalCost: runtime.Decimal | null
 }
 
@@ -100,6 +102,7 @@ export type ParcelMinAggregateOutputType = {
   isMultiParcelPickup: boolean | null
   parcelMoneyAmount: runtime.Decimal | null
   parcelMoneyCost: runtime.Decimal | null
+  npSurcharge: runtime.Decimal | null
   totalCost: runtime.Decimal | null
   costCurrency: string | null
   npTtn: string | null
@@ -165,6 +168,7 @@ export type ParcelMaxAggregateOutputType = {
   isMultiParcelPickup: boolean | null
   parcelMoneyAmount: runtime.Decimal | null
   parcelMoneyCost: runtime.Decimal | null
+  npSurcharge: runtime.Decimal | null
   totalCost: runtime.Decimal | null
   costCurrency: string | null
   npTtn: string | null
@@ -232,6 +236,7 @@ export type ParcelCountAggregateOutputType = {
   isMultiParcelPickup: number
   parcelMoneyAmount: number
   parcelMoneyCost: number
+  npSurcharge: number
   totalCost: number
   costCurrency: number
   npTtn: number
@@ -280,6 +285,7 @@ export type ParcelAvgAggregateInputType = {
   pickupPointCost?: true
   parcelMoneyAmount?: true
   parcelMoneyCost?: true
+  npSurcharge?: true
   totalCost?: true
 }
 
@@ -299,6 +305,7 @@ export type ParcelSumAggregateInputType = {
   pickupPointCost?: true
   parcelMoneyAmount?: true
   parcelMoneyCost?: true
+  npSurcharge?: true
   totalCost?: true
 }
 
@@ -338,6 +345,7 @@ export type ParcelMinAggregateInputType = {
   isMultiParcelPickup?: true
   parcelMoneyAmount?: true
   parcelMoneyCost?: true
+  npSurcharge?: true
   totalCost?: true
   costCurrency?: true
   npTtn?: true
@@ -403,6 +411,7 @@ export type ParcelMaxAggregateInputType = {
   isMultiParcelPickup?: true
   parcelMoneyAmount?: true
   parcelMoneyCost?: true
+  npSurcharge?: true
   totalCost?: true
   costCurrency?: true
   npTtn?: true
@@ -470,6 +479,7 @@ export type ParcelCountAggregateInputType = {
   isMultiParcelPickup?: true
   parcelMoneyAmount?: true
   parcelMoneyCost?: true
+  npSurcharge?: true
   totalCost?: true
   costCurrency?: true
   npTtn?: true
@@ -625,6 +635,7 @@ export type ParcelGroupByOutputType = {
   isMultiParcelPickup: boolean | null
   parcelMoneyAmount: runtime.Decimal | null
   parcelMoneyCost: runtime.Decimal | null
+  npSurcharge: runtime.Decimal | null
   totalCost: runtime.Decimal | null
   costCurrency: string
   npTtn: string | null
@@ -716,6 +727,7 @@ export type ParcelWhereInput = {
   isMultiParcelPickup?: Prisma.BoolNullableFilter<"Parcel"> | boolean | null
   parcelMoneyAmount?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableFilter<"Parcel"> | string | null
@@ -802,6 +814,7 @@ export type ParcelOrderByWithRelationInput = {
   isMultiParcelPickup?: Prisma.SortOrderInput | Prisma.SortOrder
   parcelMoneyAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   parcelMoneyCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  npSurcharge?: Prisma.SortOrderInput | Prisma.SortOrder
   totalCost?: Prisma.SortOrderInput | Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -891,6 +904,7 @@ export type ParcelWhereUniqueInput = Prisma.AtLeast<{
   isMultiParcelPickup?: Prisma.BoolNullableFilter<"Parcel"> | boolean | null
   parcelMoneyAmount?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableFilter<"Parcel"> | string | null
@@ -977,6 +991,7 @@ export type ParcelOrderByWithAggregationInput = {
   isMultiParcelPickup?: Prisma.SortOrderInput | Prisma.SortOrder
   parcelMoneyAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   parcelMoneyCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  npSurcharge?: Prisma.SortOrderInput | Prisma.SortOrder
   totalCost?: Prisma.SortOrderInput | Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -1053,6 +1068,7 @@ export type ParcelScalarWhereWithAggregatesInput = {
   isMultiParcelPickup?: Prisma.BoolNullableWithAggregatesFilter<"Parcel"> | boolean | null
   parcelMoneyAmount?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.DecimalNullableWithAggregatesFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringWithAggregatesFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableWithAggregatesFilter<"Parcel"> | string | null
@@ -1116,6 +1132,7 @@ export type ParcelCreateInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -1198,6 +1215,7 @@ export type ParcelUncheckedCreateInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -1270,6 +1288,7 @@ export type ParcelUpdateInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1352,6 +1371,7 @@ export type ParcelUncheckedUpdateInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1429,6 +1449,7 @@ export type ParcelCreateManyInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -1492,6 +1513,7 @@ export type ParcelUpdateManyMutationInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1556,6 +1578,7 @@ export type ParcelUncheckedUpdateManyInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1642,6 +1665,7 @@ export type ParcelCountOrderByAggregateInput = {
   isMultiParcelPickup?: Prisma.SortOrder
   parcelMoneyAmount?: Prisma.SortOrder
   parcelMoneyCost?: Prisma.SortOrder
+  npSurcharge?: Prisma.SortOrder
   totalCost?: Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrder
@@ -1688,6 +1712,7 @@ export type ParcelAvgOrderByAggregateInput = {
   pickupPointCost?: Prisma.SortOrder
   parcelMoneyAmount?: Prisma.SortOrder
   parcelMoneyCost?: Prisma.SortOrder
+  npSurcharge?: Prisma.SortOrder
   totalCost?: Prisma.SortOrder
 }
 
@@ -1727,6 +1752,7 @@ export type ParcelMaxOrderByAggregateInput = {
   isMultiParcelPickup?: Prisma.SortOrder
   parcelMoneyAmount?: Prisma.SortOrder
   parcelMoneyCost?: Prisma.SortOrder
+  npSurcharge?: Prisma.SortOrder
   totalCost?: Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrder
@@ -1792,6 +1818,7 @@ export type ParcelMinOrderByAggregateInput = {
   isMultiParcelPickup?: Prisma.SortOrder
   parcelMoneyAmount?: Prisma.SortOrder
   parcelMoneyCost?: Prisma.SortOrder
+  npSurcharge?: Prisma.SortOrder
   totalCost?: Prisma.SortOrder
   costCurrency?: Prisma.SortOrder
   npTtn?: Prisma.SortOrder
@@ -1837,6 +1864,7 @@ export type ParcelSumOrderByAggregateInput = {
   pickupPointCost?: Prisma.SortOrder
   parcelMoneyAmount?: Prisma.SortOrder
   parcelMoneyCost?: Prisma.SortOrder
+  npSurcharge?: Prisma.SortOrder
   totalCost?: Prisma.SortOrder
 }
 
@@ -2432,6 +2460,7 @@ export type ParcelCreateWithoutAssignedCourierInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2513,6 +2542,7 @@ export type ParcelUncheckedCreateWithoutAssignedCourierInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2594,6 +2624,7 @@ export type ParcelCreateWithoutCreatedByInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2675,6 +2706,7 @@ export type ParcelUncheckedCreateWithoutCreatedByInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2756,6 +2788,7 @@ export type ParcelCreateWithoutCollectedByInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2837,6 +2870,7 @@ export type ParcelUncheckedCreateWithoutCollectedByInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -2942,6 +2976,7 @@ export type ParcelScalarWhereInput = {
   isMultiParcelPickup?: Prisma.BoolNullableFilter<"Parcel"> | boolean | null
   parcelMoneyAmount?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.DecimalNullableFilter<"Parcel"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFilter<"Parcel"> | string
   npTtn?: Prisma.StringNullableFilter<"Parcel"> | string | null
@@ -3037,6 +3072,7 @@ export type ParcelCreateWithoutSenderInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3117,6 +3153,7 @@ export type ParcelUncheckedCreateWithoutSenderInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3199,6 +3236,7 @@ export type ParcelCreateWithoutReceiverInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3279,6 +3317,7 @@ export type ParcelUncheckedCreateWithoutReceiverInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3393,6 +3432,7 @@ export type ParcelCreateWithoutSenderAddressInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3473,6 +3513,7 @@ export type ParcelUncheckedCreateWithoutSenderAddressInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3555,6 +3596,7 @@ export type ParcelCreateWithoutReceiverAddressInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3635,6 +3677,7 @@ export type ParcelUncheckedCreateWithoutReceiverAddressInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3749,6 +3792,7 @@ export type ParcelCreateWithoutTripInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3829,6 +3873,7 @@ export type ParcelUncheckedCreateWithoutTripInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -3927,6 +3972,7 @@ export type ParcelCreateWithoutTransfersInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4008,6 +4054,7 @@ export type ParcelUncheckedCreateWithoutTransfersInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4095,6 +4142,7 @@ export type ParcelUpdateWithoutTransfersInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4176,6 +4224,7 @@ export type ParcelUncheckedUpdateWithoutTransfersInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4247,6 +4296,7 @@ export type ParcelCreateWithoutPlacesInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4328,6 +4378,7 @@ export type ParcelUncheckedCreateWithoutPlacesInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4415,6 +4466,7 @@ export type ParcelUpdateWithoutPlacesInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4496,6 +4548,7 @@ export type ParcelUncheckedUpdateWithoutPlacesInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4567,6 +4620,7 @@ export type ParcelCreateWithoutStatusHistoryInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4648,6 +4702,7 @@ export type ParcelUncheckedCreateWithoutStatusHistoryInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4735,6 +4790,7 @@ export type ParcelUpdateWithoutStatusHistoryInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4816,6 +4872,7 @@ export type ParcelUncheckedUpdateWithoutStatusHistoryInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4887,6 +4944,7 @@ export type ParcelCreateWithoutCollectionPointInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -4968,6 +5026,7 @@ export type ParcelUncheckedCreateWithoutCollectionPointInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5065,6 +5124,7 @@ export type ParcelCreateWithoutCashEntriesInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5146,6 +5206,7 @@ export type ParcelUncheckedCreateWithoutCashEntriesInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5233,6 +5294,7 @@ export type ParcelUpdateWithoutCashEntriesInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5314,6 +5376,7 @@ export type ParcelUncheckedUpdateWithoutCashEntriesInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5385,6 +5448,7 @@ export type ParcelCreateWithoutRouteTasksInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5466,6 +5530,7 @@ export type ParcelUncheckedCreateWithoutRouteTasksInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5542,6 +5607,7 @@ export type ParcelCreateWithoutCreatedFromTasksInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5623,6 +5689,7 @@ export type ParcelUncheckedCreateWithoutCreatedFromTasksInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -5710,6 +5777,7 @@ export type ParcelUpdateWithoutRouteTasksInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5791,6 +5859,7 @@ export type ParcelUncheckedUpdateWithoutRouteTasksInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5873,6 +5942,7 @@ export type ParcelUpdateWithoutCreatedFromTasksInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5954,6 +6024,7 @@ export type ParcelUncheckedUpdateWithoutCreatedFromTasksInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6025,6 +6096,7 @@ export type ParcelCreateWithoutWarehouseActionsInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -6106,6 +6178,7 @@ export type ParcelUncheckedCreateWithoutWarehouseActionsInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -6193,6 +6266,7 @@ export type ParcelUpdateWithoutWarehouseActionsInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6274,6 +6348,7 @@ export type ParcelUncheckedUpdateWithoutWarehouseActionsInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6345,6 +6420,7 @@ export type ParcelCreateWithoutNpSyncLogsInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -6426,6 +6502,7 @@ export type ParcelUncheckedCreateWithoutNpSyncLogsInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -6513,6 +6590,7 @@ export type ParcelUpdateWithoutNpSyncLogsInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6594,6 +6672,7 @@ export type ParcelUncheckedUpdateWithoutNpSyncLogsInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6665,6 +6744,7 @@ export type ParcelCreateWithoutClaimsInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -6746,6 +6826,7 @@ export type ParcelUncheckedCreateWithoutClaimsInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -6833,6 +6914,7 @@ export type ParcelUpdateWithoutClaimsInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6914,6 +6996,7 @@ export type ParcelUncheckedUpdateWithoutClaimsInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6990,6 +7073,7 @@ export type ParcelCreateManyAssignedCourierInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -7057,6 +7141,7 @@ export type ParcelCreateManyCreatedByInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -7124,6 +7209,7 @@ export type ParcelCreateManyCollectedByInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -7186,6 +7272,7 @@ export type ParcelUpdateWithoutAssignedCourierInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7267,6 +7354,7 @@ export type ParcelUncheckedUpdateWithoutAssignedCourierInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7343,6 +7431,7 @@ export type ParcelUncheckedUpdateManyWithoutAssignedCourierInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7405,6 +7494,7 @@ export type ParcelUpdateWithoutCreatedByInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7486,6 +7576,7 @@ export type ParcelUncheckedUpdateWithoutCreatedByInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7562,6 +7653,7 @@ export type ParcelUncheckedUpdateManyWithoutCreatedByInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7624,6 +7716,7 @@ export type ParcelUpdateWithoutCollectedByInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7705,6 +7798,7 @@ export type ParcelUncheckedUpdateWithoutCollectedByInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7781,6 +7875,7 @@ export type ParcelUncheckedUpdateManyWithoutCollectedByInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7847,6 +7942,7 @@ export type ParcelCreateManySenderInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -7914,6 +8010,7 @@ export type ParcelCreateManyReceiverInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -7977,6 +8074,7 @@ export type ParcelUpdateWithoutSenderInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8057,6 +8155,7 @@ export type ParcelUncheckedUpdateWithoutSenderInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8133,6 +8232,7 @@ export type ParcelUncheckedUpdateManyWithoutSenderInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8196,6 +8296,7 @@ export type ParcelUpdateWithoutReceiverInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8276,6 +8377,7 @@ export type ParcelUncheckedUpdateWithoutReceiverInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8352,6 +8454,7 @@ export type ParcelUncheckedUpdateManyWithoutReceiverInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8419,6 +8522,7 @@ export type ParcelCreateManySenderAddressInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -8486,6 +8590,7 @@ export type ParcelCreateManyReceiverAddressInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -8549,6 +8654,7 @@ export type ParcelUpdateWithoutSenderAddressInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8629,6 +8735,7 @@ export type ParcelUncheckedUpdateWithoutSenderAddressInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8705,6 +8812,7 @@ export type ParcelUncheckedUpdateManyWithoutSenderAddressInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8768,6 +8876,7 @@ export type ParcelUpdateWithoutReceiverAddressInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8848,6 +8957,7 @@ export type ParcelUncheckedUpdateWithoutReceiverAddressInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8924,6 +9034,7 @@ export type ParcelUncheckedUpdateManyWithoutReceiverAddressInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8991,6 +9102,7 @@ export type ParcelCreateManyTripInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -9054,6 +9166,7 @@ export type ParcelUpdateWithoutTripInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9134,6 +9247,7 @@ export type ParcelUncheckedUpdateWithoutTripInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9210,6 +9324,7 @@ export type ParcelUncheckedUpdateManyWithoutTripInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9278,6 +9393,7 @@ export type ParcelCreateManyCollectionPointInput = {
   isMultiParcelPickup?: boolean | null
   parcelMoneyAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: string
   npTtn?: string | null
@@ -9340,6 +9456,7 @@ export type ParcelUpdateWithoutCollectionPointInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9421,6 +9538,7 @@ export type ParcelUncheckedUpdateWithoutCollectionPointInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9497,6 +9615,7 @@ export type ParcelUncheckedUpdateManyWithoutCollectionPointInput = {
   isMultiParcelPickup?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   parcelMoneyAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   parcelMoneyCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  npSurcharge?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   totalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costCurrency?: Prisma.StringFieldUpdateOperationsInput | string
   npTtn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9667,6 +9786,7 @@ export type ParcelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   isMultiParcelPickup?: boolean
   parcelMoneyAmount?: boolean
   parcelMoneyCost?: boolean
+  npSurcharge?: boolean
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
@@ -9754,6 +9874,7 @@ export type ParcelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   isMultiParcelPickup?: boolean
   parcelMoneyAmount?: boolean
   parcelMoneyCost?: boolean
+  npSurcharge?: boolean
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
@@ -9831,6 +9952,7 @@ export type ParcelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   isMultiParcelPickup?: boolean
   parcelMoneyAmount?: boolean
   parcelMoneyCost?: boolean
+  npSurcharge?: boolean
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
@@ -9908,6 +10030,7 @@ export type ParcelSelectScalar = {
   isMultiParcelPickup?: boolean
   parcelMoneyAmount?: boolean
   parcelMoneyCost?: boolean
+  npSurcharge?: boolean
   totalCost?: boolean
   costCurrency?: boolean
   npTtn?: boolean
@@ -9938,7 +10061,7 @@ export type ParcelSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "itnLegacy" | "internalNumber" | "sequentialNumber" | "shortNumber" | "journeyNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "senderSnapshot" | "receiverSnapshot" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "doorstepDelivery" | "deliveryCost" | "packagingCost" | "doorstepCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "isMultiParcelPickup" | "parcelMoneyAmount" | "parcelMoneyCost" | "totalCost" | "costCurrency" | "npTtn" | "clientNote" | "listNote" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
+export type ParcelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "itn" | "itnLegacy" | "internalNumber" | "sequentialNumber" | "shortNumber" | "journeyNumber" | "direction" | "senderId" | "senderAddressId" | "receiverId" | "receiverAddressId" | "senderSnapshot" | "receiverSnapshot" | "tripId" | "shipmentType" | "description" | "declaredValue" | "declaredValueCurrency" | "totalWeight" | "totalVolumetricWeight" | "totalPlacesCount" | "payer" | "paymentMethod" | "paymentInUkraine" | "needsPackaging" | "doorstepDelivery" | "deliveryCost" | "packagingCost" | "doorstepCost" | "insuranceCost" | "insuranceApplied" | "addressDeliveryCost" | "pickupPointCost" | "isMultiParcelPickup" | "parcelMoneyAmount" | "parcelMoneyCost" | "npSurcharge" | "totalCost" | "costCurrency" | "npTtn" | "clientNote" | "listNote" | "npTrackingStatus" | "status" | "createdSource" | "createdById" | "assignedCourierId" | "estimatedDeliveryStart" | "estimatedDeliveryEnd" | "isPaid" | "paidAt" | "invoiceSentToPayerAt" | "photos" | "collectionMethod" | "collectionPointId" | "collectionDate" | "collectionAddress" | "collectedAt" | "collectedById" | "routeTaskStatus" | "routeTaskFailReason" | "routeTaskReschedDate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["parcel"]>
 export type ParcelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sender?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   senderAddress?: boolean | Prisma.Parcel$senderAddressArgs<ExtArgs>
@@ -10088,6 +10211,10 @@ export type $ParcelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
      * Calculated fee = parcelMoneyAmount × parcelMoneyPercent / 100.
      */
     parcelMoneyCost: runtime.Decimal | null
+    /**
+     * ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR) — додається до загальної вартості.
+     */
+    npSurcharge: runtime.Decimal | null
     totalCost: runtime.Decimal | null
     costCurrency: string
     npTtn: string | null
@@ -10606,6 +10733,7 @@ export interface ParcelFieldRefs {
   readonly isMultiParcelPickup: Prisma.FieldRef<"Parcel", 'Boolean'>
   readonly parcelMoneyAmount: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly parcelMoneyCost: Prisma.FieldRef<"Parcel", 'Decimal'>
+  readonly npSurcharge: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly totalCost: Prisma.FieldRef<"Parcel", 'Decimal'>
   readonly costCurrency: Prisma.FieldRef<"Parcel", 'String'>
   readonly npTtn: Prisma.FieldRef<"Parcel", 'String'>

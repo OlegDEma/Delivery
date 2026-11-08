@@ -14,18 +14,19 @@ import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { tripRouteLabel } from '@/lib/constants/countries';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { statusLabel } from '@/lib/parcels/status-label';
-import { formatDateWithWeekday, formatWeight } from '@/lib/utils/format';
+import { formatWeight } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { euSideParty, euAddressLine } from '@/lib/parcels/eu-side';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
-import { formatJourneyNumber } from '@/lib/utils/journey-number';
+import { formatJourneyNumber, formatLocalNumber } from '@/lib/utils/journey-number';
+import { CreateParcelButton } from '@/components/parcels/create-parcel-button';
 import { formatDate } from '@/lib/utils/format';
 import { displayParcelNumber, withoutOrdinal } from '@/lib/parcels/display-number';
 // ТЗ docx 12.10.26: телефони завжди з кодом країни.
 import { withCountryCode } from '@/lib/utils/phone';
-import { orderTripItems, TRIP_GROUP_MODES, type TripGroupMode } from '@/lib/parcels/trip-grouping';
+import { orderTripItems, leadOfRecord, TRIP_GROUP_MODES, type TripGroupMode } from '@/lib/parcels/trip-grouping';
 
 const TRIP_STATUSES: Record<string, { label: string; color: string }> = {
   planned: { label: 'Заплановано', color: 'bg-blue-100 text-blue-800' },
@@ -207,7 +208,10 @@ export default function TripDetailPage() {
           top-14 — під мобільною панеллю, на десктопі — top-0. Відʼємні відступи +
           фон перекривають вміст, що прокручується під шапкою. */}
       <div className="sticky top-14 md:top-0 z-20 bg-gray-50 -mx-4 px-4 md:-mx-6 md:px-6 pt-2 pb-3 border-b print:static">
-      <Breadcrumbs items={[{label: 'Рейси', href: '/trips'}, {label: 'Деталі рейсу'}]} />
+      {/* ТЗ docx 03.11.26 (Рейси, п.1): рядок «Відправлення … | Прибуття … | водій» прибрано —
+          щоб рейс не лишився зовсім без дати, вона стоїть у шляху замість «Деталі рейсу»
+          (той самий підпис «05.11.2026(AT)», що й у шляху сторінки посилки). */}
+      <Breadcrumbs items={[{label: 'Рейси', href: '/trips'}, {label: `${formatDate(trip.departureDate)}(${trip.country})`}]} />
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-1">
@@ -218,32 +222,20 @@ export default function TripDetailPage() {
             {TRIP_STATUSES[trip.status]?.label || trip.status}
           </Badge>
         </div>
-        <div className="text-sm text-gray-500">
-          {/* ТЗ docx 01.07.26: поруч з датами відправлення/прибуття — день тижня. */}
-          Відправлення: {formatDateWithWeekday(trip.departureDate)}
-          {trip.arrivalDate && ` | Прибуття: ${formatDateWithWeekday(trip.arrivalDate)}`}
-          {/* ТЗ docx 23.08.26: показуємо ВСІХ водіїв рейсу (як у Поїздках), а не лише першого. */}
-          {(trip.assignedCourier || trip.secondCourier) && ` | 👤 ${
-            [trip.assignedCourier?.fullName, trip.secondCourier?.fullName].filter(Boolean).join(' + ')
-          }`}
-        </div>
         {trip.notes && <div className="text-sm text-gray-400 mt-1">{trip.notes}</div>}
         <div className="flex gap-2 mt-2 flex-wrap">
           {/* ТЗ docx 09.10.26 (п.1): посилка, створена з рейсу, одразу прив'язується до нього. */}
+          {/* ТЗ docx 04.11.26 (п.4): уніфікована чорна кнопка «Створити». */}
           {(trip.status === 'planned' || trip.status === 'in_progress') && (
-            <Link href={`/parcels/new?tripId=${trip.id}`}>
-              <Button size="sm">+ Створити посилку</Button>
-            </Link>
+            <CreateParcelButton href={`/parcels/new?tripId=${trip.id}`} />
           )}
           {/* ТЗ docx 11.10.26 (п.2): друк списку посилок рейсу (A4). */}
           {/* ТЗ docx 26.10.26: список для друку — відповідно до вибраного групування. */}
           <Button variant="outline" size="sm" onClick={() => window.open(`/trips/${id}/print?group=${groupMode}`, '_blank')}>
             🖨 Друк списку посилок
           </Button>
-          {/* ТЗ docx 12.10.26: перехід до пасажирів рейсу (і назад — кнопкою на їхній сторінці). */}
-          <Link href={`/passengers?tripId=${trip.id}`}>
-            <Button variant="outline" size="sm">🧍 Пасажири ({trip.passengers.length})</Button>
-          </Link>
+          {/* ТЗ docx 03.11.26 (Рейси, п.3): кнопку «Пасажири (N)» з шапки прибрано — на телефоні
+              вона давала зайвий рядок. До пасажирів — блок «Пасажири рейсу» нижче («Відкрити →»). */}
         </div>
       </div>
       </div>
@@ -505,12 +497,30 @@ export default function TripDetailPage() {
                     {/* ТЗ docx 11.10.26: номер у поїздці. ТЗ docx 12.10.26: номер є з моменту
                         прив'язки до рейсу (і в «Створеної»); старий порядковий номер прибрано.
                         «без №» лишається лише для рейсів поза поїздкою. */}
-                    {p.journeyNumber != null ? (
-                      <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono font-semibold shrink-0">{formatJourneyNumber(p.journeyNumber)}</span>
-                    ) : (
-                      <span className="text-[10px] text-gray-400 shrink-0 pt-0.5" title="Рейс не прив'язаний до поїздки — номер у поїздці не присвоюється">без №</span>
-                    )}
-                    <span className="text-sm text-gray-900 min-w-0 break-words">{euAddressLine(eu.address) || 'Адресу не вказано'}</span>
+                    {/* ТЗ docx 03.11.26 (Рейси, п.2): першим у рядку — те, за чим групуємо:
+                        «Номер» — локальний номер (з кількістю місць «106/3», п.3 «Посилка»),
+                        «Місто» — місто, «Індекс» — індекс. */}
+                    {(() => {
+                      const localNo = formatLocalNumber(p.journeyNumber, p.totalPlacesCount);
+                      const { lead, rest } = leadOfRecord(eu.address, groupMode, localNo);
+                      return (<>
+                        {groupMode === 'number' ? (
+                          localNo ? (
+                            <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono font-semibold shrink-0">{localNo}</span>
+                          ) : (
+                            <span className="text-[10px] text-gray-400 shrink-0 pt-0.5" title="Рейс не прив'язаний до поїздки — номер у поїздці не присвоюється">без №</span>
+                          )
+                        ) : lead ? (
+                          <span className="text-sm font-semibold text-gray-900 shrink-0">{lead}</span>
+                        ) : null}
+                        <span className="text-sm text-gray-900 min-w-0 break-words">
+                          {(groupMode === 'number' ? euAddressLine(eu.address) : rest) || (lead ? '' : 'Адресу не вказано')}
+                        </span>
+                        {groupMode !== 'number' && localNo && (
+                          <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono font-semibold shrink-0 ml-auto">{localNo}</span>
+                        )}
+                      </>);
+                    })()}
                   </div>
                   <div className="text-xs text-gray-900 mt-0.5">
                     <span className="font-medium">{eu.roleLabel}:</span>{' '}
@@ -523,7 +533,7 @@ export default function TripDetailPage() {
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
                     <span className="font-mono text-xs text-gray-500">{withoutOrdinal(p.internalNumber)}</span>
                     <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>
-                      {statusLabel(p.status, { createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
+                      {statusLabel(p.status, { tripCountry: trip.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}
                     </Badge>
                   </div>
                 </Link>
@@ -532,8 +542,9 @@ export default function TripDetailPage() {
                     <div>{p.totalWeight ? formatWeight(Number(p.totalWeight)) : '—'}</div>
                     <div className="text-xs text-gray-400">{p.totalPlacesCount} м.</div>
                   </div>
-                  {/* Прибрати посилку з рейсу може лише Суперадмін (як і керувати рейсом). */}
-                  {isSuperAdmin && (
+                  {/* Прибрати посилку з рейсу може лише Суперадмін (як і керувати рейсом).
+                      ТЗ docx 03.11.26 (п.3): у завершеному рейсі — ні. */}
+                  {isSuperAdmin && trip.status !== 'completed' && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -550,7 +561,7 @@ export default function TripDetailPage() {
             })}
             {rows.length === 0 && (
               <div className="text-center py-6 text-gray-500 text-sm">
-                Немає посилок. Створіть посилку кнопкою «+ Створити посилку» або прив&apos;яжіть через сторінку посилки.
+                Немає посилок. Створіть посилку кнопкою «Створити» або прив&apos;яжіть через сторінку посилки.
               </div>
             )}
           </div>

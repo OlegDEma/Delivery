@@ -425,6 +425,8 @@ export async function POST(request: NextRequest) {
       // у створеній посилці». Раніше `parcelMoneyAmount` парсився зі схеми,
       // але НЕ передавався в createParcel — посилка зберігалась без Пакета.
       parcelMoneyAmount: parsed.parcelMoneyAmount ?? null,
+      // ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR).
+      npSurcharge: parsed.npSurcharge ?? null,
       sendInvoice: parsed.sendInvoice,
       places: parsed.places,
       createdById: userId,

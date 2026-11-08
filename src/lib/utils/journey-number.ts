@@ -6,6 +6,16 @@ export function formatJourneyNumber(n: number | null | undefined): string {
 }
 
 /**
+ * ТЗ docx 03.11.26 (п.3): «Обов'язково в локальному номері відображати кількість місць
+ * в посилці, якщо їх більше як одне»: одне місце — «106», три місця — «106/3».
+ */
+export function formatLocalNumber(n: number | null | undefined, placesCount?: number | null): string {
+  if (n == null) return '';
+  const base = formatJourneyNumber(n);
+  return placesCount != null && placesCount > 1 ? `${base}/${placesCount}` : base;
+}
+
+/**
  * ТЗ docx 12.10.26 (відповідь клієнта в коментарі до дати 12.10.26): локальні номери в
  * межах однієї поїздки (тижня) — окремими діапазонами за напрямком, країною і містом:
  *   Україна→Нідерланди            001–100

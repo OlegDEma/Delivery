@@ -3,95 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-  Home, ScanLine, Package, Truck, Users,
-  Route, Calendar, Map, Warehouse, Bus,
-  Wallet, AlertCircle, BarChart3, FileText,
-  UserCog, Tags, MapPin,
-  Users2, ListChecks, Receipt,
-  Search, LogOut, ChevronDown,
-  type LucideIcon,
-} from 'lucide-react';
+import { Search, LogOut, ChevronDown } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/hooks/use-auth';
-import { ROLE_LABELS, type Role } from '@/lib/constants/roles';
+import { ROLE_LABELS } from '@/lib/constants/roles';
+import { NAV_GROUPS, goToSearch } from '@/components/layout/nav-config';
 import { cn } from '@/lib/utils';
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  roles?: Role[];
-}
-
-interface NavGroup {
-  title?: string;
-  items: NavItem[];
-  roles?: Role[];
-  /** If true, group starts collapsed (user clicks title to expand). */
-  collapsible?: boolean;
-}
-
-// Структура меню узгоджена за документом «Загальна схема програми»:
-// 5 груп — Головна / Замовлення / Логістика / Фінанси / Адміністрування.
-// «Претензії», «Доступні», «Замовлення клієнтів», «Пункти збору» в Admin
-// прибрані з меню (функціонал лишається доступним по URL/через фільтри).
-const NAV_GROUPS: NavGroup[] = [
-  {
-    items: [
-      { label: 'Головна', href: '/', icon: Home },
-      { label: 'Сканер QR', href: '/scan', icon: ScanLine, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
-    ],
-  },
-  {
-    title: 'Замовлення',
-    items: [
-      { label: 'Посилки', href: '/parcels', icon: Package, roles: ['super_admin', 'admin', 'cashier', 'warehouse_worker'] },
-      { label: 'Мої посилки', href: '/my-parcels', icon: Truck, roles: ['driver_courier'] },
-      { label: 'Пасажири', href: '/passengers', icon: Users2, roles: ['super_admin', 'admin', 'driver_courier'] },
-    ],
-  },
-  {
-    title: 'Логістика',
-    roles: ['super_admin', 'admin', 'driver_courier', 'warehouse_worker'],
-    items: [
-      { label: 'Поїздки', href: '/journeys', icon: Route, roles: ['super_admin', 'admin', 'driver_courier'] },
-      { label: 'Рейси', href: '/trips', icon: Truck, roles: ['super_admin', 'admin', 'driver_courier'] },
-      { label: 'Маршрути', href: '/routes', icon: Map, roles: ['super_admin', 'admin', 'driver_courier'] },
-      { label: 'Пункти збору', href: '/collection-points', icon: MapPin, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
-      { label: 'Календар', href: '/calendar', icon: Calendar, roles: ['super_admin', 'admin', 'warehouse_worker', 'driver_courier'] },
-      { label: 'Склад', href: '/warehouse', icon: Warehouse, roles: ['super_admin', 'admin', 'warehouse_worker'] },
-      // ТЗ docx 08.08.26: вкладка «Транспортні засоби» у Логістиці (Суперадмін).
-      { label: 'Транспортні засоби', href: '/admin/vehicles', icon: Bus, roles: ['super_admin'] },
-    ],
-  },
-  {
-    title: 'Фінанси',
-    collapsible: true,
-    roles: ['super_admin', 'admin', 'cashier'],
-    items: [
-      { label: 'Каса', href: '/cash-register', icon: Wallet },
-      { label: 'Борги', href: '/debts', icon: AlertCircle },
-      { label: 'Звіти', href: '/reports', icon: FileText },
-      { label: 'Аналітика', href: '/analytics', icon: BarChart3, roles: ['super_admin', 'admin'] },
-    ],
-  },
-  {
-    title: 'Адміністрування',
-    collapsible: true,
-    roles: ['super_admin', 'admin'],
-    items: [
-      { label: 'Користувачі', href: '/admin/users', icon: UserCog, roles: ['super_admin'] },
-      // ТЗ docx 08.08.26: «Клієнти» перенесено з розділу «Замовлення» в «Адміністрування».
-      { label: 'Клієнти', href: '/clients', icon: Users, roles: ['super_admin', 'admin', 'cashier'] },
-      { label: 'Тарифи', href: '/admin/pricing', icon: Tags },
-      { label: 'Міста обслуговування', href: '/admin/service-cities', icon: MapPin, roles: ['super_admin', 'admin'] },
-      { label: 'Реквізити рахунка', href: '/admin/invoice-settings', icon: Receipt, roles: ['super_admin', 'admin'] },
-      { label: 'Статуси', href: '/admin/statuses', icon: ListChecks, roles: ['super_admin', 'admin'] },
-    ],
-  },
-];
-
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?';
@@ -147,10 +64,7 @@ export function Sidebar() {
             placeholder="Пошук посилок, клієнтів..."
             className="w-full pl-8 pr-2 py-1.5 text-sm border border-gray-200 rounded-md bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all placeholder:text-gray-400"
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                const val = (e.target as HTMLInputElement).value.trim();
-                if (val) window.location.href = `/search?q=${encodeURIComponent(val)}`;
-              }
+              if (e.key === 'Enter') goToSearch((e.target as HTMLInputElement).value);
             }}
           />
         </div>

@@ -18,6 +18,7 @@ import { euSideParty, euAddressLine } from '@/lib/parcels/eu-side';
 import { withCountryCode } from '@/lib/utils/phone';
 import { displayParcelNumber } from '@/lib/parcels/display-number';
 import { rememberOpenedParcel, useReturnToParcel, readListState, saveListState } from '@/lib/hooks/use-return-to-parcel';
+import { CreateParcelButton } from '@/components/parcels/create-parcel-button';
 
 // ТЗ docx 04.10.26: повернення до відкритої посилки + збережений стан списку.
 const RETURN_KEY = 'myParcels:lastOpened';
@@ -167,7 +168,8 @@ export default function MyParcelsPage() {
           <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
             Фільтри {showFilters ? '▲' : '▼'}
           </Button>
-          <Link href="/parcels/new"><Button>+ Створити</Button></Link>
+          {/* ТЗ docx 04.11.26 (п.4): уніфікована чорна кнопка «Створити». */}
+          <CreateParcelButton />
         </div>
       </div>
 
@@ -265,7 +267,7 @@ export default function MyParcelsPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-mono text-sm font-medium">{displayParcelNumber(p.internalNumber, p.journeyNumber)}</span>
-                    <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { tripCountry: p.trip?.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}</Badge>
+                    <Badge className={`text-xs ${STATUS_COLORS[p.status]}`}>{statusLabel(p.status, { tripCountry: p.trip?.country, destCountry: p.receiverAddress?.country, direction: p.direction, createdSource: p.createdSource, createdByRole: p.createdBy?.role })}</Badge>
                     {!p.isPaid && p.totalCost && <Badge variant="destructive" className="text-xs">Не оплачено</Badge>}
                   </div>
                   {/* ТЗ docx 15.10.26: у списках посилок поїздки — сторона й адреса в країні

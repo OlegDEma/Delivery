@@ -463,6 +463,8 @@ model Parcel {
   parcelMoneyAmount     Decimal?      @map("parcel_money_amount") @db.Decimal(10, 2)
   /// Calculated fee = parcelMoneyAmount × parcelMoneyPercent / 100.
   parcelMoneyCost       Decimal?      @default(0) @map("parcel_money_cost") @db.Decimal(10, 2)
+  /// ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR) — додається до загальної вартості.
+  npSurcharge           Decimal?      @map("np_surcharge") @db.Decimal(10, 2)
   totalCost             Decimal?      @map("total_cost") @db.Decimal(10, 2)
   costCurrency          String        @default("EUR") @map("cost_currency")
   npTtn                 String?       @map("np_ttn")

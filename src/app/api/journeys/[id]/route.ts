@@ -5,6 +5,7 @@ import { LOGISTICS_ROLES, JOURNEY_TRIP_MUTATION_ROLES } from '@/lib/constants/ro
 import { isUuid } from '@/lib/validators/common';
 import { logger } from '@/lib/logger';
 import type { TripStatus } from '@/generated/prisma/enums';
+import { isTripCompleted, tripLockedResponse } from '@/lib/trips/completed-lock';
 
 // GET /api/journeys/[id] — full journey details with child trips & parcels
 export async function GET(
@@ -50,8 +51,13 @@ export async function PATCH(
   try { body = await request.json(); }
   catch { return NextResponse.json({ error: 'Очікується JSON body' }, { status: 400 }); }
 
-  const exists = await prisma.journey.findUnique({ where: { id }, select: { id: true } });
+  const exists = await prisma.journey.findUnique({ where: { id }, select: { id: true, trips: { select: { status: true } } } });
   if (!exists) return NextResponse.json({ error: 'Поїздку не знайдено' }, { status: 404 });
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  // Водії й транспорт поїздки — це водії й транспорт її рейсів.
+  if (Object.keys(body ?? {}).some((f) => f !== 'status') && exists.trips.some((t) => isTripCompleted(t.status))) {
+    return tripLockedResponse();
+  }
 
   // Date validation
   for (const field of ['departureDate', 'euArrivalDate', 'euReturnDate', 'endDate']) {

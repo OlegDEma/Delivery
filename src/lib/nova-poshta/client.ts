@@ -24,10 +24,12 @@ function getApiKey(): string {
 export async function npCall<T = unknown>(
   modelName: string,
   calledMethod: string,
-  methodProperties: Record<string, unknown> = {}
+  methodProperties: Record<string, unknown> = {},
+  /** Трекінг ТТН НП віддає і без ключа API — тоді ключ необовʼязковий. */
+  options: { keyOptional?: boolean } = {},
 ): Promise<NPResponse<T>> {
   const body: NPRequest = {
-    apiKey: getApiKey(),
+    apiKey: options.keyOptional ? (process.env.NP_API_KEY || '') : getApiKey(),
     modelName,
     calledMethod,
     methodProperties,
@@ -242,4 +244,89 @@ export async function trackDocuments(documentNumbers: string[]) {
   return npCall<NPTrackingInfo>('TrackingDocument', 'getStatusDocuments', {
     Documents: documentNumbers.map(n => ({ DocumentNumber: n })),
   });
+}
+
+// ============================================================
+// ТЗ docx 04.11.26 (п.6): дані Відправника з ТТН
+// ============================================================
+
+/**
+ * Телефон Отримувача, на який клієнти відправляють посилки до Європи (ФОП у Львові —
+ * той самий номер, що в інструкції «Відправка поштою»). Нова пошта віддає ПІБ і телефон
+ * сторін у getStatusDocuments лише тоді, коли в запиті вказано телефон відправника або
+ * отримувача цієї ТТН. Можна перевизначити змінною середовища NP_RECIPIENT_PHONE.
+ */
+const NP_RECIPIENT_PHONE = (process.env.NP_RECIPIENT_PHONE || '380673320502').replace(/\D/g, '');
+
+/** Поля getStatusDocuments, які потрібні для Відправника (решту відповіді ігноруємо). */
+interface NPStatusFull {
+  Number?: string;
+  StatusCode?: string;
+  Status?: string;
+  PhoneSender?: string;
+  SenderFullNameEW?: string;
+  SenderFullName?: string;
+  CounterpartySenderDescription?: string;
+  CitySender?: string;
+  WarehouseSender?: string;
+  SenderAddress?: string;
+}
+
+export interface NpTtnSender {
+  ttn: string;
+  phone: string | null;
+  lastName: string | null;
+  firstName: string | null;
+  middleName: string | null;
+  city: string | null;
+  warehouseNumber: string | null;
+  /** Текст відділення як у НП («Відділення №5 (до 30 кг): вул. …») — для показу. */
+  warehouseText: string | null;
+}
+
+/** «Відділення №5 (до 30 кг): …», «Пункт приймання-видачі №1234», «Поштомат №5678» → номер. */
+export function npWarehouseNumberFromText(text: string | null | undefined): string | null {
+  const m = /№\s*(\d+)/.exec(text ?? '');
+  return m ? m[1] : null;
+}
+
+/** «Шевченко Тарас Григорович» → прізвище / ім'я / по батькові (порядок як у НП). */
+export function splitNpFullName(full: string | null | undefined) {
+  const parts = (full ?? '').trim().split(/\s+/).filter(Boolean);
+  return {
+    lastName: parts[0] ?? null,
+    firstName: parts[1] ?? null,
+    middleName: parts.length > 2 ? parts.slice(2).join(' ') : null,
+  };
+}
+
+/**
+ * ТЗ docx 04.11.26 (п.6): «Ми скануємо номер ТТН і отримуємо по API з Нової пошти всі
+ * реквізити даної посилки. З цих реквізитів вибираються дані Відправника: номер
+ * телефону, прізвище, ім'я, місто відправлення, номер пошти».
+ *
+ * Повертає null, якщо ТТН у НП не знайдено. Кидає помилку, якщо НП недоступна.
+ */
+export async function getNpTtnSender(ttn: string): Promise<NpTtnSender | null> {
+  const number = ttn.replace(/\D/g, '');
+  // Трекінг працює і без ключа API (перевірено 08.11.26); ПІБ і телефон Відправника НП
+  // віддає саме тому, що в запиті — телефон отримувача цієї ТТН.
+  const res = await npCall<NPStatusFull>('TrackingDocument', 'getStatusDocuments', {
+    Documents: [{ DocumentNumber: number, Phone: NP_RECIPIENT_PHONE }],
+  }, { keyOptional: true });
+  const d = res.data?.[0];
+  // StatusCode 3 — «Номер не знайдено».
+  if (!res.success || !d || d.StatusCode === '3') return null;
+  const name = splitNpFullName(d.SenderFullNameEW || d.SenderFullName || d.CounterpartySenderDescription);
+  const phoneDigits = (d.PhoneSender ?? '').replace(/\D/g, '');
+  const warehouseText = d.WarehouseSender || d.SenderAddress || null;
+  return {
+    ttn: number,
+    phone: phoneDigits ? `+${phoneDigits.startsWith('380') ? phoneDigits : `38${phoneDigits}`}` : null,
+    ...name,
+    city: d.CitySender?.trim() || null,
+    // Окремого номера відділення відправника НП не віддає — беремо з «Відділення №5 …».
+    warehouseNumber: npWarehouseNumberFromText(warehouseText),
+    warehouseText,
+  };
 }

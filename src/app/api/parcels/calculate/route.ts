@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
       isBothDirections: body.isBothDirections ?? false,
       parcelMoneyAmount: body.parcelMoneyAmount ?? 0,
       receiverCity: body.receiverCity ?? null,
+      npSurcharge: body.npSurcharge ?? 0,
     }
   );
 

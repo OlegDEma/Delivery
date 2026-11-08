@@ -67,6 +67,8 @@ interface ParcelDetail {
   doorstepCost: number | null;
   parcelMoneyAmount: number | null;
   parcelMoneyCost: number | null;
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR). */
+  npSurcharge?: number | null;
   isPaid: boolean;
   paidAt: string | null;
   payer: string;
@@ -224,7 +226,7 @@ export default function MyOrderDetailPage() {
           </h1>
           <Badge className={STATUS_COLORS[parcel.status]}>
             {statusLabel(parcel.status, {
-              tripCountry: parcel.trip?.country, direction: parcel.direction,
+              tripCountry: parcel.trip?.country, destCountry: parcel.receiverAddress?.country, direction: parcel.direction,
               createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role,
             })}
           </Badge>
@@ -424,6 +426,8 @@ export default function MyOrderDetailPage() {
           packagingCost: parcel.packagingCost,
           doorstepCost: parcel.doorstepCost,
           parcelMoneyCost: parcel.parcelMoneyCost,
+          // ТЗ docx 04.11.26 (п.5): «Доплата за НП» — рядок у розбивці (сума вже в «Всього»).
+          npSurcharge: parcel.npSurcharge,
           totalCost: parcel.totalCost,
           // ТЗ docx 15.07.26 (п.3): weightType з тарифу → «Розрахункова вага»
           // рахується так само, як у staff (той самий getBillableWeight).
@@ -487,7 +491,7 @@ export default function MyOrderDetailPage() {
               <div key={i} className="text-sm">
                 <div className="font-medium">
                   {/* ТЗ docx 26.10.26: нотатка — окремий запис, статус вона не змінює. */}
-                  {h.isNote ? '📝 Нотатка' : statusLabel(h.status, { tripCountry: parcel.trip?.country, direction: parcel.direction, createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role })}
+                  {h.isNote ? '📝 Нотатка' : statusLabel(h.status, { tripCountry: parcel.trip?.country, destCountry: parcel.receiverAddress?.country, direction: parcel.direction, createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role })}
                 </div>
                 <div className="text-xs text-gray-400">{formatDateTime(h.changedAt)}</div>
                 {h.notes && <div className="text-xs text-gray-500 mt-0.5">{h.notes}</div>}

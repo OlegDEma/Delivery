@@ -6,6 +6,7 @@ import { PAYMENT_ACCEPT_ROLES } from '@/lib/constants/roles';
 import { parseBody, acceptPaymentSchema } from '@/lib/validators';
 import { isUuid } from '@/lib/validators/common';
 import { logger } from '@/lib/logger';
+import { lockIfTripCompleted } from '@/lib/trips/completed-lock';
 
 // Payments within this tolerance (0.5 EUR / UAH) of totalCost are accepted
 // without warning. Larger deviations are blocked unless caller passes
@@ -36,6 +37,9 @@ export async function POST(
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  const lockedPay = await lockIfTripCompleted(parcel.tripId);
+  if (lockedPay) return lockedPay;
 
   // Reject duplicate payment — caller should DELETE existing one first.
   if (parcel.isPaid) {
@@ -112,6 +116,9 @@ export async function DELETE(
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  const lockedCancel = await lockIfTripCompleted(parcel.tripId);
+  if (lockedCancel) return lockedCancel;
 
   // Per ТЗ: «Доставлено» — фінальний статус. Скасування оплати після доставки
   // створює неконсистентний стан (delivered + не оплачено). Блокуємо.

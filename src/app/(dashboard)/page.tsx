@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
 import { statusLabel } from '@/lib/parcels/status-label';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
@@ -13,6 +12,7 @@ import { kyivYmd } from '@/lib/utils/tz';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
 import { displayParcelNumber } from '@/lib/parcels/display-number';
+import { CreateParcelButton } from '@/components/parcels/create-parcel-button';
 
 interface Activity {
   id: string;
@@ -205,9 +205,8 @@ export default function DashboardPage() {
         <div className="bg-white rounded-lg border">
           <div className="px-4 py-3 border-b flex items-center justify-between">
             <h2 className="font-medium">Останні посилки</h2>
-            <Link href="/parcels/new">
-              <Button size="sm">+ Нова</Button>
-            </Link>
+            {/* ТЗ docx 04.11.26 (п.4): уніфікована чорна кнопка «Створити». */}
+            <CreateParcelButton />
           </div>
           <div className="divide-y">
             {stats.recentParcels.map(p => {

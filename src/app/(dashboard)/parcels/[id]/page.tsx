@@ -34,13 +34,14 @@ import { TripSelector, type TripOption } from '@/components/parcels/trip-selecto
 import { toast } from 'sonner';
 import { compressImageForUpload, PHOTO_TOO_LARGE_MESSAGE } from '@/lib/utils/image-compress';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
-import { displayParcelNumber, messageParcelLabel } from '@/lib/parcels/display-number';
+import { displayParcelNumber, messageParcelLabel, parcelCityLabel } from '@/lib/parcels/display-number';
+import { CreateParcelButton } from '@/components/parcels/create-parcel-button';
 import { formatItn } from '@/lib/utils/itn';
 import { NO_TRIP_MESSAGE, OPERATOR_PHONE } from '@/lib/parcels/no-trip';
 import { BarcodeScanButton } from '@/components/shared/barcode-scan-button';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { STAFF_TRANSFER_STATUSES } from '@/lib/parcels/transfer-rules';
-import { formatJourneyNumber } from '@/lib/utils/journey-number';
+import { formatLocalNumber } from '@/lib/utils/journey-number';
 import { tripRouteLabel, parcelRouteLabel } from '@/lib/constants/countries';
 
 interface ParcelDetail {
@@ -89,6 +90,8 @@ interface ParcelDetail {
   /** «Пакет» — money sender transfers to receiver. */
   parcelMoneyAmount: number | null;
   parcelMoneyCost: number | null;
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR). */
+  npSurcharge: number | null;
   pickupPointCost: number | null;
   createdAt: string;
   createdSource: string | null;
@@ -140,7 +143,7 @@ interface ParcelDetail {
     payload: unknown; createdAt: string;
   }[];
   photos?: string[];
-  trip: { id: string; departureDate: string; country: string; direction: string } | null;
+  trip: { id: string; departureDate: string; country: string; direction: string; status?: string } | null;
   assignedCourier: { id: string; fullName: string } | null;
   createdBy: { fullName: string; role: string } | null;
   // Collection
@@ -319,7 +322,9 @@ export default function ParcelDetailPage() {
     { status: parcel.status, createdById: parcel.createdById },
     { userId: user?.id ?? '', role: role ?? '' },
   );
-  const isEditLocked = !canEdit;
+  // ТЗ docx 03.11.26 (п.3): рейс завершено — посилку не змінює ніхто (сервер теж відмовить).
+  const tripCompleted = parcel.trip?.status === 'completed';
+  const isEditLocked = !canEdit || tripCompleted;
   // ТЗ docx 25.08.26: сторони (Отримувач/Відправник) редаговні у всіх посилках,
   // незалежно від статусу — заморозка 26.07 на них більше не поширюється.
   const canEditParties = canEditParcelParties({ role: role ?? '' });
@@ -381,28 +386,32 @@ export default function ParcelDetailPage() {
     <div className="max-w-3xl space-y-4">
       {/* ТЗ docx 12.10.26 «Переходи між сторінками»: шлях Посилки / Рейс (дата і куди) /
           номер посилки і місто — клік по Рейсу повертає в той самий рейс без меню. */}
-      <Breadcrumbs items={[
-        { label: 'Посилки', href: '/parcels' },
-        ...(parcel.trip
-          ? [{ label: `Рейс: ${formatDate(parcel.trip.departureDate)}(${parcel.trip.country})`, href: `/trips/${parcel.trip.id}` }]
-          : []),
-        { label: displayParcelNumber(parcel.internalNumber, parcel.journeyNumber) },
-      ]} />
+      {/* ТЗ docx 04.11.26 (п.4): та сама чорна кнопка «Створити» — праворуч від шляху, щоб від
+          перегляду посилки одразу переходити до створення наступної, минаючи інші закладки. */}
+      <div className="flex items-start justify-between gap-2">
+        <Breadcrumbs items={[
+          { label: 'Посилки', href: '/parcels' },
+          ...(parcel.trip
+            ? [{ label: `Рейс: ${formatDate(parcel.trip.departureDate)}(${parcel.trip.country})`, href: `/trips/${parcel.trip.id}` }]
+            : []),
+          { label: displayParcelNumber(parcel.internalNumber, parcel.journeyNumber) },
+        ]} />
+        <CreateParcelButton />
+      </div>
 
       {/* Client order — awaiting confirmation */}
       {/* ТЗ docx 26.07.26: будь-яка посилка «Створена» (staff чи клієнтська) —
           перевір дані і «Прийми до перевезення». Саме тут дані заморожуються. */}
-      {isDraft && (
-        <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <div className="text-2xl">⚠️</div>
-            <div className="flex-1">
-              <div className="font-semibold text-yellow-900 mb-1">
+      {/* ТЗ docx 03.11.26 (Посилка, п.1): пояснювальний текст прибрано, жовте поле — за
+          розміром фраз, що залишились (заголовок і кнопка). */}
+      {/* ТЗ docx 03.11.26 (п.3): у завершеному рейсі «Прийняти» не пропонуємо — рейс заблоковано. */}
+      {isDraft && !tripCompleted && (
+        <div className="w-fit max-w-full bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 rounded-lg px-3 py-2.5">
+          <div className="flex items-start gap-2">
+            <div className="text-xl leading-6">⚠️</div>
+            <div>
+              <div className="font-semibold text-yellow-900 mb-2">
                 {isClientOrderPending ? 'Замовлення клієнта — очікує підтвердження' : 'Посилка «Створена» — очікує прийняття'}
-              </div>
-              <div className="text-sm text-yellow-800 mb-3">
-                Перевірте дані (сторони, адреси, вагу, розміри, опис), внесіть корективи і натисніть «Прийняти».
-                Статус зміниться на «Прийнято до перевезення», після чого дані замороженюються і редагування стане недоступним.
               </div>
               <Button
                 onClick={handleAcceptForTransport}
@@ -418,22 +427,23 @@ export default function ParcelDetailPage() {
 
       {/* Header — ІТН та ТТН поряд у самому верху (за ТЗ). */}
       <div>
-        <div className="flex items-center gap-3 mb-1 flex-wrap">
-          {/* ТЗ docx 04.10.26: дату створення з шапки прибрано — замість неї номер
-              рейсу, за яким закріплена посилка. Олівець — редагування рейсу/кур'єра
-              (раніше був у рядку «Рейс | Кур'єр» внизу картки, який ТЗ прибрало). */}
-          {/* ТЗ docx 12.10.26: старий порядковий номер прибрано (displayParcelNumber) —
-              номер посилки тепер «№ 001» у поїздці поруч. */}
-          <h1 className="text-xl font-bold font-mono">
-            {displayParcelNumber(parcel.internalNumber)}
-            {parcel.trip && <>, Рейс: {formatDate(parcel.trip.departureDate)}({parcel.trip.country})</>}
-          </h1>
-          {/* ТЗ docx 11.10.26: номер посилки в поїздці (001…N). */}
+        {/* ТЗ docx 03.11.26 (Посилка, п.2–4): першим — локальний номер посилки («№ 106», з
+            кількістю місць «№ 106/3», якщо їх більше одного); з «Wien 1, Рейс: 05.11.2026(AT)»
+            прибрано «1» і «, Рейс:». Статус «Створена …», «AT · 1 місце», дату й автора бачить
+            лише Суперадмін («ці дані важливі для Суперадміна»). Статус уже прийнятої посилки
+            («Прийнято до перевезення в Україну», п.5) бачать усі — у «Створеної» його замінює
+            жовте поле вище. */}
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
           {parcel.journeyNumber != null && (
-            <span className="text-sm font-mono font-semibold bg-gray-100 rounded px-1.5 py-0.5" title="Номер посилки в поїздці">
-              № {formatJourneyNumber(parcel.journeyNumber)}
+            <span className="text-base font-mono font-semibold bg-gray-100 rounded px-1.5 py-0.5" title="Локальний номер посилки">
+              № {formatLocalNumber(parcel.journeyNumber, parcel.totalPlacesCount)}
             </span>
           )}
+          <h1 className="text-xl font-bold font-mono">
+            {parcelCityLabel(parcel.internalNumber)}
+            {parcel.trip && <> {formatDate(parcel.trip.departureDate)}({parcel.trip.country})</>}
+          </h1>
+          {!tripCompleted && (
           <button
             type="button"
             onClick={() => setEditTrip((v) => !v)}
@@ -443,12 +453,15 @@ export default function ParcelDetailPage() {
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
-          <Badge className={STATUS_COLORS[parcel.status]}>
-            {statusLabel(parcel.status, {
-              tripCountry: parcel.trip?.country, direction: parcel.direction,
-              createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role,
-            })}
-          </Badge>
+          )}
+          {(isSuperAdmin || !isDraft) && (
+            <Badge className={STATUS_COLORS[parcel.status]}>
+              {statusLabel(parcel.status, {
+                tripCountry: parcel.trip?.country, destCountry: parcel.receiverAddress?.country, direction: parcel.direction,
+                createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role,
+              })}
+            </Badge>
+          )}
         </div>
         {/* ТЗ docx 04.10.26: рейсу до цієї країни в базі немає взагалі.
             Якщо рейс є, але стара посилка (до автоприв'язки) ще не прив'язана, — нейтральний рядок. */}
@@ -461,22 +474,22 @@ export default function ParcelDetailPage() {
             <a href={`tel:${OPERATOR_PHONE}`} className="font-medium underline">{OPERATOR_PHONE}</a>
           </div>
         )}
-        {/* ТЗ docx 17.08.26 (Частина перша): код країни доставки · кількість місць · рейс. */}
+        {/* ТЗ docx 03.11.26 (Посилка, п.4): «ТТН та ІТН відображати поруч в рядок. ІТН має йти
+            першим». Код країни і кількість місць (ТЗ 17.08.26) — лише Суперадміну. */}
         <div className="text-sm text-gray-700 mb-1 flex items-center gap-1.5 flex-wrap">
-          {destCC && <><span className="font-medium">{destCC}</span><span className="text-gray-300">·</span></>}
-          <span>{placesLabel(parcel.totalPlacesCount)}</span>
-          {/* Рейс тепер у самій шапці (ТЗ docx 04.10.26) — тут не дублюємо. */}
-          {/* ТЗ docx 07.10.26: ІТН (10 цифр, X-XX-XXXXXX-X) знову показуємо — правила
-              його формування затверджено (за ТЗ 03.10.26 його тимчасово ховали). */}
-          <span className="text-gray-300">·</span>
+          {isSuperAdmin && (<>
+            {destCC && <><span className="font-medium">{destCC}</span><span className="text-gray-300">·</span></>}
+            <span>{placesLabel(parcel.totalPlacesCount)}</span>
+            <span className="text-gray-300">·</span>
+          </>)}
           <span>ІТН <span className="font-mono font-medium">{formatItn(parcel.itn)}</span></span>
           <CopyButton text={parcel.itn} />
-        </div>
-        <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
+          <span className="text-gray-300">·</span>
           {parcel.npTtn ? (
             <>
-              <span>ТТН: <span className="font-mono">{parcel.npTtn}</span></span>
+              <span>ТТН <span className="font-mono">{parcel.npTtn}</span></span>
               <CopyButton text={parcel.npTtn} />
+              {!tripCompleted && (
               <button
                 type="button"
                 onClick={() => setEditTtn((v) => !v)}
@@ -485,8 +498,9 @@ export default function ParcelDetailPage() {
               >
                 <Pencil className="w-3 h-3" />
               </button>
+              )}
             </>
-          ) : (
+          ) : tripCompleted ? null : (
             <button
               type="button"
               onClick={() => setEditTtn((v) => !v)}
@@ -495,10 +509,13 @@ export default function ParcelDetailPage() {
               + ТТН
             </button>
           )}
-          <span className="text-gray-300">|</span>
-          <span>{formatDateTime(parcel.createdAt)}</span>
-          {parcel.createdBy && <span className="text-gray-400">· {parcel.createdBy.fullName}</span>}
         </div>
+        {isSuperAdmin && (
+          <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
+            <span>{formatDateTime(parcel.createdAt)}</span>
+            {parcel.createdBy && <span className="text-gray-400">· {parcel.createdBy.fullName}</span>}
+          </div>
+        )}
         {/* ТЗ docx 04.10.26 (п.3): нотатка, яку Клієнт залишив при створенні замовлення. */}
         {parcel.clientNote && (
           <div className="mt-1 text-sm bg-amber-50 border border-amber-200 rounded px-2 py-1">
@@ -511,7 +528,7 @@ export default function ParcelDetailPage() {
 
         {/* ТЗ docx 09.10.26 (п.2): окрема кнопка перенесення на інший рейс
             («Прийнято до перевезення» / «В дорозі»; до прийняття — теж). */}
-        {parcel.trip && STAFF_TRANSFER_STATUSES.includes(parcel.status) && !editTrip && (
+        {parcel.trip && !tripCompleted && STAFF_TRANSFER_STATUSES.includes(parcel.status) && !editTrip && (
           <div className="mt-2">
             <Button type="button" size="sm" variant="outline" onClick={() => setEditTrip(true)}>
               ⇄ Перенести на інший рейс
@@ -618,21 +635,19 @@ export default function ParcelDetailPage() {
         </div>
       </div>
 
-      {/* Банер блокування редагування (ТЗ docx 26.07.26 п.1). */}
-      {(isEditLocked || (isSuperAdmin && isAccepted)) && (
-        <div className={`rounded-lg border px-3 py-2 flex items-start gap-2 text-sm ${
-          isSuperAdmin && isAccepted ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-gray-50 border-gray-200 text-gray-700'
-        }`}>
+      {/* ТЗ docx 03.11.26 (Посилка, п.5): рядок «Редагувати дані цієї посилки може лише той, хто
+          її створив» (і «дані заморожено») прибрано — кнопки «Редагувати» в такому разі просто
+          немає. Лишилось попередження Суперадміну, що він править уже прийняту посилку. */}
+      {tripCompleted && (
+        <div className="rounded-lg border px-3 py-2 flex items-start gap-2 text-sm bg-gray-50 border-gray-300 text-gray-800">
           <Lock className="w-4 h-4 mt-0.5 shrink-0" />
-          <div>
-            {isSuperAdmin && isAccepted ? (
-              <>Посилка вже у роботі. Редагування даних доступне тільки вам як Суперадміну.</>
-            ) : parcel.status !== 'draft' ? (
-              <>Посилку прийнято до перевезення — дані заморожено (ТЗ). Змінювати можна лише посилку у статусі «Створена».</>
-            ) : (
-              <>Редагувати дані цієї посилки може лише той, хто її створив.</>
-            )}
-          </div>
+          <div>Рейс завершено — зміни заблоковано.</div>
+        </div>
+      )}
+      {isSuperAdmin && isAccepted && !tripCompleted && (
+        <div className="rounded-lg border px-3 py-2 flex items-start gap-2 text-sm bg-amber-50 border-amber-200 text-amber-800">
+          <Lock className="w-4 h-4 mt-0.5 shrink-0" />
+          <div>Посилка вже у роботі. Редагування даних доступне тільки вам як Суперадміну.</div>
         </div>
       )}
 
@@ -665,19 +680,22 @@ export default function ParcelDetailPage() {
 
       {/* Змінити статус — список обмежено правилами переходу (status-transitions.ts).
           Без Card-wrapper'a per ТЗ «максимально стиснути інфо-блоки». */}
-      {nextStatuses.length > 0 && !isTerminal(parcel.status) && (
+      {/* ТЗ docx 03.11.26 (Посилка, п.5): рядок зміни статусу Працівнику не показуємо —
+          «Прийняти до перевезення» сам ставить статус. Інші статуси Працівник/Водій міняють у
+          Рейсах, Маршрутах і на Складі; тут ручна зміна лишилась Суперадміну. */}
+      {isSuperAdmin && !tripCompleted && nextStatuses.length > 0 && !isTerminal(parcel.status) && (
         <div className="flex gap-2 items-center py-1">
           <Label className="text-xs text-gray-500 shrink-0">Статус:</Label>
           <Select value={newStatus} onValueChange={(v) => setNewStatus(v ?? '')}>
-            {/* min-w-[14rem] так щоб довгі лейбли «Прийнято до перевезення до України»
+            {/* min-w-[14rem] так щоб довгі лейбли «Прийнято до перевезення в Україну»
                 не обрізалися ні в trigger, ні в dropdown (SelectContent наслідує
                 ширину trigger через --anchor-width). */}
             <SelectTrigger className="h-8 text-sm min-w-[14rem] flex-1 max-w-[20rem]">
-              <SelectValue>{newStatus ? statusLabel(newStatus, { tripCountry: parcel.trip?.country, direction: parcel.direction }) : 'Виберіть…'}</SelectValue>
+              <SelectValue>{newStatus ? statusLabel(newStatus, { tripCountry: parcel.trip?.country, destCountry: parcel.receiverAddress?.country, direction: parcel.direction }) : 'Виберіть…'}</SelectValue>
             </SelectTrigger>
             <SelectContent className="min-w-[14rem]">
               {nextStatuses.map((s) => (
-                <SelectItem key={s} value={s}>{statusLabel(s, { tripCountry: parcel.trip?.country, direction: parcel.direction })}</SelectItem>
+                <SelectItem key={s} value={s}>{statusLabel(s, { tripCountry: parcel.trip?.country, destCountry: parcel.receiverAddress?.country, direction: parcel.direction })}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -711,7 +729,7 @@ export default function ParcelDetailPage() {
             })()}
             {/* ТЗ docx 25.08.26: дані Отримувача/Відправника редаговні у ВСІХ посилках,
                 НЕЗАЛЕЖНО ВІД СТАТУСУ (правило заморозки 26.07 на сторони не діє). */}
-            {canEditParties && (
+            {canEditParties && !tripCompleted && (
               <ParcelPartyEdit
                 parcelId={parcel.id}
                 role="receiver"
@@ -750,7 +768,7 @@ export default function ParcelDetailPage() {
               );
             })()}
             {/* ТЗ docx 25.08.26: те саме для Відправника — редагування без огляду на статус. */}
-            {canEditParties && (
+            {canEditParties && !tripCompleted && (
               <ParcelPartyEdit
                 parcelId={parcel.id}
                 role="sender"
@@ -821,6 +839,8 @@ export default function ParcelDetailPage() {
         // for historical data.
         insuranceEnabled={parcel.insuranceApplied ?? (Number(parcel.insuranceCost) > 0)}
         parcelMoneyAmount={parcel.parcelMoneyAmount}
+        // ТЗ docx 04.11.26 (п.5): «Доплата за НП».
+        npSurcharge={parcel.npSurcharge}
         isPickupPoint={isPickupPointPricing({ direction: parcel.direction, collectionMethod: parcel.collectionMethod, receiverDeliveryMethod: parcel.receiverAddress?.deliveryMethod })}
         isCourierPickup={parcel.direction === 'eu_to_ua' && parcel.collectionMethod === 'courier_pickup'}
         isMultiParcelPickup={!!parcel.isMultiParcelPickup}
@@ -832,7 +852,7 @@ export default function ParcelDetailPage() {
       <ParcelDetailsCard parcel={parcel} onUpdate={fetchParcel} readOnly={isEditLocked} />
 
       {/* Payment card */}
-      <ParcelPaymentCard parcel={parcel} onUpdate={fetchParcel} />
+      <ParcelPaymentCard parcel={parcel} onUpdate={fetchParcel} locked={tripCompleted} />
 
       {/* Invoice history — only renders when ≥1 SMS sent for this parcel. */}
       <InvoiceHistory parcelId={parcel.id} kind="invoice" refreshKey={invoiceRefreshKey} />
@@ -848,7 +868,9 @@ export default function ParcelDetailPage() {
       {/* ТЗ docx 04.10.26: рядок «Рейс: … | Кур'єр: …» внизу картки прибрано
           (і в Клієнта, і в Працівника). Редагування рейсу/кур'єра — олівцем у шапці. */}
 
-      {/* Фото і нотатки — компактні кнопки-дії (замість повноцінних карток). */}
+      {/* Фото і нотатки — компактні кнопки-дії (замість повноцінних карток).
+          ТЗ docx 03.11.26 (п.3): у завершеному рейсі — без змін. */}
+      {!tripCompleted && (
       <div className="flex gap-2 flex-wrap">
         <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md bg-white cursor-pointer hover:bg-gray-50 transition-colors">
           <Camera className="w-4 h-4 text-gray-500" />
@@ -888,6 +910,7 @@ export default function ParcelDetailPage() {
           <StickyNote className="w-4 h-4 mr-1" /> Додати нотатку
         </Button>
       </div>
+      )}
 
       {/* ТЗ docx 28.09.26: нотатка додається полем у сторінці (не нативним
           prompt, який на смартфоні може бути заблокований), а помилка сервера
@@ -953,7 +976,9 @@ export default function ParcelDetailPage() {
         </div>
       ) : null}
 
-      {/* Status Timeline */}
+      {/* ТЗ docx 03.11.26 (Посилка, п.6): «Історію статусів прибрати. Її може бачити лише
+          Суперадмін». Так само службовий «Журнал операцій». */}
+      {isSuperAdmin && (
       <Card>
         <CardHeader className="py-2 px-3">
           <CardTitle className="text-sm">Історія статусів</CardTitle>
@@ -970,7 +995,7 @@ export default function ParcelDetailPage() {
                 </div>
                 <div className="pb-3">
                   <div className="text-sm font-medium">
-                    {statusLabel(h.status, { tripCountry: parcel.trip?.country, direction: parcel.direction, createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role })}
+                    {statusLabel(h.status, { tripCountry: parcel.trip?.country, destCountry: parcel.receiverAddress?.country, direction: parcel.direction, createdSource: parcel.createdSource, createdByRole: parcel.createdBy?.role })}
                   </div>
                   <div className="text-xs text-gray-400">
                     {formatDateTime(h.changedAt)}
@@ -983,9 +1008,10 @@ export default function ParcelDetailPage() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Audit Journal — other operations (deletions, cost overrides, etc.) */}
-      {parcel.auditLog && parcel.auditLog.length > 0 && (
+      {isSuperAdmin && parcel.auditLog && parcel.auditLog.length > 0 && (
         <Card>
           <CardHeader className="py-2 px-3">
             <CardTitle className="text-sm">Журнал операцій</CardTitle>

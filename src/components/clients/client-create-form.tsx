@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import { transliterateCity, normalizeCityForMatch } from '@/lib/utils/transliter
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { withCountryCode } from '@/lib/utils/phone';
 import { formatPostalCodeInput } from '@/lib/utils/postal-code';
+import { handleFlowEnter, focusNextFlowLater } from '@/lib/ui/focus-flow';
 
 /**
  * ТЗ (docx 14.05.26 §a): при «Виклик кур'єра» у формі Відправника оператор
@@ -110,12 +111,24 @@ interface ClientCreateFormProps {
   prefillAddress?: {
     firstName?: string;
     lastName?: string;
+    /** ТЗ docx 04.11.26 (п.6): по батькові — з даних Нової пошти. */
+    middleName?: string;
     country?: string;
     city?: string;
     street?: string;
     building?: string;
     postalCode?: string;
+    /** ТЗ docx 04.11.26 (п.6): посилка прийшла Новою поштою → спосіб «Пошта» + номер відділення. */
+    deliveryMethod?: 'address' | 'np_warehouse' | 'pickup_point';
+    npWarehouseNum?: string;
   };
+  /** ТЗ docx 04.11.26 (п.1): форма — щоб діалог поставив курсор у перше віконце алгоритму. */
+  formRef?: React.Ref<HTMLFormElement>;
+  /**
+   * ТЗ docx 04.11.26 (п.6): дані вже заповнено (з Нової пошти) — «Працівник повинен лише
+   * зберегти ці дані», тож курсор одразу на «Зберегти».
+   */
+  startAtSave?: boolean;
 }
 
 function getDefaultCountry(
@@ -143,6 +156,8 @@ export function ClientCreateForm({
   defaultCountry,
   initialData,
   prefillAddress,
+  formRef,
+  startAtSave = false,
 }: ClientCreateFormProps) {
   const isEditMode = !!initialData;
   // ТЗ docx 21.08.26: країна з ручної адреси МЛ має пріоритет над дефолтом за напрямком.
@@ -168,27 +183,28 @@ export function ClientCreateForm({
   const [phone, setPhone] = useState(() => withCountryCode(initialData?.phone || initialPhone || '', initialCountry));
   const [firstName, setFirstName] = useState(initialData?.firstName || prefillAddress?.firstName || '');
   const [lastName, setLastName] = useState(initialData?.lastName || prefillAddress?.lastName || '');
-  const [middleName, setMiddleName] = useState(initialData?.middleName || '');
+  const [middleName, setMiddleName] = useState(initialData?.middleName || prefillAddress?.middleName || '');
   const [country, setCountry] = useState<CountryCode>(initialCountry);
-  const [deliveryMethod, setDeliveryMethod] = useState<'address' | 'np_warehouse' | 'pickup_point'>(
-    (initialAddr?.deliveryMethod as 'address' | 'np_warehouse' | 'pickup_point') || 'address'
+  const [deliveryMethodState, setDeliveryMethod] = useState<'address' | 'np_warehouse' | 'pickup_point'>(
+    (initialAddr?.deliveryMethod as 'address' | 'np_warehouse' | 'pickup_point') || prefillAddress?.deliveryMethod || 'address'
   );
+  // ТЗ docx 03.11.26 (п.1): чи Працівник сам обрав спосіб (тоді не підміняємо його дефолтом).
+  const [methodTouched, setMethodTouched] = useState(false);
+  // ТЗ docx 04.11.26 (п.1): тригери списків — від них курсор іде далі після вибору.
+  const countryTriggerRef = useRef<HTMLButtonElement>(null);
+  const methodTriggerRef = useRef<HTMLButtonElement>(null);
   const [postalCode, setPostalCode] = useState(initialAddr?.postalCode || prefillAddress?.postalCode || '');
   const [city, setCity] = useState(initialAddr?.city || prefillAddress?.city || '');
   const [street, setStreet] = useState(initialAddr?.street || prefillAddress?.street || '');
   const [building, setBuilding] = useState(initialAddr?.building || prefillAddress?.building || '');
   const [landmark, setLandmark] = useState(initialAddr?.landmark || '');
-  const [npWarehouseNum, setNpWarehouseNum] = useState(initialAddr?.npWarehouseNum || '');
+  const [npWarehouseNum, setNpWarehouseNum] = useState(initialAddr?.npWarehouseNum || prefillAddress?.npWarehouseNum || '');
   const [pickupPointText, setPickupPointText] = useState(initialAddr?.pickupPointText || '');
   // ТЗ §a: «Це буде єдина посилка?» — лише для Відправника при «Виклик
   // кур'єра» (deliveryMethod='address'). null = ще не відповіли.
   const [isMultiParcelPickup, setIsMultiParcelPickup] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  // Чи показувати питання про кількість посилок: відправник + «Виклик
-  // кур'єра» (для нього address = виклик кур'єра, а не адресна доставка).
-  const showMultiParcelQuestion = role === 'sender' && deliveryMethod === 'address';
 
   // ТЗ (docx 13.06.26 §4/§5): «Пункт видачі/збору» — це вибір зі СПИСКУ
   // реальних точок з розділу Логістика для країни/міста, а не вільний текст.
@@ -233,6 +249,27 @@ export function ClientCreateForm({
   const cityPoints = cityNorm ? points.filter(p => p.city.trim().toLowerCase() === cityNorm) : [];
   const pointsToShow = cityPoints;
   const hasAnyPoints = cityPoints.length > 0;
+
+  // ТЗ docx 03.11.26 (Створення посилки Працівником, п.1): «При виборі Способу доставки
+  // завжди по замовчуванню вибирати Пункт видачі — якщо у вибраному населеному пункті такий
+  // існує. У Відні Пункт видачі — по замовчуванню відмічати перший». Стосується Отримувача
+  // з НОВОЮ адресою (у знайденого клієнта лишається спосіб його останньої відправки) і лише
+  // поки Працівник сам не обрав інший спосіб. Похідне значення (не ефект) — спрацьовує і
+  // тоді, коли пункти країни довантажились уже після введення міста.
+  const pickupByDefault = role === 'receiver' && !initialAddr?.deliveryMethod && !prefillAddress?.deliveryMethod && !methodTouched && hasAnyPoints;
+  const deliveryMethod: 'address' | 'np_warehouse' | 'pickup_point' = pickupByDefault ? 'pickup_point' : deliveryMethodState;
+  const pointLabel = (pt: { name: string | null; city: string; address: string }) => pt.name || `${pt.city}, ${pt.address}`;
+  // Перший пункт відмічено, поки Працівник не клікнув інший (і поки немає збереженого).
+  const defaultPoint = deliveryMethod === 'pickup_point' && !selectedPointId && !pickupPointText
+    ? cityPoints[0] ?? null
+    : null;
+  const effectivePointId = selectedPointId || defaultPoint?.id || '';
+  const effectivePickupText = pickupPointText || (defaultPoint ? pointLabel(defaultPoint) : '');
+  const effectivePostalCode = postalCode || defaultPoint?.postalCode || '';
+
+  // Чи показувати питання про кількість посилок: відправник + «Виклик
+  // кур'єра» (для нього address = виклик кур'єра, а не адресна доставка).
+  const showMultiParcelQuestion = role === 'sender' && deliveryMethod === 'address';
 
   // ТЗ docx 29.06.26: обмеження можна задати ОКРЕМО для Відправника й Отримувача.
   // Тож і для отримувача консультуємо Логістику (default — доступно), а сторона
@@ -293,7 +330,7 @@ export function ClientCreateForm({
     } else if (deliveryMethod === 'pickup_point') {
       // Pickup point text — обов'язкове в усіх випадках бо без нього метод
       // не має сенсу.
-      if (!pickupPointText.trim()) {
+      if (!effectivePickupText.trim()) {
         setError('Вкажіть опис пункту збору');
         setSaving(false);
         return;
@@ -316,7 +353,7 @@ export function ClientCreateForm({
     // Meta: відповідь про кількість посилок + обраний пункт збору/видачі
     // (ТЗ docx 29.06.26 §1 — щоб у підсумку показати адресу пункту).
     const selectedPoint = deliveryMethod === 'pickup_point'
-      ? (points.find(p => p.id === selectedPointId) ?? null)
+      ? (points.find(p => p.id === effectivePointId) ?? null)
       : null;
     const meta: ClientCreateMeta | undefined =
       (showMultiParcelQuestion || selectedPoint)
@@ -341,13 +378,13 @@ export function ClientCreateForm({
         country,
         city,
         deliveryMethod,
-        postalCode: postalCode.trim() || undefined,
+        postalCode: effectivePostalCode.trim() || undefined,
       };
       const address =
         deliveryMethod === 'np_warehouse'
           ? { ...baseAddress, npWarehouseNum: npWarehouseNum || undefined }
           : deliveryMethod === 'pickup_point'
-            ? { ...baseAddress, pickupPointText: pickupPointText || undefined }
+            ? { ...baseAddress, pickupPointText: effectivePickupText || undefined }
             : {
                 ...baseAddress,
                 street: street || undefined,
@@ -414,13 +451,13 @@ export function ClientCreateForm({
           // саме ClientAddress.country читає підсумок («Країна: …»).
           country,
           deliveryMethod,
-          postalCode: postalCode.trim() || null,
+          postalCode: effectivePostalCode.trim() || null,
           city,
           street: street || null,
           building: building || null,
           landmark: landmark || null,
           npWarehouseNum: deliveryMethod === 'np_warehouse' ? (npWarehouseNum || null) : null,
-          pickupPointText: deliveryMethod === 'pickup_point' ? (pickupPointText || null) : null,
+          pickupPointText: deliveryMethod === 'pickup_point' ? (effectivePickupText || null) : null,
         };
         if (!resolvedToOwner && initialAddr?.id) {
           const r = await fetch(`/api/clients/${targetId}`, {
@@ -527,7 +564,8 @@ export function ClientCreateForm({
       : { address: 'Адресна доставка', np_warehouse: 'Пошта', pickup_point: 'Пункт видачі' };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    // ТЗ docx 04.11.26 (п.1): Enter / «Далі» переводить курсор за алгоритмом (data-flow).
+    <form ref={formRef} onSubmit={handleSubmit} onKeyDown={handleFlowEnter} className="space-y-3">
       <PhoneInput
         label="Телефон"
         required
@@ -538,11 +576,11 @@ export function ClientCreateForm({
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label>Прізвище *</Label>
-          <CapitalizeInput value={lastName} onChange={setLastName} required />
+          <CapitalizeInput value={lastName} onChange={setLastName} required data-flow="" data-flow-start={isEditMode || startAtSave ? undefined : ''} enterKeyHint="next" />
         </div>
         <div>
           <Label>Ім&apos;я *</Label>
-          <CapitalizeInput value={firstName} onChange={setFirstName} required />
+          <CapitalizeInput value={firstName} onChange={setFirstName} required data-flow="" enterKeyHint="next" />
         </div>
       </div>
       <div>
@@ -560,10 +598,12 @@ export function ClientCreateForm({
             if (next !== 'UA' && typeof window !== 'undefined') {
               localStorage.setItem('parcel:lastEuCountry', next);
             }
+            // ТЗ docx 04.11.26 (п.1): Країна → Населений пункт.
+            focusNextFlowLater(countryTriggerRef.current);
           }}
           disabled={countryLocked}
         >
-          <SelectTrigger><SelectValue>{COUNTRY_LABELS[country]}</SelectValue></SelectTrigger>
+          <SelectTrigger ref={countryTriggerRef} data-flow=""><SelectValue>{COUNTRY_LABELS[country]}</SelectValue></SelectTrigger>
           <SelectContent>
             {(Object.entries(COUNTRY_LABELS) as [CountryCode, string][])
               // Per ТЗ: «Інші країни відсутні» when country is locked by direction.
@@ -589,9 +629,10 @@ export function ClientCreateForm({
             value={city}
             onChange={(v) => setCity(capCity(v))}
             required
+            flow
           />
         ) : (
-          <CapitalizeInput value={city} onChange={setCity} required />
+          <CapitalizeInput value={city} onChange={setCity} required data-flow="" enterKeyHint="next" />
         )}
       </div>
 
@@ -602,9 +643,14 @@ export function ClientCreateForm({
           <SectionTitle>{methodSectionTitle}</SectionTitle>
           <Select
             value={deliveryMethod}
-            onValueChange={(v) => setDeliveryMethod((v ?? 'address') as 'address' | 'np_warehouse' | 'pickup_point')}
+            onValueChange={(v) => {
+              setDeliveryMethod((v ?? 'address') as 'address' | 'np_warehouse' | 'pickup_point');
+              setMethodTouched(true);
+              // ТЗ docx 04.11.26 (п.1): далі — перше віконце обраного способу.
+              focusNextFlowLater(methodTriggerRef.current);
+            }}
           >
-            <SelectTrigger>
+            <SelectTrigger ref={methodTriggerRef} data-flow="">
               <SelectValue>{methodLabels[deliveryMethod]}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -633,10 +679,14 @@ export function ClientCreateForm({
             Індекс <FieldHint text="Поштовий код, призначений даній адресі." />
           </Label>
           <Input
-            value={postalCode}
+            value={effectivePostalCode}
             // ТЗ docx 12.10.26: NL-індекс — «1234 AB» (пробіл після цифр, літери великі).
             onChange={(e) => setPostalCode(formatPostalCodeInput(e.target.value, postalCode, country))}
             placeholder={country === 'NL' ? '1234 AB' : '00-000'}
+            // ТЗ docx 04.11.26 (п.1): Індекс — у ланцюжку лише для Адресної доставки / Виклику
+            // кур'єра (для Пошти — одразу номер складу, для пункту — перша адреса).
+            data-flow={deliveryMethod === 'address' ? '' : undefined}
+            enterKeyHint="next"
           />
         </div>
       </div>
@@ -658,7 +708,7 @@ export function ClientCreateForm({
                 Отримувач «Пошта» → «Номер складу/поштомату» (§20). */}
             <Label>{role === 'sender' ? 'Номер складу' : 'Номер складу/поштомату'} *</Label>
             {/* ТЗ docx 09.10.26 (п.7): «Номер складу» — цифрова клавіатура. */}
-            <Input value={npWarehouseNum} onChange={(e) => setNpWarehouseNum(e.target.value)} inputMode="numeric" required />
+            <Input value={npWarehouseNum} onChange={(e) => setNpWarehouseNum(e.target.value)} inputMode="numeric" required data-flow="" enterKeyHint="next" />
           </div>
         )}
 
@@ -668,18 +718,20 @@ export function ClientCreateForm({
             {/* ТЗ §4/§5: список реальних точок з Логістики для країни/міста. */}
             {pointsToShow.length > 0 ? (
               <div className="space-y-1.5">
-                {pointsToShow.map((p) => {
-                  const label = p.name || `${p.city}, ${p.address}`;
+                {pointsToShow.map((p, pi) => {
+                  const label = pointLabel(p);
                   // ТЗ docx 29.06.26 §2: рівно ОДИН пункт. Підсвітка — по id
                   // обраного пункту (а не по назві): у Відні 3 пункти можуть мати
                   // однакову назву «Відень», і матч по назві підсвічував би всі
                   // одразу. pickupPointText — лише фолбек для edit-режиму, поки
                   // жодного пункту ще не клікнуто (selectedPointId порожній).
-                  const sel = selectedPointId ? selectedPointId === p.id : pickupPointText === label;
+                  const sel = effectivePointId ? effectivePointId === p.id : pickupPointText === label;
                   return (
                     <button
                       key={p.id}
                       type="button"
+                      // ТЗ docx 04.11.26 (п.1): Пункт видачі/збору → перша адреса → «Зберегти».
+                      data-flow={pi === 0 ? '' : undefined}
                       // ТЗ docx 29.06.26 §2: при виборі пункту його поштовий код
                       // авто-вставляється в поле «Індекс».
                       onClick={() => {
@@ -728,14 +780,15 @@ export function ClientCreateForm({
                     value={street}
                     onChange={setStreet}
                     required={strict}
+                    flow
                   />
                 ) : (
-                  <CapitalizeInput value={street} onChange={setStreet} required={strict} />
+                  <CapitalizeInput value={street} onChange={setStreet} required={strict} data-flow="" enterKeyHint="next" />
                 )}
               </div>
               <div>
                 <Label>Будинок {strict && '*'}</Label>
-                <Input value={building} onChange={(e) => setBuilding(e.target.value)} required={strict} />
+                <Input value={building} onChange={(e) => setBuilding(e.target.value)} required={strict} data-flow="" enterKeyHint="next" />
               </div>
             </div>
             <div>
@@ -756,6 +809,8 @@ export function ClientCreateForm({
                     className="h-4 w-4"
                     checked={isMultiParcelPickup === false}
                     onChange={() => setIsMultiParcelPickup(false)}
+                    // ТЗ docx 04.11.26 (п.1): Виклик кур'єра → … будинок → «Одна посилка» → «Зберегти».
+                    data-flow=""
                   />
                   Одна посилка
                 </label>
@@ -787,7 +842,16 @@ export function ClientCreateForm({
             Скасувати
           </Button>
         )}
-        <Button type="submit" className={onCancel ? 'flex-1' : 'w-full'} disabled={saving}>
+        {/* ТЗ docx 04.11.26 (п.1): «кнопка Зберегти (підсвічується)» — коли курсор дійшов до
+            неї, вона підсвічена, і Enter зберігає. У знайденого клієнта курсор одразу тут —
+            Працівнику лишається підтвердити дані. */}
+        <Button
+          type="submit"
+          className={cn(onCancel ? 'flex-1' : 'w-full', 'focus:ring-4 focus:ring-amber-400 focus:ring-offset-1 focus:bg-amber-600')}
+          disabled={saving}
+          data-flow="save"
+          data-flow-start={isEditMode || startAtSave ? '' : undefined}
+        >
           {saving ? 'Збереження...' : 'Зберегти'}
         </Button>
       </div>

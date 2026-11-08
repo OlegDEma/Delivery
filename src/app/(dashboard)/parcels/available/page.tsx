@@ -12,6 +12,7 @@ import { ListSkeleton } from '@/components/shared/skeleton';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { statusLabel } from '@/lib/parcels/status-label';
 import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
+import { CreateParcelButton } from '@/components/parcels/create-parcel-button';
 
 interface ParcelItem {
   id: string;
@@ -82,7 +83,8 @@ export default function AvailableParcelsPage() {
           <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
             Фільтри {showFilters ? '▲' : '▼'}
           </Button>
-          <Link href="/parcels/new"><Button>+ Створити</Button></Link>
+          {/* ТЗ docx 04.11.26 (п.4): уніфікована чорна кнопка «Створити». */}
+          <CreateParcelButton />
         </div>
       </div>
 

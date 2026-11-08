@@ -19,9 +19,15 @@ import {
 export function PlaceVolumeInputs({
   place,
   onChange,
+  fieldPrefix,
+  flow = false,
 }: {
   place: PlaceVolumeDraft;
   onChange: (patch: Pick<PlaceVolumeDraft, 'volWeight' | 'volume'>) => void;
+  /** ТЗ docx 04.11.26 (п.3): мітка віконця, куди ставити курсор при незаповненій об'ємній вазі. */
+  fieldPrefix?: string;
+  /** ТЗ docx 04.11.26 (п.1): «Об'ємна вага» першого місця — останнє віконце автопереходу. */
+  flow?: boolean;
 }) {
   const fields = draftVolumeFields(place);
   const readOnlyCls = fields.fromDims ? 'bg-gray-50 text-gray-600' : undefined;
@@ -41,6 +47,9 @@ export function PlaceVolumeInputs({
           readOnly={fields.fromDims}
           onChange={(e) => onChange(patchFromVolWeight(e.target.value))}
           className={cn('text-base', readOnlyCls)}
+          data-field={fieldPrefix ? `${fieldPrefix}-volweight` : undefined}
+          data-flow={flow ? '' : undefined}
+          enterKeyHint={flow ? 'done' : undefined}
         />
       </div>
       <div>

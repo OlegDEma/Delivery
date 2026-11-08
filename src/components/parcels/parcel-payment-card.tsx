@@ -30,6 +30,8 @@ interface ParcelPaymentCardProps {
     parcelMoneyAmount?: number | null;
   };
   onUpdate: () => void;
+  /** ТЗ docx 03.11.26 (п.3): рейс завершено — оплату не приймаємо і не скасовуємо. */
+  locked?: boolean;
 }
 
 interface PaymentEntry {
@@ -45,7 +47,7 @@ interface PaymentEntry {
 
 const METHOD_LABELS: Record<string, string> = { cash: 'Готівка', cashless: 'Безготівка' };
 
-export function ParcelPaymentCard({ parcel, onUpdate }: ParcelPaymentCardProps) {
+export function ParcelPaymentCard({ parcel, onUpdate, locked = false }: ParcelPaymentCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState<PaymentEntry[]>([]);
@@ -176,6 +178,7 @@ export function ParcelPaymentCard({ parcel, onUpdate }: ParcelPaymentCardProps) 
                     Метод: {METHOD_LABELS[parcel.paymentMethod] || parcel.paymentMethod}
                   </div>
                 </div>
+                {!locked && (
                 <Button
                   size="sm"
                   variant="ghost"
@@ -185,8 +188,11 @@ export function ParcelPaymentCard({ parcel, onUpdate }: ParcelPaymentCardProps) 
                 >
                   Скасувати
                 </Button>
+                )}
               </div>
             </div>
+          ) : locked ? (
+            <div className="text-sm text-gray-500">Не оплачено. Рейс завершено — прийом оплати заблоковано.</div>
           ) : (
             <Button
               className="w-full bg-green-600 hover:bg-green-700"

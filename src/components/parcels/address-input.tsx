@@ -19,6 +19,8 @@ interface AddressInputProps {
   className?: string;
   /** When true, suggestions stay disabled (e.g. for street when city not picked). */
   disabled?: boolean;
+  /** ТЗ docx 04.11.26 (п.1): поле — у ланцюжку автопереходу курсору (data-flow, «Далі»). */
+  flow?: boolean;
 }
 
 /**
@@ -35,12 +37,14 @@ interface AddressInputProps {
  */
 export function AddressInput({
   field, country, value, onChange,
-  placeholder, required, className, disabled,
+  placeholder, required, className, disabled, flow,
 }: AddressInputProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  // ТЗ docx 04.11.26 (п.1): номер запиту — відповідь, що прийшла вже після «Далі», ігноруємо.
+  const reqSeq = useRef(0);
 
   // Click-outside closes the dropdown.
   useEffect(() => {
@@ -62,12 +66,14 @@ export function AddressInput({
       return;
     }
     debounceRef.current = setTimeout(async () => {
+      const my = ++reqSeq.current;
       try {
         const res = await fetch(
           `/api/addresses/suggest?field=${field}&country=${encodeURIComponent(country)}&q=${encodeURIComponent(q)}`
         );
         if (!res.ok) return;
         const data: string[] = await res.json();
+        if (my !== reqSeq.current) return;
         setSuggestions(data);
         setOpen(data.length > 0);
       } catch {
@@ -119,6 +125,16 @@ export function AddressInput({
         // Browsers' built-in autofill for city/street competes with our own
         // suggestion list — disable it so the user only sees our history.
         autoComplete="off"
+        data-flow={flow ? '' : undefined}
+        enterKeyHint={flow ? 'next' : undefined}
+        // ТЗ docx 04.11.26 (п.1): «Далі» з відкритою підказкою — підказку закриваємо.
+        // Скасовуємо і запит підказок, що ще чекає (інакше він відкриє список уже після переходу).
+        onKeyDown={(e) => {
+          if (e.key !== 'Enter') return;
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          reqSeq.current++;
+          setOpen(false);
+        }}
       />
       {open && (
         <div className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">

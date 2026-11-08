@@ -185,3 +185,15 @@ export async function withItnRetry<T>(
   }
   throw lastError ?? new Error('ITN retry exhausted');
 }
+
+/**
+ * ТЗ docx 04.11.26 (п.8): при додаванні/видаленні місць у формі редагування оновлюємо
+ * частину «місця» внутрішнього номера (як у generateInternalNumber: одне місце — «1»,
+ * кілька — «1/N»): «112 Wien 1, 04.11.2026» → «112 Wien 1/4, 04.11.2026». Порядковий
+ * номер, місто й дата лишаються як були. Якщо формат номера інший — не чіпаємо.
+ */
+export function withPlacesCount(internalNumber: string, totalPlaces: number): string {
+  const m = /^(.*\S)\s+\d+(?:\/\d+)?(,\s*\d{2}\.\d{2}\.\d{4})$/.exec(internalNumber);
+  if (!m) return internalNumber;
+  return `${m[1]} ${totalPlaces > 1 ? `1/${totalPlaces}` : '1'}${m[2]}`;
+}

@@ -18,6 +18,15 @@ export function displayParcelNumber(internalNumber: string, journeyNumber?: numb
 }
 
 /**
+ * ТЗ docx 03.11.26 (Посилка, п.4): у шапці посилки з «Wien 1, Рейс: 05.11.2026(AT)»
+ * прибрано «1» (суфікс місць внутрішнього номера) і «, Рейс:». Кількість місць тепер
+ * показує локальний номер («106/3»), тож тут лишається саме місто: «Wien», «Wien 10».
+ */
+export function parcelCityLabel(internalNumber: string): string {
+  return displayParcelNumber(internalNumber).replace(/\s+\d+(?:\/\d+)?$/, '');
+}
+
+/**
  * ТЗ docx 12.10.26: старий порядковий номер на початку («13 Rosmalen 1, 03.10.2026» →
  * «Rosmalen 1, 03.10.2026»). Дату лишаємо — там, де її показували й раніше.
  */

@@ -49,3 +49,37 @@ export function orderTripItems<T>(
     })
     .map((x) => x.t);
 }
+
+interface LeadAddr {
+  city?: string | null;
+  postalCode?: string | null;
+  street?: string | null;
+  building?: string | null;
+}
+
+/**
+ * ТЗ docx 03.11.26 (Рейси, п.2): перший елемент у рядку запису залежить від групування:
+ *  • «Місто»  — місто (тієї країни, що фігурує в посилці) іде першим;
+ *  • «Індекс» — першим поштовий індекс;
+ *  • «Номер»  — першим локальний номер посилки («106», «106/3»).
+ * ТЗ docx 03.11.26 (Посилка, п.2): за замовчуванням (без іншого групування) першим —
+ * локальний номер; і в Рейсах, і в Маршрутах. `lead` — те, що показуємо першим (жирним),
+ * `rest` — решта адреси без повтору цього елемента.
+ */
+export function leadOfRecord(
+  addr: LeadAddr | null | undefined,
+  mode: TripGroupMode,
+  localNumber: string,
+): { lead: string; rest: string } {
+  const postal = (addr?.postalCode ?? '').trim().toUpperCase();
+  const city = (addr?.city ?? '').trim();
+  const street = [addr?.street, addr?.building].filter(Boolean).join(' ').trim();
+  if (mode === 'city' && city) {
+    return { lead: city, rest: [postal, street].filter(Boolean).join(', ') };
+  }
+  if (mode === 'postal' && postal) {
+    return { lead: postal, rest: [city, street].filter(Boolean).join(', ') };
+  }
+  const full = [postal, city, street].filter(Boolean).join(', ');
+  return mode === 'number' && localNumber ? { lead: localNumber, rest: full } : { lead: '', rest: full };
+}

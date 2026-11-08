@@ -22,7 +22,9 @@ interface InvoiceSettings {
 
 const PLACEHOLDERS_HELP = [
   '{{name}} — Прізвище Ім\'я платника',
-  '{{amount}} — сума до оплати (EUR)',
+  '{{amount}} — сума до оплати (EUR; при «Оплата в Україні» — у гривнях за курсом продажу євро)',
+  // ТЗ docx 04.11.26 (п.7): «EUR» після {{amount}} у шаблоні сам замінюється на «грн».
+  '{{currency}} — валюта суми: EUR або грн',
   // ТЗ docx 07.10.26: правила формування ІТН затверджено — {{itn}} знову в списку
   // (за ТЗ 03.10.26 його тимчасово прибирали).
   '{{itn}} — ІТН посилки (X-XX-XXXXXX-X)',
@@ -86,8 +88,10 @@ export default function InvoiceSettingsPage() {
     <div className="max-w-2xl">
       <h1 className="text-2xl font-bold mb-2">Реквізити для рахунка</h1>
       <p className="text-sm text-gray-500 mb-4">
-        Реквізити банку та шаблон SMS-рахунка, який надсилається платнику при
-        активації чекбокса «Відправити рахунок» у формі посилки.
+        Реквізити банку та шаблон рахунку, який надсилається платнику (SMS, Viber або
+        WhatsApp — кнопкою рахунку біля Отримувача / Відправника в посилці, або чекбоксом
+        «Відправити рахунок» у формі посилки). При «Оплата в Україні» сума — у гривнях
+        за курсом продажу євро в обмінниках (якщо недоступний — за курсом НБУ).
       </p>
 
       <Card>
@@ -179,7 +183,8 @@ export default function InvoiceSettingsPage() {
 
       <Card className="mt-4">
         <CardHeader className="py-3 px-4">
-          <CardTitle className="text-base">Шаблон SMS-рахунка</CardTitle>
+          {/* ТЗ docx 04.11.26 (п.7): рахунок — не лише SMS, а й Viber / WhatsApp. */}
+          <CardTitle className="text-base">Шаблон рахунку (SMS, Viber, WhatsApp)</CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-0 space-y-3">
           <Textarea

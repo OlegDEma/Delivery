@@ -19,9 +19,8 @@ import { TripSelector, type TripOption } from '@/components/parcels/trip-selecto
 import { CollectionBlock, type CollectionState } from '@/components/parcels/collection-block';
 import { formatWorkingDays, type Weekday } from '@/lib/constants/collection';
 import { PhoneInput } from '@/components/shared/phone-input';
-import { getBillableWeight } from '@/lib/utils/volumetric';
-import { draftVolumetricWeight, draftVolumePayload, placeHasVolumeSource } from '@/lib/parcels/place-volume';
-import { PlaceVolumeInputs } from '@/components/parcels/place-volume-inputs';
+import { PlacesEditor, usePlacesDraft, emptyPlace } from '@/components/parcels/places-editor';
+import { handleFlowEnter, focusFlowElement, focusInvalidField } from '@/lib/ui/focus-flow';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
 import { isPickupPointPricing } from '@/lib/utils/pricing-flags';
 import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
@@ -38,27 +37,16 @@ import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
  *    редагуванні кнопку 'Створити відправлення'" → внизу одна кнопка
  *    «Зберегти».
  *
+ * ТЗ docx 04.11.26 (п.8): «повинна відкриватись така сама форма (з тими самими механізмами)
+ * як і при створенні». «Параметри відправлення» — той самий блок, що у створенні
+ * (PlacesEditor: «+ Додати місце», «Загальні параметри», копіювання), «Додаткові послуги» —
+ * внизу перед кнопкою, як у створенні; нові місця сервер тепер зберігає (посилка 301).
+ *
  * Сторони (Отримувач/Відправник) показуються READ-ONLY — їхні поля
  * редагуються окремо через кнопку-олівець на сторінці посилки
  * (`ParcelPartyEdit`), бо PATCH /api/parcels/[id] не змінює власне
  * посилання на клієнтів. Це чесне обмеження — повідомляємо у формі.
  */
-
-interface PlaceDraft {
-  id?: string;
-  weight: string;
-  length: string;
-  width: string;
-  height: string;
-  volume: string;
-  /** ТЗ docx 28.10.26: віконце «Об'ємна вага» (пов'язане з «Або об'єм»). */
-  volWeight: string;
-  needsPackaging: boolean;
-}
-
-const emptyPlace = (): PlaceDraft => ({
-  weight: '', length: '', width: '', height: '', volume: '', volWeight: '', needsPackaging: false,
-});
 
 interface ParcelData {
   id: string;
@@ -76,6 +64,8 @@ interface ParcelData {
   needsPackaging: boolean;
   doorstepDelivery: boolean;
   parcelMoneyAmount: number | string | null;
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR). */
+  npSurcharge: number | string | null;
   payer: string;
   paymentMethod: string;
   paymentInUkraine: boolean;
@@ -139,19 +129,19 @@ export default function EditParcelPage() {
   const [changePickup, setChangePickup] = useState(false);
   const [parcelMoneyEnabled, setParcelMoneyEnabled] = useState(false);
   const [parcelMoneyAmount, setParcelMoneyAmount] = useState('');
+  // ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR).
+  const [npSurchargeEnabled, setNpSurchargeEnabled] = useState(false);
+  const [npSurchargeAmount, setNpSurchargeAmount] = useState('');
+  const npSurcharge = npSurchargeEnabled ? Number(npSurchargeAmount) || 0 : 0;
   const [payer, setPayer] = useState('sender');
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [paymentInUkraine, setPaymentInUkraine] = useState(false);
   const [sendInvoice, setSendInvoice] = useState(false);
   const [invoicePhone, setInvoicePhone] = useState('');
 
-  // General params toggle (UI-only — backend завжди приймає places).
-  const [useGeneralParams, setUseGeneralParams] = useState(false);
-  const [generalWeight, setGeneralWeight] = useState('');
-  const [generalVolume, setGeneralVolume] = useState('');
-  const [generalPlaces, setGeneralPlaces] = useState('1');
-
-  const [places, setPlaces] = useState<PlaceDraft[]>([emptyPlace()]);
+  // ТЗ docx 04.11.26 (п.8): ті самі «Параметри відправлення», що й у створенні.
+  const placesDraft = usePlacesDraft();
+  const { places, setPlaces } = placesDraft;
 
   const [collection, setCollection] = useState<CollectionState>({
     method: '', pointId: '', date: '', address: '', isMultiParcelPickup: null,
@@ -187,6 +177,9 @@ export default function EditParcelPage() {
       const pmAmt = p.parcelMoneyAmount != null ? Number(p.parcelMoneyAmount) : 0;
       setParcelMoneyEnabled(pmAmt > 0);
       setParcelMoneyAmount(pmAmt > 0 ? String(pmAmt) : '');
+      const npsAmt = p.npSurcharge != null ? Number(p.npSurcharge) : 0;
+      setNpSurchargeEnabled(npsAmt > 0);
+      setNpSurchargeAmount(npsAmt > 0 ? String(npsAmt) : '');
       setPayer(p.payer || 'sender');
       setPaymentMethod(p.paymentMethod || 'cash');
       setPaymentInUkraine(!!p.paymentInUkraine);
@@ -217,7 +210,7 @@ export default function EditParcelPage() {
       setError('Помилка завантаження');
       setLoading(false);
     });
-  }, [id]);
+  }, [id, setPlaces]);
 
   // ТЗ docx 26.07.26 (п.1): edit-сторінка доступна лише для статусу «Створена»
   // і лише автору (super_admin — виняток). Інакше повертаємо на детальну з
@@ -249,28 +242,6 @@ export default function EditParcelPage() {
     if (checked) setPaymentMethod('cashless');
   }
 
-  function addPlace() {
-    if (places.length >= 10) return;
-    setPlaces([...places, emptyPlace()]);
-  }
-  function copyPlace(i: number) {
-    if (places.length >= 10) return;
-    setPlaces([...places, { ...places[i], id: undefined }]);
-  }
-  function removePlace(i: number) {
-    if (places.length <= 1) return;
-    setPlaces(places.filter((_, idx) => idx !== i));
-  }
-  function updatePlace(i: number, field: keyof PlaceDraft, value: string | boolean) {
-    const u = [...places];
-    u[i] = { ...u[i], [field]: value };
-    setPlaces(u);
-  }
-  // ТЗ docx 28.10.26: «Об'ємна вага» і «Або об'єм» змінюються парою.
-  function patchPlace(i: number, patch: Partial<PlaceDraft>) {
-    setPlaces(prev => prev.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
-  }
-
   const direction = parcel?.direction || 'eu_to_ua';
   const senderCountry =
     parcel?.sender?.country
@@ -289,40 +260,27 @@ export default function EditParcelPage() {
   const declaredCurrencyLabel = parcel?.declaredValueCurrency === 'UAH' || senderInUA ? 'грн' : 'EUR';
   const declaredCurrency = (parcel?.declaredValueCurrency || (senderInUA ? 'UAH' : 'EUR')) as 'UAH' | 'EUR';
 
-  const totalWeight = useGeneralParams
-    ? (Number(generalWeight) || 0)
-    : places.reduce((s, p) => s + (Number(p.weight) || 0), 0);
-  const totalVolWeight = useGeneralParams
-    ? (Number(generalVolume) || 0) * 250
-    : places.reduce((s, p) => s + draftVolumetricWeight(p), 0);
+  const totalWeight = placesDraft.totalWeight;
+  const totalVolWeight = placesDraft.totalVolWeight;
+
+  // ТЗ docx 04.11.26 (п.3): незаповнене віконце — нагадування + курсор у нього з підсвіткою.
+  function failAt(message: string, field: string) {
+    setError(message);
+    focusInvalidField(field);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!parcel) return;
     setError('');
 
-    if (useGeneralParams) {
-      if (!generalWeight || Number(generalWeight) <= 0) { setError('Вкажіть загальну вагу'); return; }
-      if (!generalVolume || Number(generalVolume) <= 0) {
-        setError('Вкажіть загальний об\'єм (м³) — об\'ємна вага не може бути нульовою'); return;
-      }
-    } else {
-      if (!places.some(p => Number(p.weight) > 0)) {
-        setError('Вкажіть вагу хоча б одного місця'); return;
-      }
-      // ТЗ (docx 13.06.26): кожне місце з вагою має мати Д/Ш/В АБО об'єм.
-      // ТЗ docx 28.10.26: або об'ємну вагу, введену напряму.
-      const badPlace = places.findIndex(p => {
-        if (Number(p.weight) <= 0) return false;
-        return !placeHasVolumeSource(p);
-      });
-      if (badPlace !== -1) {
-        setError(`Місце ${badPlace + 1}: вкажіть довжину/ширину/висоту, об'ємну вагу АБО об'єм (м³) — об'ємна вага не може бути нульовою`);
-        return;
-      }
-    }
     if (!declaredValue || Number(declaredValue) <= 0) {
-      setError('Вкажіть оголошену вартість'); return;
+      failAt('Вкажіть оголошену вартість', '[data-field="declared-value"]'); return;
+    }
+    const placesError = placesDraft.validate();
+    if (placesError) { failAt(placesError.message, placesError.field); return; }
+    if (npSurchargeEnabled && !(Number(npSurchargeAmount) > 0)) {
+      failAt('Вкажіть суму «Доплати за НП» (EUR) або зніміть позначку', '[data-field="np-surcharge"]'); return;
     }
     if (
       direction === 'eu_to_ua' &&
@@ -334,24 +292,9 @@ export default function EditParcelPage() {
 
     setSaving(true);
 
-    // Map places. У PATCH передаємо лише id+поля; нові місця — без id (бекенд
-    // ігнорує — додавання нових місць у PATCH не підтримане, але це не
-    // блокує редагування існуючих).
-    const placesPayload = useGeneralParams
-      ? Array.from({ length: Number(generalPlaces) || 1 }, () => ({
-          weight: (Number(generalWeight) || 0) / (Number(generalPlaces) || 1),
-          length: undefined, width: undefined, height: undefined,
-          volume: Number(generalVolume) > 0 ? Number(generalVolume) / (Number(generalPlaces) || 1) : undefined,
-        }))
-      : places.map(p => ({
-          id: p.id,
-          weight: Number(p.weight) || 0,
-          length: Number(p.length) || undefined,
-          width: Number(p.width) || undefined,
-          height: Number(p.height) || undefined,
-          ...draftVolumePayload(p),
-          needsPackaging: p.needsPackaging,
-        }));
+    // ТЗ docx 04.11.26 (п.8): наявні місця — з id (оновлюються), нові — без id (сервер їх
+    // створює і перенумеровує всі місця «1/N»). «Загальні параметри» замінюють місця.
+    const placesPayload = placesDraft.payload();
 
     const res = await fetch(`/api/parcels/${id}`, {
       method: 'PATCH',
@@ -368,6 +311,8 @@ export default function EditParcelPage() {
           parcelMoneyEnabled && Number(parcelMoneyAmount) > 0
             ? Number(parcelMoneyAmount)
             : null,
+        // ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR); null — без доплати.
+        npSurcharge: npSurcharge > 0 ? npSurcharge : null,
         payer,
         paymentMethod,
         paymentInUkraine,
@@ -411,11 +356,8 @@ export default function EditParcelPage() {
   const PAYER_LABELS: Record<string, string> = { sender: 'Відправник', receiver: 'Отримувач' };
   const PAYMENT_LABELS: Record<string, string> = { cash: 'Готівка', cashless: 'Безготівка' };
 
-  // Compute Розрахункова вага по правилу тарифу (Bug 5).
-  const cfg = pricingConfigs.find(c => c.country === senderCountry && c.direction === direction);
-  const weightType = (cfg?.weightType || 'custom') as 'actual'|'volumetric'|'average'|'custom';
-  const ffrac = cfg?.weightCustomFactualFraction ?? 0.5;
-  const billable = getBillableWeight(totalWeight, totalVolWeight, weightType, ffrac);
+  // Правило тарифу для «Розрахункової ваги» (Bug 5) — у PlacesEditor.
+  const weightRule = pricingConfigs.find(c => c.country === senderCountry && c.direction === direction) ?? null;
 
   return (
     <div className="max-w-2xl">
@@ -427,7 +369,8 @@ export default function EditParcelPage() {
       ]} />
       <h1 className="text-2xl font-bold mb-4">Редагувати посилку</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {/* ТЗ docx 04.11.26 (п.1): Enter / «Далі» — Оголошена вартість → Вага → Об'ємна вага. */}
+      <form onSubmit={handleSubmit} onKeyDown={handleFlowEnter} className="space-y-4">
         {/* Direction — read-only (PATCH не змінює напрямок). */}
         <Card>
           <CardHeader className="py-3 px-4"><CardTitle className="text-base">Напрямок</CardTitle></CardHeader>
@@ -562,163 +505,27 @@ export default function EditParcelPage() {
               <Label>
                 Оголошена вартість ({declaredCurrencyLabel})
               </Label>
-              <Input type="number" step="0.01" min="0" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} placeholder="0.00" />
-            </div>
-
-            <div className="rounded-lg border p-3 bg-gray-50">
-              <div className="flex items-center gap-2">
-                <Checkbox id="insurance-cb" checked={insurance || insuranceAuto} disabled={insuranceAuto} onCheckedChange={(c) => setInsurance(c === true)} />
-                <Label htmlFor="insurance-cb" className="text-sm font-medium cursor-pointer">
-                  Страхування{' '}
-                  <FieldHint text="При активації до вартості додається % від Оголошеної вартості." />
-                </Label>
-              </div>
-            </div>
-
-            <div className="rounded-lg border p-3 bg-gray-50">
-              <div className="flex items-center gap-2">
-                <Checkbox id="packaging-cb" checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
-                <Label htmlFor="packaging-cb" className="text-sm font-medium cursor-pointer">
-                  Пакування{' '}
-                  <FieldHint text="Відмітьте, якщо пакунок не є у коробці." />
-                </Label>
-              </div>
-            </div>
-
-            {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням.
-                ТЗ docx 02.07.26 (D4): лише Європа→Україна + Адресна доставка. */}
-            {canDoorstep && (
-            <div className="rounded-lg border p-3 bg-gray-50">
-              <div className="flex items-center gap-2">
-                <Checkbox id="doorstep-cb" checked={doorstepDelivery} onCheckedChange={(c) => setDoorstepDelivery(c === true)} />
-                <Label htmlFor="doorstep-cb" className="text-sm font-medium cursor-pointer">
-                  Доставка до порога будинку{' '}
-                  <FieldHint text="До вартості додається фіксована сума з Тарифів для цього напрямку." />
-                </Label>
-              </div>
-            </div>
-            )}
-
-            <div className="rounded-lg border p-3 bg-gray-50 space-y-2">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="parcel-money-cb"
-                  checked={parcelMoneyEnabled}
-                  onCheckedChange={(c) => {
-                    const enabled = c === true;
-                    setParcelMoneyEnabled(enabled);
-                    if (!enabled) setParcelMoneyAmount('');
-                  }}
-                />
-                <Label htmlFor="parcel-money-cb" className="text-sm font-medium cursor-pointer">Пакет</Label>
-              </div>
-              {parcelMoneyEnabled && (
-                <Input
-                  type="number" inputMode="decimal" step="0.01" min="0"
-                  value={parcelMoneyAmount}
-                  onChange={(e) => setParcelMoneyAmount(e.target.value)}
-                  placeholder="Сума у віконці «Пакет»"
-                />
-              )}
+              {/* ТЗ docx 04.11.26 (п.2): цифрова клавіатура. */}
+              <Input
+                type="number" inputMode="decimal" step="0.01" min="0"
+                value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} placeholder="0.00"
+                data-field="declared-value" data-flow="" enterKeyHint="next"
+              />
             </div>
           </CardContent>
         </Card>
 
-        {/* Places. У РЕЖИМІ РЕДАГУВАННЯ:
-            — «+ Додати місце» приховане (PATCH-роут не створює нові місця);
-            — «Загальні параметри» приховані (стирання ID існуючих місць
-              викликало б їх видалення на бекенді).
-            Якщо потрібна реструктуризація місць — створюється нова посилка. */}
+        {/* ТЗ docx 04.11.26 (п.8): «Параметри відправлення» — той самий блок, що у створенні
+            (раніше тут не було «+ Додати місце» і «Загальних параметрів», а нові місця сервер
+            відкидав). */}
         <Card>
           <CardHeader className="py-3 px-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">
-                Параметри відправлення <FieldHint text="Редагуйте вагу та розміри існуючих місць. Для реструктуризації створіть нову посилку." />
-              </CardTitle>
-            </div>
+            <CardTitle className="text-base">
+              Параметри відправлення <FieldHint text="Введіть загальні параметри (вага+об'єм+кількість місць) або детально по кожному місцю." />
+            </CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 space-y-3">
-            {useGeneralParams ? (
-              <div className="border rounded-lg p-3 space-y-2">
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <Label className="text-xs">Загальна вага (кг)</Label>
-                    <Input type="number" step="0.01" min="0" value={generalWeight} onChange={(e) => setGeneralWeight(e.target.value)} className="text-base" />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Загальний об&apos;єм (м&sup3;)</Label>
-                    <Input type="number" step="0.001" min="0" value={generalVolume} onChange={(e) => setGeneralVolume(e.target.value)} />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Кількість місць</Label>
-                    <Input type="number" step="1" min="1" max="10" value={generalPlaces} onChange={(e) => setGeneralPlaces(e.target.value)} />
-                  </div>
-                </div>
-                {Number(generalVolume) > 0 && (
-                  <div className="text-xs text-gray-500">
-                    Об&apos;ємна вага: <span className="font-medium">{(Number(generalVolume) * 250).toFixed(2)} кг</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                {places.map((place, i) => (
-                  <div key={place.id || `new-${i}`} className="border rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Місце {i + 1}</span>
-                      <div className="flex gap-1">
-                        <Button type="button" variant="ghost" size="sm" onClick={() => copyPlace(i)} title="Копіювати місце">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                        </Button>
-                        {places.length > 1 && (
-                          <Button type="button" variant="ghost" size="sm" onClick={() => removePlace(i)} className="text-red-500 hover:text-red-700">×</Button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      <div>
-                        <Label className="text-xs">Вага (кг)</Label>
-                        <Input type="number" step="0.01" min="0" value={place.weight} onChange={(e) => updatePlace(i, 'weight', e.target.value)} className="text-base" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Довжина (см)</Label>
-                        <Input type="number" step="1" min="0" value={place.length} onChange={(e) => updatePlace(i, 'length', e.target.value)} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Ширина (см)</Label>
-                        <Input type="number" step="1" min="0" value={place.width} onChange={(e) => updatePlace(i, 'width', e.target.value)} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Висота (см)</Label>
-                        <Input type="number" step="1" min="0" value={place.height} onChange={(e) => updatePlace(i, 'height', e.target.value)} />
-                      </div>
-                    </div>
-                    {/* ТЗ docx 28.10.26: «Об'ємна вага» під «Вага», «Або об'єм» — правіше. */}
-                    <PlaceVolumeInputs place={place} onChange={(patch) => patchPlace(i, patch)} />
-                  </div>
-                ))}
-              </>
-            )}
-
-            {/* Totals — Розрахункова по правилу тарифу (Bug 5). */}
-            <div className="bg-gray-50 rounded-lg p-3 text-sm">
-              <div className="flex justify-between">
-                <span>Фактична вага:</span>
-                <span className="font-medium">{totalWeight.toFixed(2)} кг</span>
-              </div>
-              {totalVolWeight > 0 && (
-                <div className="flex justify-between">
-                  <span>Об&apos;ємна вага:</span>
-                  <span className="font-medium">{totalVolWeight.toFixed(2)} кг</span>
-                </div>
-              )}
-              <div className="flex justify-between font-medium border-t mt-1 pt-1">
-                <span>Розрахункова вага:</span>
-                <span>{billable.toFixed(2)} кг</span>
-              </div>
-            </div>
+          <CardContent className="px-4 pb-4 pt-0">
+            <PlacesEditor draft={placesDraft} weightRule={weightRule} />
           </CardContent>
         </Card>
 
@@ -806,7 +613,107 @@ export default function EditParcelPage() {
           isMultiParcelPickup={!!collection.isMultiParcelPickup}
           parcelMoneyAmount={parcelMoneyEnabled ? Number(parcelMoneyAmount) || 0 : 0}
           receiverCity={parcel.receiverAddress?.city || ''}
+          npSurcharge={npSurcharge}
         />
+
+        {/* ТЗ docx 11.10.26 / 04.11.26 (п.8): «Додаткові послуги» — внизу, перед кнопкою, як у формі
+            створення. ТЗ docx 04.11.26 (п.5): разом із «Доплатою за НП». */}
+        <Card>
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-base">Додаткові послуги</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 pt-0 space-y-3">
+            <div className="rounded-lg border p-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <Checkbox id="insurance-cb" checked={insurance || insuranceAuto} disabled={insuranceAuto} onCheckedChange={(c) => setInsurance(c === true)} />
+                <Label htmlFor="insurance-cb" className="text-sm font-medium cursor-pointer">
+                  Страхування{' '}
+                  <FieldHint text="При активації до вартості додається % від Оголошеної вартості." />
+                </Label>
+              </div>
+            </div>
+
+            <div className="rounded-lg border p-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <Checkbox id="packaging-cb" checked={needsPackaging} onCheckedChange={(c) => setNeedsPackaging(c === true)} />
+                <Label htmlFor="packaging-cb" className="text-sm font-medium cursor-pointer">
+                  Пакування{' '}
+                  <FieldHint text="Відмітьте, якщо пакунок не є у коробці." />
+                </Label>
+              </div>
+            </div>
+
+            {/* ТЗ docx 01.07.26: «Доставка до порога будинку» — під Пакуванням.
+                ТЗ docx 02.07.26 (D4): лише Європа→Україна + Адресна доставка. */}
+            {canDoorstep && (
+            <div className="rounded-lg border p-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <Checkbox id="doorstep-cb" checked={doorstepDelivery} onCheckedChange={(c) => setDoorstepDelivery(c === true)} />
+                <Label htmlFor="doorstep-cb" className="text-sm font-medium cursor-pointer">
+                  Доставка до порога будинку{' '}
+                  <FieldHint text="До вартості додається фіксована сума з Тарифів для цього напрямку." />
+                </Label>
+              </div>
+            </div>
+            )}
+
+            <div className="rounded-lg border p-3 bg-gray-50 space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="parcel-money-cb"
+                  checked={parcelMoneyEnabled}
+                  onCheckedChange={(c) => {
+                    const enabled = c === true;
+                    setParcelMoneyEnabled(enabled);
+                    if (!enabled) setParcelMoneyAmount('');
+                  }}
+                />
+                <Label htmlFor="parcel-money-cb" className="text-sm font-medium cursor-pointer">Пакет</Label>
+              </div>
+              {parcelMoneyEnabled && (
+                <Input
+                  type="number" inputMode="decimal" step="0.01" min="0"
+                  value={parcelMoneyAmount}
+                  onChange={(e) => setParcelMoneyAmount(e.target.value)}
+                  placeholder="Сума у віконці «Пакет»"
+                />
+              )}
+            </div>
+
+            {/* ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR) — додається до вартості до оплати. */}
+            <div className="rounded-lg border p-3 bg-gray-50 space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="np-surcharge-cb"
+                  checked={npSurchargeEnabled}
+                  onCheckedChange={(c) => {
+                    const enabled = c === true;
+                    setNpSurchargeEnabled(enabled);
+                    if (!enabled) setNpSurchargeAmount('');
+                    else setTimeout(() => focusFlowElement(document.querySelector<HTMLElement>('[data-field="np-surcharge"]')), 30);
+                  }}
+                />
+                <Label htmlFor="np-surcharge-cb" className="text-sm font-medium cursor-pointer">
+                  Доплата за НП{' '}
+                  <FieldHint text="Сума в євро, на яку збільшується загальна вартість до оплати за посилку." />
+                </Label>
+              </div>
+              {npSurchargeEnabled && (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number" inputMode="decimal" step="0.01" min="0"
+                    value={npSurchargeAmount}
+                    onChange={(e) => setNpSurchargeAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="max-w-[10rem]"
+                    data-field="np-surcharge"
+                  />
+                  <span className="text-sm text-gray-600">EUR</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">{error}</div>

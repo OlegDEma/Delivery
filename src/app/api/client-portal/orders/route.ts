@@ -43,6 +43,8 @@ export async function GET() {
       senderAddress: { select: { country: true, city: true, street: true, building: true, postalCode: true, landmark: true } },
       // ТЗ docx 04.10.26: «Створена клієнтом/водієм/…» — лише роль автора.
       createdBy: { select: { role: true } },
+      // ТЗ docx 03.11.26 (п.5): країна рейсу — «Прийнято до перевезення в Нідерланди».
+      trip: { select: { country: true } },
       statusHistory: {
         orderBy: { changedAt: 'desc' },
         take: 1,

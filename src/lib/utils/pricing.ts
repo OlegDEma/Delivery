@@ -129,6 +129,11 @@ export interface ParcelCostInput {
    * заданий `lvivPricePerKg`, застосовується знижена ціна за кг.
    */
   receiverCity?: string | null;
+  /**
+   * ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR) — сума, введена Працівником у
+   * «Додаткових послугах»; загальна вартість збільшується рівно на неї.
+   */
+  npSurcharge?: number | null;
 }
 
 /**
@@ -168,6 +173,8 @@ export interface CostBreakdown {
   /** @deprecated тепер вкладено в deliveryCost (мінімум). Завжди 0. */
   pickupPointCost: number;
   parcelMoneyCost: number;
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR), як введено. */
+  npSurchargeCost: number;
   totalCost: number;
   billableWeight: number;
 }
@@ -296,8 +303,11 @@ export function calculateParcelCost(
     doorstepCost = roundMoney(config.doorstepPrice!);
   }
 
+  // 7. ТЗ docx 04.11.26 (п.5): «Доплата за НП» — фіксована сума в євро, додається зверху.
+  const npSurchargeCost = parcel.npSurcharge && parcel.npSurcharge > 0 ? roundMoney(parcel.npSurcharge) : 0;
+
   const totalCost = roundMoney(
-    deliveryCost + insuranceCost + packagingCost + parcelMoneyCost + doorstepCost
+    deliveryCost + insuranceCost + packagingCost + parcelMoneyCost + doorstepCost + npSurchargeCost
   );
 
   return {
@@ -316,6 +326,7 @@ export function calculateParcelCost(
     addressDeliveryCost: 0,
     pickupPointCost: 0,
     parcelMoneyCost,
+    npSurchargeCost,
     totalCost,
     billableWeight,
   };

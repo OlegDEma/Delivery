@@ -10,13 +10,18 @@
  */
 
 import { STATUS_LABELS, type ParcelStatusType } from '@/lib/constants/statuses';
-import { COUNTRY_LABELS_GENITIVE, type CountryCode } from '@/lib/constants/countries';
+import { COUNTRY_LABELS_GENITIVE, COUNTRY_LABELS_ACCUSATIVE, type CountryCode } from '@/lib/constants/countries';
 
 interface StatusContext {
   /** Країна рейсу (UA / NL / AT / DE) — якщо посилка прив'язана до рейсу. */
   tripCountry?: string | null;
   /** Напрямок — fallback коли рейсу ще нема. */
   direction?: string | null;
+  /**
+   * ТЗ docx 03.11.26 (п.5): країна Отримувача — коли рейсу ще немає, «Прийнято до
+   * перевезення в Нідерланди» береться з неї (а не загальне «в Європу»).
+   */
+  destCountry?: string | null;
   /** ТЗ docx 04.10.26: джерело створення (client_web / client_telegram / worker). */
   createdSource?: string | null;
   /** ТЗ docx 04.10.26: роль того, хто створив посилку (profiles.role). */
@@ -61,7 +66,7 @@ export function statusLabel(status: ParcelStatusType | string, ctx: StatusContex
       return 'UA';
     }
     if (status === 'in_transit_to_eu' || status === 'accepted_for_transport_to_eu') {
-      const t = ctx.tripCountry;
+      const t = ctx.tripCountry || (ctx.destCountry && ctx.destCountry !== 'UA' ? ctx.destCountry : null);
       if (t && t in COUNTRY_LABELS_GENITIVE) return t as CountryCode;
       return null;
     }
@@ -75,7 +80,11 @@ export function statusLabel(status: ParcelStatusType | string, ctx: StatusContex
     return `В дорозі до ${gen}`;
   }
   if (status === 'accepted_for_transport_to_ua' || status === 'accepted_for_transport_to_eu') {
-    return `Прийнято до перевезення до ${gen}`;
+    // ТЗ docx 03.11.26 (п.5): «Має бути чітко визначено країну — куди саме прийнято до
+    // перевезення»: «Прийнято до перевезення в Україну» / «… в Нідерланди» (знахідний
+    // відмінок), а не «до України». Ця функція — єдине джерело підпису статусу для
+    // посилки, списків, рейсів, кабінету Клієнта і відстеження.
+    return `Прийнято до перевезення в ${COUNTRY_LABELS_ACCUSATIVE[destCountry]}`;
   }
   return base;
 }

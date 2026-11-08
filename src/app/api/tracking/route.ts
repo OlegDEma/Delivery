@@ -84,6 +84,10 @@ export async function GET(request: NextRequest) {
     status: parcel.status,
     direction: parcel.direction,
     routeLabel: parcelRouteLabel(parcel),
+    // ТЗ docx 03.11.26 (п.5): країна рейсу — для «Прийнято до перевезення в Нідерланди».
+    tripCountry: parcel.trip?.country ?? null,
+    // Немає рейсу — країна Отримувача (для UA→EU це і є країна призначення).
+    destCountry: parcelParties(parcel).receiver.address?.country ?? null,
     totalPlacesCount: parcel.totalPlacesCount,
     createdAt: parcel.createdAt,
     receiverCity: parcelParties(parcel).receiver.address?.city || null,

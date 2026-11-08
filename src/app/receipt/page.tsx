@@ -6,7 +6,8 @@ import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { STATUS_LABELS, STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { STATUS_COLORS, type ParcelStatusType } from '@/lib/constants/statuses';
+import { statusLabel } from '@/lib/parcels/status-label';
 import { formatDateTime } from '@/lib/utils/format';
 
 interface ReceiptData {
@@ -15,6 +16,9 @@ interface ReceiptData {
   direction: string;
   /** ТЗ docx 09.10.26: напрямок з конкретною країною (з /api/tracking). */
   routeLabel?: string;
+  /** ТЗ docx 03.11.26 (п.5): країна рейсу для підпису статусу. */
+  tripCountry?: string | null;
+  destCountry?: string | null;
   totalPlacesCount: number;
   createdAt: string;
   receiverCity: string | null;
@@ -53,7 +57,7 @@ function ReceiptContent() {
             <div className="text-center">
               <div className="text-xl font-mono font-bold">{data.internalNumber}</div>
               <Badge className={`mt-2 ${STATUS_COLORS[data.status]}`}>
-                {STATUS_LABELS[data.status]}
+                {statusLabel(data.status, { tripCountry: data.tripCountry, destCountry: data.destCountry, direction: data.direction })}
               </Badge>
             </div>
 
@@ -85,7 +89,7 @@ function ReceiptContent() {
                   <div key={i} className="flex gap-2 text-sm">
                     <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${i === 0 ? 'bg-blue-500' : 'bg-gray-300'}`} />
                     <div>
-                      <div className="font-medium">{STATUS_LABELS[h.status] || h.status}</div>
+                      <div className="font-medium">{statusLabel(h.status, { tripCountry: data.tripCountry, destCountry: data.destCountry, direction: data.direction })}</div>
                       <div className="text-xs text-gray-400">{formatDateTime(h.changedAt)}</div>
                     </div>
                   </div>

@@ -59,6 +59,7 @@ The hardest bug in this project's history: PATCH `/api/parcels/[id]` used to onl
 - `insuranceApplied`
 - `needsPackaging`
 - `parcelMoneyAmount`
+- `npSurcharge` («Доплата за НП», ТЗ 04.11.26)
 - `collectionMethod`
 - `collectionPointId`
 

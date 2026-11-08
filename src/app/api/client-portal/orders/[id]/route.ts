@@ -358,6 +358,8 @@ export async function PUT(
     isMultiParcelPickup: false,
     parcelMoneyAmount: parcel.parcelMoneyAmount ? Number(parcel.parcelMoneyAmount) : null,
     isBothDirections,
+    // ТЗ docx 04.11.26 (п.5): «Доплату за НП» ставить Працівник — правка Клієнта її не губить.
+    npSurcharge: parcel.npSurcharge ? Number(parcel.npSurcharge) : null,
   });
 
   // Що змінилось — для журналу операцій посилки (Працівник бачить, що правив Клієнт).

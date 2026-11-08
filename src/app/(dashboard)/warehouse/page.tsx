@@ -127,7 +127,7 @@ export default function WarehousePage() {
 
   const TARGET_STATUS_LABELS: Record<string, string> = { at_lviv_warehouse: '→ На складі у Львові', at_nova_poshta: '→ На Новій пошті', in_transit_to_eu: '→ В дорозі до Європи', in_transit_to_ua: '→ В дорозі до України', delivered_eu: '→ Доставлено (EU)', delivered_ua: '→ Доставлено (UA)' };
 
-  const WAREHOUSE_STATUS_LABELS: Record<string, string> = { in_transit_to_ua: 'В дорозі до UA (прийом з Європи)', at_lviv_warehouse: 'На складі Львів', in_transit_to_eu: 'В дорозі до EU (прийом з НП)', accepted_for_transport_to_ua: 'Прийнято до перевезення (→UA)', accepted_for_transport_to_eu: 'Прийнято до перевезення (→EU)' };
+  const WAREHOUSE_STATUS_LABELS: Record<string, string> = { in_transit_to_ua: 'В дорозі до UA (прийом з Європи)', at_lviv_warehouse: 'На складі Львів', in_transit_to_eu: 'В дорозі до EU (прийом з НП)', accepted_for_transport_to_ua: 'Прийнято до перевезення в Україну', accepted_for_transport_to_eu: 'Прийнято до перевезення в Європу' };
 
   return (
     <div>
@@ -149,9 +149,9 @@ export default function WarehousePage() {
               <SelectItem value="in_transit_to_ua">В дорозі до UA (прийом з Європи)</SelectItem>
               <SelectItem value="at_lviv_warehouse">На складі Львів</SelectItem>
               <SelectItem value="in_transit_to_eu">В дорозі до EU (прийом з НП)</SelectItem>
-              <SelectItem value="accepted_for_transport_to_ua">Прийнято до перевезення (→UA)</SelectItem>
+              <SelectItem value="accepted_for_transport_to_ua">Прийнято до перевезення в Україну</SelectItem>
               <SelectItem value="at_eu_warehouse">На складі у Європі</SelectItem>
-              <SelectItem value="accepted_for_transport_to_eu">Прийнято до перевезення (→EU)</SelectItem>
+              <SelectItem value="accepted_for_transport_to_eu">Прийнято до перевезення в Європу</SelectItem>
             </SelectContent>
           </Select>
         </div>

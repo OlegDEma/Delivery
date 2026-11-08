@@ -6,6 +6,7 @@ import { isUuid } from '@/lib/validators/common';
 import { applyTripStatusCascade } from '@/lib/services/trip-status';
 import { ensureJourneyNumbersForTrip, moveParcelToTrip } from '@/lib/services/journey-numbering';
 import { NOTE_ENTRIES_SELECT } from '@/lib/parcels/list-note';
+import { isTripCompleted, tripLockedResponse } from '@/lib/trips/completed-lock';
 
 // GET /api/trips/[id] — staff only
 export async function GET(
@@ -90,12 +91,12 @@ export async function PATCH(
 
   // ТЗ docx 08.08.26: ЗАВЕРШЕНИЙ рейс редагувати заборонено (дати/місця/нотатки/водії).
   // Зміну статусу (ручне виправлення) лишаємо дозволеною.
-  const EDIT_FIELDS = ['departureDate', 'arrivalDate', 'passengerCapacity', 'notes', 'assignedCourierId', 'secondCourierId'];
-  if (EDIT_FIELDS.some((f) => body[f] !== undefined)) {
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  // Будь-яке поле, крім статусу (прибрати посилку, водії, дати, місця, нотатки…). Статус
+  // лишається — Суперадмін може відкрити рейс назад, щоб щось виправити.
+  if (Object.keys(body ?? {}).some((f) => f !== 'status')) {
     const cur = await prisma.trip.findUnique({ where: { id }, select: { status: true } });
-    if (cur?.status === 'completed') {
-      return NextResponse.json({ error: 'Завершений рейс редагувати заборонено' }, { status: 403 });
-    }
+    if (isTripCompleted(cur?.status)) return tripLockedResponse();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

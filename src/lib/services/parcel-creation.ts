@@ -67,6 +67,8 @@ export interface CreateParcelInput {
   isMultiParcelPickup?: boolean | null;
   /** «Пакет» — money sender transfers to receiver (optional). 0/undef = no Пакет. */
   parcelMoneyAmount?: number | null;
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR) — додається до загальної вартості. */
+  npSurcharge?: number | null;
   /**
    * Send invoice SMS on save (per ТЗ). The /api/parcels POST handler reads
    * this flag separately to call `invoice-sms.ts` after the parcel exists —
@@ -233,6 +235,7 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
     isMultiParcelPickup: !!input.isMultiParcelPickup,
     parcelMoneyAmount: input.parcelMoneyAmount ?? null,
     isBothDirections,
+    npSurcharge: input.npSurcharge ?? null,
   });
   const deliveryCost = breakdown?.deliveryCost ?? 0;
   const packagingCost = breakdown?.packagingCost ?? 0;
@@ -319,6 +322,8 @@ export async function createParcel(input: CreateParcelInput): Promise<CreatedPar
               ? Number(input.parcelMoneyAmount)
               : null,
           parcelMoneyCost: parcelMoneyCost || null,
+          // ТЗ docx 04.11.26 (п.5): «Доплата за НП» — вже врахована в totalCost.
+          npSurcharge: input.npSurcharge && Number(input.npSurcharge) > 0 ? Number(input.npSurcharge) : null,
           totalCost: totalCost || null,
           // Перевірка 22.09.26: спосіб передачі зберігаємо і для UA→EU (клієнт у Львові
           // обирає «Виклик курʼєра»/«Пошта» — раніше вибір мовчки губився і Працівник
@@ -433,6 +438,8 @@ export interface PriceParcelInput {
   isMultiParcelPickup: boolean;
   parcelMoneyAmount: number | null;
   isBothDirections: boolean;
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR). */
+  npSurcharge?: number | null;
 }
 
 /**
@@ -509,6 +516,7 @@ export async function priceParcel(input: PriceParcelInput): Promise<{
       isBothDirections: input.isBothDirections,
       parcelMoneyAmount: input.parcelMoneyAmount ? Number(input.parcelMoneyAmount) : 0,
       receiverCity: input.receiverCity,
+      npSurcharge: input.npSurcharge ? Number(input.npSurcharge) : 0,
     }
   );
   return { pricingCountry, breakdown };

@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { parseBody } from '@/lib/validators';
 import { isUuid } from '@/lib/validators/common';
 import { logger } from '@/lib/logger';
+import { lockIfTripCompleted } from '@/lib/trips/completed-lock';
 
 const passengerCreateSchema = z.object({
   tripId: z.string().uuid(),
@@ -149,10 +150,14 @@ export async function POST(request: NextRequest) {
   // Перевіряємо що рейс існує і місце (якщо задано) не зайняте.
   const trip = await prisma.trip.findUnique({
     where: { id: body.tripId },
-    select: { id: true, passengerCapacity: true },
+    select: { id: true, passengerCapacity: true, status: true },
   });
   if (!trip) {
     return NextResponse.json({ error: 'Рейс не знайдено' }, { status: 404 });
+  }
+  // ТЗ docx 03.11.26 (п.3): на завершений рейс пасажира не додати.
+  if (trip.status === 'completed') {
+    return NextResponse.json({ error: 'Рейс завершено — додавати пасажирів не можна.', tripCompleted: true }, { status: 409 });
   }
 
   if (body.seatNumber != null) {
@@ -233,6 +238,9 @@ export async function PATCH(request: NextRequest) {
     select: { id: true, tripId: true },
   });
   if (!existing) return NextResponse.json({ error: 'Пасажира не знайдено' }, { status: 404 });
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  const lockedEdit = await lockIfTripCompleted(existing.tripId);
+  if (lockedEdit) return lockedEdit;
 
   // Якщо змінюють місце — перевіряємо, що воно не зайняте ІНШИМ пасажиром рейсу.
   if (body.seatNumber != null) {
@@ -281,8 +289,11 @@ export async function DELETE(request: NextRequest) {
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
 
-  const exists = await prisma.passenger.findFirst({ where: { id, deletedAt: null }, select: { id: true } });
+  const exists = await prisma.passenger.findFirst({ where: { id, deletedAt: null }, select: { id: true, tripId: true } });
   if (!exists) return NextResponse.json({ error: 'Пасажира не знайдено' }, { status: 404 });
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  const lockedDel = await lockIfTripCompleted(exists.tripId);
+  if (lockedDel) return lockedDel;
 
   await prisma.passenger.update({
     where: { id },

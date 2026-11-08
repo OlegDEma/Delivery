@@ -8,6 +8,7 @@ import type { ParcelStatusType } from '@/lib/constants/statuses';
 import { ROLES } from '@/lib/constants/roles';
 import { logger } from '@/lib/logger';
 import { purgeParcelPhotos, PHOTO_PURGE_STATUSES } from '@/lib/services/parcel-photos';
+import { isTripCompleted, tripLockedResponse } from '@/lib/trips/completed-lock';
 
 // POST /api/parcels/bulk-status — change status for multiple parcels (staff only)
 //
@@ -33,8 +34,10 @@ export async function POST(request: NextRequest) {
   // Look up current statuses to validate every transition + reject missing IDs.
   const current = await prisma.parcel.findMany({
     where: { id: { in: parcelIds }, deletedAt: null },
-    select: { id: true, status: true },
+    select: { id: true, status: true, trip: { select: { status: true } } },
   });
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  if (current.some((p) => isTripCompleted(p.trip?.status))) return tripLockedResponse();
   const currentMap = new Map(current.map(p => [p.id, p.status as ParcelStatusType]));
 
   // Reject if any requested IDs don't exist — silent skip would mask client bugs.

@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type ParcelStatusType } from '@/lib/constants/statuses';
 import { COUNTRY_LABELS, type CountryCode } from '@/lib/constants/countries';
-import { formatDate, formatDateWithWeekday } from '@/lib/utils/format';
+import { formatDate } from '@/lib/utils/format';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { ROLES } from '@/lib/constants/roles';
@@ -18,7 +18,9 @@ import { CapitalizeInput } from '@/components/shared/capitalize-input';
 import { toast } from 'sonner';
 import { formatPostalCodeInput } from '@/lib/utils/postal-code';
 import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
-import { formatJourneyNumber } from '@/lib/utils/journey-number';
+import { formatJourneyNumber, formatLocalNumber } from '@/lib/utils/journey-number';
+import { leadOfRecord } from '@/lib/parcels/trip-grouping';
+import { CreateParcelButton } from '@/components/parcels/create-parcel-button';
 import { withCountryCode } from '@/lib/utils/phone';
 import type { PrintListRow } from '@/components/shared/print-list-sheets';
 import { parcelListNote, type NoteEntry } from '@/lib/parcels/list-note';
@@ -732,10 +734,6 @@ export default function RoutesPage() {
   }
 
   const selectedJourney = journeys.find(j => j.id === selectedJourneyId) || null;
-  // ТЗ docx 08.08.26 (v12): у шапці — ПОВНІ імена водіїв (не лише прізвища).
-  const drivers = [selectedJourney?.assignedCourier?.fullName, selectedJourney?.secondCourier?.fullName]
-    .filter(Boolean)
-    .join(', ');
 
   // ТЗ docx 21.08.26: авто-напрямок посилки за «Статусом клієнта» + країною перебування.
   // Тут — країна перебування; other — протилежна сторона поїздки.
@@ -783,6 +781,8 @@ export default function RoutesPage() {
         name: d.name || '',
         direction: p.direction === 'eu_to_ua' ? `${selectedJourney?.country}-UA` : `UA-${selectedJourney?.country}`,
         number: parcelNumberWithJourney(p.internalNumber, p.journeyNumber),
+        parts: a ? { postalCode: a.postalCode, city: a.city, street: a.street, building: a.building } : null,
+        localNo: formatLocalNumber(p.journeyNumber, p.totalPlacesCount),
       };
     }
     return {
@@ -794,8 +794,21 @@ export default function RoutesPage() {
       name: t.manualName || '',
       direction: t.manualDirection || '',
       number: null as string | null,
+      parts: { postalCode: t.postalCode, city: t.manualCity, street: t.manualStreet || t.addressText, building: t.manualStreet ? t.manualBuilding : null },
+      localNo: formatLocalNumber(t.createdParcel?.journeyNumber),
     };
   }
+  /**
+   * ТЗ docx 03.11.26 (Посилка п.2, Рейси п.2): у записі першим іде те, за чим групуємо —
+   * «Місто» → місто, «Індекс» → індекс, «Номер» → локальний номер посилки («106/3»).
+   */
+  function recordLine(parts: ReturnType<typeof addressView>['parts'], localNo: string) {
+    if (!parts) return <>{localNo ? <b className="font-mono mr-1">{localNo}</b> : null}Адресу не вказано</>;
+    const { lead, rest } = leadOfRecord(parts, groupMode, localNo);
+    if (!lead) return <>{rest || 'Адресу не вказано'}</>;
+    return <><b className={groupMode === 'number' ? 'font-mono font-semibold' : 'font-semibold'}>{lead}</b>{rest ? <>{groupMode === 'number' ? ' · ' : ', '}{rest}</> : null}</>;
+  }
+
   // Дані ручної адреси → префіл форми створення посилки (ТЗ 21.08 «Створити посилку»).
   function createParcelHref(rec: {
     // ТЗ docx 11.09.26: id ручної адреси — щоб привʼязати створену з неї посилку.
@@ -921,23 +934,9 @@ export default function RoutesPage() {
         <div>
           {/* ТЗ docx 02.09.26: сторінка називається «Маршрути» — Маршрутні листи нижче. */}
           <h1 className="text-2xl font-bold">Маршрути</h1>
-          {/* ТЗ docx 21.07.26 (п.3): зверху — дата поїздки, прізвища водіїв,
-              номер машини (саме в цьому порядку). Видимі й у друку. */}
-          {/* ТЗ docx 08.08.26 (v12): максимально стисло, БЕЗ підписів полів —
-              країни · дати (виїзд→повернення) · ПОВНІ імена водіїв · транспорт. */}
-          {selectedJourney && (
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-gray-700">
-              <span className="font-semibold">UA → {COUNTRY_LABELS[selectedJourney.country as CountryCode] || selectedJourney.country} → UA</span>
-              <span className="text-gray-300">·</span>
-              <span>
-                {formatDateWithWeekday(selectedJourney.departureDate)}
-                {(selectedJourney.endDate || selectedJourney.euReturnDate) &&
-                  ` → ${formatDateWithWeekday((selectedJourney.endDate || selectedJourney.euReturnDate)!)}`}
-              </span>
-              {drivers && (<><span className="text-gray-300">·</span><span>{drivers}</span></>)}
-              {selectedJourney.vehicleInfo && (<><span className="text-gray-300">·</span><span>{selectedJourney.vehicleInfo}</span></>)}
-            </div>
-          )}
+          {/* ТЗ docx 03.11.26 (Маршрути): рядок «UA → Австрія → UA · дати · водії · транспорт»
+              під заголовком прибрано («Виділене червоним забрати»). Поїздку Суперадмін бачить у
+              селекторі нижче; у друку назва поїздки лишається в заголовку аркуша. */}
         </div>
         {/* ТЗ docx 20.10.26: друк — шаблоном списку рейсу. Відкрито МЛ — друкується він,
             інакше — загальний список адрес (у вибраному групуванні). */}
@@ -1116,9 +1115,9 @@ export default function RoutesPage() {
                         {/* ТЗ docx 11.09.26 (п.3): номер — чорний у посилки, помаранчевий у ручної. */}
                         <span className={`text-xs font-mono shrink-0 ${v.isManual ? 'text-amber-500' : 'text-gray-900'}`}>{ti + 1}.</span>
                         {p ? (
-                          <Link href={`/parcels/${p.id}`} className="min-w-0 flex-1 text-gray-900 hover:text-blue-600 truncate">{v.address}</Link>
+                          <Link href={`/parcels/${p.id}`} className="min-w-0 flex-1 text-gray-900 hover:text-blue-600 truncate">{recordLine(v.parts, v.localNo)}</Link>
                         ) : (
-                          <span className="min-w-0 flex-1 text-gray-900 truncate">{v.address}</span>
+                          <span className="min-w-0 flex-1 text-gray-900 truncate">{recordLine(v.parts, v.localNo)}</span>
                         )}
                         <button type="button" onClick={() => handleRemoveFromSheet(t.id, v.isManual)}
                           className="text-xs text-red-500 hover:text-red-700 shrink-0 print:hidden">Прибрати</button>
@@ -1133,7 +1132,7 @@ export default function RoutesPage() {
                           const slot = parcelSlot(t);
                           if (!slot) return null;
                           if (slot.kind === 'create') {
-                            return <a href={createParcelHref(t)} className="text-blue-600 hover:text-blue-800 font-medium">+ Створити посилку</a>;
+                            return <CreateParcelButton href={createParcelHref(t)} plainAnchor />;
                           }
                           return <Link href={slot.href} className="font-mono text-gray-900 hover:text-blue-600">{slot.text}</Link>;
                         })()}
@@ -1240,7 +1239,7 @@ export default function RoutesPage() {
                           чорний, як і всі решта даних. */}
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-900 font-mono shrink-0">{generalNumberOf.get(p.id)}.</span>
-                        <Link href={`/parcels/${p.id}`} className="min-w-0 flex-1 text-sm text-gray-900 hover:text-blue-600 truncate">{addr}</Link>
+                        <Link href={`/parcels/${p.id}`} className="min-w-0 flex-1 text-sm text-gray-900 hover:text-blue-600 truncate">{a ? recordLine({ postalCode: a.postalCode, city: a.city, street: a.street, building: a.building }, formatLocalNumber(p.journeyNumber, p.totalPlacesCount)) : addr}</Link>
                         <div className="shrink-0">
                           <Checkbox checked={selectedParcelIds.has(p.id)} onCheckedChange={() => toggleParcelSelection(p.id)} />
                         </div>
@@ -1268,7 +1267,7 @@ export default function RoutesPage() {
                       {/* ТЗ docx 11.09.26 (п.2–3): наскрізний номер; у ручної адреси —
                           помаранчевий, і це ЄДИНА відмінність від посилки. */}
                       <span className="text-xs text-amber-500 font-mono shrink-0">{generalNumberOf.get(selId)}.</span>
-                      <span className="min-w-0 flex-1 text-sm text-gray-900 truncate">{addressView(t).address}</span>
+                      <span className="min-w-0 flex-1 text-sm text-gray-900 truncate">{recordLine(addressView(t).parts, addressView(t).localNo)}</span>
                       <div className="shrink-0">
                         <Checkbox checked={selectedParcelIds.has(selId)} onCheckedChange={() => toggleParcelSelection(selId)} />
                       </div>
@@ -1286,7 +1285,7 @@ export default function RoutesPage() {
                         const slot = parcelSlot(t);
                         if (!slot) return null;
                         if (slot.kind === 'create') {
-                          return <a href={createParcelHref(t)} className="text-blue-600 hover:text-blue-800 font-medium">+ Створити посилку</a>;
+                          return <CreateParcelButton href={createParcelHref(t)} plainAnchor />;
                         }
                         return <Link href={slot.href} className="font-mono text-gray-900 hover:text-blue-600">{slot.text}</Link>;
                       })()}

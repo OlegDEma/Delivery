@@ -291,6 +291,7 @@ export const ParcelScalarFieldEnum = {
   isMultiParcelPickup: 'isMultiParcelPickup',
   parcelMoneyAmount: 'parcelMoneyAmount',
   parcelMoneyCost: 'parcelMoneyCost',
+  npSurcharge: 'npSurcharge',
   totalCost: 'totalCost',
   costCurrency: 'costCurrency',
   npTtn: 'npTtn',

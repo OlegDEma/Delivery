@@ -34,6 +34,8 @@ interface CostCalculatorProps {
   parcelMoneyAmount?: number;
   /** Населений пункт Отримувача — для Львів-винятку (§49/§50). */
   receiverCity?: string | null;
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR) — додається до «Всього». */
+  npSurcharge?: number;
   /**
    * ТЗ docx 12.07.26 (п.2): блок показується і Клієнту. clientFacing вмикає
    * нейтральні тексти помилок (без staff-інструкцій «створіть тариф» тощо).
@@ -66,6 +68,8 @@ interface CostCalculatorProps {
     packagingCost: number | string | null;
     doorstepCost: number | string | null;
     parcelMoneyCost: number | string | null;
+    /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR). */
+    npSurcharge?: number | string | null;
     totalCost: number | string | null;
     /**
      * ТЗ docx 15.07.26 (п.3): рядок «Розрахункова вага» має бути і в Клієнта,
@@ -97,6 +101,8 @@ interface CostBreakdown {
   /** @deprecated тепер 0 (мінімум вкладено в deliveryCost). */
   pickupPointCost: number;
   parcelMoneyCost: number;
+  /** ТЗ docx 04.11.26 (п.5). */
+  npSurchargeCost?: number;
   totalCost: number;
   billableWeight: number;
   pricePerKg: number;
@@ -167,6 +173,7 @@ export function CostCalculator(props: CostCalculatorProps) {
             isBothDirections: props.isBothDirections ?? false,
             parcelMoneyAmount: props.parcelMoneyAmount ?? 0,
             receiverCity: props.receiverCity ?? null,
+            npSurcharge: props.npSurcharge ?? 0,
           }),
         });
         if (res.ok) {
@@ -209,7 +216,7 @@ export function CostCalculator(props: CostCalculatorProps) {
     props.insurance, props.needsPackaging, props.isDoorstepDelivery, props.isAddressDelivery,
     props.isPickupPoint, props.isCourierPickup, props.isMultiParcelPickup,
     props.isBothDirections, props.parcelMoneyAmount, props.receiverCity,
-    props.clientFacing,
+    props.npSurcharge, props.clientFacing,
   ]);
 
   // ── ТЗ docx 12.07.26: збережена розбивка (без живого перерахунку) ──
@@ -267,6 +274,12 @@ export function CostCalculator(props: CostCalculatorProps) {
           <div className="flex justify-between">
             <span className="text-gray-600">Пакет:</span>
             <span>{formatCurrency(n(s.parcelMoneyCost), 'EUR')}</span>
+          </div>
+        )}
+        {n(s.npSurcharge ?? null) > 0 && (
+          <div className="flex justify-between">
+            <span className="text-gray-600">Доплата за НП:</span>
+            <span>{formatCurrency(n(s.npSurcharge ?? null), 'EUR')}</span>
           </div>
         )}
         <div className="flex justify-between font-bold border-t border-blue-200 pt-1 mt-1">
@@ -353,6 +366,13 @@ export function CostCalculator(props: CostCalculatorProps) {
         <div className="flex justify-between">
           <span className="text-gray-600">Пакет:</span>
           <span>{formatCurrency(cost.parcelMoneyCost, 'EUR')}</span>
+        </div>
+      )}
+      {/* ТЗ docx 04.11.26 (п.5): «Доплата за НП» — окремим рядком і в «Всього». */}
+      {(cost.npSurchargeCost ?? 0) > 0 && (
+        <div className="flex justify-between">
+          <span className="text-gray-600">Доплата за НП:</span>
+          <span>{formatCurrency(cost.npSurchargeCost ?? 0, 'EUR')}</span>
         </div>
       )}
       <div className="flex justify-between font-bold border-t border-blue-200 pt-1 mt-1">

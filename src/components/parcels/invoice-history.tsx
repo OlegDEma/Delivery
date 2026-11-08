@@ -81,7 +81,8 @@ export function InvoiceHistory({ parcelId, kind, refreshKey }: InvoiceHistoryPro
             <div className="flex items-baseline justify-between gap-2">
               <div>
                 {/* Канал показуємо для підтверджень (рахунки завжди SMS). */}
-                {kind === 'confirmation' && (
+                {/* ТЗ docx 04.11.26 (п.7): рахунок теж іде SMS / Viber / WhatsApp — показуємо канал. */}
+                {(kind === 'confirmation' || kind === 'invoice') && (
                   <span className="font-semibold text-blue-700 mr-1">{CHANNEL_LABEL[e.channel] ?? e.channel}</span>
                 )}
                 <span className="font-medium">{PARTY_LABEL[e.toParty]}</span>

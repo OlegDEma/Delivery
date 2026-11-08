@@ -13,12 +13,14 @@ import { logger } from '@/lib/logger';
 import { writeAuditLog } from '@/lib/audit';
 import { isAllowedTransition, isTerminal } from '@/lib/parcels/status-transitions';
 import { isUuid } from '@/lib/validators/common';
+import { generatePlaceITN, withPlacesCount } from '@/lib/utils/itn';
 import { canEditParcelData, canEditParcelParties, editLockReason } from '@/lib/parcels/edit-lock';
 import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
 import { isPickupPointPricing, isAddressDeliveryPricing } from '@/lib/utils/pricing-flags';
 import { isNoTripForCountry } from '@/lib/parcels/nearest-trip';
 import { ensureJourneyNumbersForTrip } from '@/lib/services/journey-numbering';
 import { purgeParcelPhotos, PHOTO_PURGE_STATUSES } from '@/lib/services/parcel-photos';
+import { isTripCompleted, tripLockedResponse, lockIfTripCompleted } from '@/lib/trips/completed-lock';
 
 // GET /api/parcels/[id]
 export async function GET(
@@ -54,7 +56,8 @@ export async function GET(
         orderBy: { changedAt: 'desc' },
         include: { changedBy: { select: { fullName: true } } },
       },
-      trip: { select: { id: true, departureDate: true, country: true, direction: true } },
+      // ТЗ docx 03.11.26 (п.3): статус рейсу — завершений рейс блокує всі зміни посилки.
+      trip: { select: { id: true, departureDate: true, country: true, direction: true, status: true } },
       assignedCourier: { select: { id: true, fullName: true } },
       createdBy: { select: { fullName: true, role: true } },
       collectionPoint: {
@@ -155,11 +158,14 @@ export async function PATCH(
 
   const parcel = await prisma.parcel.findFirst({
     where: { id, deletedAt: null },
-    include: { places: { select: { id: true } } },
+    include: { places: { select: { id: true } }, trip: { select: { status: true } } },
   });
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  // Будь-яке поле — дані, статус, нотатка, ТТН, оплата, перенесення на інший рейс.
+  if (isTripCompleted(parcel.trip?.status)) return tripLockedResponse();
 
   // ТЗ docx 26.07.26 (п.1): ДАНІ посилки (сторони/адреси/спосіб/послуги/місця/
   // «Пакет»/оплата тощо) редаговні ЛИШЕ поки статус «Створена» і лише автором
@@ -169,7 +175,7 @@ export async function PATCH(
     'description', 'declaredValue', 'insuranceApplied', 'needsPackaging', 'doorstepDelivery',
     'parcelMoneyAmount', 'payer', 'paymentMethod', 'paymentInUkraine', 'shipmentType',
     'collectionMethod', 'collectionPointId', 'collectionDate', 'collectionAddress', 'isMultiParcelPickup',
-    'places',
+    'places', 'npSurcharge',
   ] as const;
   // ТЗ docx 25.08.26: дані Отримувача/Відправника (сторона + її адреса) редаговні
   // у ВСІХ посилках, незалежно від статусу — тож виносимо їх з-під заморозки.
@@ -412,6 +418,10 @@ export async function PATCH(
       ? Number(body.parcelMoneyAmount)
       : null;
   }
+  // ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR); 0/null — без доплати.
+  if (body.npSurcharge !== undefined) {
+    updateData.npSurcharge = body.npSurcharge && Number(body.npSurcharge) > 0 ? Number(body.npSurcharge) : null;
+  }
   if (body.payer !== undefined) updateData.payer = body.payer;
   if (body.paymentMethod !== undefined) updateData.paymentMethod = body.paymentMethod;
   if (body.paymentInUkraine !== undefined) updateData.paymentInUkraine = body.paymentInUkraine;
@@ -437,7 +447,12 @@ export async function PATCH(
   // Підготовляємо оновлення місць (якщо є в body) ТА паралельно завжди
   // перераховуємо вартість, бо клієнт міг змінити лише оголошену вартість,
   // страхування, Пакет, спосіб прийому — усе це впливає на ціну.
-  let placeUpdates: Array<{ id: string; data: Record<string, unknown> }> = [];
+  //
+  // ТЗ docx 04.11.26 (п.8, посилка 301): «додав ще три місця — програма їх не бачить».
+  // Раніше тут бралися ЛИШЕ місця з id: нові (додані/скопійовані у формі редагування) мовчки
+  // відкидались, а вага/кількість місць рахувались без них. Тепер кожне місце з форми — у
+  // своєму порядку: з id → оновлення, без id → нове місце; усі перенумеровуються 1..N.
+  let placeUpdates: Array<{ id: string | null; data: Record<string, unknown> }> = [];
   let placesToDelete: string[] = [];
   let totalWeight = parcel.totalWeight ? Number(parcel.totalWeight) : 0;
   let totalVolWeight = parcel.totalVolumetricWeight ? Number(parcel.totalVolumetricWeight) : 0;
@@ -451,8 +466,8 @@ export async function PATCH(
 
     let tw = 0;
     let tv = 0;
+    const existingIdSet = new Set(existingIds);
     placeUpdates = body.places
-      .filter(p => p.id)
       .map(p => {
         const w = Number(p.weight) || 0;
         const l = p.length != null ? Number(p.length) : null;
@@ -471,7 +486,8 @@ export async function PATCH(
         tw += w;
         tv += volW;
         return {
-          id: p.id!,
+          // id чужого/неіснуючого місця не довіряємо — таке місце створюється як нове.
+          id: p.id && existingIdSet.has(p.id) ? p.id : null,
           data: {
             weight: roundWeight(w),
             length: l,
@@ -488,6 +504,9 @@ export async function PATCH(
     totalVolWeight = roundWeight(tv);
     updateData.totalWeight = totalWeight;
     updateData.totalVolumetricWeight = totalVolWeight;
+    // ТЗ docx 04.11.26 (п.8): кількість місць і «1/N» у внутрішньому номері — за фактом.
+    updateData.totalPlacesCount = placeUpdates.length;
+    updateData.internalNumber = withPlacesCount(parcel.internalNumber, placeUpdates.length);
   }
 
   // ВАЖЛИВО: recalc вартості — ВЖИВАЄТЬСЯ ЗАВЖДИ якщо в PATCH є хоча б одне
@@ -503,6 +522,7 @@ export async function PATCH(
     body.needsPackaging !== undefined ||
     body.doorstepDelivery !== undefined ||
     body.parcelMoneyAmount !== undefined ||
+    body.npSurcharge !== undefined ||
     body.collectionMethod !== undefined ||
     body.collectionPointId !== undefined ||
     body.isMultiParcelPickup !== undefined ||
@@ -608,6 +628,10 @@ export async function PATCH(
               parcelMoneyAmount: parcelMoneyAmount ? Number(parcelMoneyAmount) : 0,
               // Per ТЗ §49/§50 — Львів-виняток на ціну за кг.
               receiverCity: receiverAddr?.city ?? null,
+              // ТЗ docx 04.11.26 (п.5): свіже значення з body, інакше — збережене.
+              npSurcharge: body.npSurcharge !== undefined
+                ? (body.npSurcharge ? Number(body.npSurcharge) : 0)
+                : (parcel.npSurcharge ? Number(parcel.npSurcharge) : 0),
             }
           );
           updateData.deliveryCost = breakdown.deliveryCost;
@@ -646,14 +670,33 @@ export async function PATCH(
 
   // Single transaction: places + parcel update.
   if (Array.isArray(body.places)) {
+    const total = placeUpdates.length;
     await prisma.$transaction(async (tx) => {
-      for (const p of placeUpdates) {
-        await tx.parcelPlace.update({ where: { id: p.id }, data: p.data });
-      }
       if (placesToDelete.length > 0) {
         await tx.parcelPlace.deleteMany({
           where: { id: { in: placesToDelete }, parcelId: id },
         });
+      }
+      // Номер місця і ІТН місця унікальні — спершу відсуваємо наявні місця на тимчасові
+      // номери (без ІТН), щоб перенумерація 1..N не впиралась у старі значення.
+      const kept = placeUpdates.filter((p) => p.id);
+      for (const [i, p] of kept.entries()) {
+        await tx.parcelPlace.update({
+          where: { id: p.id! },
+          data: { placeNumber: 10_000 + i, itnPlace: null },
+        });
+      }
+      // ТЗ docx 04.11.26 (п.8): наявні місця оновлюємо (скани складу лишаються), нові —
+      // створюємо; ІТН місця «…-2/4» — за новою кількістю місць.
+      for (const [i, p] of placeUpdates.entries()) {
+        const placeNumber = i + 1;
+        const itnPlace = generatePlaceITN(parcel.itn, placeNumber, total);
+        const data = { ...p.data, placeNumber, itnPlace, barcodeData: itnPlace };
+        if (p.id) {
+          await tx.parcelPlace.update({ where: { id: p.id }, data });
+        } else {
+          await tx.parcelPlace.create({ data: { ...data, parcelId: id } as Prisma.ParcelPlaceUncheckedCreateInput });
+        }
       }
       await tx.parcel.update({ where: { id }, data: updateData });
     });
@@ -687,6 +730,9 @@ export async function DELETE(
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  const locked = await lockIfTripCompleted(parcel.tripId);
+  if (locked) return locked;
 
   await prisma.parcel.update({
     where: { id },

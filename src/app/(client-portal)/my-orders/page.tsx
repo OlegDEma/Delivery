@@ -27,6 +27,8 @@ interface Order {
   /** ТЗ docx 04.10.26: «Створена клієнтом/…». */
   createdSource: string | null;
   createdBy: { role: string } | null;
+  /** ТЗ docx 03.11.26 (п.5): країна рейсу для підпису статусу. */
+  trip?: { country: string } | null;
   sender: { firstName: string; lastName: string; phone: string };
   receiver: { firstName: string; lastName: string; phone: string };
   receiverAddress: { country: string | null; city: string; street: string | null; building: string | null; postalCode: string | null; landmark: string | null; deliveryMethod: string; npWarehouseNum: string | null } | null;
@@ -100,7 +102,7 @@ export default function MyOrdersPage() {
                   )}
                 </div>
                 <Badge className={STATUS_COLORS[o.status]}>
-                  {statusLabel(o.status, { createdSource: o.createdSource, createdByRole: o.createdBy?.role })}
+                  {statusLabel(o.status, { tripCountry: o.trip?.country, destCountry: o.receiverAddress?.country, direction: o.direction, createdSource: o.createdSource, createdByRole: o.createdBy?.role })}
                 </Badge>
               </div>
               <div className="text-sm mt-2">

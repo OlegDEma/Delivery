@@ -62,6 +62,14 @@ interface ClientSearchProps {
    */
   /** ТЗ docx 09.10.26 (п.6): тип екранної клавіатури поля пошуку (напр. 'tel' — цифри). */
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  /**
+   * ТЗ docx 04.11.26 (п.1): автоперехід курсору. `flowId` — мітка поля пошуку (щоб на нього
+   * могли перевести курсор), `autoFocus` — курсор тут одразу після відкриття форми,
+   * `nextFocus` — куди перейти, коли Працівник підтвердив/створив клієнта.
+   */
+  flowId?: string;
+  autoFocus?: boolean;
+  nextFocus?: () => HTMLElement | null;
   prefill?: {
     phone?: string;
     firstName?: string;
@@ -74,7 +82,7 @@ interface ClientSearchProps {
   } | null;
 }
 
-export function ClientSearch({ label, onSelect, onClear, selected, direction, role, onPhoneEdit, summaryFooter, prefill, inputMode }: ClientSearchProps) {
+export function ClientSearch({ label, onSelect, onClear, selected, direction, role, onPhoneEdit, summaryFooter, prefill, inputMode, flowId, autoFocus, nextFocus }: ClientSearchProps) {
   const [editingPhone, setEditingPhone] = useState(false);
   const [phoneDraft, setPhoneDraft] = useState('');
   const [query, setQuery] = useState('');
@@ -89,6 +97,21 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
   const [editCandidate, setEditCandidate] = useState<ClientResult | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  // ТЗ docx 04.11.26 (п.1): форми в діалогах — для першого віконця, і ознака «клієнта
+  // підтверджено» — тоді після закриття діалогу курсор іде далі за алгоритмом.
+  const createFormRef = useRef<HTMLFormElement>(null);
+  const editFormRef = useRef<HTMLFormElement>(null);
+  const confirmedRef = useRef(false);
+  // ТЗ docx 04.11.26 (п.1): Enter, натиснутий поки пошук ще йде, — виконуємо по його завершенні.
+  const searchingRef = useRef(false);
+  const pendingEnterRef = useRef(false);
+  const dialogInitialFocus = (form: React.RefObject<HTMLFormElement | null>) => () =>
+    form.current?.querySelector<HTMLElement>('[data-flow-start]') ?? true;
+  const dialogFinalFocus = () => {
+    if (!confirmedRef.current) return true;
+    confirmedRef.current = false;
+    return nextFocus?.() ?? true;
+  };
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -118,11 +141,14 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
     if (value.length < 2) {
       setResults([]);
       setShowDropdown(false);
+      searchingRef.current = false;
       return;
     }
 
+    searchingRef.current = true;
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
+      let found: ClientResult[] | null = null;
       try {
         const params = new URLSearchParams({ q: value, limit: '10' });
         if (role) params.set('role', role);
@@ -130,6 +156,7 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
         if (res.ok) {
           const data = await res.json();
           if (data.clients.length > 0) {
+            found = data.clients;
             setResults(data.clients);
             setShowDropdown(true);
           } else {
@@ -149,10 +176,12 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
                   addresses: [],
                 }));
                 const unique = fromParcels.filter((c, i, arr) => arr.findIndex(x => x.id === c.id) === i);
+                found = unique;
                 setResults(unique);
                 setShowDropdown(true);
               }
             } else {
+              found = [];
               setResults([]);
               setShowDropdown(true);
             }
@@ -166,6 +195,12 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
         setShowDropdown(true);
       } finally {
         setLoading(false);
+        searchingRef.current = false;
+        if (pendingEnterRef.current) {
+          pendingEnterRef.current = false;
+          if (found && found.length === 1) handleSelect(found[0]);
+          else if (found && found.length === 0) handleOpenCreate();
+        }
       }
     }, 300);
   }
@@ -187,6 +222,7 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
   }
 
   function handleEditConfirmed(client: ClientResult, meta?: ClientCreateMeta) {
+    confirmedRef.current = true;
     setEditCandidate(null);
     onSelect(client, meta);
   }
@@ -197,6 +233,7 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
   }
 
   function handleClientCreated(client: ClientResult, meta?: ClientCreateMeta) {
+    confirmedRef.current = true;
     setShowCreateDialog(false);
     setQuery('');
     onSelect(client, meta);
@@ -318,6 +355,22 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
           placeholder="Телефон або прізвище..."
           inputMode={inputMode}
           className="text-base flex-1"
+          autoFocus={autoFocus}
+          data-flow=""
+          data-flow-id={flowId}
+          enterKeyHint="search"
+          // ТЗ docx 04.11.26 (п.1): Enter у пошуку — знайдено одного клієнта → відкриваємо
+          // його для підтвердження; нікого не знайдено → форма створення (курсор на «Прізвище»).
+          // Головну форму посилки Enter тут не відправляє.
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter' || e.nativeEvent.isComposing) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (query.trim().length < 2) return;
+            if (loading || searchingRef.current) { pendingEnterRef.current = true; return; }
+            if (results.length === 1) handleSelect(results[0]);
+            else if (results.length === 0 && showDropdown && !searchError) handleOpenCreate();
+          }}
         />
         <Button
           type="button"
@@ -393,7 +446,8 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
       )}
 
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        {/* ТЗ docx 04.11.26 (п.1): нового клієнта починаємо з «Прізвище». */}
+        <DialogContent className="max-h-[90vh] overflow-y-auto" initialFocus={dialogInitialFocus(createFormRef)} finalFocus={dialogFinalFocus}>
           <DialogHeader>
             <DialogTitle>
               {/* Per ТЗ: «вкладка Новий клієнт ... має називатись "Отримувач"
@@ -402,6 +456,7 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
             </DialogTitle>
           </DialogHeader>
           <ClientCreateForm
+            formRef={createFormRef}
             onSuccess={handleClientCreated}
             onCancel={() => setShowCreateDialog(false)}
             initialPhone={prefill?.phone || getInitialPhone()}
@@ -415,7 +470,8 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
 
       {/* Edit-existing dialog — opens on search-select per ТЗ. Same form, prefilled. */}
       <Dialog open={!!editCandidate} onOpenChange={(o) => { if (!o) setEditCandidate(null); }}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        {/* ТЗ docx 04.11.26 (п.1): знайденого клієнта лишається підтвердити — курсор на «Зберегти». */}
+        <DialogContent className="max-h-[90vh] overflow-y-auto" initialFocus={dialogInitialFocus(editFormRef)} finalFocus={dialogFinalFocus}>
           <DialogHeader>
             <DialogTitle>
               {role === 'receiver' ? 'Отримувач' : role === 'sender' ? 'Відправник' : 'Клієнт'}
@@ -426,6 +482,7 @@ export function ClientSearch({ label, onSelect, onClear, selected, direction, ro
           </DialogHeader>
           {editCandidate && (
             <ClientCreateForm
+              formRef={editFormRef}
               onSuccess={handleEditConfirmed}
               onCancel={() => setEditCandidate(null)}
               direction={direction}

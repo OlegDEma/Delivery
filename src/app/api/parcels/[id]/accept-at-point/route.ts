@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireStaff } from '@/lib/auth/guards';
 import { snapshotParcelParties } from '@/lib/parcels/party-snapshot';
 import { isUuid } from '@/lib/validators/common';
+import { lockIfTripCompleted } from '@/lib/trips/completed-lock';
 
 /**
  * POST /api/parcels/[id]/accept-at-point
@@ -27,6 +28,9 @@ export async function POST(
   const body = await request.json().catch(() => ({}));
 
   const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null } });
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано.
+  const tripLocked = await lockIfTripCompleted(parcel?.tripId);
+  if (tripLocked) return tripLocked;
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }
@@ -109,6 +113,9 @@ export async function DELETE(
   const { id } = await params;
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
   const parcel = await prisma.parcel.findFirst({ where: { id, deletedAt: null } });
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано.
+  const tripLocked = await lockIfTripCompleted(parcel?.tripId);
+  if (tripLocked) return tripLocked;
   if (!parcel) {
     return NextResponse.json({ error: 'Посилку не знайдено' }, { status: 404 });
   }

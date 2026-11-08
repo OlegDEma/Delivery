@@ -23,6 +23,8 @@ import { logger } from '@/lib/logger';
 import { parcelParties } from '@/lib/parcels/party-snapshot';
 import { formatItn } from '@/lib/utils/itn';
 import { parcelNumberWithJourney } from '@/lib/parcels/display-number';
+import { dispatch, isChannelConfigured, type MessageChannel } from '@/lib/services/messaging';
+import { invoiceUahPerEur } from '@/lib/utils/cash-rate';
 
 export interface InvoiceContext {
   /** Recipient party — who's getting the SMS. */
@@ -31,8 +33,10 @@ export interface InvoiceContext {
   name: string;
   /** Recipient phone, E.164-ish. */
   phone: string;
-  /** Total cost in EUR. */
+  /** Сума до оплати — у валюті `currency` (EUR або, при оплаті в Україні, грн). */
   amount: number;
+  /** ТЗ docx 04.11.26 (п.7): 'UAH' — рахунок у гривнях (оплата в Україні). */
+  currency?: 'EUR' | 'UAH';
   /** Parcel ITN. */
   itn: string;
   /** Internal number (e.g. «2026/N00031»). */
@@ -66,10 +70,14 @@ export function renderInvoiceTemplate(
   ctx: InvoiceContext,
   bank: BankDetails
 ): string {
-  const tpl = (template && template.trim()) || DEFAULT_TEMPLATE;
+  // ТЗ docx 04.11.26 (п.7): у шаблоні після {{amount}} стоїть «EUR» — для рахунку в гривнях
+  // валюта має бути «грн». Підставляємо {{currency}} на місце написаної вручну валюти.
+  const tpl = ((template && template.trim()) || DEFAULT_TEMPLATE)
+    .replace(/\{\{amount\}\}(\s*)(?:EUR|€|євро)/gi, '{{amount}}$1{{currency}}');
   const data: Record<string, string> = {
     name: ctx.name,
     amount: ctx.amount.toFixed(2),
+    currency: ctx.currency === 'UAH' ? 'грн' : 'EUR',
     // ТЗ docx 07.10.26: ІТН у тексті — у вигляді X-XX-XXXXXX-X.
     itn: formatItn(ctx.itn),
     internalNumber: ctx.internalNumber,
@@ -148,6 +156,24 @@ export interface SendInvoiceArgs {
   /** Optional override; defaults to the party's stored phone. */
   overridePhone?: string;
   sentById: string;
+  /** ТЗ docx 04.11.26 (п.7): канал — SMS (за замовчуванням), Viber або WhatsApp. */
+  channel?: MessageChannel;
+  /**
+   * 'manual' — Працівник надіслав сам: месенджер/SMS відкрився з готовим текстом
+   * (провайдера автоматичної розсилки ще немає); лише фіксуємо факт у журналі.
+   */
+  mode?: 'auto' | 'manual';
+  /** Лише сформувати текст (для вікна «Надіслати рахунок»), нічого не надсилати й не писати. */
+  preview?: boolean;
+}
+
+/** Чи має канал реального провайдера (сервер шле сам) — для рахунку. */
+export function invoiceChannelConfigured(channel: MessageChannel): boolean {
+  if (channel === 'sms') {
+    return (!!process.env.TWILIO_ACCOUNT_SID && !!process.env.TWILIO_AUTH_TOKEN && !!process.env.TWILIO_FROM_NUMBER)
+      || isChannelConfigured('sms');
+  }
+  return isChannelConfigured(channel);
 }
 
 /**
@@ -158,6 +184,7 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
   ok: boolean;
   smsLogId: string;
   body: string;
+  phone: string;
   status: SendResult['status'];
   errorMessage?: string;
 }> {
@@ -165,6 +192,8 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
     where: { id: args.parcelId },
     select: {
       id: true, itn: true, npTtn: true, internalNumber: true, journeyNumber: true, totalCost: true,
+      // ТЗ docx 04.11.26 (п.7): оплата в Україні → рахунок у гривнях.
+      paymentInUkraine: true,
       // ТЗ docx 26.07.26 (п.1): для accepted+ ПІБ/тел беремо зі знімка (parcelParties).
       status: true, senderSnapshot: true, receiverSnapshot: true,
       sender: { select: { firstName: true, lastName: true, phone: true } },
@@ -184,13 +213,18 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
   if (totalCost <= 0) throw new Error('TOTAL_COST_NOT_SET');
 
   const settings = await prisma.invoiceSettings.findFirst({ where: { isSingleton: true } });
+  // ТЗ docx 04.11.26 (п.7): «При виборі оплати в Україні рахунок повинен виставлятись лише в
+  // гривнях» — сума в євро × курс продажу євро в обмінниках (запасний — курс НБУ).
+  const inUah = !!parcel.paymentInUkraine;
+  const uahRate = inUah ? (await invoiceUahPerEur()).rate : 1;
   const body = renderInvoiceTemplate(
     settings?.smsTemplate ?? null,
     {
       toParty: args.toParty,
       name: `${target.firstName} ${target.lastName}`.trim(),
       phone,
-      amount: totalCost,
+      amount: inUah ? Math.round(totalCost * uahRate * 100) / 100 : totalCost,
+      currency: inUah ? 'UAH' : 'EUR',
       itn: parcel.itn,
       // ТЗ docx 12.10.26: у повідомленні — без старого порядкового номера.
       internalNumber: parcelNumberWithJourney(parcel.internalNumber, parcel.journeyNumber),
@@ -204,11 +238,21 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
     }
   );
 
+  if (args.preview) {
+    return { ok: true, smsLogId: '', body, phone, status: 'queued' };
+  }
+
+  const channel: MessageChannel = args.channel ?? 'sms';
   let result: SendResult;
-  try {
-    result = await sendViaProvider(phone, body);
-  } catch (err) {
-    result = { status: 'failed', provider: null, errorMessage: err instanceof Error ? err.message : 'send error' };
+  if (args.mode === 'manual') {
+    // ТЗ docx 04.11.26 (п.7): Працівник надіслав сам (відкрився месенджер/SMS з текстом).
+    result = { status: 'sent', provider: 'deeplink' };
+  } else {
+    try {
+      result = channel === 'sms' ? await sendViaProvider(phone, body) : await dispatch(channel, phone, body);
+    } catch (err) {
+      result = { status: 'failed', provider: null, errorMessage: err instanceof Error ? err.message : 'send error' };
+    }
   }
 
   // Always log — even on failure — so audit trail is preserved.
@@ -218,6 +262,7 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
       toParty: args.toParty,
       toPhone: phone,
       body,
+      channel,
       provider: result.provider,
       status: result.status,
       errorMessage: result.errorMessage ?? null,
@@ -238,6 +283,7 @@ export async function sendInvoice(args: SendInvoiceArgs): Promise<{
     ok: result.status !== 'failed',
     smsLogId: log.id,
     body,
+    phone,
     status: result.status,
     errorMessage: result.errorMessage,
   };

@@ -67,14 +67,18 @@ export async function applyTripStatusCascade(
 /**
  * ТЗ docx 14.05.26 L3e: авто-перехід статусів рейсів за датою.
  *  - «Заплановано» → «В дорозі» після настання дати виїзду.
- *  - «В дорозі» → «Завершено» після 23:59 дати прибуття.
- * Ручні статуси (будь-який) не чіпаємо — авто рухає лише planned/in_progress.
+ *  - «В дорозі» → «Завершено» — БІЛЬШЕ НЕ автоматично (див. нижче).
+ * Ручні статуси (будь-який) не чіпаємо — авто рухає лише planned.
+ *
+ * ТЗ docx 03.11.26 (п.3): завершений рейс тепер ПОВНІСТЮ заблоковано (посилки, оплати,
+ * пасажири, водії, транспорт). Авто-завершення наступного дня після дати прибуття
+ * блокувало б водіїв, які ще розвозять посилки й приймають оплату (рейс UA→AT з
+ * прибуттям 05.11 ставав «Завершено» вже 06.11). Рішення (08.11.26): «Завершено»
+ * ставить лише Суперадмін вручну, коли рейс справді закрито.
  * Викликається ліниво при читанні списків рейсів/поїздок (cron немає).
  */
 export async function autoAdvanceTrips(): Promise<void> {
   const now = new Date();
-  // Початок сьогоднішнього дня — для порівняння «дата прибуття вже минула».
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   // planned → in_progress: дата виїзду настала (departureDate <= зараз).
   const toStart = await prisma.trip.findMany({
@@ -86,13 +90,5 @@ export async function autoAdvanceTrips(): Promise<void> {
     await applyTripStatusCascade(t.id, 'in_progress', null, 'Авто: рейс розпочав рух (за датою виїзду)');
   }
 
-  // in_progress → completed: день прибуття повністю минув (arrivalDate < сьогодні).
-  const toComplete = await prisma.trip.findMany({
-    where: { status: 'in_progress', arrivalDate: { not: null, lt: todayStart } },
-    select: { id: true },
-  });
-  for (const t of toComplete) {
-    await prisma.trip.update({ where: { id: t.id }, data: { status: 'completed' } });
-    await applyTripStatusCascade(t.id, 'completed', null, 'Авто: рейс завершено (за датою прибуття)');
-  }
+  // in_progress → completed: вручну Суперадміном (ТЗ docx 03.11.26 п.3, див. вище).
 }

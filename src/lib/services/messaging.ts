@@ -145,7 +145,8 @@ async function sendViaWhatsApp(phone: string, body: string): Promise<SendResult>
   return { status: 'queued', provider: null };
 }
 
-function dispatch(channel: MessageChannel, phone: string, body: string): Promise<SendResult> {
+/** ТЗ docx 04.11.26 (п.7): той самий диспетчер — і для рахунку у Viber/WhatsApp. */
+export function dispatch(channel: MessageChannel, phone: string, body: string): Promise<SendResult> {
   if (channel === 'whatsapp') return sendViaWhatsApp(phone, body);
   return sendViaTurboSms(channel, phone, body); // 'sms' | 'viber'
 }

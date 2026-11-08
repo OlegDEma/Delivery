@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth/guards';
 import { LOGISTICS_ROLES, ROLES } from "@/lib/constants/roles";
+import { lockIfTripCompleted } from '@/lib/trips/completed-lock';
 
 function isUuid(v: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
@@ -30,6 +31,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     select: { id: true, parcelId: true, tripId: true, routeSheetId: true, routeSheet: { select: { createdById: true } } },
   });
   if (!task) return NextResponse.json({ error: "Задачу не знайдено" }, { status: 404 });
+  // ТЗ docx 03.11.26 (п.3): адреси завершеного рейсу не змінюються.
+  const tripLocked = await lockIfTripCompleted(task.tripId);
+  if (tripLocked) return tripLocked;
 
   // ТЗ docx 02.09.26: адресу, що лежить у ЧУЖОМУ Маршрутному листі, чіпати не можна.
   const isSuper = guard.user.role === ROLES.SUPER_ADMIN;
@@ -124,9 +128,12 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
   if (!isUuid(id)) return NextResponse.json({ error: 'Невалідний id' }, { status: 400 });
   const task = await prisma.routeTask.findUnique({
     where: { id },
-    select: { id: true, parcelId: true, routeSheetId: true, routeSheet: { select: { createdById: true } } },
+    select: { id: true, parcelId: true, tripId: true, routeSheetId: true, routeSheet: { select: { createdById: true } } },
   });
   if (!task) return NextResponse.json({ error: 'Задачу не знайдено' }, { status: 404 });
+  // ТЗ docx 03.11.26 (п.3): адреси завершеного рейсу не змінюються.
+  const tripLockedDel = await lockIfTripCompleted(task.tripId);
+  if (tripLockedDel) return tripLockedDel;
 
   // ТЗ docx 02.09.26: адресу з ЧУЖОГО листа чіпати не можна.
   if (task.routeSheet && guard.user.role !== ROLES.SUPER_ADMIN

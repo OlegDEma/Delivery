@@ -23,6 +23,9 @@ interface TrackingResult {
   /** ТЗ docx 04.10.26: «Створена клієнтом/водієм/…». */
   createdSource?: string | null;
   createdByRole?: string | null;
+  /** ТЗ docx 03.11.26 (п.5): країна рейсу для підпису статусу. */
+  tripCountry?: string | null;
+  destCountry?: string | null;
   receiverCity: string | null;
   statusHistory: {
     status: ParcelStatusType;
@@ -104,7 +107,7 @@ export default function TrackingPage() {
                     і з номером у поїздці — повторно не форматуємо (інакше «028» зріжеться). */}
                 {result.internalNumber}</CardTitle>
                 <Badge className={STATUS_COLORS[result.status]}>
-                  {statusLabel(result.status, { createdSource: result.createdSource, createdByRole: result.createdByRole })}
+                  {statusLabel(result.status, { tripCountry: result.tripCountry, destCountry: result.destCountry, direction: result.direction, createdSource: result.createdSource, createdByRole: result.createdByRole })}
                 </Badge>
               </div>
               {/* ТЗ docx 07.10.26: ІТН — X-XX-XXXXXX-X. */}
@@ -134,7 +137,7 @@ export default function TrackingPage() {
                     </div>
                     <div className="pb-2">
                       <div className="text-sm font-medium">
-                        {statusLabel(h.status, { createdSource: result.createdSource, createdByRole: result.createdByRole })}
+                        {statusLabel(h.status, { tripCountry: result.tripCountry, destCountry: result.destCountry, direction: result.direction, createdSource: result.createdSource, createdByRole: result.createdByRole })}
                       </div>
                       <div className="text-xs text-gray-400">{formatDateTime(h.changedAt)}</div>
                       {h.notes && <div className="text-xs text-gray-500">{h.notes}</div>}

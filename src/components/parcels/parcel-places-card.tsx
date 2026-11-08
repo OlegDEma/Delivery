@@ -55,6 +55,8 @@ interface ParcelPlacesCardProps {
   insuranceEnabled?: boolean;
   /** «Пакет» сума — для коректної live-оцінки фактично збереженого розрахунку. */
   parcelMoneyAmount?: number | null;
+  /** ТЗ docx 04.11.26 (п.5): «Доплата за НП» (EUR) — у «Розрахунку вартості». */
+  npSurcharge?: number | string | null;
   /** Чи передача через пункт збору — впливає на додатковий компонент вартості. */
   isPickupPoint?: boolean;
   /** Чи виклик кур'єра (collectionMethod=courier_pickup) — впливає на мінімум. */
@@ -74,6 +76,8 @@ interface ParcelPlacesCardProps {
     packagingCost: number | string | null;
     doorstepCost: number | string | null;
     parcelMoneyCost: number | string | null;
+    /** ТЗ docx 04.11.26 (п.5). */
+    npSurcharge?: number | string | null;
     totalCost: number | string | null;
     /** ТЗ docx 15.07.26: weightType з тарифу — для рядка «Розрахункова вага». */
     weightType?: 'actual' | 'volumetric' | 'average' | 'custom';
@@ -118,6 +122,7 @@ export function ParcelPlacesCard({
   doorstepDelivery,
   insuranceEnabled,
   parcelMoneyAmount,
+  npSurcharge,
   isPickupPoint,
   isCourierPickup,
   isMultiParcelPickup,
@@ -313,6 +318,7 @@ export function ParcelPlacesCard({
                 isCourierPickup={!!isCourierPickup}
                 isMultiParcelPickup={!!isMultiParcelPickup}
                 parcelMoneyAmount={parcelMoneyAmount ? Number(parcelMoneyAmount) : 0}
+                  npSurcharge={npSurcharge ? Number(npSurcharge) : 0}
                 receiverCity={receiverCity ?? null}
               />
             )}
@@ -368,6 +374,7 @@ export function ParcelPlacesCard({
                   isCourierPickup={!!isCourierPickup}
                   isMultiParcelPickup={!!isMultiParcelPickup}
                   parcelMoneyAmount={parcelMoneyAmount ? Number(parcelMoneyAmount) : 0}
+                  npSurcharge={npSurcharge ? Number(npSurcharge) : 0}
                   receiverCity={receiverCity ?? null}
                   // ТЗ docx 12.07.26: клієнтський контекст + збережена розбивка.
                   clientFacing={clientFacing}

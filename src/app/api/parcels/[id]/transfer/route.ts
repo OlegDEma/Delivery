@@ -3,6 +3,7 @@ import { requireStaff } from '@/lib/auth/guards';
 import { isUuid } from '@/lib/validators/common';
 import { transferParcel } from '@/lib/services/parcel-transfer';
 import { logger } from '@/lib/logger';
+import { lockIfParcelTripCompleted } from '@/lib/trips/completed-lock';
 
 /**
  * POST /api/parcels/[id]/transfer  { tripId }
@@ -21,6 +22,10 @@ export async function POST(
   if (!body?.tripId || !isUuid(body.tripId)) {
     return NextResponse.json({ error: 'Оберіть рейс' }, { status: 400 });
   }
+
+  // ТЗ docx 03.11.26 (п.3): завершений рейс повністю заблоковано — жодних змін його даних.
+  const locked = await lockIfParcelTripCompleted(id);
+  if (locked) return locked;
 
   const res = await transferParcel({ parcelId: id, toTripId: body.tripId, userId: guard.user.userId, actor: 'staff' });
   if (!res.ok) return NextResponse.json({ error: res.error }, { status: res.status });
